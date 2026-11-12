@@ -77,3 +77,27 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 - Strata 与 V100 归用户管理,系统只读状态 + 串行调用。
 - 面板仅绑定 `127.0.0.1`,无发布端点。
 - 规则全文见 [`07_rules/CORE_RULES.md`](07_rules/CORE_RULES.md)。
+
+## 版本控制与 GitHub
+
+| 项 | 值 |
+|---|---|
+| 远端仓库 | <https://github.com/daxiaolonglong/ttxt-factory>（private） |
+| 默认分支 | `main` |
+| git 客户端 | 便携版 MinGit 2.56.1，位于 `tools/git/`，经 `scripts\git.cmd` 调用（不污染系统 PATH） |
+| 入库范围 | 源码、配置、文档、测试、Wiki、技能文件；`.venv/`、`*.db`、`01_categories/*/rag`、`keywords`、`metrics`、`09_logs/`、`11_backups/`、`99_temp/`、`tools/` 由 `.gitignore` 排除 |
+
+```powershell
+# 日常提交并推送（令牌仅从环境变量读，不落盘、不进 .git/config）
+set GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
+scripts\push.cmd -m "feat: 采集去重阈值调整"
+
+# 仅查看状态
+scripts\push.cmd --dry-run
+
+# 首次连接新仓库（建仓 + 首次提交 + 推送，可重复执行）
+.venv\Scripts\python.exe -X utf8 scripts\github_connect.py --repo ttxt-factory
+```
+
+> 本机 `schannel` TLS 在受限环境下不可用，仓库已写死 `http.sslBackend=openssl`；换机器克隆后同样执行
+> `git config http.sslBackend openssl`。令牌建议最小权限（仅 `repo`）并设有效期，用完可在 GitHub 侧随时撤销。
