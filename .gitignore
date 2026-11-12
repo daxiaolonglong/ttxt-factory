@@ -13,6 +13,7 @@ __pycache__/
 *.db-wal
 *.db-shm
 *.sqlite3
+00_control/model_gate/gate.lock
 01_categories/*/rag/
 01_categories/*/keywords/
 01_categories/*/metrics/
