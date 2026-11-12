@@ -172,6 +172,25 @@ def _execute_job(
                 summary["listing_links"] = collected["links"]
                 summary["robots_skipped"] = collected["robots_skipped"]
                 summary["article_errors"] = collected["errors"]
+                # 真实缺陷(2026-11-13 job 47,H 场景强杀浏览器):10/10 文章页全部
+                # 抓取失败、0 条产出,任务却 ok=True/done/inserted=0 —— 崩溃被吞掉,
+                # 永远进不了重试/租约回收通道。全损必须走可重试通道;部分失败仍算完成。
+                if (
+                    int(collected["links"] or 0) > 0
+                    and not items
+                    and int(collected["errors"] or 0) >= int(collected["links"] or 0)
+                ):
+                    raise RuntimeError(
+                        f"toutiao 全部文章页抓取失败({collected['errors']}/{collected['links']}),"
+                        "疑似浏览器会话崩溃,走可重试通道"
+                    )
+                if int(collected["errors"] or 0) > 0:
+                    LOG.warn(
+                        "crawl.article_errors",
+                        source=source.id,
+                        errors=collected["errors"],
+                        links=collected["links"],
+                    )
             elif source.kind == "html":
                 pages = 0
                 url: str | None = source.url

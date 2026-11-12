@@ -1,0 +1,244 @@
+{
+  "generated_at": "2026-11-13T02:39:02+08:00",
+  "wall_clock_s": 129.7,
+  "strata_before": {
+    "ok": true,
+    "models": [
+      "qwen3.8-flash-next-iq3_s"
+    ]
+  },
+  "strata_after": {
+    "ok": true,
+    "models": [
+      "qwen3.8-flash-next-iq3_s"
+    ]
+  },
+  "strata_unchanged": true,
+  "model_jobs_delta_all_scenarios": 0,
+  "scenarios": {
+    "A_duplicate_enqueue": {
+      "first": {
+        "job_id": 34,
+        "category": "finance",
+        "deduped": false,
+        "note": "已入队,等待执行(ttxt crawl-queue --run)"
+      },
+      "second": {
+        "job_id": 34,
+        "category": "finance",
+        "deduped": true,
+        "note": "已有排队/运行任务,未重复入队"
+      },
+      "deduped": true,
+      "same_job_id": true
+    },
+    "B_missing_source": {
+      "rejected": true,
+      "message": "来源不存在:no_such_source_xyz"
+    },
+    "C_metrics_gates": {
+      "cross_category_row_errors": [
+        "第 1 行:文章不在 finance 类目库(跨类目或不存在),拒绝写入"
+      ],
+      "cross_category_written": 0,
+      "unauthorized_rejected": true,
+      "unauthorized_message": "未授权数据来源 'made_up_api':不在 config.metrics.authorized_sources 白名单内,禁止入库(防止编造指标)。",
+      "note": "指标内容为合成夹具,仅测门禁机制"
+    },
+    "D_network_failure": {
+      "unresolvable_robots_gate": {
+        "unknown": true,
+        "allowed": false
+      },
+      "sspai_soft404_probe": {
+        "status": 200,
+        "error": ""
+      },
+      "real_404_fetch_error": "FetchError: HTTP 404(终态,不重试)",
+      "real_404_terminal": true,
+      "note": "真实网络调用;失败根因必须被记录而非静默丢弃"
+    },
+    "E_robots_denial": {
+      "url": "https://www.ftchinese.com/interactive",
+      "unknown": false,
+      "allowed": false,
+      "denied": true
+    },
+    "F_full_worker_run": {
+      "enqueued_job_ids": [
+        35,
+        36,
+        37,
+        34,
+        38,
+        39,
+        40
+      ],
+      "elapsed_s": 107.2,
+      "jobs": [
+        {
+          "job_id": 34,
+          "source": "tmtpost_rss",
+          "ok": true,
+          "inserted": 2,
+          "duplicates": 14,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 0.8
+        },
+        {
+          "job_id": 35,
+          "source": "sspai_rss",
+          "ok": true,
+          "inserted": 0,
+          "duplicates": 10,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 0.44
+        },
+        {
+          "job_id": 36,
+          "source": "ruanyifeng_atom",
+          "ok": true,
+          "inserted": 0,
+          "duplicates": 3,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 0.55
+        },
+        {
+          "job_id": 37,
+          "source": "eastmoney_rss",
+          "ok": true,
+          "inserted": 0,
+          "duplicates": 30,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 0.67
+        },
+        {
+          "job_id": 38,
+          "source": "ifanr_feed",
+          "ok": true,
+          "inserted": 0,
+          "duplicates": 20,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 0.89
+        },
+        {
+          "job_id": 39,
+          "source": "who_cn_news",
+          "ok": true,
+          "inserted": 0,
+          "duplicates": 25,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 0.62
+        },
+        {
+          "job_id": 40,
+          "source": "toutiao_tech",
+          "ok": true,
+          "inserted": 10,
+          "duplicates": 0,
+          "error": null,
+          "robots_allowed": true,
+          "elapsed_s": 103.19
+        }
+      ],
+      "reader_state": "finished",
+      "reader_iterations_ok": 60,
+      "reader_errors": 0,
+      "reader_error_samples": [],
+      "model_jobs_delta": 0
+    },
+    "G_hard_kill_lease": {
+      "job_id": 45,
+      "killed_worker_pid": 28332,
+      "killed_at": "02:01:23",
+      "owner_before_kill": "p12b5-hardkill-test",
+      "status_after_kill": "running",
+      "lease_expired_forced": true,
+      "recovered_jobs": 1,
+      "status_after_recover": "failed",
+      "recover_last_error": "recovered: 进程中断(租约过期, owner=p12b5-hardkill-test)",
+      "requeued_jobs": 1,
+      "status_after_requeue": "queued",
+      "attempts_after_recover": 1,
+      "rerun_summary_ok": true,
+      "rerun_claimed_job_id": 45,
+      "reclaimed_by": 45,
+      "final_status": "done",
+      "final_attempts": 2,
+      "final_owner": "p12b5-hardkill-recoverer"
+    },
+    "H_browser_crash_recovery": {
+      "job_id": 53,
+      "kill_design": "worker 内部线程:日志监视捕获列表页 200(channel=tech)后再等 3s 强杀(必落第一篇文章抓取中途)",
+      "kill_post_detection_s": 3,
+      "kill_listing_was_done": true,
+      "browser_kill_at": "02:37:21",
+      "kill_pids": [
+        9312,
+        30492,
+        8820,
+        20828,
+        5716,
+        14492,
+        31868,
+        27052,
+        6328
+      ],
+      "kill_pid_count": 9,
+      "worker_hung_then_killed": false,
+      "worker_summary": {
+        "job_id": 53,
+        "source": "toutiao_tech",
+        "category": "technology",
+        "kind": "html",
+        "ok": false,
+        "robots_allowed": true,
+        "pages_fetched": 1,
+        "robots_skipped": 0,
+        "pagination_stop": null,
+        "items_extracted": 0,
+        "inserted": 0,
+        "duplicates": 0,
+        "elapsed_s": 76.44,
+        "error": "RuntimeError: toutiao 全部文章页抓取失败(8/8),疑似浏览器会话崩溃,走可重试通道",
+        "listing_links": 8,
+        "article_errors": 8,
+        "requeued": true
+      },
+      "status_after_crash": "queued",
+      "attempts_after_crash": 1,
+      "last_error_after_crash": "RuntimeError: toutiao 全部文章页抓取失败(8/8),疑似浏览器会话崩溃,走可重试通道",
+      "recovered_claimed_job_id": 53,
+      "recovery_result_ok": true,
+      "recovery_raw": "{'job_id': 53, 'source': 'toutiao_tech', 'category': 'technology', 'kind': 'html', 'ok': True, 'robots_allowed': True, 'pages_fetched': 8, 'robots_skipped': 0, 'pagination_stop': None, 'items_extracte",
+      "final_status": "done",
+      "final_attempts": 2,
+      "final_inserted_or_dup": {
+        "inserted": 7,
+        "duplicates": 0
+      }
+    },
+    "I_housekeep_disk": {
+      "housekeep_exit": 0,
+      "housekeep_tail": [
+        "    }",
+        "  }",
+        "}"
+      ],
+      "temp_bytes_before": 1733550,
+      "temp_bytes_after": 1733550,
+      "pw_artifacts_dirs_before": 3,
+      "pw_artifacts_dirs_after": 3,
+      "project_total_gb": 1.094,
+      "budget_gb": 20,
+      "within_budget": true
+    }
+  },
+  "previous_generated_at": "2026-11-13T02:33:20+08:00"
+}

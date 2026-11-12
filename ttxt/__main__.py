@@ -11,7 +11,7 @@ from . import __version__
 from . import config as cfg
 from . import db, doctor, housekeep, scheduler
 from .analysis import analyze as analyzer
-from .analysis import metrics_import, prediction
+from .analysis import metrics_import, prediction, viral
 from .analysis import rag as analyzer_rag
 from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
@@ -307,8 +307,14 @@ def cmd_metrics(args: argparse.Namespace) -> int:
         report["relabel"] = metrics_import.relabel_after_import(args.category)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
+    if args.calibrate:
+        report = viral.calibrate(args.category)
+        if report["status"] != "calibrated" and not args.no_relabel:
+            report["relabel"] = viral.label_category(args.category)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0 if report["status"] in ("calibrated", "insufficient_sample") else 1
     if not args.import_file or not args.source:
-        print("metrics 需要 --import FILE --source 已授权来源 id(或 --snapshot)")
+        print("metrics 需要 --import FILE --source 已授权来源 id(或 --snapshot/--calibrate)")
         return 1
     try:
         report = metrics_import.import_metrics(args.category, args.import_file, args.source)
@@ -423,6 +429,7 @@ def build_parser() -> argparse.ArgumentParser:
     metrics.add_argument("--import", dest="import_file", default=None, help="CSV/JSON 指标文件")
     metrics.add_argument("--source", default=None, help="数据来源 id(须在白名单)")
     metrics.add_argument("--snapshot", action="store_true", help="为现有指标追加时序快照")
+    metrics.add_argument("--calibrate", action="store_true", help="从真实测得样本拟合爆款阈值(样本不足则拒绝改口径)")
     metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
     metrics.set_defaults(func=cmd_metrics)
 

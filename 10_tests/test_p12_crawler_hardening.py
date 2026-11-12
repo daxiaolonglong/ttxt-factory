@@ -603,3 +603,62 @@ def test_rss_source_max_articles_caps_full_feed(tmp_path, monkeypatch, system_db
     assert len(fake_insert[0][2]) == 2
     meta = json.loads(job_status(system_db, job)["meta_json"])
     assert meta["feed_total"] == 6 and meta["inserted"] == 2
+
+
+# ---------------------------------------------------------------- 浏览器崩溃全损回归
+
+def _toutiao_collect_stub(**payload):
+    def _collect(source, limit=None, rules=None, session=None):
+        base = {"items": [], "pages": 1, "links": 0, "robots_skipped": 0, "errors": 0}
+        base.update(payload)
+        return base
+
+    return _collect
+
+
+def test_toutiao_all_article_errors_requeued_not_done(monkeypatch, system_db):
+    """真实缺陷(2026-11-13 job 47,H 场景采集中途强杀 msedge):
+
+    浏览器死亡后 10/10 文章页全部失败、0 条产出,任务却 ok=True/done/inserted=0,
+    崩溃被吞掉,永远进不了重试/租约回收通道。全损必须按 transient 走重排,
+    达到 attempts 上限才落终态。
+    """
+    write_sources(Path(system_db).parent, monkeypatch, [html_source_entry(id="fake_tt", extractor="toutiao")])
+    job = store.create_crawl_job("fake_tt", "demo", db_path=system_db)
+    monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
+    monkeypatch.setattr(
+        toutiao, "collect",
+        _toutiao_collect_stub(items=[], pages=11, links=5, errors=5),
+    )
+
+    results = runner.run_queued(limit=1)
+    assert results and results[0]["ok"] is False
+    assert "全部文章页抓取失败" in (results[0]["error"] or "")
+    row = job_status(system_db, job)
+    assert row["status"] == "queued" and row["attempts"] == 1
+    meta = json.loads(row["meta_json"])
+    assert meta["article_errors"] == 5 and meta["listing_links"] == 5
+
+    for _ in range(2):
+        runner.run_queued(limit=1)
+    row2 = job_status(system_db, job)
+    assert row2["status"] == "failed" and row2["attempts"] == 3
+
+
+def test_toutiao_partial_article_errors_still_done(monkeypatch, system_db, fake_insert):
+    """部分文章页失败但仍有产出:任务算完成,错误计数必须进观测(不得静默)。"""
+    write_sources(Path(system_db).parent, monkeypatch, [html_source_entry(id="fake_tt2", extractor="toutiao")])
+    job = store.create_crawl_job("fake_tt2", "demo", db_path=system_db)
+    monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
+    monkeypatch.setattr(
+        toutiao, "collect",
+        _toutiao_collect_stub(items=[SimpleNamespace(title="t", url="https://demo.example.com/a/1/")],
+                              pages=4, links=5, errors=2),
+    )
+
+    results = runner.run_queued(limit=1)
+    assert results and results[0]["ok"] is True
+    row = job_status(system_db, job)
+    assert row["status"] == "done"
+    meta = json.loads(row["meta_json"])
+    assert meta["article_errors"] == 2 and meta["listing_links"] == 5
