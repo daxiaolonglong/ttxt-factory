@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import time
+from contextlib import nullcontext
 from typing import Any
+from urllib.parse import urlsplit
 
 from ttxt import config as cfg
 from ttxt.logging import get_logger
@@ -63,17 +65,18 @@ def run_queued(limit: int = 5, category: str | None = None) -> list[dict[str, An
         try:
             source = sources.get_source(source_id)
         except KeyError:
-            store.finish_crawl_job(job_id, "failed", f"来源不存在:{source_id}")
+            # P12:配置性失败 → 终态 aborted(重试无意义;不进 requeue,杜绝幽灵任务无限重排)
+            store.abort_crawl_job(job_id, f"来源不存在:{source_id}", meta={"reason": "source_missing"})
             results.append({"job_id": job_id, "source": source_id, "ok": False, "error": "source_missing"})
             continue
         if not source.enabled:
-            store.finish_crawl_job(job_id, "failed", f"来源已停用:{source_id}")
+            store.abort_crawl_job(job_id, f"来源已停用:{source_id}", meta={"reason": "source_disabled"})
             results.append({"job_id": job_id, "source": source_id, "ok": False, "error": "source_disabled"})
             continue
         try:
             target_category = resolve_category(source, str(job["category"]) or None)
         except ValueError as exc:
-            store.finish_crawl_job(job_id, "failed", f"类目路由拒绝:{exc}")
+            store.abort_crawl_job(job_id, f"类目路由拒绝:{exc}", meta={"reason": "category_refused"})
             results.append({"job_id": job_id, "source": source_id, "ok": False, "error": str(exc)})
             continue
         store.mark_job_started(job_id)
@@ -97,6 +100,8 @@ def _execute_job(
         "ok": False,
         "robots_allowed": None,
         "pages_fetched": 0,
+        "robots_skipped": 0,
+        "pagination_stop": None,
         "items_extracted": 0,
         "inserted": 0,
         "duplicates": 0,
@@ -105,7 +110,9 @@ def _execute_job(
     }
     try:
         ua = str(cfg.load_config().get("crawler", {}).get("user_agent", "TouTiaoSmartFactory/0.1"))
-        rules = robots.fetch_robots(source.url, ua)
+        # P12:host 级规则缓存;列表/分页得到的每个新 URL 都必须再过一遍 robots 门禁
+        rules_cache: dict[str, robots.RobotsRules] = {}
+        rules, first_allowed = robots.gate(source.url, ua, rules_cache)
         if rules.unknown:
             store.finish_crawl_job(
                 job_id, "failed", "robots.txt 无法确认(5xx/网络异常),来源暂停,不放行", meta=summary
@@ -115,8 +122,8 @@ def _execute_job(
             summary["elapsed_s"] = round(time.monotonic() - started, 2)
             return summary
         path = robots.target_path(source.url)
-        summary["robots_allowed"] = rules.allowed(path)
-        if not rules.allowed(path):
+        summary["robots_allowed"] = first_allowed
+        if not first_allowed:
             store.finish_crawl_job(job_id, "failed", "robots.txt disallows this path", meta=summary)
             summary["error"] = "robots_disallow"
             LOG.warn("crawl.robots_disallow", source=source.id, path=path)
@@ -125,46 +132,70 @@ def _execute_job(
 
         delay = max(float(source.rate_limit_s), float(rules.crawl_delay_s or 0))
         items: list[extract.ExtractedItem] = []
-
-        if source.kind == "rss":
-            result = fetcher.fetch_page(source.url)
-            summary["pages_fetched"] += 1
-            items = extract.extract_rss_items(fetcher.page_text(result.page), source)
-            summary["items_extracted"] = len(items)
-        elif source.extractor == "toutiao":
-            from . import toutiao as toutiao_adapter
-
-            collected = toutiao_adapter.collect(source, limit=limit)
-            items = collected["items"]
-            summary["items_extracted"] = len(items)
-            summary["listing_links"] = collected["links"]
-            summary["robots_skipped"] = collected["robots_skipped"]
-            summary["article_errors"] = collected["errors"]
-        elif source.kind == "html":
-            pages = 0
-            url: str | None = source.url
-            page_cap = max_pages or source.max_pages
-            while url and pages < page_cap:
-                result = fetcher.fetch_page(url)
+        render = source.render == "browser"
+        # P12:需要渲染的来源一次任务只开一个浏览器会话(引用计数共享,页面池复用)
+        session_cm = fetcher.browser_session() if render else nullcontext(None)
+        with session_cm as browser_session:
+            if source.kind == "rss":
+                result = fetcher.fetch_page(source.url, render=render, session=browser_session)
                 summary["pages_fetched"] += 1
-                pages += 1
-                items.extend(extract.extract_html_items(result.page, source))
+                items = extract.extract_rss_items(fetcher.page_text(result.page), source)
                 summary["items_extracted"] = len(items)
-                if limit and len(items) >= limit:
-                    break
-                next_url = None
-                if source.next_selector:
-                    found = result.page.css(source.next_selector)
-                    if len(found):
-                        href = found[0].attrib.get("href")
-                        if href:
-                            next_url = clean.normalize_url(href, base=url)
-                if not next_url:
-                    break
-                time.sleep(delay)
-                url = next_url
-        else:
-            raise RuntimeError(f"unsupported source kind: {source.kind}")
+            elif source.extractor == "toutiao":
+                from . import toutiao as toutiao_adapter
+
+                collected = toutiao_adapter.collect(
+                    source, limit=limit, rules=rules, session=browser_session
+                )
+                items = collected["items"]
+                summary["items_extracted"] = len(items)
+                summary["pages_fetched"] = collected["pages"]
+                summary["listing_links"] = collected["links"]
+                summary["robots_skipped"] = collected["robots_skipped"]
+                summary["article_errors"] = collected["errors"]
+            elif source.kind == "html":
+                pages = 0
+                url: str | None = source.url
+                page_cap = max_pages or source.max_pages
+                seen: set[str] = set()
+                while url and pages < page_cap:
+                    norm = clean.normalize_url(url, base=source.url)
+                    if norm in seen:
+                        summary["pagination_stop"] = "loop"
+                        LOG.warn("crawl.pagination_loop", source=source.id, url=url)
+                        break
+                    seen.add(norm)
+                    # P12:分页跳转得到的 URL 同样必须过 robots 门禁(host 级缓存,不重复取规则)
+                    _, page_allowed = robots.gate(url, ua, rules_cache)
+                    if not page_allowed:
+                        summary["robots_skipped"] = int(summary.get("robots_skipped") or 0) + 1
+                        summary["pagination_stop"] = "robots"
+                        LOG.warn("crawl.pagination_robots", source=source.id, url=url)
+                        break
+                    result = fetcher.fetch_page(url, render=render, session=browser_session)
+                    summary["pages_fetched"] += 1
+                    pages += 1
+                    items.extend(extract.extract_html_items(result.page, source))
+                    summary["items_extracted"] = len(items)
+                    if limit and len(items) >= limit:
+                        break
+                    next_url = None
+                    if source.next_selector:
+                        found = result.page.css(source.next_selector)
+                        if len(found):
+                            href = found[0].attrib.get("href")
+                            if href:
+                                next_url = clean.normalize_url(href, base=url)
+                    # P12:仅允许同 host 分页;跨域跳转记录原因并停止(白名单与 robots 均按来源 host 约束)
+                    if next_url and urlsplit(next_url).netloc.lower() != urlsplit(source.url).netloc.lower():
+                        summary["pagination_stop"] = "cross_host"
+                        LOG.warn("crawl.pagination_cross_host", source=source.id, next_url=next_url)
+                        next_url = None
+                    url = next_url
+                    if url:
+                        time.sleep(delay)
+            else:
+                raise RuntimeError(f"unsupported source kind: {source.kind}")
 
         if limit:
             items = items[:limit]
@@ -172,6 +203,8 @@ def _execute_job(
         counts = store.insert_items(target_category, source.id, items)
         summary.update(counts)
         summary["ok"] = True
+        # elapsed 必须在落库前算好:否则 meta_json 里永远是初始 0.0,观测谎报
+        summary["elapsed_s"] = round(time.monotonic() - started, 2)
         store.finish_crawl_job(job_id, "done", meta=summary)
         LOG.info(
             "crawl.done",
@@ -183,6 +216,7 @@ def _execute_job(
         )
     except Exception as exc:  # noqa: BLE001 - 记录根因后按重试策略处理
         summary["error"] = f"{type(exc).__name__}: {exc}"
+        summary["elapsed_s"] = round(time.monotonic() - started, 2)
         outcome = store.fail_crawl_job(job_id, summary["error"], meta=summary)
         summary["requeued"] = outcome == "queued"
         LOG.error("crawl.failed", source=source.id, error=summary["error"], outcome=outcome)

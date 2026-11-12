@@ -384,7 +384,31 @@ def finish_crawl_job(
         con.close()
 
 
+def abort_crawl_job(job_id: int, error: str, meta: dict | None = None, db_path: Path | None = None) -> None:
+    """P12 终态 ``aborted``:配置性失败(来源不存在/停用/类目拒绝)。
+
+    这类失败重试无意义,绝不进入 ``requeue_failed_crawl_jobs``(它只回收 transient
+    失败产生的 ``failed``),也不占 attempts 重试额度 —— 杜绝幽灵任务无限重排。
+    """
+    import json
+
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        con.execute(
+            "UPDATE crawl_jobs SET status='aborted', last_error=?, finished_at=?, meta_json=? WHERE id=?",
+            (error[:2000], cfg.now_iso(), json.dumps(meta or {}, ensure_ascii=False), job_id),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+
 def fail_crawl_job(job_id: int, error: str, meta: dict | None = None, db_path: Path | None = None) -> str:
+    """任务失败(网络/抓取等 transient):attempts 未达上限则重新排队,否则 failed。
+
+    注意:只有 transient 失败走这里;配置性失败必须用 ``abort_crawl_job`` 终态化。
+    """
     """任务失败:attempts 未达上限则重新排队(queued),否则 failed。"""
     import json
 

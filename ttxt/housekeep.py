@@ -31,6 +31,7 @@ MAJOR_PATHS: dict[str, Path] = {
     "temp": cfg.TEMP_DIR,
     "venv": cfg.VENV_DIR,
     "pip_cache": cfg.PIP_CACHE_DIR,
+    "tools": cfg.PROJECT_ROOT / "tools",
 }
 
 
@@ -223,6 +224,10 @@ def report() -> dict[str, Any]:
     config = cfg.load_config()
     disk_cfg = config.get("disk", {})
     sizes = {name: dir_size(path) for name, path in MAJOR_PATHS.items()}
+    # P12:pytest base temp 目录散落在项目根(pytest-of-*),必须纳入统计,杜绝预算盲区
+    sizes["pytest_of"] = sum(
+        dir_size(p) for p in sorted(cfg.PROJECT_ROOT.glob("pytest-of-*")) if p.is_dir()
+    )
     total = sum(sizes.values())
     free = free_space_gb()
     budget_gb = float(disk_cfg.get("project_budget_gb", 20))
@@ -254,6 +259,29 @@ def report() -> dict[str, Any]:
     }
 
 
+def prune_pytest_dirs(base: Path | None = None, keep: int = 2) -> dict[str, Any]:
+    """P12:清理项目根下旧的 pytest base temp 目录(pytest-of-*),只保留最近 ``keep`` 个。
+
+    这些目录是 pytest 自动创建的测试缓存,位于项目根、不在 99_temp 桶内,
+    必须有 TTL 清理,否则磁盘预算统计会持续漂移。正被占用的目录跳过并记录。
+    """
+    root = Path(base) if base is not None else cfg.PROJECT_ROOT
+    candidates = [p for p in root.glob("pytest-of-*") if p.is_dir()]
+    candidates.sort(key=lambda p: p.stat().st_mtime)
+    stale = candidates[: max(0, len(candidates) - max(0, int(keep)))]
+    removed: list[str] = []
+    skipped = 0
+    for old in stale:
+        try:
+            shutil.rmtree(old)
+            removed.append(str(old))
+        except OSError:
+            skipped += 1
+    result = {"removed": len(removed), "skipped_locked": skipped}
+    LOG.info("housekeep.prune_pytest_dirs", "pytest base temp dirs pruned", **result)
+    return result
+
+
 def run(clean: bool = False, temp_max_age_hours: float = 24.0) -> dict[str, Any]:
     result: dict[str, Any] = {"report": report()}
     if clean:
@@ -261,4 +289,5 @@ def run(clean: bool = False, temp_max_age_hours: float = 24.0) -> dict[str, Any]
         result["rotate_logs"] = rotate_logs()
         result["clean_pip_cache"] = clean_pip_cache()
         result["clean_browser_cache"] = clean_browser_cache()
+        result["prune_pytest_dirs"] = prune_pytest_dirs()
     return result

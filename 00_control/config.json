@@ -64,7 +64,8 @@
     "executable_path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
     "headless": true,
     "timeout_ms": 60000,
-    "network_idle": true
+    "network_idle": true,
+    "page_pool": 2
   },
   "model_gate": {
     "poll_interval_s": 2,

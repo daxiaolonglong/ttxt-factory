@@ -99,3 +99,24 @@ def fetch_robots(url: str, user_agent: str, timeout: float = 10) -> RobotsRules:
 def target_path(url: str) -> str:
     parts = urlsplit(url)
     return (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+
+
+def fetch_rules(url: str, user_agent: str, timeout: float = 10.0) -> RobotsRules:
+    """统一取规则入口(host 级):同一 host 的 robots.txt 只取一次。"""
+    return fetch_robots(url, user_agent, timeout=timeout)
+
+
+def gate(url: str, user_agent: str, cache: dict[str, RobotsRules], timeout: float = 10.0) -> tuple[RobotsRules, bool]:
+    """P12:带 host 级规则缓存的逐 URL 门禁,返回 (rules, 规则允许)。
+
+    分页/列表跳转出的每个新 URL 都必须重新过闸;规则按 host 缓存避免逐 URL 重取
+    robots.txt。``unknown``(无法确认)一律不放行;失败结果也按 host 缓存,本次任务
+    内不再反复探测(下个任务会重试)。
+    """
+    parts = urlsplit(url)
+    key = f"{parts.scheme.lower()}://{parts.netloc.lower()}"
+    rules = cache.get(key)
+    if rules is None:
+        rules = fetch_rules(url, user_agent, timeout=timeout)
+        cache[key] = rules
+    return rules, rules.allowed(target_path(url))

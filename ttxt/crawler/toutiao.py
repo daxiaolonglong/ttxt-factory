@@ -95,9 +95,20 @@ def extract_article(page, url: str) -> ExtractedItem:
     )
 
 
-def collect(source: Source, limit: int | None = None) -> dict:
+def collect(
+    source: Source,
+    limit: int | None = None,
+    rules: robots.RobotsRules | None = None,
+    session=None,
+) -> dict:
+    """抓取头条列表页 + 文章页。
+
+    P12:``rules`` 传入 runner 已取好的 host 级规则(不再自行重取 robots);
+    ``session`` 传入调用方持有的浏览器会话 —— 整次采集共用一个浏览器,不再逐 URL 起停。
+    """
     user_agent = str(cfg.load_config().get("crawler", {}).get("user_agent", "TouTiaoSmartFactory/0.1"))
-    rules = robots.fetch_robots(source.url, user_agent)
+    if rules is None:
+        rules = robots.fetch_robots(source.url, user_agent)
     if rules.unknown:
         raise RuntimeError("robots.txt 无法确认,来源暂停,不放行")
     listing_path = robots.target_path(source.url)
@@ -105,7 +116,8 @@ def collect(source: Source, limit: int | None = None) -> dict:
         raise RuntimeError(f"robots.txt disallows listing path: {listing_path}")
 
     delay = max(float(source.rate_limit_s or 2.0), float(rules.crawl_delay_s or 0))
-    listing = fetcher.fetch_page(source.url, render=True)
+    listing = fetcher.fetch_page(source.url, render=True, session=session)
+    pages = 1  # 真实抓页数:观测字段必须与实际抓取次数一致,不虚报 0
     links = extract_listing(listing.page)
     max_articles = max(1, int(limit or source.max_articles or 10))
 
@@ -118,10 +130,17 @@ def collect(source: Source, limit: int | None = None) -> dict:
             robots_skipped += 1
             continue
         try:
-            page = fetcher.fetch_page(url, render=True)
+            page = fetcher.fetch_page(url, render=True, session=session)
+            pages += 1
             items.append(extract_article(page.page, url))
         except Exception:  # noqa: BLE001 - 单篇失败不中断整批
             errors += 1
             continue
         time.sleep(delay)
-    return {"items": items, "links": len(links), "robots_skipped": robots_skipped, "errors": errors}
+    return {
+        "items": items,
+        "links": len(links),
+        "pages": pages,
+        "robots_skipped": robots_skipped,
+        "errors": errors,
+    }
