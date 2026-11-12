@@ -69,7 +69,7 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 | P7 面板与自动化 | ✅ 已完成 | `08_wiki/reports/P7-report.md`、`11_backups/P7-*.zip` |
 | P8 全链路验收 | ✅ 已完成 | `08_wiki/reports/P8-report.md`、`11_backups/P8-*.zip` |
 | P9 头条科技来源接入 | ✅ 已完成 | `08_wiki/reports/P9-toutiao-tech.md`、`11_backups/P9-final-*.zip` |
-| P10 生产可靠性修复 | 🚧 进行中 | `08_wiki/reports/P10-report.md`、`11_backups/P10-*.zip` |
+| P10 生产可靠性修复 | ✅ 第一批完成 | `08_wiki/reports/P10-report.md`、`11_backups/P10-final-*.zip` |
 
 > 首轮部署完成;真实采集来源清单与头条授权指标数据是剩余外部输入。
 > 日常命令见 [`08_wiki/operations.md`](08_wiki/operations.md)。

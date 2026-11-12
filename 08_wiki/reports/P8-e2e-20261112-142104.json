@@ -1,0 +1,132 @@
+{
+  "time": "2026-11-12T14:21:04+08:00",
+  "ok": true,
+  "steps": [
+    {
+      "step": "preflight",
+      "ok": true,
+      "result": {
+        "paths_within_project": [],
+        "free_gb": 109.4,
+        "within_budget": true,
+        "strata_loaded": true,
+        "model": "qwen3.8-flash-next-unsloth-ud-q4_k_xl"
+      }
+    },
+    {
+      "step": "crawl",
+      "ok": true,
+      "result": {
+        "job_id": 11,
+        "inserted": 0,
+        "duplicates": 5
+      }
+    },
+    {
+      "step": "clean",
+      "ok": true,
+      "result": {
+        "articles": 33,
+        "clusters": 33,
+        "near_duplicate_pairs": 0,
+        "singletons": 33,
+        "cleaned": 33,
+        "dates_normalized": 0,
+        "clean_version": "p3-v1"
+      }
+    },
+    {
+      "step": "analyze",
+      "ok": true,
+      "result": {
+        "category": "demo",
+        "seeded_keywords": 4,
+        "keywords": {
+          "keywords": 4,
+          "zero_coverage": 4,
+          "feedback_candidates": [
+            "人工智能",
+            "开源",
+            "效率工具",
+            "数据"
+          ]
+        },
+        "viral": {
+          "articles": 33,
+          "tiers": {
+            "missing_data": 33
+          }
+        },
+        "knowledge": {
+          "assets": 2,
+          "articles": 33,
+          "zero_coverage": 4
+        },
+        "index": {
+          "indexed": 33
+        }
+      }
+    },
+    {
+      "step": "write",
+      "ok": true,
+      "result": {
+        "draft_id": "demo-20261112141927-d748ca",
+        "title": "智能家居音频孤岛现状：多房间音乐为何难以统一控制",
+        "versions": 1,
+        "score": 0.3,
+        "status": "rejected",
+        "passed": false,
+        "truncated": false,
+        "evidence": 5,
+        "path": "D:\\ttxt\\04_writing\\drafts\\demo\\rejected\\demo-20261112141927-d748ca.md",
+        "published": false
+      }
+    },
+    {
+      "step": "dashboard",
+      "ok": true,
+      "result": {
+        "url": "http://127.0.0.1:55980",
+        "categories": 6,
+        "articles_total": 33,
+        "logs": 3,
+        "schema_version": "p10-v1"
+      }
+    },
+    {
+      "step": "failure_injection",
+      "ok": true,
+      "result": {
+        "job_id": 12,
+        "error": "robots_unknown"
+      }
+    },
+    {
+      "step": "backup_restore",
+      "ok": true,
+      "result": {
+        "zip": "D:\\ttxt\\11_backups\\E2E-20261112-142100.zip",
+        "articles": 33,
+        "restored_count": 33
+      }
+    },
+    {
+      "step": "disk",
+      "ok": true,
+      "result": {
+        "project_total_gb": 0.364,
+        "budget_gb": 20.0,
+        "free_gb": 109.4
+      }
+    },
+    {
+      "step": "serial",
+      "ok": true,
+      "result": {
+        "jobs_checked": 26,
+        "overlaps": 0
+      }
+    }
+  ]
+}
