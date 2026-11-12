@@ -86,18 +86,27 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 | 默认分支 | `main` |
 | git 客户端 | 便携版 MinGit 2.56.1，位于 `tools/git/`，经 `scripts\git.cmd` 调用（不污染系统 PATH） |
 | 入库范围 | 源码、配置、文档、测试、Wiki、技能文件；`.venv/`、`*.db`、`01_categories/*/rag`、`keywords`、`metrics`、`09_logs/`、`11_backups/`、`99_temp/`、`tools/` 由 `.gitignore` 排除 |
+| 凭据 | `scripts\login.cmd` 保存一次令牌到 `.secrets/github_token`（已被 git 忽略，ACL 仅当前用户可读）；推送脚本自动读取，无需每次输入 |
 
 ```powershell
-# 日常提交并推送（令牌仅从环境变量读，不落盘、不进 .git/config）
-set GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
+# 第一次：保存令牌（只需一次，输入不回显；也支持 --token ghp_xxx）
+scripts\login.cmd
+
+# 以后提交并推送，不用再贴令牌
 scripts\push.cmd -m "feat: 采集去重阈值调整"
 
-# 仅查看状态
+# 查看当前凭据来自哪里 / 删除本地凭据
+scripts\login.cmd --check
+scripts\login.cmd --forget
+
+# 仅看状态不推送
 scripts\push.cmd --dry-run
 
 # 首次连接新仓库（建仓 + 首次提交 + 推送，可重复执行）
+scripts\login.cmd
 .venv\Scripts\python.exe -X utf8 scripts\github_connect.py --repo ttxt-factory
 ```
 
+> 令牌读取顺序：环境变量 `GITHUB_TOKEN`/`GH_TOKEN` → `.secrets/github_token`；可用 `TTXT_GITHUB_TOKEN_FILE` 指定别处。
 > 本机 `schannel` TLS 在受限环境下不可用，仓库已写死 `http.sslBackend=openssl`；换机器克隆后同样执行
 > `git config http.sslBackend openssl`。令牌建议最小权限（仅 `repo`）并设有效期，用完可在 GitHub 侧随时撤销。

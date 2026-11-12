@@ -14,7 +14,6 @@ import argparse
 import base64
 import http.client
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -22,6 +21,8 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+
+from _github_auth import load_token
 
 API = "https://api.github.com"
 ROOT = Path(__file__).resolve().parent.parent
@@ -97,10 +98,11 @@ def main() -> int:
     ap.add_argument("--message", default="chore: 初始化头条智能工厂源码仓库", help="首次提交的提交信息")
     args = ap.parse_args()
 
-    token = (os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or "").strip()
+    token, source = load_token()
     if not token:
-        print("缺少 GITHUB_TOKEN 环境变量", file=sys.stderr)
+        print("没有可用凭据：先运行 scripts\\login.cmd 保存令牌（只需一次）", file=sys.stderr)
         return 1
+    print(f"凭据来源：{source}")
 
     status, me = api("/user", token)
     if status != 200:

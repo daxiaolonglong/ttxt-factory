@@ -11,11 +11,12 @@ from __future__ import annotations
 
 import argparse
 import base64
-import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+from _github_auth import load_token
 
 ROOT = Path(__file__).resolve().parent.parent
 GIT = ROOT / "tools" / "git" / "cmd" / "git.exe"
@@ -42,10 +43,11 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    token = (os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or "").strip()
+    token, source = load_token()
     if not token:
-        print("缺少 GITHUB_TOKEN 环境变量（GitHub → Settings → Developer settings → Tokens (classic)）", file=sys.stderr)
+        print("没有可用凭据：先运行 scripts\\login.cmd 保存令牌（只需一次）", file=sys.stderr)
         return 1
+    print(f"凭据来源：{source}")
 
     remote = git("remote", "get-url", "origin").stdout.strip()
     if "github.com/" not in remote:

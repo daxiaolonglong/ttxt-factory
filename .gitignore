@@ -31,6 +31,9 @@ tools/
 *.pem
 *.key
 secrets/
+.secrets/
+github_token*
+*.token
 
 # ---- 系统 / 编辑器 ----
 Thumbs.db
