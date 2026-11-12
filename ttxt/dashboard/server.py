@@ -125,7 +125,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
     # 3) Host 只允许回环地址 —— 阻断 DNS rebinding;
     # 4) 请求体上限 64KB,仅接受 JSON。
 
-    _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
+    # 解析时已剥离 IPv6 方括号,集合内保存裸 "::1" 才能匹配(带括号则永远拒)。
+    _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
     def _task_allowed(self) -> str | None:
         if self.headers.get("X-TTXT-Task") != "1":

@@ -1,0 +1,12 @@
+﻿PASS  GET /api/sources 200  code=200
+PASS  GET /api/tasks 200+shape  code=200
+PASS  POST crawl toutiao_tech -> 202  code=202 body={"job_id": 13, "category": "technology", "deduped": true, "note": "已有排队/运行任务,未重复入队"}
+PASS  POST analyze(demo) 200  code=200
+PASS  POST no task header 403  code=403
+PASS  POST evil Origin 403  code=403
+PASS  POST non-loopback Host 403  code=403
+PASS  POST malformed JSON 400  code=400
+PASS  POST write 404 refused  code=404 body={"error": "未知任务接口;面板支持 crawl 入队与 analyze,写作/发布/模型不可下发"}
+PASS  POST non-task path 405  code=405
+PASS  POST [::1] Host/Origin 200  code=200
+---- 11/11 passed ----

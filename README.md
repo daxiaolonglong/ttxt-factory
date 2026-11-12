@@ -35,6 +35,12 @@ D:\ttxt\scripts\ttxt.cmd selftest
 # 5) 磁盘/限额报告与临时清理
 D:\ttxt\scripts\ttxt.cmd housekeep
 D:\ttxt\scripts\ttxt.cmd housekeep --clean
+
+# 6) 闭环操作(P11):查看排队/调度状态(均只入队/查看,不自行采集或发布)
+D:\ttxt\scripts\ttxt.cmd crawl-queue --limit 20
+D:\ttxt\scripts\ttxt.cmd schedule
+D:\ttxt\scripts\ttxt.cmd metrics --list-sources
+D:\ttxt\scripts\ttxt.cmd predict report --category technology
 ```
 
 ## 目录
@@ -70,8 +76,9 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 | P8 全链路验收 | ✅ 已完成 | `08_wiki/reports/P8-report.md`、`11_backups/P8-*.zip` |
 | P9 头条科技来源接入 | ✅ 已完成 | `08_wiki/reports/P9-toutiao-tech.md`、`11_backups/P9-final-*.zip` |
 | P10 生产可靠性修复 | ✅ 第一批完成 | `08_wiki/reports/P10-report.md`、`11_backups/P10-final-*.zip` |
+| P11 生产闭环第二批 | ✅ 已完成 | `08_wiki/reports/P11-report.md`、`08_wiki/reports/p11-evidence/`、`11_backups/P11-final-*.zip` |
 
-> 首轮部署完成;真实采集来源清单与头条授权指标数据是剩余外部输入。
+> 生产闭环已贯通:指标回流(白名单)→ 快照 → 预测校准 → 知识资产;分析 → 关键词反哺 → 自动入队采集;本地调度器无人值守(仅入队/分析/恢复/清理)。等待的外部输入只剩头条后台真实指标导出;第三批(多类目长跑、故障全矩阵、写作质量回归、磁盘压测)按计划未做。
 > 日常命令见 [`08_wiki/operations.md`](08_wiki/operations.md)。
 > 定时巡检:本 DSH 环境已建立「每日 18:00(Asia/Shanghai)质量巡检」计划任务(新会话独立执行);你此前在 ChatGPT 建立的每周一巡检属于另一工具,不属于本项目配置。
 
@@ -79,7 +86,7 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 
 - 所有写入仅在 `D:\ttxt`;磁盘预算 20 GB,每阶段实测。
 - Strata 与 V100 归用户管理,系统只读状态 + 串行调用。
-- 面板仅绑定 `127.0.0.1`,无发布端点。
+- 面板仅绑定 `127.0.0.1`;POST 带护栏且只可下发采集入队与分析,写作/发布/模型不可下发,无发布端点;调度器同样禁止这三类任务。
 - 规则全文见 [`07_rules/CORE_RULES.md`](07_rules/CORE_RULES.md)。
 
 ## 版本控制与 GitHub

@@ -13,7 +13,7 @@
 import io
 import json
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -223,7 +223,7 @@ def test_predict_settle_and_accuracy_asset(tmp_path):
     assert first["recorded"] == 2
     basis = {json.loads(row[0])["bucket"]
              for row in _rows(db_path, "SELECT basis FROM prediction_records")}
-    assert basis == {"question", "plain"}
+    assert basis == {"question", "number"}
 
     # 幂等:已有预测记录不重复登记
     again = prediction.predict_articles("demo", db_path=db_path)
@@ -326,7 +326,7 @@ def test_feedback_gap_enqueues_once_with_evidence(tmp_path):
     ], db_path=db_path)
     keywords.score_keywords("demo", db_path=db_path)
     third = keywords.auto_feedback("demo", sources_path=sources_path, **kwargs)
-    assert third["recovered"] >= 1 and "效率工具" not in third["gap_keywords"]
+    assert third["recovered_keywords"] >= 1 and "效率工具" not in third["gap_keywords"]
     con = sqlite3.connect(db_path)
     try:
         status = con.execute("SELECT status FROM keywords WHERE keyword='效率工具'").fetchone()[0]
@@ -385,6 +385,17 @@ def test_scheduler_due_and_disabled(tmp_path):
     assert disabled["skipped"] == "scheduler.disabled" and disabled["ran"] == []
 
 
+def test_scheduler_offsets_are_safe(tmp_path):
+    """状态里带时区偏移的 last_run_at 不得让第二次运行崩溃(历史 bug)。"""
+    now = datetime(2026, 11, 12, 12, 0, 0)
+    job = {"id": "j", "kind": "recover", "interval_min": 60, "enabled": True,
+           "system_db": str(tmp_path / "none.db")}
+    old = (now - timedelta(minutes=90)).astimezone(timezone.utc).isoformat()
+    fresh = (now - timedelta(minutes=30)).astimezone(timezone.utc).isoformat()
+    assert scheduler.is_due(job, {"j": {"last_run_at": old}}, now)
+    assert not scheduler.is_due(job, {"j": {"last_run_at": fresh}}, now)
+
+
 def test_scheduler_run_due_isolates_failures(tmp_path):
     state_path = tmp_path / "state.json"
     conf = {"scheduler": {"enabled": True, "jobs": [
@@ -441,7 +452,6 @@ def test_task_guard_matrix():
 
 
 def test_json_body_limits():
-    _Req({"X-TTXT-Task": "1", "Host": "127.0.0.1", "Content-Length": "5"}, b'{"a"1}').  _task_allowed()
     handler = _Req({"Content-Length": "5"}, b'{"a"1')
     with pytest.raises(ValueError):
         handler._read_json_body()
@@ -527,9 +537,9 @@ def test_dashboard_post_routes_reject_everything_else():
 
     Probe("/api/other").do_POST()
     assert sent[-1][0] == 405 and "405" not in str(sent[-1][1])
-    Probe("/api/tasks/write")._task_allowed = lambda: None  # type: ignore[method-assign]
     probe = Probe("/api/tasks/write")
+    probe._task_allowed = lambda: None                      # type: ignore[method-assign]
     probe.rfile = io.BytesIO(b"{}")
-    probe._read_json_body = lambda: {}                    # type: ignore[method-assign]
+    probe._read_json_body = lambda: {}                      # type: ignore[method-assign]
     probe.do_POST()
     assert sent[-1][0] == 404 and "写作" in sent[-1][1]["error"]

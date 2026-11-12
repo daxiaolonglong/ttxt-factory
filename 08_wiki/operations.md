@@ -30,10 +30,31 @@
 # 写作闭环(仅导出草稿,不发布)
 .venv\Scripts\python.exe -X utf8 -m ttxt write --category demo --topic "智能音箱与家庭自动化" --max-revisions 1
 
-# 面板(只读,仅 127.0.0.1)
+# 面板(仅 127.0.0.1;POST 受护栏,只可下发 crawl 入队 / analyze)
 .venv\Scripts\python.exe -X utf8 -m ttxt serve --port 8765
 # 或双击 scripts\start-dashboard.cmd(带窗口) / scripts\start-dashboard.vbs(无黑窗)
 # 停止: scripts\stop-dashboard.cmd
+# 护栏验收: powershell 执行 scripts\p11_http_check.ps1(11 项矩阵)
+
+# ---- P11 闭环命令 ----
+# 采集队列(默认只列队;--run 才真正执行,建议人工确认后再跑)
+.venv\Scripts\python.exe -X utf8 -m ttxt crawl-queue --limit 20
+.venv\Scripts\python.exe -X utf8 -m ttxt crawl-queue --run [--category <类目>] [--limit N]
+
+# 真实指标回流(仅白名单来源;伪造/未授权会被硬拒)
+.venv\Scripts\python.exe -X utf8 -m ttxt metrics --list-sources
+.venv\Scripts\python.exe -X utf8 -m ttxt metrics --category technology --import <导出.json> --source toutiao_admin_export
+.venv\Scripts\python.exe -X utf8 -m ttxt metrics --category technology --snapshot   # 冻结快照+重打标签
+
+# 预测→回填→知识资产(无实测基线拒绝预测;样本不足不写资产)
+.venv\Scripts\python.exe -X utf8 -m ttxt predict predict --category technology
+.venv\Scripts\python.exe -X utf8 -m ttxt predict settle   --category technology
+.venv\Scripts\python.exe -X utf8 -m ttxt predict report   --category technology
+
+# 本地调度器(任务定义在 00_control/config.json → scheduler.jobs;状态存 scheduler_state.json)
+.venv\Scripts\python.exe -X utf8 -m ttxt schedule            # 查看到期状态
+.venv\Scripts\python.exe -X utf8 -m ttxt schedule --once     # 跑一遍到期任务(只入队/分析/恢复/清理)
+.venv\Scripts\python.exe -X utf8 -m ttxt schedule --daemon   # 常驻循环(默认 300s 一轮)
 
 # 崩溃恢复与任务重排
 .venv\Scripts\python.exe -X utf8 -m ttxt recover
@@ -61,7 +82,7 @@
 
 - 项目根:`D:\ttxt`;所有写入、缓存、日志、备份、venv 均在此。
 - **禁止**:修改/重启 Strata;同时运行两个模型;自动发布文章;伪造指标;写入 D 盘外项目文件。
-- 面板只读、只绑定回环地址。
+- 面板仅绑定回环地址;GET 只读,POST 仅 `crawl` 入队与 `analyze` 两类,带四重护栏(任务头/回环 Host/Origin 同源/64KB JSON);写作、发布、模型任务不可下发(404)。调度器同样禁止 write/publish/model 类任务。
 
 ## 3. 故障恢复
 
@@ -77,6 +98,9 @@
 | 数据库损坏 | `doctor` 报 integrity;从 `11_backups` 解压恢复对应 `db/<类目>/articles.db` |
 | 磁盘不足 | `housekeep --clean` 清理 temp/日志/pip 缓存/浏览器缓存;检查 99_temp TTL |
 | 需要回退代码 | 解压对应阶段备份覆盖;数据用其中 `db/` 恢复 |
+| 面板 POST 返回 403 | 缺 `X-TTXT-Task: 1` 头 / Origin 非本站 / Host 非回环 —— 属护栏生效,不是故障;合法调用见 `reports/P11-report.md` §4.1 |
+| 指标导入被拒(PermissionError/ValueError) | 来源不在 `config.json → metrics.authorized_sources` 白名单,或行内负数/跨类目/全缺指标;这是防伪造机制,按导出源真实数据重试 |
+| 引用已删来源的排队任务反复失败 | 已知边界(P12 计划自动撤销);当前手工处理:`system.db` 中将该 `crawl_jobs` 置 cancelled,勿反复 `recover --run` |
 
 ## 4. 数据备份与恢复
 

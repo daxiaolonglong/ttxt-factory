@@ -42,7 +42,9 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
     target = Path(db_path) if db_path is not None else cfg.CATEGORIES_DIR / category / "articles.db"
     con = connect(target)
     try:
-        rows = con.execute("SELECT id, keyword FROM keywords WHERE status='active' ORDER BY id").fetchall()
+        # 覆盖统计必须覆盖全部关键词(含 gap):若只统计 active,gap 词再也不会被重新计数,
+        # auto_feedback 的 gap→active 恢复通道就永远无法触发(闭环断在评分层)。
+        rows = con.execute("SELECT id, keyword FROM keywords ORDER BY id").fetchall()
         articles = con.execute("SELECT cleaned_content, content FROM articles").fetchall()
         texts = [(row["cleaned_content"] or row["content"] or "") for row in articles]
         lengths = [len(text) for text in texts]

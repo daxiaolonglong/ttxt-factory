@@ -16,16 +16,16 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 
 ## 2. articles.db(每类目一份,同构;当前 `p10-v1`)
 
-> P3 清洗/聚类列 + `article_clusters`;P4 分析表 + FTS5;P6 写作/评审/证据链表;P8 `prediction_records`;P10 `writing_history.status`(draft/passed/rejected)与写作 L4 门禁。迁移幂等。
+> P3 清洗/聚类列 + `article_clusters`;P4 分析表 + FTS5;P6 写作/评审/证据链表;P8 `prediction_records`;P10 `writing_history.status`(draft/passed/rejected)与写作 L4 门禁;P11 无 schema 变更,新增行为语义:指标导入白名单、`metric_snapshots` 写入通道、`prediction_records` 回填/知识资产门禁、`keywords.status` active↔gap 状态机。迁移幂等。
 
 | 表 | 作用 | 关键列 |
 |---|---|---|
 | articles | 文章主表 | id, category, source, source_item_id, title, content, cleaned_content, excerpt, author, published_at, url, url_normalized, fetched_at, content_hash, text_length, simhash, cluster_id, completeness, credibility, processor_version, cleaned_at, clean_version |
 | article_clusters | 相似聚类摘要 | cluster_id, category, representative_id, member_count, created_at, updated_at |
-| keywords | 关键词库 | id, keyword, category, origin, status, created_at(UNIQUE keyword+category) |
+| keywords | 关键词库 | id, keyword, category, origin, status, created_at(UNIQUE keyword+category;status 状态机 active↔gap 由 `auto_feedback` 独占迁移) |
 | keyword_performance | 关键词效果 | keyword_id, collected, quality_articles, avg_text_length, score, last_used_at, updated_at |
 | viral_labels | 爆款标签 | article_id, label, confidence_tier, score, reason, features_json, labeled_at |
-| article_metrics | 真实指标(仅授权来源;允许 NULL,缺失≠0) | article_id, reads, likes, favorites, comments, impressions, account_baseline, data_source, credibility, captured_at |
+| article_metrics | 真实指标(仅 config 白名单来源可入库,未授权 `PermissionError`;允许 NULL,缺失≠0;负数/跨类目/全缺行拒绝) | article_id, reads, likes, favorites, comments, impressions, account_baseline, data_source, credibility, captured_at |
 | metric_snapshots | 多时点指标 | article_id, captured_at, reads, likes, favorites, comments, impressions, data_source |
 | knowledge_assets | 知识资产(可追溯) | category, kind, statement, evidence_json, support_count, confidence, updated_at |
 | writing_history | 草稿版本(带状态) | draft_id, category, topic, version, content, model_id, status, created_at |
@@ -42,6 +42,9 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 - 爆款标签:缺曝光 `unscored + missing_data`;互动字段任一缺失 `unscored + incomplete_data`(缺失 ≠ 0);全部有值才评分。
 - 证据链:quote 为来源文章中与声明重叠度最高的句子(启发式,不等同事实核查)。
 - 写作门禁:完整性(长度 ≥400、句末标点收尾、finish_reason≠length)+ score ≥0.6 + critical 为空才 `passed`;否则 `rejected`(仅导出到 rejected 目录)。
+- 指标回流(P11):导入仅 `00_control/config.json → metrics.authorized_sources` 白名单来源;`--snapshot` 冻结当前指标进 `metric_snapshots` 并联动重打爆款标签。
+- 预测闭环(P11):无 measured 基线拒绝预测(不凭空);`settle` 仅以 measured 标签回填 outcome;`report` 仅当已回填样本 ≥ `prediction.min_samples`(默认 5)才写 `knowledge_assets`,否则如实记录样本不足。
+- 关键词反哺(P11):覆盖统计对全部关键词进行(含 gap);零覆盖 active → `gap` 并自动为缺口入队非 demo 来源(去重);gap 词重新有覆盖 → 恢复 active;每类目写 `03_intelligence/keyword_feedback/*.json` 证据。
 - 保留原始 `content`,清洗结果写入 `cleaned_content`,不覆盖原始数据。
 
 ## 3. 隔离与备份

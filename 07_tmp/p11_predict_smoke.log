@@ -1,0 +1,21 @@
+﻿--- predict ---
+{
+  "category": "demo",
+  "recorded": 0,
+  "skipped_no_baseline": 0,
+  "reason": "类目内没有任何 measured 实测样本,拒绝凭空预测"
+}
+--- settle ---
+{
+  "category": "demo",
+  "settled": 0,
+  "pending": 0
+}
+--- report ---
+{
+  "category": "demo",
+  "settled_samples": 0,
+  "mae": null,
+  "mean_bias": null,
+  "asset_written": false
+}

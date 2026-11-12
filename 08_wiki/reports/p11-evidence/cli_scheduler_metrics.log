@@ -1,0 +1,188 @@
+﻿--- crawl-queue ---
+{
+  "queued": [
+    {
+      "id": 1,
+      "source": "quotes_toscrape",
+      "category": "demo",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-12T12:29:43+08:00"
+    },
+    {
+      "id": 6,
+      "source": "e2e_unreachable",
+      "category": "demo",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-12T12:47:29+08:00"
+    },
+    {
+      "id": 8,
+      "source": "e2e_unreachable",
+      "category": "demo",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-12T12:48:54+08:00"
+    },
+    {
+      "id": 13,
+      "source": "toutiao_tech",
+      "category": "technology",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-12T19:56:42+08:00"
+    }
+  ],
+  "note": "加 --run 才真正执行采集"
+}
+--- schedule --once ---
+{
+  "ran": [
+    {
+      "id": "crawl_enqueue_4h",
+      "kind": "crawl_enqueue",
+      "result": {
+        "enqueued": 2,
+        "deduped": 2,
+        "routing_rejected": 0,
+        "errors": []
+      },
+      "status": "ok",
+      "finished_at": "2026-11-12T19:57:35+08:00"
+    },
+    {
+      "id": "analyze_daily",
+      "kind": "analyze",
+      "result": {
+        "technology": "ok",
+        "finance": "ok",
+        "social": "ok",
+        "history": "ok",
+        "health": "ok",
+        "demo": "ok"
+      },
+      "status": "ok",
+      "finished_at": "2026-11-12T19:57:35+08:00"
+    },
+    {
+      "id": "recover_daily",
+      "kind": "recover",
+      "result": {
+        "model_stale_requeued": 0,
+        "crawl_stale_marked_failed": 0,
+        "crawl_failed_requeued": 1
+      },
+      "status": "ok",
+      "finished_at": "2026-11-12T19:57:35+08:00"
+    },
+    {
+      "id": "housekeep_weekly",
+      "kind": "housekeep",
+      "result": {
+        "report": {
+          "root": "D:\\ttxt",
+          "sizes_bytes": {
+            "control": 163438,
+            "categories": 1564672,
+            "crawler": 2133,
+            "intelligence": 2292,
+            "writing": 21461,
+            "dashboard": 22653,
+            "agents": 9612,
+            "rules": 2951,
+            "wiki": 62158,
+            "logs": 53161,
+            "tests": 369134,
+            "backups": 3451520,
+            "temp": 1705025,
+            "venv": 288247467,
+            "pip_cache": 95691429
+          },
+          "project_total_gb": 0.364,
+          "budget_gb": 20.0,
+          "within_budget": true,
+          "free_gb": 109.5,
+          "min_free_gb": 5.0,
+          "free_ok": true,
+          "caps": {
+            "temp_max_gb": 2,
+            "pip_cache_max_gb": 1,
+            "log_max_mb": 10,
+            "backup_keep": 7,
+            "browser_max_gb": 3
+          },
+          "caps_status": {
+            "pip_cache_bytes": 95691429,
+            "pip_cache_within": true,
+            "browser_bytes": 0,
+            "browser_within": true,
+            "db_warnings": []
+          }
+        }
+      },
+      "status": "ok",
+      "finished_at": "2026-11-12T19:57:35+08:00"
+    }
+  ],
+  "skipped_not_due": 0
+}
+--- schedule status ---
+{
+  "enabled": true,
+  "jobs": [
+    {
+      "id": "crawl_enqueue_4h",
+      "kind": "crawl_enqueue",
+      "enabled": true,
+      "interval_min": 240,
+      "last_run_at": "2026-11-12T19:57:35+08:00",
+      "last_status": "ok",
+      "due": false
+    },
+    {
+      "id": "analyze_daily",
+      "kind": "analyze",
+      "enabled": true,
+      "interval_min": 1440,
+      "last_run_at": "2026-11-12T19:57:35+08:00",
+      "last_status": "ok",
+      "due": false
+    },
+    {
+      "id": "recover_daily",
+      "kind": "recover",
+      "enabled": true,
+      "interval_min": 1440,
+      "last_run_at": "2026-11-12T19:57:35+08:00",
+      "last_status": "ok",
+      "due": false
+    },
+    {
+      "id": "housekeep_weekly",
+      "kind": "housekeep",
+      "enabled": true,
+      "interval_min": 10080,
+      "last_run_at": "2026-11-12T19:57:35+08:00",
+      "last_status": "ok",
+      "due": false
+    }
+  ]
+}
+--- metrics list-sources ---
+{
+  "toutiao_admin_export": "self_reported",
+  "manual_verified": "verified"
+}
+--- metrics snapshot demo ---
+{
+  "category": "demo",
+  "captured_at": "2026-11-12T19:57:36+08:00",
+  "snapshots": 0,
+  "relabel": {
+    "articles": 33,
+    "tiers": {
+      "missing_data": 33
+    }
+  }
+}

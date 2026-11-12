@@ -53,9 +53,15 @@ def write_state(state: dict, state_path: Path | None = None) -> None:
 
 def _parse_iso(value: str) -> datetime | None:
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
     except (ValueError, TypeError):
         return None
+    if parsed.tzinfo is not None:
+        # 状态时间戳(cfg.now_iso)带本地时区偏移,而 run_due/status_report 用
+        # datetime.now() 的 naive 本地时间比较;统一转成本地 naive,
+        # 否则第二次运行起 aware-naive 混算必抛 TypeError。
+        parsed = parsed.astimezone().replace(tzinfo=None)
+    return parsed
 
 
 def is_due(job: dict, state: dict, now: datetime) -> bool:

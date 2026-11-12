@@ -21,15 +21,18 @@
 ## 2. 组件与数据流
 
 ```
-面板(05_dashboard,127.0.0.1:8765)  ← 只读 DB/日志 + 任务下发
+面板(05_dashboard,127.0.0.1:8765)  ← 读 DB/日志 + 受护栏的任务下发(仅 crawl 入队/analyze;写作/发布/模型 404)
        │
-控制中心(00_control:system.db/config/registry)
+本地调度器(ttxt scheduler:仅 crawl_enqueue/analyze/recover/housekeep;配置禁止 write/publish/model)
+        │
+控制中心(00_control:system.db/config/registry/scheduler_state.json)
        │
 采集(02_crawler:Scrapling HTTP 优先 → 浏览器按需)→ 清洗/去重/聚类
        │
 类目隔离库(01_categories/<cat>/articles.db + rag/keywords/metrics)
        │
-分析(03_intelligence:指标快照→爆款四级标签+置信度→趋势/生命周期→关键词评分→知识资产/FTS5 RAG)
+分析(03_intelligence:指标快照→爆款四级标签+置信度→趋势/生命周期→关键词评分→知识资产/FTS5 RAG
+      →关键词反哺:零覆盖词标 gap 并自动入队采集(去重),gap↔active 状态机,每类目 JSON 证据)
        │
 唯一模型入口(00_control/model_gate:SQLite 队列 + 串行锁 + /health 等待)
        │
@@ -37,7 +40,8 @@
        │
 六角色(06_agents)由总调度装载,全部经 model_gate 串行
        │
-真实表现回流(仅授权导出/接口)→ 预测对照校准
+真实表现回流(仅 config 白名单来源导入,未授权拒绝)→ 预测对照校准
+(无实测基线拒绝预测;回填样本 < min_samples 不写知识资产)
 ```
 
 ## 3. 关键技术决策
@@ -68,9 +72,10 @@
 | P8 全链路验收 | ✅ 已完成(报告:`reports/P8-report.md`) |
 | P9 头条科技来源接入 | ✅ 已完成(报告:`reports/P9-toutiao-tech.md`) |
 | P10 生产可靠性修复 | ✅ 第一批完成(报告:`reports/P10-report.md`) |
+| P11 生产闭环第二批 | ✅ 已完成(报告:`reports/P11-report.md`) |
 
 ## 5. 当前状态(2026-11-12)
 
-- P0–P10 第一批完成:框架 + 采集 + 数据库 + 分析 + 串行模型 + 写作门禁 + 面板 + 头条科技真实来源 + 可靠性修复。
-- 诚实状态:依赖授权指标数据的 4/5/9 条验收仍为"机制就绪、待授权数据";写作门禁已生效(不合格草稿只进 rejected 目录);第二/三批(指标导入、调度、故障全矩阵)未做。
+- P0–P11:框架 + 采集 + 数据库 + 分析 + 串行模型 + 写作门禁 + 面板 + 头条科技真实来源 + 可靠性修复 + **生产闭环(指标回流/预测校准/关键词反哺/本地调度/面板下发)**。
+- 诚实状态:预测与校准环等待头条后台真实指标导出(机制就绪,无数据不伪造);第三批(多类目长跑、故障全矩阵、写作质量回归、磁盘压测)未做。P11 发现并修复三个闭环级缺陷(调度器时区崩溃、IPv6 回环护栏不自洽、gap 关键词评分死锁),见 `reports/P11-report.md` §2。
 - 运维命令见 `operations.md`;回滚快照见 `11_backups/`。

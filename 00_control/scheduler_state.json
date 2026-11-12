@@ -1,0 +1,83 @@
+{
+  "crawl_enqueue_4h": {
+    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_status": "ok",
+    "last_result": {
+      "enqueued": 2,
+      "deduped": 2,
+      "routing_rejected": 0,
+      "errors": []
+    },
+    "last_error": null
+  },
+  "analyze_daily": {
+    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_status": "ok",
+    "last_result": {
+      "technology": "ok",
+      "finance": "ok",
+      "social": "ok",
+      "history": "ok",
+      "health": "ok",
+      "demo": "ok"
+    },
+    "last_error": null
+  },
+  "recover_daily": {
+    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_status": "ok",
+    "last_result": {
+      "model_stale_requeued": 0,
+      "crawl_stale_marked_failed": 0,
+      "crawl_failed_requeued": 1
+    },
+    "last_error": null
+  },
+  "housekeep_weekly": {
+    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_status": "ok",
+    "last_result": {
+      "report": {
+        "root": "D:\\ttxt",
+        "sizes_bytes": {
+          "control": 163438,
+          "categories": 1564672,
+          "crawler": 2133,
+          "intelligence": 2292,
+          "writing": 21461,
+          "dashboard": 22653,
+          "agents": 9612,
+          "rules": 2951,
+          "wiki": 62158,
+          "logs": 53161,
+          "tests": 369134,
+          "backups": 3451520,
+          "temp": 1705025,
+          "venv": 288247467,
+          "pip_cache": 95691429
+        },
+        "project_total_gb": 0.364,
+        "budget_gb": 20.0,
+        "within_budget": true,
+        "free_gb": 109.5,
+        "min_free_gb": 5.0,
+        "free_ok": true,
+        "caps": {
+          "temp_max_gb": 2,
+          "pip_cache_max_gb": 1,
+          "log_max_mb": 10,
+          "backup_keep": 7,
+          "browser_max_gb": 3
+        },
+        "caps_status": {
+          "pip_cache_bytes": 95691429,
+          "pip_cache_within": true,
+          "browser_bytes": 0,
+          "browser_within": true,
+          "db_warnings": []
+        }
+      }
+    },
+    "last_error": null
+  }
+}
