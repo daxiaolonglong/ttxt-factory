@@ -1,0 +1,129 @@
+{
+  "time": "2026-11-12T12:47:44+08:00",
+  "ok": true,
+  "steps": [
+    {
+      "step": "preflight",
+      "ok": true,
+      "result": {
+        "paths_within_project": [],
+        "free_gb": 109.6,
+        "within_budget": true,
+        "strata_loaded": true,
+        "model": "qwen3.8-flash-next-iq3_s"
+      }
+    },
+    {
+      "step": "crawl",
+      "ok": true,
+      "result": {
+        "job_id": 5,
+        "inserted": 0,
+        "duplicates": 5
+      }
+    },
+    {
+      "step": "clean",
+      "ok": true,
+      "result": {
+        "articles": 33,
+        "clusters": 33,
+        "near_duplicate_pairs": 0,
+        "singletons": 33,
+        "cleaned": 33,
+        "dates_normalized": 0,
+        "clean_version": "p3-v1"
+      }
+    },
+    {
+      "step": "analyze",
+      "ok": true,
+      "result": {
+        "category": "demo",
+        "seeded_keywords": 4,
+        "keywords": {
+          "keywords": 4,
+          "zero_coverage": 4,
+          "feedback_candidates": [
+            "人工智能",
+            "开源",
+            "效率工具",
+            "数据"
+          ]
+        },
+        "viral": {
+          "articles": 33,
+          "tiers": {
+            "missing_data": 33
+          }
+        },
+        "knowledge": {
+          "assets": 2,
+          "articles": 33,
+          "zero_coverage": 4
+        },
+        "index": {
+          "indexed": 33
+        }
+      }
+    },
+    {
+      "step": "write",
+      "ok": true,
+      "result": {
+        "draft_id": "demo-20261112124723-596ae6",
+        "title": "智能家居音频孤岛现状：为何灯光与传感器已打通，多房间音频却仍各自为战",
+        "versions": 1,
+        "score": 0.65,
+        "evidence": 4,
+        "path": "D:\\ttxt\\04_writing\\drafts\\demo\\demo-20261112124723-596ae6.md",
+        "published": false
+      }
+    },
+    {
+      "step": "dashboard",
+      "ok": true,
+      "result": {
+        "url": "http://127.0.0.1:50686",
+        "categories": 6,
+        "articles_total": 33,
+        "logs": 3,
+        "schema_version": "p6-v1"
+      }
+    },
+    {
+      "step": "failure_injection",
+      "ok": true,
+      "result": {
+        "job_id": 6,
+        "error": "FetchError: fetch failed after 3 attempts: Failed to perform, curl: (7) Failed to connect to 127.0.0.1:9 after 0 ms: Could not connect to server. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+      }
+    },
+    {
+      "step": "backup_restore",
+      "ok": true,
+      "result": {
+        "zip": "D:\\ttxt\\11_backups\\E2E-20261112-124743.zip",
+        "articles": 33,
+        "restored_count": 33
+      }
+    },
+    {
+      "step": "disk",
+      "ok": true,
+      "result": {
+        "project_total_gb": 0.36,
+        "budget_gb": 20.0,
+        "free_gb": 109.6
+      }
+    },
+    {
+      "step": "serial",
+      "ok": true,
+      "result": {
+        "jobs_checked": 14,
+        "overlaps": 0
+      }
+    }
+  ]
+}

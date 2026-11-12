@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "project_root": "D:\\ttxt",
+  "strata": {
+    "base_url": "http://127.0.0.1:8080",
+    "health_path": "/health",
+    "models_path": "/v1/models",
+    "chat_path": "/v1/chat/completions",
+    "request_timeout_s": 600,
+    "api_key_env": "STRATA_API_KEY",
+    "enable_thinking_default": false,
+    "note": "Strata 由用户管理;系统只读取状态与排队调用,绝不启动/停止/重启/切换模型"
+  },
+  "dashboard": {
+    "host": "127.0.0.1",
+    "port": 8765
+  },
+  "paths": {
+    "control": "00_control",
+    "categories": "01_categories",
+    "crawler": "02_crawler",
+    "intelligence": "03_intelligence",
+    "writing": "04_writing",
+    "dashboard": "05_dashboard",
+    "agents": "06_agents",
+    "rules": "07_rules",
+    "wiki": "08_wiki",
+    "logs": "09_logs",
+    "tests": "10_tests",
+    "backups": "11_backups",
+    "temp": "99_temp"
+  },
+  "disk": {
+    "project_budget_gb": 20,
+    "min_free_gb": 5,
+    "temp_max_gb": 2,
+    "pip_cache_max_gb": 1,
+    "log_max_mb": 10,
+    "log_keep": 7,
+    "backup_keep": 7,
+    "db_max_mb": {
+      "system": 200,
+      "article": 2048
+    },
+    "rag_max_mb": 500,
+    "browser_max_gb": 3
+  },
+  "categories": [
+    "technology",
+    "finance",
+    "social",
+    "history",
+    "health"
+  ],
+  "crawler": {
+    "http_timeout_s": 30,
+    "max_attempts": 3,
+    "min_delay_s": 1.0,
+    "respect_robots": true,
+    "user_agent": "TouTiaoSmartFactory/0.1 (+local research collector)"
+  },
+  "browser": {
+    "enabled": true,
+    "executable_path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "headless": true,
+    "timeout_ms": 60000,
+    "network_idle": true
+  },
+  "model_gate": {
+    "poll_interval_s": 2,
+    "health_timeout_s": 5,
+    "job_timeout_s": 600
+  }
+}

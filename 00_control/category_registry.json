@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "isolation": "physical",
+  "updated_at": "2026-11-12",
+  "categories": [
+    { "slug": "technology", "display_name": "科技", "status": "active", "created_at": "2026-11-12", "seed_keywords": ["人工智能", "开源", "效率工具", "数据"] },
+    { "slug": "finance", "display_name": "财经", "status": "active", "created_at": "2026-11-12", "seed_keywords": ["市场", "投资", "财报", "利率"] },
+    { "slug": "social", "display_name": "社会", "status": "active", "created_at": "2026-11-12", "seed_keywords": ["城市", "教育", "就业"] },
+    { "slug": "history", "display_name": "历史", "status": "active", "created_at": "2026-11-12", "seed_keywords": ["历史", "考古", "文明"] },
+    { "slug": "health", "display_name": "健康", "status": "active", "created_at": "2026-11-12", "seed_keywords": ["健康", "运动", "睡眠"] }
+  ],
+  "rules": {
+    "isolation": "每个类目拥有独立 articles.db、rag、keywords、metrics;禁止跨类目混合原始文章、检索上下文、关键词与评审数据",
+    "switching": "切换类目时必须清空上一类目的运行上下文"
+  }
+}

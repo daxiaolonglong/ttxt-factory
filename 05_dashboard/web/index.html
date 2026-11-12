@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>头条智能工厂</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>头条智能工厂</h1>
+      <span id="schema" class="muted"></span>
+    </div>
+    <div class="controls">
+      <label>类目
+        <select id="category"><option value="">加载中…</option></select>
+      </label>
+      <span id="refreshAt" class="muted"></span>
+    </div>
+  </header>
+
+  <nav id="tabs">
+    <button data-tab="overview" class="active">系统总览</button>
+    <button data-tab="collect">智能采集</button>
+    <button data-tab="analysis">数据分析</button>
+    <button data-tab="writing">智能创作</button>
+    <button data-tab="knowledge">知识进化</button>
+    <button data-tab="system">系统管理</button>
+    <button data-tab="logs">动态日志</button>
+  </nav>
+
+  <main>
+    <section id="tab-overview" class="tab active">
+      <div id="overview-cards" class="cards"></div>
+      <h2>最近采集任务</h2>
+      <div id="crawl-jobs"></div>
+      <h2>最近模型任务</h2>
+      <div id="model-jobs"></div>
+    </section>
+
+    <section id="tab-collect" class="tab">
+      <h2>文章库 <span id="articles-summary" class="muted"></span></h2>
+      <form id="search-form">
+        <input id="search-q" placeholder="按标题或正文搜索">
+        <button type="submit">搜索</button>
+      </form>
+      <div id="articles-table"></div>
+      <h2>关键词与反哺候选</h2>
+      <div id="keywords-table"></div>
+    </section>
+
+    <section id="tab-analysis" class="tab">
+      <div id="analysis-cards" class="cards"></div>
+      <h2>爆款标签分布</h2>
+      <div id="viral-table"></div>
+      <h2>知识资产</h2>
+      <div id="assets-table"></div>
+    </section>
+
+    <section id="tab-writing" class="tab">
+      <h2>草稿版本(仅待人工确认)</h2>
+      <div id="drafts-table"></div>
+      <h2>评审记录</h2>
+      <div id="evaluations-table"></div>
+    </section>
+
+    <section id="tab-knowledge" class="tab">
+      <h2>知识资产</h2>
+      <div id="knowledge-table"></div>
+      <h2>关键词缺口(下一轮采集候选)</h2>
+      <div id="keyword-gap"></div>
+    </section>
+
+    <section id="tab-system" class="tab">
+      <div id="system-cards" class="cards"></div>
+      <h2>模型队列</h2>
+      <div id="queue-table"></div>
+      <h2>磁盘与数据</h2>
+      <div id="disk-table"></div>
+    </section>
+
+    <section id="tab-logs" class="tab">
+      <h2>结构化日志 <span class="muted">(每 3 秒刷新)</span></h2>
+      <div id="logs-list"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "updated_at": "2026-11-12",
+  "notes": "P2 演示来源:公开抓取练习站 + 公开 RSS 订阅源。真实来源清单待用户提供后追加;每个来源采集前必须通过 robots.txt 检查。",
+  "sources": [
+    {
+      "id": "toutiao_tech",
+      "name": "今日头条 · 科技频道",
+      "category": "technology",
+      "kind": "html",
+      "url": "https://www.toutiao.com/ch/news_tech/",
+      "enabled": true,
+      "rate_limit_s": 2.0,
+      "max_pages": 1,
+      "extractor": "toutiao",
+      "render": "browser",
+      "max_articles": 10,
+      "demo": false,
+      "notes": "robots 未禁止频道页与 /article/;使用本机 Edge 浏览器渲染,逐篇限速 2s,逐 URL 检查 robots;不登录、不绕过访问控制"
+    },
+    {
+      "id": "quotes_toscrape",
+      "name": "Quotes to Scrape(Scrapling 官方演示站)",
+      "category": "technology",
+      "kind": "html",
+      "url": "https://quotes.toscrape.com/",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 3,
+      "item_selector": ".quote",
+      "title_selector": ".text",
+      "author_selector": ".author",
+      "next_selector": ".next a",
+      "base_url": "https://quotes.toscrape.com",
+      "demo": true,
+      "notes": "公开抓取练习站,用于验证分页/选择器/去重/入库链路"
+    },
+    {
+      "id": "sspai_rss",
+      "name": "少数派 RSS(公开订阅源)",
+      "category": "technology",
+      "kind": "rss",
+      "url": "https://sspai.com/feed",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "demo": true,
+      "notes": "公开 RSS 元数据(标题/链接/时间/摘要),受 robots 检查约束"
+    },
+    {
+      "id": "ruanyifeng_atom",
+      "name": "阮一峰博客 Atom(公开订阅源)",
+      "category": "technology",
+      "kind": "rss",
+      "url": "https://www.ruanyifeng.com/blog/atom.xml",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "demo": true,
+      "notes": "公开 Atom 元数据,受 robots 检查约束"
+    }
+  ]
+}

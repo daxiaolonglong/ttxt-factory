@@ -1,0 +1,40 @@
+# ---- 虚拟环境 / 缓存 ----
+.venv/
+.pip-cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 运行时数据（SQLite 与生成产物，不入库）----
+*.db
+*.db-wal
+*.db-shm
+*.sqlite3
+01_categories/*/rag/
+01_categories/*/keywords/
+01_categories/*/metrics/
+
+# ---- 日志 / 备份 / 临时 ----
+09_logs/
+11_backups/
+99_temp/
+
+# ---- 本地工具（便携版 git 等）----
+tools/
+
+# ---- 密钥与私密配置 ----
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# ---- 系统 / 编辑器 ----
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

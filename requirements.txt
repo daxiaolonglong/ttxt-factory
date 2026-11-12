@@ -1,0 +1,3 @@
+#!/usr/bin/env python
+# 运行依赖(仅 Scrapling;其余用 Python 标准库)
+scrapling[fetchers]>=0.3
