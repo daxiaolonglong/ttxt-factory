@@ -543,3 +543,63 @@ def test_run_queued_persists_honest_elapsed_and_pages(tmp_path, monkeypatch, sys
     meta = json.loads(row["meta_json"])
     assert meta["pages_fetched"] == 1
     assert meta["elapsed_s"] == 7.5
+
+
+# ---------------------------------------------------------------- RSS 配额封顶
+
+def test_robots_unknown_job_requeued_not_terminal(monkeypatch, system_db):
+    """P12批次3真实缺陷(job 26 who_cn_news):robots.txt 瞬时失败被钉成终态 failed。
+
+    robots_unknown 是 transient:attempts 未达上限必须回到 queued 等待重试;
+    达到上限才落 failed。任何情况下都不得放行抓取(fail-safe 不变)。
+    """
+    write_sources(Path(system_db).parent, monkeypatch, [html_source_entry()])
+    job = store.create_crawl_job("fake_html", "demo", db_path=system_db)
+    monkeypatch.setattr(
+        robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules(unknown=True)
+    )
+
+    results = runner.run_queued(limit=1)
+    assert results and results[0]["error"] == "robots_unknown"
+    assert results[0]["requeued"] is True
+    row = job_status(system_db, job)
+    assert row["status"] == "queued"
+    assert row["attempts"] == 1  # 未抓取任何内容:失败发生在门禁阶段
+
+    # 达到上限后必须落终态,不能无限重排(attempts 在认领时 +1)
+    for _ in range(3):
+        runner.run_queued(limit=1)
+    row2 = job_status(system_db, job)
+    assert row2["status"] == "failed"
+    assert row2["attempts"] == 3
+
+
+def test_rss_source_max_articles_caps_full_feed(tmp_path, monkeypatch, system_db, fake_insert):
+    """P12批次3:RSS 全量 feed 可达数百条(2026-11-12 实测 eastmoney 96 条/次)。
+
+    未显式传 limit 时必须按来源 max_articles 封顶,并把 feed_total 写进观测,
+    防止单个源一次灌满类目库。
+    """
+    items_xml = "".join(
+        f"<item><title>标题{i}</title><link>https://demo.example.com/a/{i}/</link>"
+        f"<description>正文内容{i}</description>"
+        f"<pubDate>Wed, 12 Nov 2026 10:00:0{i} +0800</pubDate></item>"
+        for i in range(6)
+    )
+    feed = f"<?xml version='1.0'?><rss version='2.0'><channel>{items_xml}</channel></rss>"
+    entry = html_source_entry(
+        id="fake_rss", kind="rss", url="https://demo.example.com/feed.xml", max_articles=2
+    )
+    write_sources(tmp_path, monkeypatch, [entry])
+    job = store.create_crawl_job("fake_rss", "demo", db_path=system_db)
+    recorder = FetchRecorder({"https://demo.example.com/feed.xml": SimpleNamespace(text=feed)})
+    monkeypatch.setattr(fetcher, "fetch_page", recorder)
+    monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
+
+    results = runner.run_queued(limit=1)
+    assert results and results[0]["ok"] is True
+    assert results[0]["feed_total"] == 6  # 观测记录 feed 全量,不谎报
+    assert results[0]["items_extracted"] == 2  # 实际入库按来源配额封顶
+    assert len(fake_insert[0][2]) == 2
+    meta = json.loads(job_status(system_db, job)["meta_json"])
+    assert meta["feed_total"] == 6 and meta["inserted"] == 2

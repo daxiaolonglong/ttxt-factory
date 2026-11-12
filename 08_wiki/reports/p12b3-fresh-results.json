@@ -1,0 +1,120 @@
+[
+  {
+    "category": "health",
+    "id": "people_health",
+    "url": "http://www.people.com.cn/rss/health.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 100,
+    "pub_min": "2025-05-30",
+    "pub_max": "2025-06-05",
+    "pub_count": 100,
+    "verdict": "ok",
+    "group": "fresh"
+  },
+  {
+    "category": "social",
+    "id": "xinhuanet_pol",
+    "url": "http://www.xinhuanet.com/politics/news_politics.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 300,
+    "pub_min": null,
+    "pub_max": null,
+    "pub_count": 0,
+    "verdict": "ok",
+    "group": "fresh"
+  },
+  {
+    "category": "finance",
+    "id": "eastmoney_rss",
+    "url": "https://rss.eastmoney.com/rss_partener.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 96,
+    "pub_min": "2026-11-12T06:07:11+08:00",
+    "pub_max": "2026-11-12T22:30:02+08:00",
+    "pub_count": 96,
+    "verdict": "ok",
+    "group": "fresh"
+  },
+  {
+    "category": "finance",
+    "id": "tmtpost_rss",
+    "url": "https://www.tmtpost.com/rss.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 17,
+    "pub_min": "2026-11-12T17:42:30+08:00",
+    "pub_max": "2026-11-12T21:42:07+08:00",
+    "pub_count": 17,
+    "verdict": "ok",
+    "group": "fresh"
+  },
+  {
+    "category": "technology",
+    "id": "ifanr_feed",
+    "url": "https://www.ifanr.com/feed",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 20,
+    "pub_min": "2026-11-10T17:30:18+08:00",
+    "pub_max": "2026-11-12T22:36:47+08:00",
+    "pub_count": 20,
+    "verdict": "ok",
+    "group": "fresh"
+  },
+  {
+    "category": "health",
+    "id": "who_cn_news",
+    "url": "https://www.who.int/rss-feeds/news-chinese.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 25,
+    "pub_min": "2026-09-15T17:07:07+08:00",
+    "pub_max": "2026-11-10T02:11:11+08:00",
+    "pub_count": 25,
+    "verdict": "ok",
+    "group": "new"
+  },
+  {
+    "category": "health",
+    "id": "dxy_rss",
+    "url": "https://www.dxy.cn/portal/rss",
+    "robots_allowed": true,
+    "verdict": "error",
+    "error": "FetchError: fetch failed after 3 attempts: ConnectionError: Failed to perform, curl: (7) Redirect to internal IP 127.0.0.1 rejected (SSRF protection). See https://curl.se/libcurl/c/libcurl-errors.html",
+    "group": "new"
+  },
+  {
+    "category": "social",
+    "id": "chinanews_scroll",
+    "url": "https://www.chinanews.com/rss/scroll.xml",
+    "robots_allowed": true,
+    "verdict": "error",
+    "error": "FetchError: HTTP 404(终态,不重试)",
+    "group": "new"
+  },
+  {
+    "category": "social",
+    "id": "zaobao_china",
+    "url": "https://www.zaobao.com/rss/realtime-china",
+    "robots_allowed": true,
+    "http_status": 200,
+    "verdict": "not_feed",
+    "group": "new"
+  },
+  {
+    "category": "history",
+    "id": "bbc_zhongwen",
+    "url": "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "items": 42,
+    "pub_min": "2026-09-22T22:36:55+08:00",
+    "pub_max": "2026-11-12T23:00:58+08:00",
+    "pub_count": 42,
+    "verdict": "ok",
+    "group": "new"
+  }
+]

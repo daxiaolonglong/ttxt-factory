@@ -129,11 +129,15 @@ def _execute_job(
         rules_cache: dict[str, robots.RobotsRules] = {}
         rules, first_allowed = robots.gate(source.url, ua, rules_cache)
         if rules.unknown:
-            store.finish_crawl_job(
-                job_id, "failed", "robots.txt 无法确认(5xx/网络异常),来源暂停,不放行", meta=summary
+            # P12批次3:robots 无法确认是 transient(5xx/网络),必须走可重试通道
+            # (真实缺陷 2026-11-12 job 26:who_cn_news robots.txt 瞬时抓取失败,
+            # finish_crawl_job 直接钉 failed,attempts 1/3 却不再排队)
+            outcome = store.fail_crawl_job(
+                job_id, "robots.txt 无法确认(5xx/网络异常),来源暂停,不放行", meta=summary
             )
             summary["error"] = "robots_unknown"
-            LOG.error("crawl.robots_unknown", source=source.id)
+            summary["requeued"] = outcome == "queued"
+            LOG.error("crawl.robots_unknown", source=source.id, outcome=outcome)
             summary["elapsed_s"] = round(time.monotonic() - started, 2)
             return summary
         path = robots.target_path(source.url)
@@ -214,6 +218,10 @@ def _execute_job(
 
         if limit:
             items = items[:limit]
+        elif source.max_articles > 0:
+            # P12批次3:RSS/HTML 全量 feed 可达数百条,未显式 limit 时按来源配置封顶
+            summary["feed_total"] = len(items)
+            items = items[: max(1, int(source.max_articles))]
         summary["items_extracted"] = len(items)
         counts = store.insert_items(target_category, source.id, items)
         summary.update(counts)

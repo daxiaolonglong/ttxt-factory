@@ -1,0 +1,174 @@
+[
+  {
+    "category": "finance",
+    "id": "tmtpost_rss",
+    "url": "https://www.tmtpost.com/rss.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 179274,
+    "looks_like_feed": true,
+    "items": 17,
+    "sample": {
+      "title": "Chinese Workers Are Paying Their Own AI Bills to Stay Produc",
+      "author": null,
+      "published_at": "2026-11-12T21:42:07+08:00",
+      "url": "https://www.tmtpost.com/8203536.html",
+      "content_len": 261
+    },
+    "field_fill": {
+      "author": 0,
+      "published_at": 17,
+      "total": 17
+    },
+    "verdict": "ok"
+  },
+  {
+    "category": "finance",
+    "id": "36kr_feed",
+    "url": "https://36kr.com/feed",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 25361,
+    "looks_like_feed": false,
+    "verdict": "not_feed"
+  },
+  {
+    "category": "finance",
+    "id": "ftchinese_news",
+    "url": "https://www.ftchinese.com/rss/news",
+    "robots_allowed": false,
+    "verdict": "robots_denied"
+  },
+  {
+    "category": "finance",
+    "id": "eastmoney_rss",
+    "url": "https://rss.eastmoney.com/rss_partener.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 803824,
+    "looks_like_feed": true,
+    "items": 96,
+    "sample": {
+      "title": "美股三大指数涨跌不一 英伟达大跌13%市值蒸发超5000亿美元",
+      "author": null,
+      "published_at": "2026-11-12T22:30:02+08:00",
+      "url": "http://finance.eastmoney.com/news/1345,202611123929972290.html",
+      "content_len": 11123
+    },
+    "field_fill": {
+      "author": 0,
+      "published_at": 96,
+      "total": 96
+    },
+    "verdict": "ok"
+  },
+  {
+    "category": "health",
+    "id": "people_health",
+    "url": "http://www.people.com.cn/rss/health.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 427500,
+    "looks_like_feed": true,
+    "items": 100,
+    "sample": {
+      "title": "专家提示：老年人应尽早识别潜在的眼底病变风险",
+      "author": "人民网",
+      "published_at": "2025-06-05",
+      "url": "http://health.people.com.cn/n1/2025/0605/c14739-40494769.html",
+      "content_len": 1062
+    },
+    "field_fill": {
+      "author": 100,
+      "published_at": 100,
+      "total": 100
+    },
+    "verdict": "ok"
+  },
+  {
+    "category": "health",
+    "id": "gmw_health",
+    "url": "https://www.gmw.cn/rss/health.xml",
+    "robots_allowed": false,
+    "verdict": "robots_denied"
+  },
+  {
+    "category": "history",
+    "id": "chnmuseum",
+    "url": "https://www.chnmuseum.cn/rss.xml",
+    "robots_allowed": true,
+    "verdict": "error",
+    "error": "FetchError: HTTP 404(终态,不重试)"
+  },
+  {
+    "category": "history",
+    "id": "dpm_org",
+    "url": "https://www.dpm.org.cn/rss.xml",
+    "robots_allowed": true,
+    "verdict": "error",
+    "error": "FetchError: HTTP 404(终态,不重试)"
+  },
+  {
+    "category": "social",
+    "id": "thepaper",
+    "url": "https://www.thepaper.cn/rss.jsp",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 57926,
+    "looks_like_feed": false,
+    "verdict": "not_feed"
+  },
+  {
+    "category": "social",
+    "id": "xinhuanet_pol",
+    "url": "http://www.xinhuanet.com/politics/news_politics.xml",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 174092,
+    "looks_like_feed": true,
+    "items": 300,
+    "sample": {
+      "title": "微视频｜“新”在中国",
+      "author": "www.xinhuanet.com",
+      "published_at": null,
+      "url": "http://www.news.cn/politics/2022-12/14/c_1129207254.htm",
+      "content_len": 80
+    },
+    "field_fill": {
+      "author": 300,
+      "published_at": 0,
+      "total": 300
+    },
+    "verdict": "ok"
+  },
+  {
+    "category": "technology",
+    "id": "geekpark_rss",
+    "url": "https://www.geekpark.net/rss",
+    "robots_allowed": false,
+    "verdict": "robots_denied"
+  },
+  {
+    "category": "technology",
+    "id": "ifanr_feed",
+    "url": "https://www.ifanr.com/feed",
+    "robots_allowed": true,
+    "http_status": 200,
+    "body_bytes": 444879,
+    "looks_like_feed": true,
+    "items": 20,
+    "sample": {
+      "title": "突发！黄仁勋辞任 CEO，英伟达迎来历史性换帅",
+      "author": null,
+      "published_at": "2026-11-12T22:36:47+08:00",
+      "url": "https://www.ifanr.com/1689249?utm_source=rss&utm_medium=rss&utm_campaign=",
+      "content_len": 60
+    },
+    "field_fill": {
+      "author": 0,
+      "published_at": 20,
+      "total": 20
+    },
+    "verdict": "ok"
+  }
+]

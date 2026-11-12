@@ -1,7 +1,7 @@
 {
   "version": 1,
   "updated_at": "2026-11-12",
-  "notes": "P2 演示来源:公开抓取练习站 + 公开 RSS 订阅源。真实来源清单待用户提供后追加;每个来源采集前必须通过 robots.txt 检查。",
+  "notes": "P12批次3(2026-11-12):正式来源白名单按探测证据注册(eastmoney/tmtpost/ifanr/who)。history/social 暂无合格源:候选探测记录见 99_temp/p12b3_probe_results.json 与 p12b3_fresh_results.json(ftchinese/gmw/geekpark robots 拒绝;chnmuseum/dpm/chinanews 404;people_health/xinhuanet 存档陈旧;zaobao not_feed;dxy SSRF 重定向被拒)。每个来源采集前必须通过 robots.txt 检查。",
   "sources": [
     {
       "id": "toutiao_tech",
@@ -58,6 +58,58 @@
       "max_pages": 1,
       "demo": false,
       "notes": "公开 Atom 元数据,受 robots 检查约束;真实科技博客来源,2026-11-12 P12 起转正(demo=false),体检报告 quality-20261112 §2 记录的是转正前状态"
+    },
+    {
+      "id": "eastmoney_rss",
+      "name": "东方财富财经要闻(公开 RSS)",
+      "category": "finance",
+      "kind": "rss",
+      "url": "https://rss.eastmoney.com/rss_partener.xml",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "max_articles": 30,
+      "demo": false,
+      "notes": "2026-11-12 23:10 探测:robots 允许,HTTP 200,feed 96 条全部当日发布(06:07-22:30),正文全文约11KB/条;author 字段 feed 未提供(入库为 NULL);配额封顶 30 条/次(feed_total 记入观测)"
+    },
+    {
+      "id": "tmtpost_rss",
+      "name": "钛媒体(公开 RSS)",
+      "category": "finance",
+      "kind": "rss",
+      "url": "https://www.tmtpost.com/rss.xml",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "max_articles": 20,
+      "demo": false,
+      "notes": "2026-11-12 23:10 探测:robots 允许,HTTP 200,17 条全部当日发布,正文为摘要(约260字/条);feed 含中英双语条目;author 缺失(NULL)"
+    },
+    {
+      "id": "ifanr_feed",
+      "name": "爱范儿(公开 RSS)",
+      "category": "technology",
+      "kind": "rss",
+      "url": "https://www.ifanr.com/feed",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "max_articles": 20,
+      "demo": false,
+      "notes": "2026-11-12 23:10 探测:robots 允许,HTTP 200,20 条(11-10 至 11-12),正文为短摘要(约60字);author 缺失(NULL);URL 带 utm 参数(入库保留原 URL)"
+    },
+    {
+      "id": "who_cn_news",
+      "name": "世界卫生组织中文新闻(公开 RSS)",
+      "category": "health",
+      "kind": "rss",
+      "url": "https://www.who.int/rss-feeds/news-chinese.xml",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "max_articles": 25,
+      "demo": false,
+      "notes": "2026-11-12 23:14 探测:robots 允许,HTTP 200,25 条(2026-09-15 至 11-10,近两月);health 类目当前唯一新鲜可达源;people.com.cn/gmw 候选分别因存档陈旧(2025-06)与 robots 拒绝未注册"
     }
   ]
 }
