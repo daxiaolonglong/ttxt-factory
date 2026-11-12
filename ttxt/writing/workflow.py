@@ -1,4 +1,13 @@
-"""写作工作流:取 material → 大纲 → 正文 → 事实声明核验 → 反向评审 → 修改 → 导出。"""
+"""写作工作流(含 L4 质量门禁)。
+
+门禁规则:
+- 完整性:finish_reason=length 自动加大 token 重试一次;文本启发式检查
+  (长度 ≥ gate_min_chars 且末行句末标点收尾);
+- 评审:{score, issues, critical},critical 含事实错误/编造/无来源断言/截断;
+- 硬门禁:完整性 OK 且 score ≥ gate_min_score 且 critical 为空 → passed,
+  否则修订(≤ gate_max_revisions);修订用尽仍未过 → rejected,
+  仅导出到 drafts/<类目>/rejected/,成品目录不得出现。
+"""
 
 from __future__ import annotations
 
@@ -20,6 +29,8 @@ from . import export, prompts
 
 LOG = get_logger("writing")
 MAX_CLAIMS = 5
+CRITICAL_HINTS = ("事实", "编造", "虚假", "来源", "截断", "夸大", "无依据", "数据错误")
+TERMINAL_CHARS = "。！？!?…\"”'』」"
 
 
 def default_model_call(
@@ -28,28 +39,39 @@ def default_model_call(
     temperature: float = 0.3,
     enable_thinking: bool = False,
 ) -> str:
-    outcome = gate.submit_and_run(
-        "writing",
-        {
-            "prompt": prompt,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "enable_thinking": enable_thinking,
-        },
-    )
-    done = [
-        item
-        for item in outcome.get("results", [])
-        if item.get("outcome") == "done"
-        and isinstance(item.get("result"), dict)
-        and item["result"].get("text")
-    ]
-    if not done:
-        error = "no result"
-        if outcome.get("results"):
-            error = outcome["results"][-1].get("result", {}).get("error", "no result")
-        raise RuntimeError(f"model task failed: {error}")
-    return done[-1]["result"]["text"]
+    """经 model_gate 串行调用;finish_reason=length 时自动加大 token 重试一次。"""
+
+    def _call(tokens: int) -> dict:
+        outcome = gate.submit_and_run(
+            "writing",
+            {
+                "prompt": prompt,
+                "max_tokens": tokens,
+                "temperature": temperature,
+                "enable_thinking": enable_thinking,
+            },
+        )
+        done = [
+            item
+            for item in outcome.get("results", [])
+            if item.get("outcome") == "done"
+            and isinstance(item.get("result"), dict)
+            and item["result"].get("text")
+        ]
+        if not done:
+            error = "no result"
+            if outcome.get("results"):
+                error = outcome["results"][-1].get("result", {}).get("error", "no result")
+            raise RuntimeError(f"model task failed: {error}")
+        return done[-1]["result"]
+
+    result = _call(max_tokens)
+    if result.get("finish_reason") == "length":
+        bigger = min(int(max_tokens * 1.5), int(cfg.load_config().get("writing", {}).get("draft_retry_max_tokens", 2048)))
+        if bigger > max_tokens:
+            LOG.warn("writing.truncation_retry", max_tokens=max_tokens, retry_tokens=bigger)
+            result = _call(bigger)
+    return result["text"]
 
 
 def _strip_fences(text: str) -> str:
@@ -108,6 +130,7 @@ def parse_review(text: str) -> dict:
                 payload = None
     score: float | None = None
     issues: list[str] = []
+    critical: list[str] = []
     if payload:
         try:
             score = float(payload.get("score"))
@@ -118,13 +141,20 @@ def parse_review(text: str) -> dict:
             issues = [str(item).strip() for item in raw_issues if str(item).strip()]
         elif isinstance(raw_issues, str) and raw_issues.strip():
             issues = [raw_issues.strip()]
+        raw_critical = payload.get("critical") or []
+        if isinstance(raw_critical, list):
+            critical = [str(item).strip() for item in raw_critical if str(item).strip()]
+        elif isinstance(raw_critical, str) and raw_critical.strip():
+            critical = [raw_critical.strip()]
+    if not critical:
+        critical = [issue for issue in issues if any(hint in issue for hint in CRITICAL_HINTS)]
     if score is None:
         match = re.search(r"(?:score|评分)\D{0,4}(0(?:\.\d+)?|1(?:\.0+)?)", cleaned)
         if match:
             score = float(match.group(1))
     if score is not None:
         score = max(0.0, min(1.0, score))
-    return {"score": score, "issues": issues, "raw": cleaned[:2000]}
+    return {"score": score, "issues": issues, "critical": critical, "raw": cleaned[:2000]}
 
 
 def build_materials(materials: list[dict]) -> str:
@@ -135,6 +165,24 @@ def build_materials(materials: list[dict]) -> str:
         snippet = (material["text"] or "").replace("\n", " ")[:240]
         lines.append(f"[{index}] {material['title']} — {snippet}")
     return "\n".join(lines)
+
+
+def _best_sentence(claim_tokens: set[str], text: str, limit: int = 200) -> str | None:
+    best: str | None = None
+    best_overlap = -1.0
+    for sentence in re.split(r"(?<=[。！？!?；;\n])", text or ""):
+        sentence = sentence.strip()
+        if len(sentence) < 4:
+            continue
+        tokens = set(tokenize(sentence))
+        if not tokens:
+            continue
+        overlap = (len(claim_tokens & tokens) / len(claim_tokens)) if claim_tokens else 0.0
+        if overlap > best_overlap:
+            best, best_overlap = sentence, overlap
+    if best is None:
+        return None
+    return best if len(best) <= limit else best[:limit]
 
 
 def verify_claims(claims: list[dict], materials: list[dict]) -> list[dict]:
@@ -151,13 +199,14 @@ def verify_claims(claims: list[dict], materials: list[dict]) -> list[dict]:
                 {
                     "claim": item["claim"],
                     "article_id": material["id"],
+                    "quote": _best_sentence(claim_tokens, material["text"]),
                     "overlap": round(overlap, 3),
                     "credibility": credibility,
                 }
             )
         else:
             evidence.append(
-                {"claim": item["claim"], "article_id": None, "overlap": 0.0, "credibility": "no_source"}
+                {"claim": item["claim"], "article_id": None, "quote": None, "overlap": 0.0, "credibility": "no_source"}
             )
     return evidence
 
@@ -180,9 +229,19 @@ def _save_version(
     con = connect(db_path)
     try:
         con.execute(
-            "INSERT OR REPLACE INTO writing_history(draft_id, category, topic, version, content, model_id, created_at) VALUES (?,?,?,?,?,?,?)",
-            (draft_id, category, topic, version, content, model_id, cfg.now_iso_ms()),
+            "INSERT OR REPLACE INTO writing_history(draft_id, category, topic, version, content, model_id, status, created_at) "
+            "VALUES (?,?,?,?,?,?,?,?)",
+            (draft_id, category, topic, version, content, model_id, "draft", cfg.now_iso_ms()),
         )
+        con.commit()
+    finally:
+        con.close()
+
+
+def _set_draft_status(db_path: Path, draft_id: str, status: str) -> None:
+    con = connect(db_path)
+    try:
+        con.execute("UPDATE writing_history SET status=? WHERE draft_id=?", (status, draft_id))
         con.commit()
     finally:
         con.close()
@@ -192,14 +251,18 @@ def _save_evaluation(db_path: Path, draft_id: str, version: int, review: dict) -
     con = connect(db_path)
     try:
         con.execute(
-            "INSERT INTO evaluation_history(draft_id, version, evaluator, criteria_json, score, issues_json, created_at) VALUES (?,?,?,?,?,?,?)",
+            "INSERT INTO evaluation_history(draft_id, version, evaluator, criteria_json, score, issues_json, created_at) "
+            "VALUES (?,?,?,?,?,?,?)",
             (
                 draft_id,
                 version,
                 "model_review",
                 json.dumps({"criteria": "facts/structure/title/plain"}, ensure_ascii=False),
                 review.get("score"),
-                json.dumps(review.get("issues") or [], ensure_ascii=False),
+                json.dumps(
+                    {"issues": review.get("issues") or [], "critical": review.get("critical") or []},
+                    ensure_ascii=False,
+                ),
                 cfg.now_iso_ms(),
             ),
         )
@@ -213,13 +276,14 @@ def _save_evidence(db_path: Path, draft_id: str, evidence: list[dict]) -> None:
     try:
         con.execute("DELETE FROM evidence_links WHERE draft_id = ?", (draft_id,))
         con.executemany(
-            "INSERT INTO evidence_links(draft_id, claim, article_id, quote, overlap, credibility, created_at) VALUES (?,?,?,?,?,?,?)",
+            "INSERT INTO evidence_links(draft_id, claim, article_id, quote, overlap, credibility, created_at) "
+            "VALUES (?,?,?,?,?,?,?)",
             [
                 (
                     draft_id,
                     item["claim"],
                     item.get("article_id"),
-                    None,
+                    item.get("quote"),
                     item.get("overlap"),
                     item.get("credibility"),
                     cfg.now_iso_ms(),
@@ -249,16 +313,45 @@ def _review(model_call, draft: str, evidence: list[dict], enable_thinking: bool)
     return parse_review(text)
 
 
+def _is_complete(text: str, min_chars: int) -> bool:
+    if not text or len(text.strip()) < min_chars:
+        return False
+    last_line = text.strip().splitlines()[-1].rstrip()
+    if not last_line:
+        return False
+    return last_line[-1] in TERMINAL_CHARS
+
+
+def _passed(complete: bool, review: dict, min_score: float) -> bool:
+    return bool(
+        complete
+        and review["score"] is not None
+        and review["score"] >= min_score
+        and not review["critical"]
+    )
+
+
 def write_article(
     category: str,
     topic: str,
     model_call=None,
-    max_revisions: int = 2,
-    max_tokens: int = 900,
+    max_revisions: int | None = None,
+    max_tokens: int | None = None,
     enable_thinking: bool = False,
     db_path: Path | None = None,
     export_dir: Path | None = None,
+    gate_min_score: float | None = None,
+    gate_min_chars: int | None = None,
 ) -> dict:
+    writing_cfg = cfg.load_config().get("writing", {})
+    if max_revisions is None:
+        max_revisions = int(writing_cfg.get("gate_max_revisions", 2))
+    if max_tokens is None:
+        max_tokens = int(writing_cfg.get("draft_max_tokens", 900))
+    if gate_min_score is None:
+        gate_min_score = float(writing_cfg.get("gate_min_score", 0.6))
+    if gate_min_chars is None:
+        gate_min_chars = int(writing_cfg.get("gate_min_chars", 400))
     model_call = model_call or default_model_call
     store.migrate_articles_db(category, db_path=db_path)
     db_path = store.articles_db_path(category) if db_path is None else Path(db_path)
@@ -290,6 +383,18 @@ def write_article(
         temperature=0.4,
         enable_thinking=enable_thinking,
     )
+    complete = _is_complete(draft, gate_min_chars)
+    retry_cap = int(writing_cfg.get("draft_retry_max_tokens", 2048))
+    if not complete and retry_cap > max_tokens:
+        LOG.warn("writing.incomplete_retry", topic=topic, max_tokens=max_tokens)
+        draft = model_call(
+            prompts.draft_prompt(topic, outline, materials_text),
+            max_tokens=min(max_tokens * 2, retry_cap),
+            temperature=0.4,
+            enable_thinking=enable_thinking,
+        )
+        complete = _is_complete(draft, gate_min_chars)
+
     claims_text = model_call(
         prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
         max_tokens=400,
@@ -305,21 +410,37 @@ def write_article(
     review = _review(model_call, draft, evidence, enable_thinking)
     _save_evaluation(db_path, draft_id, version, review)
 
+    passed = _passed(complete, review, gate_min_score)
     revisions = 0
-    while review["issues"] and revisions < max_revisions:
+    while not passed and revisions < max_revisions:
         draft = model_call(
-            prompts.revise_prompt(draft, review["issues"]),
+            prompts.revise_prompt(draft, review["issues"] + review["critical"]),
             max_tokens=max_tokens,
             temperature=0.4,
             enable_thinking=enable_thinking,
         )
+        complete = _is_complete(draft, gate_min_chars)
         version += 1
         revisions += 1
         _save_version(db_path, draft_id, category, topic, version, draft, None)
         review = _review(model_call, draft, evidence, enable_thinking)
         _save_evaluation(db_path, draft_id, version, review)
+        passed = _passed(complete, review, gate_min_score)
 
+    status = "passed" if passed else "rejected"
+    _set_draft_status(db_path, draft_id, status)
     _save_evidence(db_path, draft_id, evidence)
+
+    notes = None
+    if not complete:
+        notes = "内容完整性检查未通过(疑似截断)"
+    elif review["score"] is None:
+        notes = "评审输出无法解析,按不合格处理"
+    elif review["score"] < gate_min_score:
+        notes = f"评审得分 {review['score']} 低于门禁 {gate_min_score}"
+    if notes is None and review["critical"]:
+        notes = "评审存在致命问题: " + ";".join(review["critical"][:3])
+
     title = (draft.strip().splitlines() or [topic])[0][:80]
     path = export.write_export(
         category,
@@ -331,23 +452,25 @@ def write_article(
         review,
         version,
         export_dir=export_dir,
+        status=status,
+        notes=notes,
     )
     result = {
         "draft_id": draft_id,
         "title": title,
         "versions": version,
         "revisions": revisions,
+        "status": status,
+        "passed": passed,
+        "truncated": not complete,
         "score": review.get("score"),
         "issues": review.get("issues") or [],
+        "critical": review.get("critical") or [],
         "evidence": evidence,
         "path": str(path),
         "materials": len(materials),
+        "notes": notes,
+        "published": False,
     }
-    LOG.info(
-        "writing.done",
-        category=category,
-        draft_id=draft_id,
-        versions=version,
-        materials=len(materials),
-    )
+    LOG.info("writing.done", category=category, draft_id=draft_id, status=status, versions=version)
     return result

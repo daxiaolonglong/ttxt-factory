@@ -39,8 +39,9 @@ def claims_prompt(draft: str, article_numbers: list[int]) -> str:
 
 def review_prompt(draft: str, evidence_text: str) -> str:
     return f"""你是严格的中文内容评审。评审下面文章,只输出 JSON 对象,不要其他文字:
-{{"score":0.0到1.0,"issues":["问题1","问题2"]}}
+{{"score":0.0到1.0,"issues":["次要问题1","次要问题2"],"critical":["致命问题:事实错误/编造/无来源断言/内容截断"]}}
 评分标准:事实与材料一致 40%,结构清晰 30%,标题吸引力 20%,无空话套话 10%。
+存在事实错误、编造、无来源断言或内容截断时,必须写入 critical 数组;否则 critical 为空数组。
 文章:
 {draft}
 证据链:

@@ -13,6 +13,30 @@ from . import clean, extract, fetcher, robots, sources, store
 LOG = get_logger("crawler.runner")
 
 
+def resolve_category(source: sources.Source, category: str | None) -> str:
+    """来源-类目路由校验。
+
+    - 演示来源(demo=True)只能写入 demo 命名空间;未指定时默认 demo。
+    - 正式来源必须写入其声明类目 source.category。
+    违反即抛 ValueError,不产生任何数据写入。
+    """
+    if source.demo:
+        if category is None:
+            return "demo"
+        if category != "demo":
+            raise ValueError(
+                f"演示来源 {source.id} 只能写入 demo 命名空间,拒绝写入 {category}"
+            )
+        return "demo"
+    if category is None:
+        return source.category
+    if category != source.category:
+        raise ValueError(
+            f"来源 {source.id} 声明类目为 {source.category},拒绝写入 {category}"
+        )
+    return category
+
+
 def crawl_source(
     source_id: str,
     category: str | None = None,
@@ -22,7 +46,7 @@ def crawl_source(
     source = sources.get_source(source_id)
     if not source.enabled:
         raise RuntimeError(f"source disabled: {source_id}")
-    target_category = category or source.category
+    target_category = resolve_category(source, category)
     store.init_articles_db(target_category)
     job_id = store.create_crawl_job(source_id, target_category)
     store.mark_job_started(job_id)
@@ -45,6 +69,14 @@ def crawl_source(
     try:
         ua = str(cfg.load_config().get("crawler", {}).get("user_agent", "TouTiaoSmartFactory/0.1"))
         rules = robots.fetch_robots(source.url, ua)
+        if rules.unknown:
+            store.finish_crawl_job(
+                job_id, "failed", "robots.txt 无法确认(5xx/网络异常),来源暂停,不放行", meta=summary
+            )
+            summary["error"] = "robots_unknown"
+            LOG.error("crawl.robots_unknown", source=source.id)
+            summary["elapsed_s"] = round(time.monotonic() - started, 2)
+            return summary
         path = robots.target_path(source.url)
         summary["robots_allowed"] = rules.allowed(path)
         if not rules.allowed(path):
@@ -112,10 +144,11 @@ def crawl_source(
             inserted=summary["inserted"],
             duplicates=summary["duplicates"],
         )
-    except Exception as exc:  # noqa: BLE001 - 记录根因后返回
+    except Exception as exc:  # noqa: BLE001 - 记录根因后按重试策略处理
         summary["error"] = f"{type(exc).__name__}: {exc}"
-        store.finish_crawl_job(job_id, "failed", summary["error"], meta=summary)
-        LOG.error("crawl.failed", source=source.id, error=summary["error"])
+        outcome = store.fail_crawl_job(job_id, summary["error"], meta=summary)
+        summary["requeued"] = outcome == "queued"
+        LOG.error("crawl.failed", source=source.id, error=summary["error"], outcome=outcome)
     finally:
         summary["elapsed_s"] = round(time.monotonic() - started, 2)
     return summary

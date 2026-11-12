@@ -70,5 +70,12 @@
     "poll_interval_s": 2,
     "health_timeout_s": 5,
     "job_timeout_s": 600
+  },
+  "writing": {
+    "gate_min_score": 0.6,
+    "gate_min_chars": 400,
+    "gate_max_revisions": 2,
+    "draft_max_tokens": 900,
+    "draft_retry_max_tokens": 2048
   }
 }

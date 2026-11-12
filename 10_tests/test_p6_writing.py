@@ -1,4 +1,7 @@
-"""P6 测试:写作闭环(假模型)、解析容错、修订路径、导出与数据库记录。"""
+"""P6 测试:写作闭环(假模型)、解析容错、修订路径、导出与数据库记录。
+
+P10 起写作加入 L4 门禁:完整、评分 ≥0.6、无 critical 才导出为成品。
+"""
 
 import sqlite3
 from pathlib import Path
@@ -43,10 +46,10 @@ def _fake_model(state: dict, review_sequences: list[str] | None = None):
             state["reviews"] += 1
             if review_sequences and state["reviews"] <= len(review_sequences):
                 return review_sequences[state["reviews"] - 1]
-            return '{"score": 0.8, "issues": []}'
+            return '{"score": 0.8, "issues": [], "critical": []}'
         if "根据评审意见修改文章" in prompt:
-            return "修改后的标题\n修改后的正文,人工智能正在改变世界。[1]"
-        return "人工智能与开源\n人工智能正在改变世界,开源模型让研究更高效。[1]"
+            return "修改后的标题\n修改后的正文,人工智能正在改变世界。"
+        return "人工智能与开源\n人工智能正在改变世界,开源模型让研究更高效。"
 
     return call
 
@@ -62,11 +65,20 @@ def test_parse_claims():
 
 
 def test_parse_review():
-    review = workflow.parse_review('```json\n{"score": 0.7, "issues": ["问题A"]}\n```')
+    review = workflow.parse_review(
+        '```json\n{"score": 0.7, "issues": ["问题A"], "critical": ["存在无来源断言"]}\n```'
+    )
     assert review["score"] == 0.7
     assert review["issues"] == ["问题A"]
+    assert review["critical"] == ["存在无来源断言"]
     fallback = workflow.parse_review("评分 0.5 分")
     assert fallback["score"] == 0.5
+    assert fallback["critical"] == []
+
+
+def test_parse_review_critical_hints():
+    review = workflow.parse_review('{"score": 0.8, "issues": ["部分内容夸大"]}')
+    assert review["critical"] == ["部分内容夸大"]
 
 
 def test_write_workflow(tmp_path):
@@ -79,13 +91,18 @@ def test_write_workflow(tmp_path):
         max_revisions=0,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        gate_min_chars=0,
     )
     assert result["versions"] == 1
     assert result["materials"] == 1
     assert result["evidence"][0]["credibility"] == "supported"
+    assert result["evidence"][0]["quote"]
+    assert result["passed"] is True
+    assert result["status"] == "passed"
 
     path = Path(result["path"])
     assert path.exists()
+    assert "rejected" not in str(path)
     text = path.read_text(encoding="utf-8")
     assert "待人工确认" in text
     assert "事实证据链" in text
@@ -95,6 +112,8 @@ def test_write_workflow(tmp_path):
         assert con.execute("SELECT COUNT(*) FROM writing_history").fetchone()[0] == 1
         assert con.execute("SELECT COUNT(*) FROM evaluation_history").fetchone()[0] == 1
         assert con.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == 1
+        status = con.execute("SELECT status FROM writing_history").fetchone()[0]
+        assert status == "passed"
     finally:
         con.close()
 
@@ -102,7 +121,7 @@ def test_write_workflow(tmp_path):
 def test_write_workflow_revision(tmp_path):
     db_path = _prepared_db(tmp_path)
     state = {"reviews": 0}
-    fake = _fake_model(state, ['{"score": 0.5, "issues": ["论证不足"]}'])
+    fake = _fake_model(state, ['{"score": 0.5, "issues": ["论证不足"], "critical": []}'])
     result = workflow.write_article(
         "demo",
         "人工智能与开源",
@@ -110,10 +129,12 @@ def test_write_workflow_revision(tmp_path):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        gate_min_chars=0,
     )
     assert result["versions"] == 2
     assert result["revisions"] == 1
     assert result["score"] == 0.8
+    assert result["passed"] is True
 
     con = sqlite3.connect(db_path)
     try:

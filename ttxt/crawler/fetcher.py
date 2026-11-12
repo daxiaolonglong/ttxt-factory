@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -42,13 +43,26 @@ def _browser_get(url: str) -> Any:
     executable = browser_cfg.get("executable_path")
     if executable and not Path(executable).exists():
         raise FetchError(f"browser executable not found: {executable}")
-    return StealthyFetcher.fetch(
-        url,
-        headless=bool(browser_cfg.get("headless", True)),
-        executable_path=executable or None,
-        timeout=int(browser_cfg.get("timeout_ms", 60000)),
-        network_idle=bool(browser_cfg.get("network_idle", True)),
-    )
+    # 将浏览器临时目录重定向到项目内,避免写入系统 %TEMP%
+    browser_tmp = cfg.TEMP_DIR / "browser-tmp"
+    browser_tmp.mkdir(parents=True, exist_ok=True)
+    previous_tmp = (os.environ.get("TMP"), os.environ.get("TEMP"))
+    os.environ["TMP"] = str(browser_tmp)
+    os.environ["TEMP"] = str(browser_tmp)
+    try:
+        return StealthyFetcher.fetch(
+            url,
+            headless=bool(browser_cfg.get("headless", True)),
+            executable_path=executable or None,
+            timeout=int(browser_cfg.get("timeout_ms", 60000)),
+            network_idle=bool(browser_cfg.get("network_idle", True)),
+        )
+    finally:
+        for key, value in zip(("TMP", "TEMP"), previous_tmp):
+            if value is not None:
+                os.environ[key] = value
+            else:
+                os.environ.pop(key, None)
 
 
 def _fetch_once(url: str, timeout: float, render: bool) -> Any:

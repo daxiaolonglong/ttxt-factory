@@ -95,3 +95,33 @@ def stats(db_path: Path | None = None) -> dict[str, int]:
         return {row["status"]: int(row["n"]) for row in rows}
     finally:
         con.close()
+
+
+def requeue_stale_running(lease_s: float = 900.0, db_path: Path | None = None) -> int:
+    """进程崩溃/长任务后恢复:running 且 started_at 超过租约 → 重置 queued。"""
+    from datetime import datetime
+
+    con = connect(_db(db_path))
+    try:
+        rows = con.execute("SELECT id, started_at FROM model_jobs WHERE status='running'").fetchall()
+        now = datetime.now().astimezone()
+        recovered = 0
+        for row in rows:
+            started = row["started_at"]
+            if not started:
+                continue
+            try:
+                started_dt = datetime.fromisoformat(started)
+            except ValueError:
+                continue
+            if (now - started_dt).total_seconds() > lease_s:
+                con.execute(
+                    "UPDATE model_jobs SET status='queued', started_at=NULL, "
+                    "last_error='recovered: running 超过租约(进程中断?)' WHERE id=?",
+                    (row["id"],),
+                )
+                recovered += 1
+        con.commit()
+        return recovered
+    finally:
+        con.close()

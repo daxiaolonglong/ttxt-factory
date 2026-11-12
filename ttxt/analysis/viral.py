@@ -19,6 +19,7 @@ LABEL_UNSCORED = "unscored"
 
 TIER_MEASURED = "measured"
 TIER_NO_IMPRESSIONS = "no_impressions"
+TIER_INCOMPLETE = "incomplete_data"
 TIER_MISSING = "missing_data"
 
 
@@ -35,12 +36,21 @@ def compute_features(title: str, content: str, text_length: int) -> dict:
 
 def score_with_metrics(features: dict, metrics: dict) -> tuple[str, str, float | None, str]:
     impressions = metrics.get("impressions")
-    if not impressions or int(impressions) <= 0:
+    if impressions is None or int(impressions) <= 0:
         return LABEL_UNSCORED, TIER_NO_IMPRESSIONS, None, "缺少曝光量,不得计算完整互动率"
-    reads = int(metrics.get("reads") or 0)
-    likes = int(metrics.get("likes") or 0)
-    favorites = int(metrics.get("favorites") or 0)
-    comments = int(metrics.get("comments") or 0)
+    # 缺失 ≠ 0:任一互动字段缺失时不得代入 0 计算
+    for field in ("reads", "likes", "favorites", "comments"):
+        if metrics.get(field) is None:
+            return (
+                LABEL_UNSCORED,
+                TIER_INCOMPLETE,
+                None,
+                f"互动指标 {field} 缺失,不得计算互动率(缺失不等于 0)",
+            )
+    reads = int(metrics["reads"])
+    likes = int(metrics["likes"])
+    favorites = int(metrics["favorites"])
+    comments = int(metrics["comments"])
     read_rate = reads / int(impressions)
     fav_rate = favorites / reads if reads else 0.0
     like_rate = likes / reads if reads else 0.0

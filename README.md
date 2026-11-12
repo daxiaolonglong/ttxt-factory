@@ -16,6 +16,7 @@
 ```powershell
 # 0) 打开面板(双击脚本,或命令行)
 scripts\start-dashboard.cmd
+#   或双击 scripts\start-dashboard.vbs(隐藏窗口,无黑窗)
 #   等价: .venv\Scripts\python.exe -X utf8 -m ttxt serve --port 8765
 #    浏览器访问 http://127.0.0.1:8765/
 
@@ -67,9 +68,12 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 | P6 写作与反向评审 | ✅ 已完成 | `08_wiki/reports/P6-report.md`、`11_backups/P6-*.zip` |
 | P7 面板与自动化 | ✅ 已完成 | `08_wiki/reports/P7-report.md`、`11_backups/P7-*.zip` |
 | P8 全链路验收 | ✅ 已完成 | `08_wiki/reports/P8-report.md`、`11_backups/P8-*.zip` |
+| P9 头条科技来源接入 | ✅ 已完成 | `08_wiki/reports/P9-toutiao-tech.md`、`11_backups/P9-final-*.zip` |
+| P10 生产可靠性修复 | 🚧 进行中 | `08_wiki/reports/P10-report.md`、`11_backups/P10-*.zip` |
 
-> 首轮部署完成。真实采集来源清单与头条授权指标数据是剩余两项外部输入,见 `08_wiki/reports/P8-report.md`。
-> 日常命令见 [`08_wiki/operations.md`](08_wiki/operations.md);每日 18:00 自动质量巡检已建立(DSH 计划任务,新会话独立执行)。
+> 首轮部署完成;真实采集来源清单与头条授权指标数据是剩余外部输入。
+> 日常命令见 [`08_wiki/operations.md`](08_wiki/operations.md)。
+> 定时巡检:本 DSH 环境已建立「每日 18:00(Asia/Shanghai)质量巡检」计划任务(新会话独立执行);你此前在 ChatGPT 建立的每周一巡检属于另一工具,不属于本项目配置。
 
 ## 关键约束
 
@@ -110,3 +114,23 @@ scripts\login.cmd
 > 令牌读取顺序：环境变量 `GITHUB_TOKEN`/`GH_TOKEN` → `.secrets/github_token`；可用 `TTXT_GITHUB_TOKEN_FILE` 指定别处。
 > 本机 `schannel` TLS 在受限环境下不可用，仓库已写死 `http.sslBackend=openssl`；换机器克隆后同样执行
 > `git config http.sslBackend openssl`。令牌建议最小权限（仅 `repo`）并设有效期，用完可在 GitHub 侧随时撤销。
+
+### DSH 插件：变更请求与工作树（GitHub PR 面板）
+
+本机 DSH `desktop` profile 已安装并启用官方实验组合包 `@deepseek-ai/dsh-experimental-forge-bundle`：
+Git 工作区里的会话在侧栏可查看关联 GitHub PR 的检查状态、评审意见与 diff，模型也多一个 `create_worktree` 工具。
+
+| 项 | 值 |
+|---|---|
+| GitHub CLI | 便携版 gh 2.103.3 位于 `tools/gh/`，由 [`scripts/install_gh.py`](scripts/install_gh.py) 安装 |
+| gh 凭据 | `%APPDATA%\GitHub CLI\hosts.yml`（明文令牌，与 `.secrets/github_token` 同一枚） |
+| git 指向 | profile patch 里 `forge-github`、`worktree` 两行配置绝对路径，不写 PATH、不写注册表 |
+| 生效条件 | 需重启 DSH（安装结果为 restart-required） |
+
+已知限制：
+
+- `gh auth status` 会提示缺少 `read:org` scope（现有令牌只有 `repo`）；读取 PR、检查、diff 均正常，
+  仅在读组织级数据时需要 `gh auth refresh -h github.com -s read:org` 重新授权。
+- 面板里“新建工作树”按钮仍调用 PATH 上的 `git`（本机未把 git 加入 PATH），会失败；
+  模型的 `create_worktree` 工具已指向 `tools/git`，可正常使用。
+

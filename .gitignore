@@ -21,6 +21,8 @@ __pycache__/
 09_logs/
 11_backups/
 99_temp/
+pytest-of-*/
+/tmp[0-9a-z]*
 
 # ---- 本地工具（便携版 git 等）----
 tools/

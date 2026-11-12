@@ -32,7 +32,12 @@
 
 # 面板(只读,仅 127.0.0.1)
 .venv\Scripts\python.exe -X utf8 -m ttxt serve --port 8765
-# 或直接双击: scripts\start-dashboard.cmd(自动打开浏览器)
+# 或双击 scripts\start-dashboard.cmd(带窗口) / scripts\start-dashboard.vbs(无黑窗)
+# 停止: scripts\stop-dashboard.cmd
+
+# 崩溃恢复与任务重排
+.venv\Scripts\python.exe -X utf8 -m ttxt recover
+.venv\Scripts\python.exe -X utf8 -m ttxt recover --run
 
 # 今日头条 · 科技频道(浏览器渲染,逐篇限速,robots 合规)
 .venv\Scripts\python.exe -X utf8 -m ttxt crawl --source toutiao_tech --category technology --limit 10
@@ -62,12 +67,15 @@
 
 | 场景 | 处理 |
 |---|---|
-| 采集失败 | 查看 `crawl_jobs.last_error`;修复来源或网络后重跑(`crawl` 幂等,不重复入库) |
+| 采集失败 | 查看 `crawl_jobs.last_error`;attempts 未达上限会自动重排 queued;`ttxt recover --run` 重跑(去重幂等,不重复入库) |
+| robots 无法确认(5xx/网络异常) | 来源任务失败并暂停,不写任何数据;网络恢复后手动重跑 |
 | 模型未就绪 | `model --status` 查看队列;`wait_ready` 会自动等待;任务保持 queued,不会并发 |
 | 模型任务失败 | 自动重试 3 次后 failed;`last_error` 记录根因;`model --drain` 重跑队列 |
-| 锁文件残留 | 超过 30 分钟自动清理;或确认无任务后手动删除 `00_control\model_gate\gate.lock` |
+| 进程崩溃遗留 running 任务 | `ttxt recover`:模型侧超 900s 重置 queued,采集侧超 30 分钟标记 failed(根因:进程中断) |
+| 锁文件残留 | 只有「mtime 超 30 分钟且持有进程已死」才会被接管;`ttxt recover` 与任务执行前自动清理 |
+| 不合格草稿 | 写入 `04_writing/drafts/<类目>/rejected/`(含拒绝原因),成品目录不出现;通过门禁的草稿才在类目目录 |
 | 数据库损坏 | `doctor` 报 integrity;从 `11_backups` 解压恢复对应 `db/<类目>/articles.db` |
-| 磁盘不足 | `housekeep --clean` 清理 temp/日志;检查 99_temp TTL;必要时清理 pip 缓存 |
+| 磁盘不足 | `housekeep --clean` 清理 temp/日志/pip 缓存/浏览器缓存;检查 99_temp TTL |
 | 需要回退代码 | 解压对应阶段备份覆盖;数据用其中 `db/` 恢复 |
 
 ## 4. 数据备份与恢复

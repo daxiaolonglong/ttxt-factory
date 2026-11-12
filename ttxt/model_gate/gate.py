@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ctypes
 import json
 import os
 import time
@@ -14,6 +15,40 @@ from . import client, queue
 
 LOG = get_logger("model_gate")
 GATE_LOCK = cfg.CONTROL_DIR / "model_gate" / "gate.lock"
+
+_PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+_STILL_ACTIVE = 259
+
+
+def _pid_alive(pid: int) -> bool:
+    """Windows 进程存活判断(仅查询句柄,不注入不杀进程)。"""
+    if pid <= 0:
+        return False
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.OpenProcess(_PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+    if not handle:
+        return False
+    try:
+        exit_code = ctypes.c_ulong()
+        if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+            return True  # 无法确认 → 保守视为存活
+        return exit_code.value == _STILL_ACTIVE
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def _read_lock(path: Path) -> tuple[int | None, float | None]:
+    try:
+        text = path.read_text(encoding="ascii", errors="ignore")
+    except OSError:
+        return None, None
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return None, None
+    parts = text.split()
+    pid = int(parts[0]) if parts and parts[0].isdigit() else None
+    return pid, mtime
 
 
 class FileLock:
@@ -38,14 +73,14 @@ class FileLock:
                 time.sleep(0.2)
 
     def _clear_stale(self) -> None:
-        try:
-            age = time.time() - self.path.stat().st_mtime
-        except FileNotFoundError:
+        pid, mtime = _read_lock(self.path)
+        if mtime is None:
             return
-        if age > self.stale_s:
+        age = time.time() - mtime
+        if age > self.stale_s and (pid is None or not _pid_alive(pid)):
             try:
                 self.path.unlink()
-                LOG.warn("gate.lock_stale_removed", path=str(self.path), age_s=round(age))
+                LOG.warn("gate.lock_stale_removed", path=str(self.path), age_s=round(age), pid=pid)
             except FileNotFoundError:
                 pass
 
@@ -53,10 +88,14 @@ class FileLock:
         if self._fd is not None:
             os.close(self._fd)
             self._fd = None
-        try:
-            self.path.unlink()
-        except FileNotFoundError:
-            pass
+        pid, _ = _read_lock(self.path)
+        if pid == os.getpid():
+            try:
+                self.path.unlink()
+            except FileNotFoundError:
+                pass
+        else:
+            LOG.warn("gate.lock_ownership_lost", path=str(self.path), holder=pid)
 
     def __enter__(self) -> "FileLock":
         return self.acquire()
@@ -113,6 +152,7 @@ def submit_and_run(
     job_id = queue.enqueue(job_type, payload, category=category, db_path=db_path)
     results: list[dict] = []
     with FileLock(gate_lock or GATE_LOCK, timeout_s=wait_timeout_s):
+        queue.requeue_stale_running(db_path=db_path)
         for _ in range(max_jobs):
             row = queue.claim_next(db_path=db_path)
             if row is None:
@@ -142,6 +182,7 @@ def drain(
 ) -> dict:
     results: list[dict] = []
     with FileLock(gate_lock or GATE_LOCK, timeout_s=wait_timeout_s):
+        queue.requeue_stale_running(db_path=db_path)
         for _ in range(max_jobs):
             row = queue.claim_next(db_path=db_path)
             if row is None:

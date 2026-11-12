@@ -13,7 +13,7 @@ from ttxt.db import connect, system_db_path
 
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9_\-]{0,63}$")
 PROCESSOR_VERSION = "p2-v1"
-SCHEMA_VERSION = "p8-v1"
+SCHEMA_VERSION = "p10-v1"
 
 ARTICLES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS articles (
@@ -186,6 +186,9 @@ def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
         con.executescript(CLUSTERS_SCHEMA)
         con.executescript(V3_SCHEMA)
         con.executescript(V4_SCHEMA)
+        writing_columns = {row[1] for row in con.execute("PRAGMA table_info(writing_history)")}
+        if "status" not in writing_columns:
+            con.execute("ALTER TABLE writing_history ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'")
         con.execute(
             "INSERT OR REPLACE INTO articles_meta(key, value) VALUES('schema_version', ?)",
             (SCHEMA_VERSION,),
@@ -286,8 +289,9 @@ def count_articles(category: str, db_path: Path | None = None) -> int:
 # ---- 采集任务记录(system.db.crawl_jobs) ----
 
 
-def create_crawl_job(source_id: str, category: str) -> int:
-    con = connect(system_db_path())
+def create_crawl_job(source_id: str, category: str, db_path: Path | None = None) -> int:
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
     try:
         cursor = con.execute(
             "INSERT INTO crawl_jobs(job_type, category, source, status, created_at) VALUES('crawl', ?, ?, 'queued', ?)",
@@ -299,11 +303,12 @@ def create_crawl_job(source_id: str, category: str) -> int:
         con.close()
 
 
-def mark_job_started(job_id: int) -> None:
-    con = connect(system_db_path())
+def mark_job_started(job_id: int, db_path: Path | None = None) -> None:
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
     try:
         con.execute(
-            "UPDATE crawl_jobs SET status='running', started_at=? WHERE id=?",
+            "UPDATE crawl_jobs SET status='running', started_at=?, attempts=attempts+1 WHERE id=?",
             (cfg.now_iso(), job_id),
         )
         con.commit()
@@ -316,15 +321,92 @@ def finish_crawl_job(
     status: str,
     error: str | None = None,
     meta: dict | None = None,
+    db_path: Path | None = None,
 ) -> None:
     import json
 
-    con = connect(system_db_path())
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
     try:
         con.execute(
             "UPDATE crawl_jobs SET status=?, last_error=?, finished_at=?, meta_json=? WHERE id=?",
             (status, error, cfg.now_iso(), json.dumps(meta or {}, ensure_ascii=False), job_id),
         )
         con.commit()
+    finally:
+        con.close()
+
+
+def fail_crawl_job(job_id: int, error: str, meta: dict | None = None, db_path: Path | None = None) -> str:
+    """任务失败:attempts 未达上限则重新排队(queued),否则 failed。"""
+    import json
+
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        row = con.execute(
+            "SELECT attempts, max_attempts FROM crawl_jobs WHERE id=?", (job_id,)
+        ).fetchone()
+        attempts = int(row["attempts"]) if row else 0
+        max_attempts = int(row["max_attempts"]) if row else 3
+        status = "queued" if attempts < max_attempts else "failed"
+        con.execute(
+            "UPDATE crawl_jobs SET status=?, last_error=?, finished_at=?, meta_json=? WHERE id=?",
+            (
+                status,
+                error[:2000],
+                cfg.now_iso() if status == "failed" else None,
+                json.dumps(meta or {}, ensure_ascii=False),
+                job_id,
+            ),
+        )
+        con.commit()
+        return status
+    finally:
+        con.close()
+
+
+def requeue_failed_crawl_jobs(db_path: Path | None = None) -> int:
+    """把 attempts 未达上限的 failed 采集任务重新排队(等待人工/--run 重跑)。"""
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        cursor = con.execute(
+            "UPDATE crawl_jobs SET status='queued', finished_at=NULL "
+            "WHERE status='failed' AND attempts < max_attempts"
+        )
+        con.commit()
+        return int(cursor.rowcount)
+    finally:
+        con.close()
+
+
+def recover_stale_crawl_jobs(lease_s: float = 1800.0, db_path: Path | None = None) -> int:
+    """进程中断恢复:running 超过租约 → failed(根因:进程中断)。"""
+    from datetime import datetime
+
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        rows = con.execute("SELECT id, started_at FROM crawl_jobs WHERE status='running'").fetchall()
+        now = datetime.now().astimezone()
+        recovered = 0
+        for row in rows:
+            started = row["started_at"]
+            if not started:
+                continue
+            try:
+                started_dt = datetime.fromisoformat(started)
+            except ValueError:
+                continue
+            if (now - started_dt).total_seconds() > lease_s:
+                con.execute(
+                    "UPDATE crawl_jobs SET status='failed', finished_at=?, "
+                    "last_error='recovered: 进程中断(运行超过租约)' WHERE id=?",
+                    (cfg.now_iso(), row["id"]),
+                )
+                recovered += 1
+        con.commit()
+        return recovered
     finally:
         con.close()

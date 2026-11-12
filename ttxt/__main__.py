@@ -15,6 +15,7 @@ from .analysis import rag as analyzer_rag
 from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
 from .crawler import sources as crawler_sources
+from .crawler import store as crawler_store
 from .dashboard import server as dashboard_server
 from .model_gate import client as model_client
 from .model_gate import gate as model_gate
@@ -213,6 +214,35 @@ def cmd_agents(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_recover(args: argparse.Namespace) -> int:
+    report: dict[str, object] = {
+        "model_stale_requeued": model_queue.requeue_stale_running(),
+        "crawl_stale_marked_failed": crawler_store.recover_stale_crawl_jobs(),
+        "crawl_failed_requeued": crawler_store.requeue_failed_crawl_jobs(),
+        "rerun": [],
+    }
+    if args.run:
+        con = db.connect(db.system_db_path())
+        try:
+            rows = con.execute(
+                "SELECT id, source, category FROM crawl_jobs WHERE status='queued' ORDER BY id"
+            ).fetchall()
+        finally:
+            con.close()
+        for row in rows:
+            try:
+                summary = crawler_runner.crawl_source(row["source"], category=row["category"])
+                report["rerun"].append(
+                    {"job": row["id"], "source": row["source"], "ok": summary.get("ok")}
+                )
+            except Exception as exc:  # noqa: BLE001
+                report["rerun"].append(
+                    {"job": row["id"], "source": row["source"], "error": f"{type(exc).__name__}: {exc}"}
+                )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     dashboard_server.serve(args.host, args.port)
     return 0
@@ -264,6 +294,10 @@ def build_parser() -> argparse.ArgumentParser:
     model.add_argument("--category", default=None)
     model.add_argument("--think", action="store_true", help="启用模型推理过程(默认关闭)")
     model.set_defaults(func=cmd_model)
+
+    recover = sub.add_parser("recover", help="崩溃恢复:重置 stale 任务、重排失败任务")
+    recover.add_argument("--run", action="store_true", help="并重跑排队的采集任务")
+    recover.set_defaults(func=cmd_recover)
 
     write = sub.add_parser("write", help="写作闭环(仅导出草稿,不发布)")
     write.add_argument("--category", required=True)

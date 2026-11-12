@@ -10,7 +10,6 @@ import json
 import shutil
 import sqlite3
 import sys
-import tempfile
 import threading
 import urllib.request
 import zipfile
@@ -78,18 +77,27 @@ def write_step():
         "demo",
         "智能音箱与家庭自动化",
         max_revisions=0,
-        max_tokens=300,
+        max_tokens=900,
     )
     path = Path(result["path"])
     assert path.exists(), result
     text = path.read_text(encoding="utf-8")
     assert "待人工确认" in text, "草稿缺少人工确认声明"
     assert result["evidence"], "缺少证据链"
+    assert isinstance(result["passed"], bool)
+    assert result["passed"] == (result["status"] == "passed")
+    # 核心不变量:截断必拒,拒绝必入 rejected 目录
+    if result["truncated"]:
+        assert result["passed"] is False, "截断草稿不得通过"
+        assert "rejected" in str(path), "截断草稿必须进入 rejected 目录"
     return {
         "draft_id": result["draft_id"],
         "title": result["title"],
         "versions": result["versions"],
         "score": result["score"],
+        "status": result["status"],
+        "passed": result["passed"],
+        "truncated": result["truncated"],
         "evidence": len(result["evidence"]),
         "path": str(path),
         "published": False,
@@ -159,7 +167,9 @@ def backup_restore_step():
         "E2E",
         [cfg.CONTROL_DIR / "system.db", store.articles_db_path("demo")],
     )
-    workdir = Path(tempfile.mkdtemp())
+    # 恢复演练的临时目录位于项目内(99_temp),不写入系统 %TEMP%
+    workdir = cfg.TEMP_DIR / f"e2e-restore-{datetime.now().strftime('%H%M%S')}"
+    workdir.mkdir(parents=True, exist_ok=True)
     try:
         with zipfile.ZipFile(zip_path) as archive:
             archive.extractall(workdir)

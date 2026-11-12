@@ -98,6 +98,8 @@ def extract_article(page, url: str) -> ExtractedItem:
 def collect(source: Source, limit: int | None = None) -> dict:
     user_agent = str(cfg.load_config().get("crawler", {}).get("user_agent", "TouTiaoSmartFactory/0.1"))
     rules = robots.fetch_robots(source.url, user_agent)
+    if rules.unknown:
+        raise RuntimeError("robots.txt 无法确认,来源暂停,不放行")
     listing_path = robots.target_path(source.url)
     if not rules.allowed(listing_path):
         raise RuntimeError(f"robots.txt disallows listing path: {listing_path}")
