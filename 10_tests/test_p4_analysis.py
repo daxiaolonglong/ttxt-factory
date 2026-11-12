@@ -2,6 +2,7 @@
 
 import sqlite3
 
+from ttxt import db
 from ttxt.analysis import analyze, keywords, rag, viral
 from ttxt.crawler import store
 from ttxt.crawler.extract import ExtractedItem
@@ -115,12 +116,20 @@ def test_viral_with_metrics(tmp_path):
 
 def test_analyze_pipeline_idempotent(tmp_path):
     db_path = _prepared_db(tmp_path)
-    first = analyze.run_analysis("demo", db_path=db_path)
-    second = analyze.run_analysis("demo", db_path=db_path)
+    db.init_system_db(tmp_path / "sys.db")
+    kwargs = dict(db_path=db_path, system_db=tmp_path / "sys.db", evidence_dir=tmp_path / "feedback")
+    first = analyze.run_analysis("demo", **kwargs)
+    second = analyze.run_analysis("demo", **kwargs)
     assert first["viral"]["tiers"] == {"missing_data": 2}
     assert first["index"]["indexed"] == 2
     assert second["index"]["indexed"] == 2
-    assert second["keywords"]["keywords"] == first["keywords"]["keywords"]
+    # P11 反哺:首轮把零覆盖关键词由 active 转 gap,计数随之下降;进入稳定态后幂等。
+    assert second["keywords"]["keywords"] <= first["keywords"]["keywords"]
+    third = analyze.run_analysis("demo", **kwargs)
+    assert third["keywords"]["keywords"] == second["keywords"]["keywords"]
+    # 演示类目没有正式来源:只记录反哺证据,绝不入队真实任务。
+    assert first["feedback"]["queued_job_id"] is None
+    assert first["feedback"]["gap_keywords"]
 
     con = sqlite3.connect(db_path)
     try:

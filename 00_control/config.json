@@ -77,5 +77,23 @@
     "gate_max_revisions": 2,
     "draft_max_tokens": 900,
     "draft_retry_max_tokens": 2048
+  },
+  "metrics": {
+    "authorized_sources": {
+      "toutiao_admin_export": "self_reported",
+      "manual_verified": "verified"
+    }
+  },
+  "prediction": {
+    "min_samples": 5
+  },
+  "scheduler": {
+    "enabled": true,
+    "jobs": [
+      {"id": "crawl_enqueue_4h", "kind": "crawl_enqueue", "interval_min": 240, "enabled": true},
+      {"id": "analyze_daily", "kind": "analyze", "interval_min": 1440, "enabled": true},
+      {"id": "recover_daily", "kind": "recover", "interval_min": 1440, "enabled": true},
+      {"id": "housekeep_weekly", "kind": "housekeep", "interval_min": 10080, "enabled": true}
+    ]
   }
 }

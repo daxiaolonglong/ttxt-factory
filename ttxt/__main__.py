@@ -9,8 +9,9 @@ import sys
 
 from . import __version__
 from . import config as cfg
-from . import db, doctor, housekeep
+from . import db, doctor, housekeep, scheduler
 from .analysis import analyze as analyzer
+from .analysis import metrics_import, prediction
 from .analysis import rag as analyzer_rag
 from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
@@ -222,24 +223,75 @@ def cmd_recover(args: argparse.Namespace) -> int:
         "rerun": [],
     }
     if args.run:
-        con = db.connect(db.system_db_path())
-        try:
-            rows = con.execute(
-                "SELECT id, source, category FROM crawl_jobs WHERE status='queued' ORDER BY id"
-            ).fetchall()
-        finally:
-            con.close()
-        for row in rows:
-            try:
-                summary = crawler_runner.crawl_source(row["source"], category=row["category"])
-                report["rerun"].append(
-                    {"job": row["id"], "source": row["source"], "ok": summary.get("ok")}
-                )
-            except Exception as exc:  # noqa: BLE001
-                report["rerun"].append(
-                    {"job": row["id"], "source": row["source"], "error": f"{type(exc).__name__}: {exc}"}
-                )
+        for summary in crawler_runner.run_queued(limit=100):
+            report["rerun"].append(
+                {
+                    "job": summary.get("job_id"),
+                    "source": summary.get("source"),
+                    "ok": summary.get("ok"),
+                    "error": summary.get("error"),
+                }
+            )
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_crawl_queue(args: argparse.Namespace) -> int:
+    if not args.run:
+        jobs = crawler_store.list_queued_crawl_jobs(limit=args.limit, category=args.category)
+        print(json.dumps({"queued": jobs, "note": "加 --run 才真正执行采集"}, ensure_ascii=False, indent=2))
+        return 0
+    results = crawler_runner.run_queued(limit=args.limit, category=args.category)
+    print(json.dumps({"executed": len(results), "results": results}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_metrics(args: argparse.Namespace) -> int:
+    if args.list_sources:
+        print(json.dumps(metrics_import.load_authorized_sources(), ensure_ascii=False, indent=2))
+        return 0
+    if not args.category:
+        print("metrics 需要 --category(或用 --list-sources 查看授权来源)")
+        return 1
+    if args.snapshot:
+        report = metrics_import.snapshot_current_metrics(args.category)
+        report["relabel"] = metrics_import.relabel_after_import(args.category)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
+    if not args.import_file or not args.source:
+        print("metrics 需要 --import FILE --source 已授权来源 id(或 --snapshot)")
+        return 1
+    try:
+        report = metrics_import.import_metrics(args.category, args.import_file, args.source)
+    except (PermissionError, FileNotFoundError, ValueError) as exc:
+        print(json.dumps({"error": str(exc)}, ensure_ascii=False))
+        return 2
+    if not args.no_relabel:
+        report["relabel"] = metrics_import.relabel_after_import(args.category)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if not report["row_errors"] else 0
+
+
+def cmd_predict(args: argparse.Namespace) -> int:
+    if args.action == "predict":
+        report = prediction.predict_articles(args.category, limit=args.limit)
+    elif args.action == "settle":
+        report = prediction.settle_predictions(args.category)
+    else:
+        report = prediction.prediction_report(args.category)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_schedule(args: argparse.Namespace) -> int:
+    if args.once:
+        report = scheduler.run_due()
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
+    if args.daemon:
+        scheduler.daemon(interval_s=args.interval_sec)
+        return 0
+    print(json.dumps(scheduler.status_report(), ensure_ascii=False, indent=2))
     return 0
 
 
@@ -296,8 +348,36 @@ def build_parser() -> argparse.ArgumentParser:
     model.set_defaults(func=cmd_model)
 
     recover = sub.add_parser("recover", help="崩溃恢复:重置 stale 任务、重排失败任务")
-    recover.add_argument("--run", action="store_true", help="并重跑排队的采集任务")
+    recover.add_argument("--run", action="store_true", help="并消费排队的采集任务(串行)")
     recover.set_defaults(func=cmd_recover)
+
+    queue = sub.add_parser("crawl-queue", help="查看/执行排队采集任务(面板与调度器只入队,由此消费)")
+    queue.add_argument("--limit", type=int, default=5)
+    queue.add_argument("--category", default=None)
+    queue.add_argument("--run", action="store_true", help="真正执行(默认只列出)")
+    queue.set_defaults(func=cmd_crawl_queue)
+
+    metrics = sub.add_parser("metrics", help="授权指标导入/快照(缺失≠0,未授权来源拒绝)")
+    metrics.add_argument("--list-sources", action="store_true", help="列出授权指标来源")
+    metrics.add_argument("--category", default=None)
+    metrics.add_argument("--import", dest="import_file", default=None, help="CSV/JSON 指标文件")
+    metrics.add_argument("--source", default=None, help="数据来源 id(须在白名单)")
+    metrics.add_argument("--snapshot", action="store_true", help="为现有指标追加时序快照")
+    metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
+    metrics.set_defaults(func=cmd_metrics)
+
+    predict = sub.add_parser("predict", help="预测闭环:基线预测/实测回填/准确率报告")
+    predict.add_argument("action", choices=["predict", "settle", "report"])
+    predict.add_argument("--category", required=True)
+    predict.add_argument("--limit", type=int, default=None)
+    predict.set_defaults(func=cmd_predict)
+
+    schedule = sub.add_parser("schedule", help="本地调度器(只入队采集与本地分析,绝不写作/发布)")
+    schedule.add_argument("--once", action="store_true", help="执行一轮到期任务后退出")
+    schedule.add_argument("--daemon", action="store_true", help="常驻轮询")
+    schedule.add_argument("--interval-sec", type=int, default=300)
+    schedule.add_argument("--status", action="store_true", help="查看计划(默认)")
+    schedule.set_defaults(func=cmd_schedule)
 
     write = sub.add_parser("write", help="写作闭环(仅导出草稿,不发布)")
     write.add_argument("--category", required=True)
@@ -309,7 +389,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("selftest", help="运行 pytest 测试").set_defaults(func=cmd_selftest)
 
-    serve = sub.add_parser("serve", help="启动本地 Web 面板(只读)")
+    serve = sub.add_parser("serve", help="启动本地 Web 面板(只读 + 本机任务下发)")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", type=int, default=8765)
     serve.set_defaults(func=cmd_serve)

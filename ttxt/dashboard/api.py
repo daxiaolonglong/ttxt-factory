@@ -223,3 +223,93 @@ def logs(limit: int = 100) -> list[dict]:
 
 def model_status() -> dict:
     return {"health": model_client.health(), "queue": model_queue.stats()}
+
+
+# ---------------------------------------------------------------------------
+# P11 任务下发:面板只能入队采集 / 触发本地分析,绝不能触发写作、发布或模型调用。
+
+
+def sources() -> list[dict]:
+    from ttxt.crawler import sources as source_loader
+
+    try:
+        items = source_loader.load_sources()
+    except FileNotFoundError:
+        return []
+    return [
+        {
+            "id": item.id,
+            "name": item.name,
+            "category": item.category,
+            "kind": item.kind,
+            "enabled": bool(item.enabled),
+            "demo": bool(item.demo),
+        }
+        for item in items
+    ]
+
+
+def task_queue(limit: int = 20) -> dict:
+    limit = max(1, min(int(limit), 100))
+    system = connect(system_db_path())
+    try:
+        pending = [
+            dict(row)
+            for row in system.execute(
+                "SELECT id, source, category, status, attempts, max_attempts, created_at "
+                "FROM crawl_jobs WHERE status IN ('queued','running') ORDER BY id DESC LIMIT ?",
+                (limit,),
+            )
+        ]
+    finally:
+        system.close()
+    try:
+        from ttxt import scheduler
+
+        schedule = scheduler.status_report()
+    except Exception as exc:  # noqa: BLE001 - 调度状态缺失不影响任务队列
+        schedule = {"error": f"{type(exc).__name__}: {exc}"}
+    return {"pending": pending, "schedule": schedule}
+
+
+def enqueue_crawl(source_id: str, category: str | None = None) -> dict:
+    from ttxt.crawler import runner
+    from ttxt.crawler import sources as source_loader
+    from ttxt.crawler import store as crawler_store
+
+    if not source_id or not str(source_id).strip():
+        raise ValueError("必须指定 source_id")
+    try:
+        source = source_loader.get_source(str(source_id).strip())
+    except KeyError as exc:
+        raise ValueError(f"来源不存在:{source_id}") from exc
+    target = runner.resolve_category(source, (str(category).strip() or None) if category else None)
+    existing = crawler_store.find_pending_crawl_job(source.id, target)
+    if existing is not None:
+        return {"job_id": existing, "category": target, "deduped": True, "note": "已有排队/运行任务,未重复入队"}
+    job_id = crawler_store.create_crawl_job(
+        source.id, target, meta={"dispatched_via": "dashboard"}
+    )
+    return {"job_id": job_id, "category": target, "deduped": False, "note": "已入队,等待执行(ttxt crawl-queue --run)"}
+
+
+def run_analyze_task(category: str) -> dict:
+    from ttxt.analysis import analyze
+
+    slug = str(category or "").strip()
+    if not slug or not store.SLUG_RE.match(slug):
+        raise ValueError(f"非法类目:{category!r}")
+    allowed = set(cfg.load_config().get("categories", []))
+    if slug not in allowed and not (cfg.CATEGORIES_DIR / slug / "articles.db").exists():
+        raise ValueError(f"类目 {slug} 不在配置且无本地库,拒绝分析")
+    result = analyze.run_analysis(slug)
+    return {
+        "ok": True,
+        "category": slug,
+        "keywords": result["keywords"]["keywords"],
+        "zero_coverage": result["keywords"]["zero_coverage"],
+        "feedback_gaps": len(result["feedback"]["gap_keywords"]),
+        "feedback_job": result["feedback"].get("queued_job_id"),
+        "viral_articles": result["viral"].get("articles"),
+        "knowledge_assets": result["knowledge"].get("assets"),
+    }

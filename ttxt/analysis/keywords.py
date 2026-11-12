@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from ttxt import config as cfg
@@ -83,3 +84,101 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         "zero_coverage": len(candidates),
         "feedback_candidates": candidates,
     }
+
+
+def auto_feedback(
+    category: str,
+    db_path: Path | None = None,
+    system_db: Path | None = None,
+    sources_path: Path | None = None,
+    evidence_dir: Path | None = None,
+) -> dict:
+    """B3 关键词反哺闭环:零覆盖关键词 → gap 状态 → 自动入队补充采集(只入队)。
+
+    - 关键词从 gap 恢复覆盖 → 回到 active;
+    - 零覆盖 gap 关键词 → 为该类目正式来源入队一条采集任务(已有排队/运行任务则去重);
+    - 每次动作都落证据文件到 03_intelligence/keyword_feedback/,可审计;
+    - 演示类目没有正式来源:只写证据文件,不入队。
+    """
+    from ttxt.crawler import sources as source_loader
+    from ttxt.crawler import store
+
+    target = Path(db_path) if db_path is not None else cfg.CATEGORIES_DIR / category / "articles.db"
+    recovered = 0
+    gaps: list[str] = []
+    con = connect(target)
+    try:
+        zero_rows = con.execute(
+            "SELECT k.id, k.keyword FROM keywords k"
+            " JOIN keyword_performance p ON p.keyword_id = k.id"
+            " WHERE k.status='active' AND p.collected = 0"
+        ).fetchall()
+        for row in zero_rows:
+            con.execute("UPDATE keywords SET status='gap' WHERE id=?", (row["id"],))
+        recovered = int(
+            con.execute(
+                "SELECT COUNT(*) FROM keywords k"
+                " JOIN keyword_performance p ON p.keyword_id = k.id"
+                " WHERE k.status='gap' AND p.collected > 0"
+            ).fetchone()[0]
+        )
+        if recovered:
+            con.execute(
+                "UPDATE keywords SET status='active' WHERE status='gap' AND id IN"
+                " (SELECT p.keyword_id FROM keyword_performance p WHERE p.collected > 0)"
+            )
+        gaps = [
+            row["keyword"]
+            for row in con.execute(
+                "SELECT keyword FROM keywords WHERE category=? AND status='gap' ORDER BY keyword", (category,)
+            ).fetchall()
+        ]
+        con.commit()
+    finally:
+        con.close()
+
+    job_id: int | None = None
+    job_note = None
+    if gaps:
+        loader_kwargs = {"path": Path(sources_path)} if sources_path else {}
+        try:
+            candidates_sources = [
+                item for item in source_loader.load_sources(**loader_kwargs)
+                if item.category == category and item.enabled and not item.demo
+            ]
+        except FileNotFoundError:
+            candidates_sources = []
+        if candidates_sources:
+            target_source = candidates_sources[0]
+            existing = store.find_pending_crawl_job(target_source.id, category, db_path=system_db)
+            if existing is not None:
+                job_id, job_note = existing, "已有排队/运行任务,本次不重复入队"
+            else:
+                job_id = store.create_crawl_job(
+                    target_source.id,
+                    category,
+                    db_path=system_db,
+                    meta={"reason": "keyword_gap_feedback", "keywords": gaps, "dispatched_via": "keyword_feedback"},
+                )
+                job_note = "已入队补充采集任务(不自动执行)"
+        else:
+            job_note = "该类目无正式启用来源(或演示类目),仅记录反哺证据"
+
+    evidence = {
+        "category": category,
+        "generated_at": cfg.now_iso(),
+        "gap_keywords": gaps,
+        "recovered_keywords": recovered,
+        "queued_job_id": job_id,
+        "note": job_note,
+    }
+    file_written = None
+    if gaps or recovered:
+        out_dir = Path(evidence_dir) if evidence_dir else cfg.INTELLIGENCE_DIR / "keyword_feedback"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        stamp = cfg.now_iso().replace(":", "").replace("-", "")
+        out_path = out_dir / f"{category}-feedback-{stamp}.json"
+        out_path.write_text(json.dumps(evidence, ensure_ascii=False, indent=2), encoding="utf-8")
+        file_written = str(out_path)
+    evidence["evidence_file"] = file_written
+    return evidence

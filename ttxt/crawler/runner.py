@@ -50,7 +50,44 @@ def crawl_source(
     store.init_articles_db(target_category)
     job_id = store.create_crawl_job(source_id, target_category)
     store.mark_job_started(job_id)
+    return _execute_job(job_id, source, target_category, limit=limit, max_pages=max_pages)
 
+
+def run_queued(limit: int = 5, category: str | None = None) -> list[dict[str, Any]]:
+    """消费 queued 采集任务(面板/调度器只入队,由本入口或人工统一执行)。"""
+    jobs = store.list_queued_crawl_jobs(limit=limit, category=category)
+    results: list[dict[str, Any]] = []
+    for job in jobs:
+        job_id = int(job["id"])
+        source_id = str(job["source"])
+        try:
+            source = sources.get_source(source_id)
+        except KeyError:
+            store.finish_crawl_job(job_id, "failed", f"来源不存在:{source_id}")
+            results.append({"job_id": job_id, "source": source_id, "ok": False, "error": "source_missing"})
+            continue
+        if not source.enabled:
+            store.finish_crawl_job(job_id, "failed", f"来源已停用:{source_id}")
+            results.append({"job_id": job_id, "source": source_id, "ok": False, "error": "source_disabled"})
+            continue
+        try:
+            target_category = resolve_category(source, str(job["category"]) or None)
+        except ValueError as exc:
+            store.finish_crawl_job(job_id, "failed", f"类目路由拒绝:{exc}")
+            results.append({"job_id": job_id, "source": source_id, "ok": False, "error": str(exc)})
+            continue
+        store.mark_job_started(job_id)
+        results.append(_execute_job(job_id, source, target_category))
+    return results
+
+
+def _execute_job(
+    job_id: int,
+    source: sources.Source,
+    target_category: str,
+    limit: int | None = None,
+    max_pages: int | None = None,
+) -> dict[str, Any]:
     started = time.monotonic()
     summary: dict[str, Any] = {
         "job_id": job_id,

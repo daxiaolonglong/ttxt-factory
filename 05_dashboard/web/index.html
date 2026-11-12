@@ -74,6 +74,15 @@
 
     <section id="tab-system" class="tab">
       <div id="system-cards" class="cards"></div>
+      <h2>任务下发 <span class="muted">(只入队采集/本地分析;写作、发布、模型绝不经面板触发)</span></h2>
+      <div class="dispatch" id="dispatch-bar">
+        <label>来源 <select id="dispatch-source"><option value="">加载中…</option></select></label>
+        <button id="btn-enqueue-crawl" type="button">入队采集</button>
+        <button id="btn-run-analyze" type="button">分析当前类目</button>
+        <span id="dispatch-status" class="muted"></span>
+      </div>
+      <h2>任务队列与调度计划</h2>
+      <div id="task-queue-table"></div>
       <h2>模型队列</h2>
       <div id="queue-table"></div>
       <h2>磁盘与数据</h2>

@@ -34,6 +34,10 @@ header {
 .brand { display: flex; align-items: baseline; gap: 12px; }
 .brand h1 { margin: 0; font-size: 20px; letter-spacing: 1px; }
 .muted { color: var(--muted); font-size: 12px; }
+.muted.error, #dispatch-status.error { color: #ff6b6b; }
+.dispatch { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 8px 0 14px; }
+.dispatch select { max-width: 420px; }
+button:disabled { opacity: .5; cursor: wait; }
 
 .controls { display: flex; align-items: center; gap: 14px; }
 .controls select,

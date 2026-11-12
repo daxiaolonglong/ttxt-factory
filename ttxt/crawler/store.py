@@ -289,16 +289,63 @@ def count_articles(category: str, db_path: Path | None = None) -> int:
 # ---- 采集任务记录(system.db.crawl_jobs) ----
 
 
-def create_crawl_job(source_id: str, category: str, db_path: Path | None = None) -> int:
+def create_crawl_job(
+    source_id: str,
+    category: str,
+    db_path: Path | None = None,
+    meta: dict | None = None,
+) -> int:
+    import json
+
     target = Path(db_path) if db_path is not None else system_db_path()
     con = connect(target)
     try:
         cursor = con.execute(
-            "INSERT INTO crawl_jobs(job_type, category, source, status, created_at) VALUES('crawl', ?, ?, 'queued', ?)",
-            (category, source_id, cfg.now_iso()),
+            "INSERT INTO crawl_jobs(job_type, category, source, status, created_at, meta_json) "
+            "VALUES('crawl', ?, ?, 'queued', ?, ?)",
+            (category, source_id, cfg.now_iso(), json.dumps(meta or {}, ensure_ascii=False)),
         )
         con.commit()
         return int(cursor.lastrowid)
+    finally:
+        con.close()
+
+
+def find_pending_crawl_job(source_id: str, category: str, db_path: Path | None = None) -> int | None:
+    """同来源+类目已有 queued/running 任务时返回其 id(用于入队去重)。"""
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        row = con.execute(
+            "SELECT id FROM crawl_jobs WHERE source=? AND category=? AND status IN ('queued','running') "
+            "ORDER BY id LIMIT 1",
+            (source_id, category),
+        ).fetchone()
+        return int(row["id"]) if row else None
+    finally:
+        con.close()
+
+
+def list_queued_crawl_jobs(
+    limit: int = 20,
+    category: str | None = None,
+    db_path: Path | None = None,
+) -> list[dict]:
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        where = "status='queued' AND job_type='crawl'"
+        params: list = []
+        if category:
+            where += " AND category=?"
+            params.append(category)
+        params.append(max(1, int(limit)))
+        rows = con.execute(
+            f"SELECT id, source, category, attempts, max_attempts, created_at FROM crawl_jobs "
+            f"WHERE {where} ORDER BY id LIMIT ?",
+            params,
+        ).fetchall()
+        return [dict(row) for row in rows]
     finally:
         con.close()
 

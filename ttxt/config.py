@@ -81,6 +81,11 @@ def resolve_path(value: str | Path) -> Path:
     return p.resolve()
 
 
+def category_db_path(category: str) -> Path:
+    """类目隔离库路径:01_categories/<slug>/articles.db。"""
+    return CATEGORIES_DIR / category / "articles.db"
+
+
 def ensure_dirs() -> list[str]:
     """创建全部必需目录与类目子目录,返回本次新建的目录列表。"""
     created: list[str] = []

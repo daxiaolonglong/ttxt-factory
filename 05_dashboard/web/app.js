@@ -9,6 +9,18 @@ async function getJSON(url) {
   return res.json();
 }
 
+async function postJSON(url, payload) {
+  const res = await fetch(url, {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json", "X-TTXT-Task": "1" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status} ${url}`);
+  return data;
+}
+
 function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 function text(value) { return value === null || value === undefined || value === "" ? "—" : String(value); }
 
@@ -252,6 +264,96 @@ function renderSystem(overview, model) {
   );
 }
 
+async function loadDispatchSources() {
+  const select = $("dispatch-source");
+  if (!select) return;
+  const list = await getJSON("/api/sources");
+  clear(select);
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "选择来源…";
+  select.appendChild(placeholder);
+  list.forEach((s) => {
+    if (!s.enabled) return;
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = `${s.id} → ${s.category}${s.demo ? "(演示)" : ""} · ${s.name}`;
+    select.appendChild(opt);
+  });
+}
+
+function renderTaskQueue(data) {
+  const pending = (data.pending || []).map((j) => [
+    j.id, j.source, j.category, j.status, `${j.attempts}/${j.max_attempts}`, j.created_at,
+  ]);
+  const sched = data.schedule || {};
+  const jobs = (sched.jobs || []).map((j) => [
+    j.id, j.kind, `${j.interval_min} 分钟`, j.enabled ? "启用" : "停用",
+    j.due ? "是" : "否", j.last_run_at || "未运行", j.last_status || "—",
+  ]);
+  const wrap = document.createElement("div");
+  wrap.appendChild(table(["任务 id", "来源", "类目", "状态", "重试", "入队时间"], pending));
+  const title = document.createElement("p");
+  title.className = "muted";
+  title.textContent = `调度器:${sched.enabled ? "启用" : "停用"} · 执行入口 ttxt schedule --once / crawl-queue --run(面板只入队)`;
+  wrap.appendChild(title);
+  wrap.appendChild(table(["计划", "类型", "周期", "状态", "到期", "上次运行", "上次结果"], jobs));
+  setContent("task-queue-table", wrap);
+}
+
+function setDispatchStatus(message, isError) {
+  const node = $("dispatch-status");
+  if (!node) return;
+  node.textContent = message;
+  node.classList.toggle("error", !!isError);
+}
+
+async function onEnqueueCrawl() {
+  const select = $("dispatch-source");
+  const sourceId = select ? select.value : "";
+  if (!sourceId) {
+    setDispatchStatus("请先选择采集来源", true);
+    return;
+  }
+  const btn = $("btn-enqueue-crawl");
+  btn.disabled = true;
+  setDispatchStatus("入队中…", false);
+  try {
+    const res = await postJSON("/api/tasks/crawl", { source_id: sourceId });
+    setDispatchStatus(`#${res.job_id} ${res.category} · ${res.note}`);
+    renderTaskQueue(await getJSON("/api/tasks?limit=20"));
+  } catch (err) {
+    setDispatchStatus(`入队失败:${err.message}`, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function onRunAnalyze() {
+  if (!state.category) {
+    setDispatchStatus("请先选择类目", true);
+    return;
+  }
+  if (!window.confirm(`立即对类目「${state.category}」执行本地分析?关键词反哺会自动入队采集任务,不会触发写作或发布。`)) {
+    return;
+  }
+  const btn = $("btn-run-analyze");
+  btn.disabled = true;
+  setDispatchStatus("分析执行中…", false);
+  try {
+    const res = await postJSON("/api/tasks/analyze", { category: state.category });
+    setDispatchStatus(
+      `分析完成:关键词 ${res.keywords} · 缺口 ${res.zero_coverage}` +
+      (res.feedback_job ? ` · 反哺入队 #${res.feedback_job}` : "")
+    );
+    await refreshAll();
+  } catch (err) {
+    setDispatchStatus(`分析失败:${err.message}`, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function renderLogs(records) {
   const list = $("logs-list");
   clear(list);
@@ -290,14 +392,16 @@ async function refreshLogs() {
 
 async function refreshAll() {
   try {
-    const [overview, jobs, model] = await Promise.all([
+    const [overview, jobs, model, tasks] = await Promise.all([
       getJSON("/api/overview"),
       getJSON("/api/jobs?limit=10"),
       getJSON("/api/model"),
+      getJSON("/api/tasks?limit=20"),
     ]);
     renderOverview(overview);
     renderJobs(jobs);
     renderSystem(overview, model);
+    renderTaskQueue(tasks);
     if (state.category) {
       const base = `/api/category/${encodeURIComponent(state.category)}`;
       const [articles, keywords, analysis] = await Promise.all([
@@ -358,8 +462,13 @@ async function init() {
   });
   $("category").addEventListener("change", onCategoryChange);
   $("search-form").addEventListener("submit", onSearch);
+  const enqueueBtn = $("btn-enqueue-crawl");
+  if (enqueueBtn) enqueueBtn.addEventListener("click", onEnqueueCrawl);
+  const analyzeBtn = $("btn-run-analyze");
+  if (analyzeBtn) analyzeBtn.addEventListener("click", onRunAnalyze);
   try {
     await loadCategories();
+    await loadDispatchSources();
     await refreshAll();
     await refreshLogs();
   } catch (err) {
