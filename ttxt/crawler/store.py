@@ -13,7 +13,7 @@ from ttxt.db import connect, system_db_path
 
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9_\-]{0,63}$")
 PROCESSOR_VERSION = "p2-v1"
-SCHEMA_VERSION = "p10-v1"
+SCHEMA_VERSION = "p12-v1"
 
 ARTICLES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS articles (
@@ -158,6 +158,8 @@ CREATE TABLE IF NOT EXISTS evidence_links (
   quote TEXT,
   overlap REAL,
   credibility TEXT,
+  source_url TEXT,
+  checks_json TEXT,
   created_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS prediction_records (
@@ -189,6 +191,11 @@ def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
         writing_columns = {row[1] for row in con.execute("PRAGMA table_info(writing_history)")}
         if "status" not in writing_columns:
             con.execute("ALTER TABLE writing_history ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'")
+        # P12 批次4:证据链升级 —— 来源URL + 逐事实核验结果(幂等)
+        evidence_columns = {row[1] for row in con.execute("PRAGMA table_info(evidence_links)")}
+        for name, ddl in (("source_url", "TEXT"), ("checks_json", "TEXT")):
+            if name not in evidence_columns:
+                con.execute(f"ALTER TABLE evidence_links ADD COLUMN {name} {ddl}")
         con.execute(
             "INSERT OR REPLACE INTO articles_meta(key, value) VALUES('schema_version', ?)",
             (SCHEMA_VERSION,),

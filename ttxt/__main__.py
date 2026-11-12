@@ -189,6 +189,25 @@ def cmd_model(args: argparse.Namespace) -> int:
 
 
 def cmd_write(args: argparse.Namespace) -> int:
+    # P12 批次4:消费者隔离 —— 正式写作只允许注册表中 active 的类目,
+    # demo/未注册命名空间不得进入正式写作链(测试直接调用 workflow 不受限)。
+    try:
+        registry = cfg.load_registry()
+        active = {
+            item["slug"]
+            for item in registry.get("categories", [])
+            if item.get("status") == "active"
+        }
+    except Exception as exc:  # noqa: BLE001
+        print(f"拒绝写作:无法读取类目注册表: {exc}", file=sys.stderr)
+        return 1
+    if args.category not in active:
+        print(
+            f"拒绝写作:类目 '{args.category}' 不在 category_registry 的 active 列表"
+            f"({','.join(sorted(active))});demo/测试命名空间禁止消费正式素材",
+            file=sys.stderr,
+        )
+        return 2
     result = writing_workflow.write_article(
         args.category,
         args.topic,

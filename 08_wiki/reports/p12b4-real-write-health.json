@@ -1,0 +1,91 @@
+﻿{
+  "draft_id": "health-20261113003349-32aa55",
+  "title": "睡眠与运动：如何科学搭配，让身体更年轻、更强壮",
+  "versions": 3,
+  "revisions": 2,
+  "status": "rejected",
+  "passed": false,
+  "truncated": false,
+  "score": 0.6,
+  "issues": [
+    "标题-正文一致性(标题兑现):标题词面正文覆盖 38%",
+    "文章整体结构清晰，逻辑连贯，标题具有吸引力。",
+    "内容符合大众健康科普常识，无明显的逻辑谬误或极端建议。",
+    "语言流畅，避免了空话套话，提供了具体的操作建议（如固定作息、记录睡眠日志）。"
+  ],
+  "critical": [
+    "无来源断言:运动通过促进大脑中腺苷的积累来增加困意，从而帮助入睡。",
+    "无来源断言:规律运动有助于调节下丘脑-垂体-肾上腺轴（HPA轴），降低长期压力激素水平以利于夜间放松。",
+    "无来源断言:在深度睡眠阶段分泌的生长激素对于维持肌肉力量、促进组织修复和保持骨骼密度至关重要。",
+    "无来源断言:长期睡眠不足会导致皮质醇水平升高，进而阻碍肌肉合成并引发慢性低度炎症。",
+    "无来源断言:周末补觉难以完全抵消工作日熬夜造成的代谢和免疫损伤，因为睡眠债难以完全偿还。",
+    "致命问题:无来源断言 - 证据链中所有关键事实点（腺苷积累机制、HPA轴调节、生长激素分泌、皮质醇影响、睡眠债偿还）均标记为'no_source'，缺乏具体的医学文献或权威机构引用支持。",
+    "致命问题:无来源断言 - 文中提到的'部分研究指出下午或傍晚运动更利于夜间休息'等具体科学结论未提供出处，属于无来源断言。"
+  ],
+  "evidence": [
+    {
+      "claim": "运动通过促进大脑中腺苷的积累来增加困意，从而帮助入睡。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "规律运动有助于调节下丘脑-垂体-肾上腺轴（HPA轴），降低长期压力激素水平以利于夜间放松。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "在深度睡眠阶段分泌的生长激素对于维持肌肉力量、促进组织修复和保持骨骼密度至关重要。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "长期睡眠不足会导致皮质醇水平升高，进而阻碍肌肉合成并引发慢性低度炎症。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "周末补觉难以完全抵消工作日熬夜造成的代谢和免疫损伤，因为睡眠债难以完全偿还。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    }
+  ],
+  "path": "D:\\ttxt\\04_writing\\drafts\\health\\rejected\\health-20261113003349-32aa55.md",
+  "materials": 0,
+  "notes": "门禁致命问题: 无来源断言:运动通过促进大脑中腺苷的积累来增加困意，从而帮助入睡。;无来源断言:规律运动有助于调节下丘脑-垂体-肾上腺轴（HPA轴），降低长期压力激素水平以利于夜间放松。;无来源断言:在深度睡眠阶段分泌的生长激素对于维持肌肉力量、促进组织修复和保持骨骼密度至关重要。",
+  "model_meta": {
+    "same_model_review": true,
+    "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+    "served_model": "qwen3.8-flash-next-iq3_s"
+  },
+  "published": false
+}

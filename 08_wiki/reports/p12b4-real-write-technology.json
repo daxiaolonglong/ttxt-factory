@@ -1,0 +1,176 @@
+﻿{
+  "draft_id": "technology-20261113000422-5a990d",
+  "title": "数据要素赋能全球AI格局演变：开源生态与基础设施的多维博弈",
+  "versions": 3,
+  "revisions": 2,
+  "status": "passed",
+  "passed": true,
+  "truncated": false,
+  "score": 0.95,
+  "issues": [
+    "标题略显冗长，'多维博弈'一词稍显空泛",
+    "第三段关于'城市电力网络向地下电缆下沉'的类比虽生动但逻辑衔接稍显牵强"
+  ],
+  "critical": [],
+  "evidence": [
+    {
+      "claim": "硅谷门罗风投数据显示，美国企业在开源大模型支出中，月之暗面的Kimi占据61%份额，DeepSeek、智谱GLM和阿里巴巴通义千问分别占15%、11%和3%，而Meta的Llama仅占7%。",
+      "kind": "fact",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "quote": "月之暗面的Kimi以61%的份额位居第一，之后依次是DeepSeek、智谱GLM、阿里巴巴通义千问（Qwen），占比分别为15%、11%和3%。",
+      "quote_offset": 93,
+      "overlap": 0.412,
+      "anchors": {
+        "numbers": [
+          "61%",
+          "15%",
+          "11%",
+          "3%",
+          "7%",
+          "千"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "61%",
+            "15%",
+            "11%",
+            "3%",
+            "7%",
+            "千"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "斯坦福年度AI指数报告指出，自2017年以来，迁往美国的AI研究人员数量呈现放缓甚至逆转的趋势。",
+      "kind": "fact",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "quote": "第二个出自斯坦福的年度AI指数报告：2017年以来，迁往美国的AI研究人员数量下降了89%，光是过去一年就降了80%。",
+      "quote_offset": 204,
+      "overlap": 0.559,
+      "anchors": {
+        "numbers": [
+          "2017"
+        ],
+        "dates": [
+          "2017年"
+        ],
+        "persons": [
+          "指数报告"
+        ],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "2017"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [
+            "2017年"
+          ],
+          "missing": []
+        },
+        "persons": {
+          "found": [
+            "指数报告"
+          ],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "近期英伟达股价出现剧烈波动，单日市值蒸发约1900亿美元。",
+      "kind": "fact",
+      "article_id": 7,
+      "source_url": "https://www.toutiao.com/article/7695994490426884658/",
+      "quote": "11月10日收盘，股价跌4.27%，单日市值蒸发约1900亿美元，创七个月收盘新低。",
+      "quote_offset": 135,
+      "overlap": 0.476,
+      "anchors": {
+        "numbers": [
+          "1900亿"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "1900亿"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    }
+  ],
+  "path": "D:\\ttxt\\04_writing\\drafts\\technology\\technology-20261113000422-5a990d.md",
+  "materials": 5,
+  "notes": null,
+  "model_meta": {
+    "same_model_review": true,
+    "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+    "served_model": "qwen3.8-flash-next-iq3_s"
+  },
+  "published": false
+}

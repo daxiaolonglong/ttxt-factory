@@ -1,0 +1,170 @@
+﻿{
+  "draft_id": "health-20261113005555-e143da",
+  "title": "睡眠与运动：守护健康的隐形双引擎",
+  "versions": 3,
+  "revisions": 2,
+  "status": "rejected",
+  "passed": false,
+  "truncated": false,
+  "score": 0.85,
+  "issues": [
+    "第三段引用证据链[3]时，原文对应来源标记为[5]，存在引用编号不一致的小瑕疵",
+    "第四段关于可穿戴设备的具体论述在提供的证据链中仅部分支持（unverified），且该段落核心论点偏向个人建议而非强事实断言，虽无致命错误但支撑力度稍弱"
+  ],
+  "critical": [
+    "事实未通过来源核验:利用可穿戴设备量化步数、心率变异性及睡眠数据，有助于个人主动参与健康管理并践行预防为主理念。(原文引句未绑定)",
+    "第三段引用证据链[3]时，原文对应来源标记为[5]，存在引用编号不一致的小瑕疵",
+    "第四段关于可穿戴设备的具体论述在提供的证据链中仅部分支持（unverified），且该段落核心论点偏向个人建议而非强事实断言，虽无致命错误但支撑力度稍弱"
+  ],
+  "evidence": [
+    {
+      "claim": "世界卫生组织发起了“携手共促科学与健康”全球运动，汇集240多个组织以增强公众对科学的信任。",
+      "kind": "fact",
+      "article_id": 1,
+      "source_url": "https://www.who.int/zh/news-room/10-11-2026-who-launches-together-for-science-and-health-movement-to-strengthen-trust-worldwide",
+      "quote": "世界卫生组织（世卫组织）今天发起了“携手共促科学与健康”新全球运动，汇集了240多个组织，共同致力于增强对科学的信任，并发挥科学的力量来改善健康和发展。",
+      "quote_offset": 0,
+      "overlap": 0.818,
+      "anchors": {
+        "numbers": [
+          "240"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [
+          "世界卫生组织",
+          "多个组织"
+        ],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "240"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [
+            "世界卫生组织",
+            "多个组织"
+          ],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "采取包括改善环境在内的六项经过验证的气候和健康措施，每年可挽救160万人的生命并带来数万亿美元的经济收益。",
+      "kind": "fact",
+      "article_id": 5,
+      "source_url": "https://www.who.int/zh/news-room/04-11-2026-six-climate-and-health-actions-could-save-1.6-million-lives-and-deliver-trillions-in-benefits-each-year",
+      "quote": "根据世界卫生组织（世卫组织）今天发布的新报告，采取六项经过验证的气候和健康措施每年可以挽救160万人的生命，同时还能带来数万亿美元的经济和财政收益。",
+      "quote_offset": 0,
+      "overlap": 0.696,
+      "anchors": {
+        "numbers": [
+          "160",
+          "六",
+          "万",
+          "万亿"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "160",
+            "六",
+            "万",
+            "万亿"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "利用可穿戴设备量化步数、心率变异性及睡眠数据，有助于个人主动参与健康管理并践行预防为主理念。",
+      "kind": "fact",
+      "article_id": 25,
+      "source_url": "https://www.who.int/zh/news-room/15-09-2026-who-and-commonwealth-secretariat-renew-partnership-to-strengthen-health-systems-and-advance-universal-health-coverage",
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "anchors": {
+        "numbers": [],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "unverified"
+    }
+  ],
+  "path": "D:\\ttxt\\04_writing\\drafts\\health\\rejected\\health-20261113005555-e143da.md",
+  "materials": 5,
+  "notes": "门禁致命问题: 事实未通过来源核验:利用可穿戴设备量化步数、心率变异性及睡眠数据，有助于个人主动参与健康管理并践行预防为主理念。(原文引句未绑定);第三段引用证据链[3]时，原文对应来源标记为[5]，存在引用编号不一致的小瑕疵;第四段关于可穿戴设备的具体论述在提供的证据链中仅部分支持（unverified），且该段落核心论点偏向个人建议而非强事实断言，虽无致命错误但支撑力度稍弱",
+  "model_meta": {
+    "same_model_review": true,
+    "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+    "served_model": "qwen3.8-flash-next-iq3_s"
+  },
+  "published": false
+}

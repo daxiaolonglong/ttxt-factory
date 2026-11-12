@@ -35,20 +35,28 @@ def render_markdown(
         "",
         content,
         "",
-        "## 事实证据链",
+        "## 事实证据链(P12 逐事实绑定:URL + 原文连续引句 + 分维度核验)",
         "",
-        "| 陈述 | 来源文章ID | 原文证据(quote) | 重叠度 | 可信度 |",
-        "|---|---|---|---|---|",
+        "| 陈述 | 类型 | 来源文章ID | 来源URL | 原文证据(连续切片) | offset | 重叠度 | 核验 | 维度缺失 |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     if evidence:
         for item in evidence:
             claim = str(item.get("claim", "")).replace("|", "/")
             quote = str(item.get("quote") or "—").replace("|", "/")[:160]
+            url = str(item.get("source_url") or "—").replace("|", "/")
+            missing_parts = []
+            for dim in ("numbers", "dates", "persons", "orgs", "causal"):
+                payload = (item.get("checks") or {}).get(dim) or {}
+                if payload.get("missing"):
+                    missing_parts.append(f"{dim}:{','.join(payload['missing'])}")
             lines.append(
-                f"| {claim} | {item.get('article_id') or '—'} | {quote} | {item.get('overlap') or 0:.2f} | {item.get('credibility')} |"
+                f"| {claim} | {item.get('kind') or 'fact'} | {item.get('article_id') or '—'} | {url} "
+                f"| {quote} | {item.get('quote_offset') if item.get('quote_offset') is not None else '—'} "
+                f"| {item.get('overlap') or 0:.2f} | {item.get('credibility')} | {';'.join(missing_parts) or '—'} |"
             )
     else:
-        lines.append("| (无) | — | — | — | no_source |")
+        lines.append("| (无) | — | — | — | — | — | — | no_source | — |")
     lines += ["", "## 评审记录", "", f"- 最终评分:{review.get('score')}"]
     issues = review.get("issues") or []
     critical = review.get("critical") or []

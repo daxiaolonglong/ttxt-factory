@@ -95,7 +95,7 @@ def test_write_workflow(tmp_path):
     )
     assert result["versions"] == 1
     assert result["materials"] == 1
-    assert result["evidence"][0]["credibility"] == "supported"
+    assert result["evidence"][0]["credibility"] == "verified"
     assert result["evidence"][0]["quote"]
     assert result["passed"] is True
     assert result["status"] == "passed"

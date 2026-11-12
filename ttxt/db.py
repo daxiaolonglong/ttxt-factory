@@ -97,6 +97,9 @@ def connect(path: Path | str) -> sqlite3.Connection:
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA foreign_keys=ON")
     con.execute("PRAGMA busy_timeout=30000")
+    # 强制内存临时 B-tree:避免 temp 溢写落到 TMP(项目边界外),
+    # 也避免受限环境下 "unable to open database file"(P12 analyze 实测)。
+    con.execute("PRAGMA temp_store=MEMORY")
     ensure_crawl_job_columns(con)
     return con
 

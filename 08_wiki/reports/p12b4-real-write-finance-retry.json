@@ -1,0 +1,221 @@
+﻿{
+  "draft_id": "finance-20261113005130-cf7373",
+  "title": "财报季引爆市场情绪：硬科技亮眼与A股修复共振",
+  "versions": 1,
+  "revisions": 0,
+  "status": "passed",
+  "passed": true,
+  "truncated": false,
+  "score": 0.95,
+  "issues": [
+    "标题-正文一致性(标题兑现):标题词面正文覆盖 47%",
+    "标题中‘共振’一词略显抽象，虽符合财经语境但可更具体化",
+    "部分段落过渡稍显平铺直叙，缺乏更强的逻辑递进感"
+  ],
+  "critical": [],
+  "evidence": [
+    {
+      "claim": "中芯国际第三季度净利润同比大增87.6%",
+      "kind": "fact",
+      "article_id": 28,
+      "source_url": "http://finance.eastmoney.com/news/1345,202611123929707150.html",
+      "quote": "</strong></p><p> <span web=\"1\" href=\"http://quote.eastmoney.com/unify/r/1.688981\" class=\"em_stock_key_common\" data-code=\"1,688981\">中芯国际</span>财报显示，2026年第三季度销售晶圆数量303万片，环比增长5.7%，同比增长21.4%。",
+      "quote_offset": 2388,
+      "overlap": 0.467,
+      "anchors": {
+        "numbers": [
+          "87.6%",
+          "三"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "87.6%",
+            "三"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "Trade Desk财报超预期，至少有14位跟踪该股票的分析师在财报发布后上调了其目标价",
+      "kind": "fact",
+      "article_id": 35,
+      "source_url": "https://www.tmtpost.com/8203436.html",
+      "quote": "至少有14位跟踪该股票的分析师在财报发布后上调了他们的目标价。",
+      "quote_offset": 0,
+      "overlap": 0.767,
+      "anchors": {
+        "numbers": [
+          "14"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "14"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "中信建投首席经济学家指出当前A股市场处于低估状态，新一轮修复行情正在到来",
+      "kind": "fact",
+      "article_id": 19,
+      "source_url": "http://finance.eastmoney.com/news/1354,202611123929760321.html",
+      "quote": "-- EM_StockImg_End --><p> “当前，A股市场已经处于低估状态，在流动性改善和业绩增长共同推动下，新一轮修复行情正在到来。",
+      "quote_offset": 538,
+      "overlap": 0.581,
+      "anchors": {
+        "numbers": [
+          "一"
+        ],
+        "dates": [],
+        "persons": [
+          "经济学家"
+        ],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "一"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [
+            "经济学家"
+          ],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "11月12日晚间，沪深两市多家上市公司密集发布重大事项公告",
+      "kind": "fact",
+      "article_id": 14,
+      "source_url": "http://finance.eastmoney.com/news/1345,202611123929779813.html",
+      "quote": "<p> 沪深两市多家上市公司11月12日晚间发布公司公告，以下为重要公告汇总。",
+      "quote_offset": 0,
+      "overlap": 0.667,
+      "anchors": {
+        "numbers": [
+          "11",
+          "12",
+          "两"
+        ],
+        "dates": [
+          "11月12日"
+        ],
+        "persons": [],
+        "orgs": [
+          "沪深两市多家上市公司"
+        ],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "11",
+            "12",
+            "两"
+          ],
+          "missing": []
+        },
+        "dates": {
+          "found": [
+            "11月12日"
+          ],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [
+            "沪深两市多家上市公司"
+          ],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    }
+  ],
+  "path": "D:\\ttxt\\04_writing\\drafts\\finance\\finance-20261113005130-cf7373.md",
+  "materials": 5,
+  "notes": null,
+  "model_meta": {
+    "same_model_review": true,
+    "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+    "served_model": "qwen3.8-flash-next-iq3_s"
+  },
+  "published": false
+}

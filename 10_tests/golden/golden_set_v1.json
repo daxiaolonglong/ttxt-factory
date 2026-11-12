@@ -1,0 +1,1391 @@
+{
+  "meta": {
+    "version": "p12-golden-v1",
+    "generated_at": "2026-11-13T00:07:11+08:00",
+    "corpus_articles_used": {
+      "technology": 29,
+      "finance": 25,
+      "health": 0
+    },
+    "card_count": 57,
+    "machine_agreement": 52,
+    "human_adjudicated_count": 0,
+    "disclaimer": "机器预裁仅是规则输出;构造预期不是人工裁定;人工逐条复核完成前,本集合不得用于宣称通过率或验收。"
+  },
+  "cards": [
+    {
+      "card_id": "g001",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "一个被华为单点验证的新形态，正在变成全行业的“同题作文”。",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "verified",
+        "quote": "一个被华为单点验证的新形态，正在变成全行业的“同题作文”。",
+        "quote_offset": 46,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g002",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 2,
+      "source_url": "https://www.toutiao.com/article/7707095896844009993/",
+      "claim": "现在18家大国企几乎全军覆没，痛心",
+      "source_excerpt": "最惨大国重器：曾是世界第1！现在18家大国企几乎全军覆没，痛心\n作品声明：内容存在故事情节、虚构演绎成分\n2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。\n可每一个钢铁巨块背后，真正撑门面的不是镁铝合金和焊接工艺，而是埋在车间最深处",
+      "machine": {
+        "credibility": "verified",
+        "quote": "现在18家大国企几乎全军覆没，痛心",
+        "quote_offset": 14,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g003",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 3,
+      "source_url": "https://www.toutiao.com/article/7706849492141605430/",
+      "claim": "打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+      "source_excerpt": "打脸了，72小时卖了10000台，酷派阔屏新机爆了\n作品声明：个人观点、仅供参考\n酷派方块数码发文：开售仅3天！酷派阔直板京东销量突破10000台，这款新机的名字叫Cool X Wide。实话实说，确实挺打脸的，起码我的脸被打到了，因为这个",
+      "machine": {
+        "credibility": "verified",
+        "quote": "打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+        "quote_offset": 0,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g004",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "claim": "两个89%，放在一起看很有意思。",
+      "source_excerpt": "马斯克坐不住了！他发现：美国最大的王牌，可能毁在自己人手里！\n作品声明：个人观点、仅供参考\n两个89%，放在一起看很有意思。第一个来自硅谷的门罗风投：今年美国企业花在开源大模型上的钱，\n月之暗面的Kimi以61%的份额位居第一，之后依次是D",
+      "machine": {
+        "credibility": "verified",
+        "quote": "两个89%，放在一起看很有意思。",
+        "quote_offset": 46,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g005",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 5,
+      "source_url": "https://www.toutiao.com/article/7707099307568005682/",
+      "claim": "11月11日，苹果官网突然宣布，",
+      "source_excerpt": "太突然！苹果官网宣布：将永久关闭\n今日聚焦\n太突然！苹果官网宣布：将永久关闭\n11月11日，苹果官网突然宣布，\nApple支持社区将于2026年11月20日永久关闭\n。即日起，社区将不再接受新帖子，并转为只读模式。\n用户仍可前往官方Appl",
+      "machine": {
+        "credibility": "verified",
+        "quote": "11月11日，苹果官网突然宣布，",
+        "quote_offset": 39,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g006",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 6,
+      "source_url": "https://www.toutiao.com/article/7707106918711493135/",
+      "claim": "凤凰网科技讯 北京时间11月12日，英伟达董事会可能会罢免CEO黄仁勋(Jensen Huang)。",
+      "source_excerpt": "马斯克回应聘用黄仁勋：我的荣幸\n凤凰网科技讯 北京时间11月12日，英伟达董事会可能会罢免CEO黄仁勋(Jensen Huang)。现在，黄仁勋的下一步去向已引发讨论。\n有用户在网上发帖，呼吁埃隆 马斯克(Elon Musk)聘用黄仁勋。\n",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": false
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g007",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 7,
+      "source_url": "https://www.toutiao.com/article/7695994490426884658/",
+      "claim": "60个人直接向一个人汇报，英伟达的“去中心化”出了事才露底",
+      "source_excerpt": "60个人直接向一个人汇报，英伟达的“去中心化”出了事才露底\n作品声明：内容取材于网络\n在阅读此文之前，辛苦您点击一下“关注”，既方便您进行讨论和分享，又能给您带来不一样的参与感，感谢您的支持！\n编辑：\n兄弟们，黄仁勋11月8日一封道歉信，英",
+      "machine": {
+        "credibility": "verified",
+        "quote": "60个人直接向一个人汇报，英伟达的“去中心化”出了事才露底",
+        "quote_offset": 0,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g008",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 8,
+      "source_url": "https://www.toutiao.com/article/7706932199543358015/",
+      "claim": "为什么上太空要带一名女航天员？",
+      "source_excerpt": "为什么上太空要带一名女航天员？内行人说出实情，看完让人心酸\n作品声明：内容取材于网络\n出远门收拾行李，谁都纠结过。\n这个带不带，那个要不要，箱子就那么大，装不下的只能忍痛放弃。\n搬到太空，这份纠结得放大一万倍。\n飞船的运载能力有限，每一公斤",
+      "machine": {
+        "credibility": "verified",
+        "quote": "为什么上太空要带一名女航天员？",
+        "quote_offset": 0,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g009",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 9,
+      "source_url": "https://www.toutiao.com/article/7706104421939200575/",
+      "claim": "在日本，还有人为高昂投入能否收回成本而犹豫；而答案，其实藏在城市脚下几十米深的地方。",
+      "source_excerpt": "日本专家：为何中国要放弃电线杆用昂贵的地下电缆？看完才懂\n作品声明：内容取材于网络\n架空电线杆造价低、施工快，为什么中国不少城市宁愿多花数倍成本，也要把电缆埋进地下？在日本，还有人为高昂投入能否收回成本而犹豫；而答案，其实藏在城市脚下几十米",
+      "machine": {
+        "credibility": "verified",
+        "quote": "在日本，还有人为高昂投入能否收回成本而犹豫；",
+        "quote_offset": 83,
+        "overlap": 0.529,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g010",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 10,
+      "source_url": "https://www.toutiao.com/article/7700287582881546787/",
+      "claim": "一个行业能否长久立足，核心并不在于技术是否先进，而是看它是否贴合人们实实在在的刚需，是否需要人亲临现场，依靠经验、手感与临场判断处理各类复杂多变的状况。",
+      "source_excerpt": "永不消失的15个行业！第一个，电工。第二个，厨师\n最近几年，人工智能、自动化设备快速普及，不少岗位都在悄悄发生变化。很多人心里充满焦虑，担心自己从事的行当，没过多久，就会被机器替代。其实纵观长久的社会发展，真正\n一个行业能否长久立足，核心并",
+      "machine": {
+        "credibility": "verified",
+        "quote": "一个行业能否长久立足，核心并不在于技术是否先进，而是看它是否贴合人们实实在在的刚需，是否需要人亲临现场，依靠经验、手感与临场判断处理各类复杂多变的状况。",
+        "quote_offset": 106,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g011",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 14,
+      "source_url": "https://www.toutiao.com/article/7705009467955364390/",
+      "claim": "打过仗的人都懂一个道理：阵地丢了，很多时候不是因为敌人太强，而是自家后方早就烂了。",
+      "source_excerpt": "作品声明：内容取材于网络\n打过仗的人都懂一个道理：阵地丢了，很多时候不是因为敌人太强，而是自家后方早就烂了。\n粮草是假的，番号是空的。\n花名册上写着一个团，拉出来一数，只剩一个排。\n这样的队伍，冲锋号吹得再响，也打不了硬仗。\n再看手机里的外",
+      "machine": {
+        "credibility": "verified",
+        "quote": "打过仗的人都懂一个道理：阵地丢了，很多时候不是因为敌人太强，而是自家后方早就烂了。",
+        "quote_offset": 13,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g012",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 15,
+      "source_url": "https://www.toutiao.com/article/7707114305468842547/",
+      "claim": "兄弟们，今天是双 11 最后一天了，都买了些什么呀？",
+      "source_excerpt": "兄弟们，今天是双 11 最后一天了，都买了些什么呀？\n果子我反正是没下手，虽然也没少逛就是了...\n在逛的时候，顺手也发现了一些价格还不错的机子。\n像红米 K90 至尊果子就刷到过 2500 左右的，还是 16+512GB 大存储的！\n这个",
+      "machine": {
+        "credibility": "verified",
+        "quote": "兄弟们，今天是双 11 最后一天了，都买了些什么呀？",
+        "quote_offset": 0,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g013",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 16,
+      "source_url": "https://www.toutiao.com/article/7706793505557742095/",
+      "claim": "2001年12月31日，一批\"大哥大\"老用户都有点舍不得。",
+      "source_excerpt": "作品声明：内容取材于网络\n2001年12月31日，一批\"大哥大\"老用户都有点舍不得。按照中国移动的安排，中国移动通信集团公司将于2001年12月31日后关闭模拟移动电话网，停止经营模拟移动电话业务。\n而在那个年代，凡号码以\"9\"字开头的手机",
+      "machine": {
+        "credibility": "verified",
+        "quote": "2001年12月31日，一批\"大哥大\"老用户都有点舍不得。",
+        "quote_offset": 13,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g014",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 17,
+      "source_url": "https://www.toutiao.com/article/7707284879213330982/",
+      "claim": "11月8日，黄仁勋承认了一段婚外情，董事会随后公开表示对黄仁勋有信心，并宣布启动独立调查。",
+      "source_excerpt": "本文仅在今日头条发布，谢绝转载\n文 | 弦乐（瑞典语、英语译者）\n这周对于英伟达来说，可谓难上加难。11月8日，黄仁勋承认了一段婚外情，董事会随后公开表示对黄仁勋有信心，并宣布启动独立调查。\n三天后，《纽约时报》又曝出黄仁勋的另一段关系，这",
+      "machine": {
+        "credibility": "verified",
+        "quote": "11月8日，黄仁勋承认了一段婚外情，董事会随后公开表示对黄仁勋有信心，并宣布启动独立调查。",
+        "quote_offset": 50,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g015",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 19,
+      "source_url": "https://www.toutiao.com/article/7706841999491531327/",
+      "claim": "开车的老司机都知道，车上四样东西最不能省，轮胎算一个。",
+      "source_excerpt": "作品声明：个人观点、仅供参考\n开车的老司机都知道，车上四样东西最不能省，轮胎算一个。\n可很多人不晓得，咱们轮胎里那点核心橡胶，过去长期被人攥着脖子。\n2026年7月，新疆独山子一套年产10万吨的装置全线投产，造的是一种叫稀土顺丁橡胶的“超级",
+      "machine": {
+        "credibility": "verified",
+        "quote": "开车的老司机都知道，车上四样东西最不能省，轮胎算一个。",
+        "quote_offset": 15,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g016",
+      "kind": "positive",
+      "expected_by_construction": "verified",
+      "category": "technology",
+      "article_id": 20,
+      "source_url": "https://www.toutiao.com/article/7707098300847112730/",
+      "claim": "这个专家的核心逻辑，其实就两点。",
+      "source_excerpt": "作品声明：内容取材于网络\n最近，有美国智库专家对外表态，\n劝我们不要再继续砸钱研发芯片，不然巨大的投入会拖累国内经济，甚至引发经济危机。\n这话听着刺耳，是真有道理，还是美方又在玩心理战？\n这个专家的核心逻辑，其实就两点。\n第一，芯片行业是出",
+      "machine": {
+        "credibility": "verified",
+        "quote": "这个专家的核心逻辑，其实就两点。",
+        "quote_offset": 94,
+        "overlap": 1.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "来源原句(含数字/日期锚点)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g017",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "这两年手机越做越像——全是13.7英寸、全是20:9细长条、全是左上角挖孔。",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是左上角挖孔。",
+        "quote_offset": 89,
+        "overlap": 0.947,
+        "missing": {
+          "numbers": [
+            "13.7"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g018",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 2,
+      "source_url": "https://www.toutiao.com/article/7707095896844009993/",
+      "claim": "现在25家大国企几乎全军覆没，痛心",
+      "source_excerpt": "最惨大国重器：曾是世界第1！现在18家大国企几乎全军覆没，痛心\n作品声明：内容存在故事情节、虚构演绎成分\n2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。\n可每一个钢铁巨块背后，真正撑门面的不是镁铝合金和焊接工艺，而是埋在车间最深处",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "现在18家大国企几乎全军覆没，痛心",
+        "quote_offset": 14,
+        "overlap": 0.917,
+        "missing": {
+          "numbers": [
+            "25家"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g019",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 3,
+      "source_url": "https://www.toutiao.com/article/7706849492141605430/",
+      "claim": "打脸了，79小时卖了10000台，酷派阔屏新机爆了",
+      "source_excerpt": "打脸了，72小时卖了10000台，酷派阔屏新机爆了\n作品声明：个人观点、仅供参考\n酷派方块数码发文：开售仅3天！酷派阔直板京东销量突破10000台，这款新机的名字叫Cool X Wide。实话实说，确实挺打脸的，起码我的脸被打到了，因为这个",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+        "quote_offset": 0,
+        "overlap": 0.933,
+        "missing": {
+          "numbers": [
+            "79"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g020",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "claim": "两个96%，放在一起看很有意思。",
+      "source_excerpt": "马斯克坐不住了！他发现：美国最大的王牌，可能毁在自己人手里！\n作品声明：个人观点、仅供参考\n两个89%，放在一起看很有意思。第一个来自硅谷的门罗风投：今年美国企业花在开源大模型上的钱，\n月之暗面的Kimi以61%的份额位居第一，之后依次是D",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "两个89%，放在一起看很有意思。",
+        "quote_offset": 46,
+        "overlap": 0.9,
+        "missing": {
+          "numbers": [
+            "96%"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g021",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 5,
+      "source_url": "https://www.toutiao.com/article/7707099307568005682/",
+      "claim": "24月11日，苹果官网突然宣布，",
+      "source_excerpt": "太突然！苹果官网宣布：将永久关闭\n今日聚焦\n太突然！苹果官网宣布：将永久关闭\n11月11日，苹果官网突然宣布，\nApple支持社区将于2026年11月20日永久关闭\n。即日起，社区将不再接受新帖子，并转为只读模式。\n用户仍可前往官方Appl",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "11月11日，苹果官网突然宣布，",
+        "quote_offset": 39,
+        "overlap": 0.909,
+        "missing": {
+          "numbers": [
+            "24"
+          ],
+          "dates": [
+            "24月11日"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g022",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 7,
+      "source_url": "https://www.toutiao.com/article/7695994490426884658/",
+      "claim": "73个人直接向一个人汇报，英伟达的“去中心化”出了事才露底",
+      "source_excerpt": "60个人直接向一个人汇报，英伟达的“去中心化”出了事才露底\n作品声明：内容取材于网络\n在阅读此文之前，辛苦您点击一下“关注”，既方便您进行讨论和分享，又能给您带来不一样的参与感，感谢您的支持！\n编辑：\n兄弟们，黄仁勋11月8日一封道歉信，英",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "60个人直接向一个人汇报，英伟达的“去中心化”出了事才露底",
+        "quote_offset": 0,
+        "overlap": 0.95,
+        "missing": {
+          "numbers": [
+            "73"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g023",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 8,
+      "source_url": "https://www.toutiao.com/article/7706932199543358015/",
+      "claim": "2032年10月，全球妇女峰会召开之际，全国妇联兼职副主席、航天员王亚平接受中新社专访，直言开展载人航天任务，没有女性的参与是不完美的。",
+      "source_excerpt": "为什么上太空要带一名女航天员？内行人说出实情，看完让人心酸\n作品声明：内容取材于网络\n出远门收拾行李，谁都纠结过。\n这个带不带，那个要不要，箱子就那么大，装不下的只能忍痛放弃。\n搬到太空，这份纠结得放大一万倍。\n飞船的运载能力有限，每一公斤",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "2025年10月，全球妇女峰会召开之际，全国妇联兼职副主席、航天员王亚平接受中新社专访，直言开展载人航天任务，没有女性的参与是不完美的。",
+        "quote_offset": 289,
+        "overlap": 0.981,
+        "missing": {
+          "numbers": [
+            "2032"
+          ],
+          "dates": [
+            "2032年10月"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g024",
+      "kind": "number",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 9,
+      "source_url": "https://www.toutiao.com/article/7706104421939200575/",
+      "claim": "其实，台湾已有将近一半的电缆埋入地下，台北市的地下化比例高达94%。",
+      "source_excerpt": "日本专家：为何中国要放弃电线杆用昂贵的地下电缆？看完才懂\n作品声明：内容取材于网络\n架空电线杆造价低、施工快，为什么中国不少城市宁愿多花数倍成本，也要把电缆埋进地下？在日本，还有人为高昂投入能否收回成本而犹豫；而答案，其实藏在城市脚下几十米",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "其实，台湾已有将近一半的电缆埋入地下，台北市的地下化比例高达87%。",
+        "quote_offset": 189,
+        "overlap": 0.96,
+        "missing": {
+          "numbers": [
+            "94%"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中数字被扰动(+7/+13/+101)",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g025",
+      "kind": "date",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "vivo被曝2025年入局阔直板，而且不走大屏路线，直接做6.5英寸以下的小尺寸阔直板。",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "vivo被曝2027年入局阔直板，而且不走大屏路线，直接做6.5英寸以下的小尺寸阔直板。",
+        "quote_offset": 308,
+        "overlap": 0.96,
+        "missing": {
+          "numbers": [
+            "2025"
+          ],
+          "dates": [
+            "2025年"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中日期年份被前移",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g026",
+      "kind": "date",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 2,
+      "source_url": "https://www.toutiao.com/article/7707095896844009993/",
+      "claim": "2025年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。",
+      "source_excerpt": "最惨大国重器：曾是世界第1！现在18家大国企几乎全军覆没，痛心\n作品声明：内容存在故事情节、虚构演绎成分\n2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。\n可每一个钢铁巨块背后，真正撑门面的不是镁铝合金和焊接工艺，而是埋在车间最深处",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。",
+        "quote_offset": 53,
+        "overlap": 0.95,
+        "missing": {
+          "numbers": [
+            "2025"
+          ],
+          "dates": [
+            "2025年"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中日期年份被前移",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g027",
+      "kind": "date",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "claim": "第二个出自斯坦福的年度AI指数报告：2016年以来，迁往美国的AI研究人员数量下降了89%，光是过去一年就降了80%。",
+      "source_excerpt": "马斯克坐不住了！他发现：美国最大的王牌，可能毁在自己人手里！\n作品声明：个人观点、仅供参考\n两个89%，放在一起看很有意思。第一个来自硅谷的门罗风投：今年美国企业花在开源大模型上的钱，\n月之暗面的Kimi以61%的份额位居第一，之后依次是D",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "第二个出自斯坦福的年度AI指数报告：2017年以来，迁往美国的AI研究人员数量下降了89%，光是过去一年就降了80%。",
+        "quote_offset": 204,
+        "overlap": 0.974,
+        "missing": {
+          "numbers": [
+            "2016"
+          ],
+          "dates": [
+            "2016年"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中日期年份被前移",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g028",
+      "kind": "date",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 5,
+      "source_url": "https://www.toutiao.com/article/7707099307568005682/",
+      "claim": "Apple支持社区将于2025年11月20日永久关闭",
+      "source_excerpt": "太突然！苹果官网宣布：将永久关闭\n今日聚焦\n太突然！苹果官网宣布：将永久关闭\n11月11日，苹果官网突然宣布，\nApple支持社区将于2026年11月20日永久关闭\n。即日起，社区将不再接受新帖子，并转为只读模式。\n用户仍可前往官方Appl",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "Apple支持社区将于2026年11月20日永久关闭",
+        "quote_offset": 56,
+        "overlap": 0.933,
+        "missing": {
+          "numbers": [
+            "2025"
+          ],
+          "dates": [
+            "2025年11月20日"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中日期年份被前移",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g029",
+      "kind": "date",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 7,
+      "source_url": "https://www.toutiao.com/article/7695994490426884658/",
+      "claim": "黄仁勋2024年3月在Lex Fridman播客里亲口说过，他目前没有、也无意制定传统意义上的“接班计划”。",
+      "source_excerpt": "60个人直接向一个人汇报，英伟达的“去中心化”出了事才露底\n作品声明：内容取材于网络\n在阅读此文之前，辛苦您点击一下“关注”，既方便您进行讨论和分享，又能给您带来不一样的参与感，感谢您的支持！\n编辑：\n兄弟们，黄仁勋11月8日一封道歉信，英",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "黄仁勋2026年3月在Lex Fridman播客里亲口说过，他目前没有、也无意制定传统意义上的“接班计划”。",
+        "quote_offset": 421,
+        "overlap": 0.967,
+        "missing": {
+          "numbers": [
+            "2024"
+          ],
+          "dates": [
+            "2024年3月"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中日期年份被前移",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g030",
+      "kind": "date",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 8,
+      "source_url": "https://www.toutiao.com/article/7706932199543358015/",
+      "claim": "2023年10月，全球妇女峰会召开之际，全国妇联兼职副主席、航天员王亚平接受中新社专访，直言开展载人航天任务，没有女性的参与是不完美的。",
+      "source_excerpt": "为什么上太空要带一名女航天员？内行人说出实情，看完让人心酸\n作品声明：内容取材于网络\n出远门收拾行李，谁都纠结过。\n这个带不带，那个要不要，箱子就那么大，装不下的只能忍痛放弃。\n搬到太空，这份纠结得放大一万倍。\n飞船的运载能力有限，每一公斤",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "2025年10月，全球妇女峰会召开之际，全国妇联兼职副主席、航天员王亚平接受中新社专访，直言开展载人航天任务，没有女性的参与是不完美的。",
+        "quote_offset": 289,
+        "overlap": 0.981,
+        "missing": {
+          "numbers": [
+            "2023"
+          ],
+          "dates": [
+            "2023年10月"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句中日期年份被前移",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g031",
+      "kind": "person",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "张伟表示,手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+        "quote_offset": 0,
+        "overlap": 0.88,
+        "missing": {
+          "persons": [
+            "张伟"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构人物",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g032",
+      "kind": "person",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 2,
+      "source_url": "https://www.toutiao.com/article/7707095896844009993/",
+      "claim": "李慧敏表示,现在18家大国企几乎全军覆没，痛心",
+      "source_excerpt": "最惨大国重器：曾是世界第1！现在18家大国企几乎全军覆没，痛心\n作品声明：内容存在故事情节、虚构演绎成分\n2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。\n可每一个钢铁巨块背后，真正撑门面的不是镁铝合金和焊接工艺，而是埋在车间最深处",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "现在18家大国企几乎全军覆没，痛心",
+        "quote_offset": 14,
+        "overlap": 0.75,
+        "missing": {
+          "persons": [
+            "李慧敏"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构人物",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g033",
+      "kind": "person",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 3,
+      "source_url": "https://www.toutiao.com/article/7706849492141605430/",
+      "claim": "王建国表示,打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+      "source_excerpt": "打脸了，72小时卖了10000台，酷派阔屏新机爆了\n作品声明：个人观点、仅供参考\n酷派方块数码发文：开售仅3天！酷派阔直板京东销量突破10000台，这款新机的名字叫Cool X Wide。实话实说，确实挺打脸的，起码我的脸被打到了，因为这个",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+        "quote_offset": 0,
+        "overlap": 0.789,
+        "missing": {
+          "persons": [
+            "王建国"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构人物",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g034",
+      "kind": "person",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "claim": "赵岩表示,他发现：美国最大的王牌，可能毁在自己人手里！",
+      "source_excerpt": "马斯克坐不住了！他发现：美国最大的王牌，可能毁在自己人手里！\n作品声明：个人观点、仅供参考\n两个89%，放在一起看很有意思。第一个来自硅谷的门罗风投：今年美国企业花在开源大模型上的钱，\n月之暗面的Kimi以61%的份额位居第一，之后依次是D",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": false
+      },
+      "note": "句前挂虚构人物",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g035",
+      "kind": "person",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 5,
+      "source_url": "https://www.toutiao.com/article/7707099307568005682/",
+      "claim": "陈慕言表示,11月11日，苹果官网突然宣布，",
+      "source_excerpt": "太突然！苹果官网宣布：将永久关闭\n今日聚焦\n太突然！苹果官网宣布：将永久关闭\n11月11日，苹果官网突然宣布，\nApple支持社区将于2026年11月20日永久关闭\n。即日起，社区将不再接受新帖子，并转为只读模式。\n用户仍可前往官方Appl",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "11月11日，苹果官网突然宣布，",
+        "quote_offset": 39,
+        "overlap": 0.714,
+        "missing": {
+          "persons": [
+            "陈慕言"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构人物",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g036",
+      "kind": "person",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 6,
+      "source_url": "https://www.toutiao.com/article/7707106918711493135/",
+      "claim": "刘子墨表示,凤凰网科技讯 北京时间11月12日，英伟达董事会可能会罢免CEO黄仁勋(Jensen Huang)。",
+      "source_excerpt": "马斯克回应聘用黄仁勋：我的荣幸\n凤凰网科技讯 北京时间11月12日，英伟达董事会可能会罢免CEO黄仁勋(Jensen Huang)。现在，黄仁勋的下一步去向已引发讨论。\n有用户在网上发帖，呼吁埃隆 马斯克(Elon Musk)聘用黄仁勋。\n",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": false
+      },
+      "note": "句前挂虚构人物",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g037",
+      "kind": "org",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "昆仑智能研究院称,手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+        "quote_offset": 0,
+        "overlap": 0.759,
+        "missing": {
+          "persons": [
+            "能研究院"
+          ],
+          "orgs": [
+            "昆仑智能研究院"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构机构",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g038",
+      "kind": "org",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 2,
+      "source_url": "https://www.toutiao.com/article/7707095896844009993/",
+      "claim": "昆仑智能研究院称,现在18家大国企几乎全军覆没，痛心",
+      "source_excerpt": "最惨大国重器：曾是世界第1！现在18家大国企几乎全军覆没，痛心\n作品声明：内容存在故事情节、虚构演绎成分\n2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。\n可每一个钢铁巨块背后，真正撑门面的不是镁铝合金和焊接工艺，而是埋在车间最深处",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "现在18家大国企几乎全军覆没，痛心",
+        "quote_offset": 14,
+        "overlap": 0.632,
+        "missing": {
+          "persons": [
+            "能研究院"
+          ],
+          "orgs": [
+            "昆仑智能研究院"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构机构",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g039",
+      "kind": "org",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 3,
+      "source_url": "https://www.toutiao.com/article/7706849492141605430/",
+      "claim": "昆仑智能研究院称,打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+      "source_excerpt": "打脸了，72小时卖了10000台，酷派阔屏新机爆了\n作品声明：个人观点、仅供参考\n酷派方块数码发文：开售仅3天！酷派阔直板京东销量突破10000台，这款新机的名字叫Cool X Wide。实话实说，确实挺打脸的，起码我的脸被打到了，因为这个",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+        "quote_offset": 0,
+        "overlap": 0.682,
+        "missing": {
+          "persons": [
+            "能研究院"
+          ],
+          "orgs": [
+            "昆仑智能研究院"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构机构",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g040",
+      "kind": "org",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "claim": "昆仑智能研究院称,他发现：美国最大的王牌，可能毁在自己人手里！",
+      "source_excerpt": "马斯克坐不住了！他发现：美国最大的王牌，可能毁在自己人手里！\n作品声明：个人观点、仅供参考\n两个89%，放在一起看很有意思。第一个来自硅谷的门罗风投：今年美国企业花在开源大模型上的钱，\n月之暗面的Kimi以61%的份额位居第一，之后依次是D",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": false
+      },
+      "note": "句前挂虚构机构",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g041",
+      "kind": "org",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 5,
+      "source_url": "https://www.toutiao.com/article/7707099307568005682/",
+      "claim": "昆仑智能研究院称,11月11日，苹果官网突然宣布，",
+      "source_excerpt": "太突然！苹果官网宣布：将永久关闭\n今日聚焦\n太突然！苹果官网宣布：将永久关闭\n11月11日，苹果官网突然宣布，\nApple支持社区将于2026年11月20日永久关闭\n。即日起，社区将不再接受新帖子，并转为只读模式。\n用户仍可前往官方Appl",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "11月11日，苹果官网突然宣布，",
+        "quote_offset": 39,
+        "overlap": 0.588,
+        "missing": {
+          "persons": [
+            "能研究院"
+          ],
+          "orgs": [
+            "昆仑智能研究院"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "句前挂虚构机构",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g042",
+      "kind": "causal",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "由于手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+        "quote_offset": 0,
+        "overlap": 0.917,
+        "missing": {
+          "causal": [
+            "由于"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "无因果来源被强加「由于」",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g043",
+      "kind": "causal",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 5,
+      "source_url": "https://www.toutiao.com/article/7707099307568005682/",
+      "claim": "由于11月11日，苹果官网突然宣布，",
+      "source_excerpt": "太突然！苹果官网宣布：将永久关闭\n今日聚焦\n太突然！苹果官网宣布：将永久关闭\n11月11日，苹果官网突然宣布，\nApple支持社区将于2026年11月20日永久关闭\n。即日起，社区将不再接受新帖子，并转为只读模式。\n用户仍可前往官方Appl",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "11月11日，苹果官网突然宣布，",
+        "quote_offset": 39,
+        "overlap": 0.909,
+        "missing": {
+          "causal": [
+            "由于"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "无因果来源被强加「由于」",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g044",
+      "kind": "causal",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 10,
+      "source_url": "https://www.toutiao.com/article/7700287582881546787/",
+      "claim": "由于最近几年，人工智能、自动化设备快速普及，不少岗位都在悄悄发生变化。",
+      "source_excerpt": "永不消失的15个行业！第一个，电工。第二个，厨师\n最近几年，人工智能、自动化设备快速普及，不少岗位都在悄悄发生变化。很多人心里充满焦虑，担心自己从事的行当，没过多久，就会被机器替代。其实纵观长久的社会发展，真正\n一个行业能否长久立足，核心并",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "最近几年，人工智能、自动化设备快速普及，不少岗位都在悄悄发生变化。",
+        "quote_offset": 25,
+        "overlap": 0.926,
+        "missing": {
+          "causal": [
+            "由于"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "无因果来源被强加「由于」",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g045",
+      "kind": "causal",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 21,
+      "source_url": "https://www.toutiao.com/article/7706427598393442867/",
+      "claim": "由于今年双11小米还是挺给力的，除了红米K100系列，小米17 Max也开启了降价促销。",
+      "source_excerpt": "作品声明：个人观点、仅供参考\n今年双11小米还是挺给力的，除了红米K100系列，小米17 Max也开启了降价促销。以16GB+512GB版为例，叠加国补和优惠券后到手价4299元，比发布会价格5799元降了1500元。小米17 Max搭载第",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "今年双11小米还是挺给力的，除了红米K100系列，小米17 Max也开启了降价促销。",
+        "quote_offset": 15,
+        "overlap": 0.923,
+        "missing": {
+          "causal": [
+            "由于"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "无因果来源被强加「由于」",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g046",
+      "kind": "causal",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 22,
+      "source_url": "https://www.toutiao.com/article/7707287338497344040/",
+      "claim": "由于北京时间11月12日，韩国产业通商资源部在AI半导体 M.AX 联盟下半年总会上发布《K‑端侧AI半导体技术开发路线图》。",
+      "source_excerpt": "北京时间11月12日，韩国产业通商资源部在AI半导体 M.AX 联盟下半年总会上发布《K‑端侧AI半导体技术开发路线图》。该项目总预算8002亿韩元（约6.01亿美元），联合需求企业、Fabless、代工厂与IP企业全栈开发，目标2030年",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "北京时间11月12日，韩国产业通商资源部在AI半导体 M.AX 联盟下半年总会上发布《K‑端侧AI半导体技术开发路线图》。",
+        "quote_offset": 0,
+        "overlap": 0.949,
+        "missing": {
+          "causal": [
+            "由于"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "无因果来源被强加「由于」",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g047",
+      "kind": "causal",
+      "expected_by_construction": "unverified",
+      "category": "finance",
+      "article_id": 3,
+      "source_url": "http://finance.eastmoney.com/news/1345,202611123929926773.html",
+      "claim": "由于公司现任执行副总裁兼首席财务官科莱特·克雷斯（Colette Kress）出任临时CEO，并继续担任CFO，直至正式继任者确定。",
+      "source_excerpt": "<!-- EM_StockImg_Start --><p style=\"text-align:center;\"><a href=\"http://quote.eastmoney.com/us/NVDA.html\" data-code=\"NVD",
+      "machine": {
+        "credibility": "unverified",
+        "quote": "公司现任执行副总裁兼首席财务官科莱特·克雷斯（Colette Kress）出任临时CEO，并继续担任CFO，直至正式继任者确定。",
+        "quote_offset": 699,
+        "overlap": 0.95,
+        "missing": {
+          "orgs": [
+            "由于公司"
+          ],
+          "causal": [
+            "由于"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "无因果来源被强加「由于」",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g048",
+      "kind": "unrelated",
+      "expected_by_construction": "unverified",
+      "category": "finance",
+      "article_id": 3,
+      "source_url": "http://finance.eastmoney.com/news/1345,202611123929926773.html",
+      "claim": "一个被华为单点验证的新形态，正在变成全行业的“同题作文”。",
+      "source_excerpt": "<!-- EM_StockImg_Start --><p style=\"text-align:center;\"><a href=\"http://quote.eastmoney.com/us/NVDA.html\" data-code=\"NVD",
+      "machine": {
+        "credibility": "unverified",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {
+          "numbers": [
+            "一"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "原句挂到不含锚点数字/日期的无关来源",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g049",
+      "kind": "unrelated",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "现在18家大国企几乎全军覆没，痛心",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {
+          "numbers": [
+            "18家"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "原句挂到不含锚点数字/日期的无关来源",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g050",
+      "kind": "unrelated",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "打脸了，72小时卖了10000台，酷派阔屏新机爆了",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {
+          "numbers": [
+            "72",
+            "10000"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "原句挂到不含锚点数字/日期的无关来源",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g051",
+      "kind": "unrelated",
+      "expected_by_construction": "unverified",
+      "category": "finance",
+      "article_id": 3,
+      "source_url": "http://finance.eastmoney.com/news/1345,202611123929926773.html",
+      "claim": "两个89%，放在一起看很有意思。",
+      "source_excerpt": "<!-- EM_StockImg_Start --><p style=\"text-align:center;\"><a href=\"http://quote.eastmoney.com/us/NVDA.html\" data-code=\"NVD",
+      "machine": {
+        "credibility": "unverified",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {
+          "numbers": [
+            "89%",
+            "两",
+            "一"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "原句挂到不含锚点数字/日期的无关来源",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g052",
+      "kind": "unrelated",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "11月11日，苹果官网突然宣布，",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "unverified",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {
+          "numbers": [
+            "11"
+          ],
+          "dates": [
+            "11月11日"
+          ]
+        },
+        "agrees_with_construction": true
+      },
+      "note": "原句挂到不含锚点数字/日期的无关来源",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g053",
+      "kind": "unrelated",
+      "expected_by_construction": "unverified",
+      "category": "technology",
+      "article_id": 10,
+      "source_url": "https://www.toutiao.com/article/7700287582881546787/",
+      "claim": "凤凰网科技讯 北京时间11月12日，英伟达董事会可能会罢免CEO黄仁勋(Jensen Huang)。",
+      "source_excerpt": "永不消失的15个行业！第一个，电工。第二个，厨师\n最近几年，人工智能、自动化设备快速普及，不少岗位都在悄悄发生变化。很多人心里充满焦虑，担心自己从事的行当，没过多久，就会被机器替代。其实纵观长久的社会发展，真正\n一个行业能否长久立足，核心并",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": false
+      },
+      "note": "原句挂到不含锚点数字/日期的无关来源",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g054",
+      "kind": "opinion",
+      "expected_by_construction": "opinion",
+      "category": "technology",
+      "article_id": 1,
+      "source_url": "https://www.toutiao.com/article/7705970580805173796/",
+      "claim": "我认为,手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了",
+      "source_excerpt": "手机圈最大反转：不是折叠屏赢了，是“宽屏直板”把所有人叫醒了\n作品声明：个人观点、仅供参考\n一个被华为单点验证的新形态，正在变成全行业的“同题作文”。\n你有没有发现一个怪现象：\n这两年手机越做越像——全是6.7英寸、全是20:9细长条、全是",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "事实句加观点前缀,应走观点分离",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g055",
+      "kind": "opinion",
+      "expected_by_construction": "opinion",
+      "category": "technology",
+      "article_id": 2,
+      "source_url": "https://www.toutiao.com/article/7707095896844009993/",
+      "claim": "我认为,作品声明：内容存在故事情节、虚构演绎成分",
+      "source_excerpt": "最惨大国重器：曾是世界第1！现在18家大国企几乎全军覆没，痛心\n作品声明：内容存在故事情节、虚构演绎成分\n2026年，汽车圈都在吹一体化压铸这股风，讲得天花乱坠。\n可每一个钢铁巨块背后，真正撑门面的不是镁铝合金和焊接工艺，而是埋在车间最深处",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "事实句加观点前缀,应走观点分离",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g056",
+      "kind": "opinion",
+      "expected_by_construction": "opinion",
+      "category": "technology",
+      "article_id": 3,
+      "source_url": "https://www.toutiao.com/article/7706849492141605430/",
+      "claim": "我认为,实话实说，确实挺打脸的，起码我的脸被打到了，因为这个成绩太意外了。",
+      "source_excerpt": "打脸了，72小时卖了10000台，酷派阔屏新机爆了\n作品声明：个人观点、仅供参考\n酷派方块数码发文：开售仅3天！酷派阔直板京东销量突破10000台，这款新机的名字叫Cool X Wide。实话实说，确实挺打脸的，起码我的脸被打到了，因为这个",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "事实句加观点前缀,应走观点分离",
+      "human_adjudicated": false,
+      "human_verdict": null
+    },
+    {
+      "card_id": "g057",
+      "kind": "opinion",
+      "expected_by_construction": "opinion",
+      "category": "technology",
+      "article_id": 4,
+      "source_url": "https://www.toutiao.com/article/7706085211007746575/",
+      "claim": "我认为,他发现：美国最大的王牌，可能毁在自己人手里！",
+      "source_excerpt": "马斯克坐不住了！他发现：美国最大的王牌，可能毁在自己人手里！\n作品声明：个人观点、仅供参考\n两个89%，放在一起看很有意思。第一个来自硅谷的门罗风投：今年美国企业花在开源大模型上的钱，\n月之暗面的Kimi以61%的份额位居第一，之后依次是D",
+      "machine": {
+        "credibility": "opinion",
+        "quote": null,
+        "quote_offset": null,
+        "overlap": 0.0,
+        "missing": {},
+        "agrees_with_construction": true
+      },
+      "note": "事实句加观点前缀,应走观点分离",
+      "human_adjudicated": false,
+      "human_verdict": null
+    }
+  ]
+}

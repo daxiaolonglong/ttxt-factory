@@ -1,0 +1,76 @@
+﻿{
+  "draft_id": "finance-20261113001849-dc9a4d",
+  "title": "财报季波动：宏观共振、行业分化与策略应对",
+  "versions": 3,
+  "revisions": 2,
+  "status": "rejected",
+  "passed": false,
+  "truncated": false,
+  "score": 0.65,
+  "issues": [
+    "标题吸引力一般，较为常规",
+    "部分表述略显冗长，可进一步精简以提升阅读效率"
+  ],
+  "critical": [
+    "无来源断言:财报密集发布期往往伴随个股波动率的显著上升，这种波动更多来自市场对前瞻性指引的重新评估及宏观环境变化",
+    "无来源断言:2023年第四季度美国ISM制造业PMI连续多月低于荣枯线时，市场对企业营收增长的预期普遍下调。",
+    "无来源断言:在2023年至2024年初的财报季中，资金流向呈现出从“高波动成长”向“确定性防御”迁移的趋势，公用",
+    "无来源断言:多项市场微观结构研究指出，在财报发布后的极短时间内（如5分钟内），价格反应中相当大比例由算法交易驱动",
+    "致命问题:无来源断言 - 文中多处关键事实（如2023年Q4 PMI数据影响、半导体企业具体案例、算法交易占比等）均缺乏明确的数据来源或引用支撑，证据链核验结果均为'no_source'"
+  ],
+  "evidence": [
+    {
+      "claim": "财报密集发布期往往伴随个股波动率的显著上升，这种波动更多来自市场对前瞻性指引的重新评估及宏观环境变化的共振效应。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "2023年第四季度美国ISM制造业PMI连续多月低于荣枯线时，市场对企业营收增长的预期普遍下调。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "在2023年至2024年初的财报季中，资金流向呈现出从“高波动成长”向“确定性防御”迁移的趋势，公用事业等防御性板块展现出较强的抗跌性。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    },
+    {
+      "claim": "多项市场微观结构研究指出，在财报发布后的极短时间内（如5分钟内），价格反应中相当大比例由算法交易驱动。",
+      "kind": "fact",
+      "article_id": null,
+      "source_url": null,
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "checks": {},
+      "credibility": "no_source"
+    }
+  ],
+  "path": "D:\\ttxt\\04_writing\\drafts\\finance\\rejected\\finance-20261113001849-dc9a4d.md",
+  "materials": 0,
+  "notes": "门禁致命问题: 无来源断言:财报密集发布期往往伴随个股波动率的显著上升，这种波动更多来自市场对前瞻性指引的重新评估及宏观环境变化;无来源断言:2023年第四季度美国ISM制造业PMI连续多月低于荣枯线时，市场对企业营收增长的预期普遍下调。;无来源断言:在2023年至2024年初的财报季中，资金流向呈现出从“高波动成长”向“确定性防御”迁移的趋势，公用",
+  "model_meta": {
+    "same_model_review": true,
+    "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+    "served_model": "qwen3.8-flash-next-iq3_s"
+  },
+  "published": false
+}
