@@ -90,7 +90,7 @@ B3 是本批最重要的发现:它说明"评分层只盯 active"会让反哺闭�
 
 ## 7. 备份与回滚
 
-- 本批完成后快照:`11_backups/P11-final-<时间戳>.zip`(见 README 阶段表);
+- 本批完成后快照:`11_backups/P11-final-20261112-201051.zip`(836.5 KB,含代码 + 测试 + Wiki + 草稿 + system.db + 各类目库 SQLite 快照);代码已推送 GitHub `main`。
 - 恢复路径不变:`db/system.db → 00_control/`,`db/<类目>/articles.db → 01_categories/<类目>/`。
 
 ## 8. 验收结论
