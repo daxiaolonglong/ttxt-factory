@@ -17,6 +17,7 @@ from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
 from .crawler import sources as crawler_sources
 from .crawler import store as crawler_store
+from .crawler import worker as crawler_worker
 from .dashboard import server as dashboard_server
 from .model_gate import client as model_client
 from .model_gate import gate as model_gate
@@ -246,6 +247,35 @@ def cmd_crawl_queue(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_worker(args: argparse.Namespace) -> int:
+    if args.stop:
+        path = crawler_worker.request_stop()
+        print(f"已创建停止标志:{path}")
+        return 0
+    if args.clear_stop:
+        path = crawler_worker.stop_path()
+        if path.exists():
+            path.unlink()
+            print(f"已删除停止标志:{path}")
+        else:
+            print("停止标志不存在,无需清理")
+        return 0
+    try:
+        report = crawler_worker.run_worker(
+            owner=args.owner,
+            max_jobs=args.max_jobs,
+            max_runtime_s=args.max_runtime_s,
+            idle_stop_s=args.idle_stop_s,
+            category=args.category,
+            lease_s=args.lease_s,
+        )
+    except crawler_worker.WorkerAlreadyRunning as exc:
+        print(f"拒绝启动:{exc}")
+        return 2
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_metrics(args: argparse.Namespace) -> int:
     if args.list_sources:
         print(json.dumps(metrics_import.load_authorized_sources(), ensure_ascii=False, indent=2))
@@ -351,11 +381,22 @@ def build_parser() -> argparse.ArgumentParser:
     recover.add_argument("--run", action="store_true", help="并消费排队的采集任务(串行)")
     recover.set_defaults(func=cmd_recover)
 
-    queue = sub.add_parser("crawl-queue", help="查看/执行排队采集任务(面板与调度器只入队,由此消费)")
+    queue = sub.add_parser("crawl-queue", help="查看/执行排队采集任务(面板与调度器只入队,由 Worker 或本入口消费)")
     queue.add_argument("--limit", type=int, default=5)
     queue.add_argument("--category", default=None)
     queue.add_argument("--run", action="store_true", help="真正执行(默认只列出)")
     queue.set_defaults(func=cmd_crawl_queue)
+
+    worker = sub.add_parser("worker", help="受限采集 Worker:单实例消费 crawl 队列(不含模型/发布)")
+    worker.add_argument("--owner", default="cli-worker", help="执行者标识,写入任务 owner 供审计")
+    worker.add_argument("--max-jobs", type=int, default=1, help="执行 N 个任务后退出(0=不限)")
+    worker.add_argument("--max-runtime-s", type=float, default=None, help="运行秒数预算,到点退出")
+    worker.add_argument("--idle-stop-s", type=float, default=10.0, help="队列空闲该秒数后退出(0=不因空闲退出)")
+    worker.add_argument("--category", default=None, help="只消费指定类目(默认不限)")
+    worker.add_argument("--lease-s", type=float, default=900.0, help="任务租约秒数,超时视为进程中断")
+    worker.add_argument("--stop", action="store_true", help="创建停止标志,让运行中的 Worker 优雅退出")
+    worker.add_argument("--clear-stop", action="store_true", help="删除停止标志,允许再次启动")
+    worker.set_defaults(func=cmd_worker)
 
     metrics = sub.add_parser("metrics", help="授权指标导入/快照(缺失≠0,未授权来源拒绝)")
     metrics.add_argument("--list-sources", action="store_true", help="列出授权指标来源")

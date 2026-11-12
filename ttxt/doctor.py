@@ -89,11 +89,23 @@ def run_doctor() -> int:
     strata = _strata_health(config)
     if strata["ok"]:
         data = strata["data"]
+        actual_model = data.get("model")
+        expected_model = config.get("strata", {}).get("model")
         check(
             "strata.health",
             True,
-            f"model={data.get('model')} context={data.get('max_context')} loaded={data.get('loaded')}",
+            f"served_model={actual_model} context={data.get('max_context')} loaded={data.get('loaded')}",
         )
+        if expected_model and expected_model != actual_model:
+            # Strata 由用户管理,漂移不是故障;但报告若引用必须用 served 值,不得用配置值
+            results.append(
+                (
+                    "WARN",
+                    "strata.model_drift",
+                    f"config expects '{expected_model}' but service serves '{actual_model}'"
+                    " — 引用模型名时一律以 served 为准",
+                )
+            )
     else:
         results.append(("WARN", "strata.health", f"not reachable: {strata['error']}"))
 

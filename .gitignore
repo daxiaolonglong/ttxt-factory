@@ -11,6 +11,10 @@ __pycache__/
 # ---- 浏览器 profile 与 Playwright 工件(本机会话数据,绝不入库)----
 02_crawler/.browser/
 
+# ---- Worker 运行时锁与软停标志(本机进程状态,绝不入库)----
+00_control/worker.lock
+00_control/worker_stop
+
 # ---- 运行时数据（SQLite 与生成产物，不入库）----
 *.db
 *.db-wal

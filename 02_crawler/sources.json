@@ -24,7 +24,7 @@
       "category": "technology",
       "kind": "html",
       "url": "https://quotes.toscrape.com/",
-      "enabled": true,
+      "enabled": false,
       "rate_limit_s": 1.0,
       "max_pages": 3,
       "item_selector": ".quote",
@@ -44,8 +44,8 @@
       "enabled": true,
       "rate_limit_s": 1.0,
       "max_pages": 1,
-      "demo": true,
-      "notes": "公开 RSS 元数据(标题/链接/时间/摘要),受 robots 检查约束"
+      "demo": false,
+      "notes": "公开 RSS 元数据(标题/链接/时间/摘要),受 robots 检查约束;真实科技媒体来源,2026-11-12 P12 起转正(demo=false),体检报告 quality-20261112 §2 记录的是转正前状态"
     },
     {
       "id": "ruanyifeng_atom",
@@ -56,8 +56,8 @@
       "enabled": true,
       "rate_limit_s": 1.0,
       "max_pages": 1,
-      "demo": true,
-      "notes": "公开 Atom 元数据,受 robots 检查约束"
+      "demo": false,
+      "notes": "公开 Atom 元数据,受 robots 检查约束;真实科技博客来源,2026-11-12 P12 起转正(demo=false),体检报告 quality-20261112 §2 记录的是转正前状态"
     }
   ]
 }

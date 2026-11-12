@@ -55,32 +55,47 @@ def crawl_source(
     return _execute_job(job_id, source, target_category, limit=limit, max_pages=max_pages)
 
 
+def run_next(
+    owner: str = "manual-cli",
+    category: str | None = None,
+    lease_s: float = 900.0,
+) -> dict[str, Any] | None:
+    """P12:原子认领并执行一个 queued 任务;无可认领任务时返回 ``None``。
+
+    认领(``store.claim_next_crawl_job``)是进入 running 的唯一通道:写入
+    owner/租约、同源不并发、attempts 在认领时 +1 由 ``max_attempts`` 真正封顶。
+    人工 CLI 与 Worker 共用本通道,两个执行者不可能同时拿到同一个任务。
+    """
+    job = store.claim_next_crawl_job(owner, lease_s=lease_s, category=category)
+    if job is None:
+        return None
+    job_id = int(job["id"])
+    source_id = str(job["source"])
+    try:
+        source = sources.get_source(source_id)
+    except KeyError:
+        # P12:配置性失败 → 终态 aborted(重试无意义;不进 requeue,杜绝幽灵任务无限重排)
+        store.abort_crawl_job(job_id, f"来源不存在:{source_id}", meta={"reason": "source_missing"})
+        return {"job_id": job_id, "source": source_id, "ok": False, "error": "source_missing"}
+    if not source.enabled:
+        store.abort_crawl_job(job_id, f"来源已停用:{source_id}", meta={"reason": "source_disabled"})
+        return {"job_id": job_id, "source": source_id, "ok": False, "error": "source_disabled"}
+    try:
+        target_category = resolve_category(source, str(job["category"] or "") or None)
+    except ValueError as exc:
+        store.abort_crawl_job(job_id, f"类目路由拒绝:{exc}", meta={"reason": "category_refused"})
+        return {"job_id": job_id, "source": source_id, "ok": False, "error": str(exc)}
+    return _execute_job(job_id, source, target_category)
+
+
 def run_queued(limit: int = 5, category: str | None = None) -> list[dict[str, Any]]:
-    """消费 queued 采集任务(面板/调度器只入队,由本入口或人工统一执行)。"""
-    jobs = store.list_queued_crawl_jobs(limit=limit, category=category)
+    """消费 queued 采集任务(面板/调度器只入队,由本入口、人工或 Worker 统一执行)。"""
     results: list[dict[str, Any]] = []
-    for job in jobs:
-        job_id = int(job["id"])
-        source_id = str(job["source"])
-        try:
-            source = sources.get_source(source_id)
-        except KeyError:
-            # P12:配置性失败 → 终态 aborted(重试无意义;不进 requeue,杜绝幽灵任务无限重排)
-            store.abort_crawl_job(job_id, f"来源不存在:{source_id}", meta={"reason": "source_missing"})
-            results.append({"job_id": job_id, "source": source_id, "ok": False, "error": "source_missing"})
-            continue
-        if not source.enabled:
-            store.abort_crawl_job(job_id, f"来源已停用:{source_id}", meta={"reason": "source_disabled"})
-            results.append({"job_id": job_id, "source": source_id, "ok": False, "error": "source_disabled"})
-            continue
-        try:
-            target_category = resolve_category(source, str(job["category"]) or None)
-        except ValueError as exc:
-            store.abort_crawl_job(job_id, f"类目路由拒绝:{exc}", meta={"reason": "category_refused"})
-            results.append({"job_id": job_id, "source": source_id, "ok": False, "error": str(exc)})
-            continue
-        store.mark_job_started(job_id)
-        results.append(_execute_job(job_id, source, target_category))
+    for _ in range(max(1, int(limit))):
+        summary = run_next(category=category)
+        if summary is None:
+            break
+        results.append(summary)
     return results
 
 

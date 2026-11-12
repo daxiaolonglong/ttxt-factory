@@ -452,28 +452,115 @@ def requeue_failed_crawl_jobs(db_path: Path | None = None) -> int:
         con.close()
 
 
+def claim_next_crawl_job(
+    owner: str,
+    lease_s: float = 900.0,
+    category: str | None = None,
+    db_path: Path | None = None,
+) -> dict | None:
+    """P12:原子认领一个 queued 采集任务 —— 进入 running 的唯一通道。
+
+    - 原子性:单条 UPDATE(内含选任务子查询)在一个写事务内完成。多个 Worker
+      并发争抢时,WAL 写锁串行化,后来者的 ``id=(SELECT...)`` 命中的行已非
+      queued,``fetchone()`` 为空 —— 同一任务不可能被两个执行者拿到。
+    - 同源不并发:该 source 已有 running 任务时,同 source 其余任务一律不认领
+      (同站并发会破坏限速,并争抢浏览器)。
+    - ``attempts`` 在认领时 +1:尝试次数与实际执行严格一致,``max_attempts``
+      因此真正封顶失败重试。
+    - 只认领 ``job_type='crawl'``:Worker 永不触碰其它类型任务。
+    """
+    from datetime import datetime, timedelta
+
+    target = Path(db_path) if db_path is not None else system_db_path()
+    lease_until = (datetime.now().astimezone() + timedelta(seconds=float(lease_s))).isoformat(
+        timespec="seconds"
+    )
+    where = "status='queued' AND job_type='crawl'"
+    params: list = [owner, cfg.now_iso(), lease_until]
+    if category:
+        where += " AND category=?"
+        params.append(category)
+    con = connect(target)
+    try:
+        cur = con.execute(
+            f"""
+            UPDATE crawl_jobs
+               SET status='running', owner=?, started_at=?, lease_expires_at=?, attempts=attempts+1
+             WHERE id = (
+                SELECT j.id FROM crawl_jobs j
+                 WHERE {where}
+                   AND NOT EXISTS (
+                        SELECT 1 FROM crawl_jobs r
+                         WHERE r.source = j.source AND r.status='running'
+                   )
+                 ORDER BY j.id LIMIT 1
+             )
+             AND status='queued'
+             RETURNING id, source, category, attempts, max_attempts, owner, lease_expires_at
+            """,
+            params,
+        )
+        row = cur.fetchone()
+        con.commit()
+        return dict(row) if row else None
+    finally:
+        con.close()
+
+
+def renew_lease(job_id: int, lease_s: float = 900.0, db_path: Path | None = None) -> None:
+    """长任务在阶段边界续租(仅当仍为 running)。"""
+    from datetime import datetime, timedelta
+
+    target = Path(db_path) if db_path is not None else system_db_path()
+    lease_until = (datetime.now().astimezone() + timedelta(seconds=float(lease_s))).isoformat(
+        timespec="seconds"
+    )
+    con = connect(target)
+    try:
+        con.execute(
+            "UPDATE crawl_jobs SET lease_expires_at=? WHERE id=? AND status='running'",
+            (lease_until, job_id),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+
 def recover_stale_crawl_jobs(lease_s: float = 1800.0, db_path: Path | None = None) -> int:
-    """进程中断恢复:running 超过租约 → failed(根因:进程中断)。"""
+    """进程中断恢复:running 且租约过期的任务 → failed(根因:进程中断)。
+
+    优先用认领写入的 ``lease_expires_at``;没有该列值的旧行退回
+    ``started_at + lease_s`` 的保守判断。后续由 ``requeue_failed_crawl_jobs``
+    在 attempts 未达上限时重新排队。
+    """
     from datetime import datetime
 
     target = Path(db_path) if db_path is not None else system_db_path()
     con = connect(target)
     try:
-        rows = con.execute("SELECT id, started_at FROM crawl_jobs WHERE status='running'").fetchall()
+        rows = con.execute(
+            "SELECT id, started_at, lease_expires_at, owner FROM crawl_jobs WHERE status='running'"
+        ).fetchall()
         now = datetime.now().astimezone()
         recovered = 0
         for row in rows:
-            started = row["started_at"]
-            if not started:
-                continue
-            try:
-                started_dt = datetime.fromisoformat(started)
-            except ValueError:
-                continue
-            if (now - started_dt).total_seconds() > lease_s:
+            stale = False
+            if row["lease_expires_at"]:
+                try:
+                    stale = now > datetime.fromisoformat(row["lease_expires_at"])
+                except ValueError:
+                    stale = False
+            elif row["started_at"]:
+                try:
+                    stale = (now - datetime.fromisoformat(row["started_at"])).total_seconds() > lease_s
+                except ValueError:
+                    stale = False
+            if stale:
                 con.execute(
                     "UPDATE crawl_jobs SET status='failed', finished_at=?, "
-                    "last_error='recovered: 进程中断(运行超过租约)' WHERE id=?",
+                    "last_error='recovered: 进程中断(租约过期, owner="
+                    + str(row["owner"] or "?")
+                    + ")' WHERE id=?",
                     (cfg.now_iso(), row["id"]),
                 )
                 recovered += 1

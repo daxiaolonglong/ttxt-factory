@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS crawl_jobs (
   created_at TEXT NOT NULL,
   started_at TEXT,
   finished_at TEXT,
+  owner TEXT,
+  lease_expires_at TEXT,
   meta_json TEXT
 );
 CREATE TABLE IF NOT EXISTS model_jobs (
@@ -95,7 +97,31 @@ def connect(path: Path | str) -> sqlite3.Connection:
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA foreign_keys=ON")
     con.execute("PRAGMA busy_timeout=30000")
+    ensure_crawl_job_columns(con)
     return con
+
+
+def ensure_crawl_job_columns(con) -> None:
+    """P12 幂等迁移:凡含 crawl_jobs 的库都补齐 Worker 租约列(绝不重建/丢数据)。
+
+    放在 connect() 里执行,保证任何入口(CLI/Worker/面板/测试)都不会因为
+    ``init_system_db`` 未被调用而撞上 ``no such column: lease_expires_at``。
+    """
+    has_table = con.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='crawl_jobs'"
+    ).fetchone()
+    if not has_table:
+        return
+    cols = {row["name"] for row in con.execute("PRAGMA table_info(crawl_jobs)")}
+    changed = False
+    if "owner" not in cols:
+        con.execute("ALTER TABLE crawl_jobs ADD COLUMN owner TEXT")
+        changed = True
+    if "lease_expires_at" not in cols:
+        con.execute("ALTER TABLE crawl_jobs ADD COLUMN lease_expires_at TEXT")
+        changed = True
+    if changed:
+        con.commit()
 
 
 def init_system_db(path: Path | str | None = None) -> Path:
@@ -105,6 +131,8 @@ def init_system_db(path: Path | str | None = None) -> Path:
     con = connect(target)
     try:
         con.executescript(SYSTEM_SCHEMA)
+        # P12 幂等迁移:旧库补 Worker 租约列(connect 内已保证,这里显式再调一次以求自证)
+        ensure_crawl_job_columns(con)
         con.execute(
             "INSERT OR REPLACE INTO schema_meta(key, value) VALUES('schema_version', ?)",
             (str(SCHEMA_VERSION),),
