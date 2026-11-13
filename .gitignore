@@ -24,6 +24,8 @@ __pycache__/
 01_categories/*/rag/
 01_categories/*/keywords/
 01_categories/*/metrics/
+# 4.9 GB 语料/数据库资产库，只留在本机，绝不入库
+资产库/
 
 # ---- 日志 / 备份 / 临时 ----
 09_logs/
