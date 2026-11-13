@@ -8,6 +8,8 @@
 
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -180,3 +182,20 @@ def test_shipped_v2_file_is_schema_clean_and_gated():
     # 候选集刚建立时必然没有人工裁定,门禁必须拒绝给出质量结论
     if metrics["adjudicated_count"] < harness.MIN_HUMAN_CASES:
         assert metrics["quality_claim"] == "NOT_AVAILABLE"
+
+
+def test_gate_is_machine_detectable_via_exit_code(tmp_path):
+    """NOT_AVAILABLE 必须以退出码 2 暴露,否则 CI / 每周巡检无法判定。"""
+    script = str(ROOT / "scripts" / "golden_v2_harness.py")
+
+    failing = _write(tmp_path, [_card(card_id=f"v2e{i:03d}") for i in range(30)])
+    bad = subprocess.run(
+        [sys.executable, "-X", "utf8", script, "--cards", str(failing), "--no-report"],
+        cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
+    assert bad.returncode == 2, bad.stderr[-500:]
+
+    passing = _write(tmp_path, _gate_satisfying_cards())
+    good = subprocess.run(
+        [sys.executable, "-X", "utf8", script, "--cards", str(passing), "--no-report"],
+        cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
+    assert good.returncode == 0, good.stderr[-500:]

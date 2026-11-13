@@ -14,11 +14,11 @@ v1 那 57 条「机器预裁定」卡片已不能作为质量证据;v2 已建成
 |---|---|---|
 | v2 卡片规范 | [golden_set_v2.schema.md](../golden/golden_set_v2.schema.md) | 三项判定分离 + 证据分级 A–D + 硬门禁 |
 | 生成器 | [build_golden_set_v2.py](../../scripts/build_golden_set_v2.py) | 产出 61 张候选卡片 |
-| 评测器(唯一口径) | [golden_v2_harness.py](../../scripts/golden_v2_harness.py) | 模式校验 0 错;输出 status 报告;退出码 1(门禁未通过) |
+| 评测器(唯一口径) | [golden_v2_harness.py](../../scripts/golden_v2_harness.py) | 模式校验 0 错;退出码 0=门禁通过 / 1=模式校验错误 / **2=质量 NOT_AVAILABLE(本次实测 2)** |
 | 候选集 | [golden_set_v2.jsonl](../../golden/golden_set_v2.jsonl) | 61 行,schema 校验 `errors: []` |
 | 人工裁定工作表 | [P13-batch1-golden-v2-review.md](P13-batch1-golden-v2-review.md) | 61 条待人工三问 |
-| 机器状态快照 | [P13-batch1-golden-v2-status.md](P13-batch1-golden-v2-status.md) | 由 harness 生成,10:26:44 |
-| 回归测试 | [test_p13_golden_v2.py](../../10_tests/test_p13_golden_v2.py) | 12 条用例;`10_tests` 全量 **173 passed in 24.34s**(10:22:13–10:22:37 本机实跑;基线由 161 变为 173) |
+| 机器状态快照 | [P13-batch1-golden-v2-status.md](P13-batch1-golden-v2-status.md) | 由 harness 生成,10:33:15 |
+| 回归测试 | [test_p13_golden_v2.py](../../10_tests/test_p13_golden_v2.py) | 13 条用例;`10_tests` 全量 **174 passed in 23.75s**(10:34:22–10:34:47 本机实跑;基线由 161 变为 174) |
 
 **为什么必须存在消费方**:v1 的 `golden_set_v1.json` 从未被任何代码读取(全仓 grep 无引用),所以「有黄金集」只是文件存在。
 v2 由 harness + 12 条测试真实消费;门禁测试会在人工裁定不足 50 条时**主动拒绝**给出质量结论。
@@ -90,6 +90,8 @@ v1 之所以虚高,正是把 ① 当成了质量分数:`g002`「现在18家大�
 硬门禁(`scripts/golden_v2_harness.py` 内常量):已人工裁定 ≥50 条、三类目各 ≥10 条、
 A+B 级占比 ≥50%、负样本占比 ≥30%、每 kind ≥3 条。任一不满足 → `quality_claim = NOT_AVAILABLE`,
 并在 `gate_failures` 列明原因。当前三条失败:`已人工裁定 0 < 50`、`每类目有效卡片不足`、`A/B 级独立证据占比 None < 0.5`。
+门禁同时是**机器可判定**的:harness 退出码 0/1/2 分别对应 通过 / 模式校验错误 / 质量 NOT_AVAILABLE(本次实测 2),
+行为由用例 `test_gate_is_machine_detectable_via_exit_code` 固定,每周巡检与 CI 都能据此判定,不依赖人工读报告。
 
 ## 10. 未闭合项
 
@@ -102,6 +104,6 @@ A+B 级占比 ≥50%、负样本占比 ≥30%、每 kind ≥3 条。任一不满
 
 ## 11. 结论口径(必须分开写)
 
-- `AUTO_PASSED`:仅「规则吻合度 0.902」「测试 173 passed」「doctor 10 ok / 0 failed」这类自动事实。
+- `AUTO_PASSED`:仅「规则吻合度 0.902」「测试 174 passed」「doctor 10 ok / 0 failed」这类自动事实。
 - `HUMAN_APPROVED`:**无**。批次0/1 尚无人类批准记录,本批产物在提交前 `git status` 全部为未跟踪/未提交。
 - 因此对外只能写:**P13 批次0 已完成(只读核实 + 基线备份),批次1 已建成候选集与评测口径,质量结论 NOT_AVAILABLE。**

@@ -302,7 +302,10 @@ def main(argv: list[str] | None = None) -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(render_report(metrics, errors), encoding="utf-8")
         print(f"\n报告:{out}")
-    return 1 if errors else 0
+    if errors:
+        return 1
+    # 门禁未通过必须让 CI / 每周巡检能机器识别:NOT_AVAILABLE → 退出码 2
+    return 0 if metrics["quality_claim"] == "AVAILABLE" else 2
 
 
 if __name__ == "__main__":
