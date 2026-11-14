@@ -45,16 +45,20 @@ def role_context(name: str) -> str:
     )
 
 
-def export_skills() -> list[str]:
+def export_skills(root: Path | None = None) -> list[str]:
     """把六角色导出为 DSH 项目级技能(D:\\ttxt\\.dsh\\skills,rank 100)。
 
     DSH 项目根 = 最近的 .git 祖先;无 .git 时使用当前工作目录 D:\\ttxt。
     只写项目内目录,不触碰 DSH 全局配置。技能名要求连字符,角色名中的下划线转为连字符。
+
+    ``root`` 可指定输出根目录(``<root>/<skill>/SKILL.md``),用于测试导出到临时目录,
+    避免覆盖 git 跟踪的项目技能。
     """
+    skills_root = SKILLS_ROOT if root is None else Path(root)
     created: list[str] = []
     for role in list_roles():
         name = f"ttxt-{role['name'].replace('_', '-')}"
-        directory = SKILLS_ROOT / name
+        directory = skills_root / name
         directory.mkdir(parents=True, exist_ok=True)
         description = ROLE_DESCRIPTIONS.get(role["name"], f"头条智能工厂角色:{role['name']}")
         body = read_role(role["name"]).strip()

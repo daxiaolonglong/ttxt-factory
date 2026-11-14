@@ -1,6 +1,8 @@
 """P1 冒烟测试:目录、配置、数据库、磁盘预算、日志落点。"""
 
+import shutil
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -54,16 +56,29 @@ def test_system_db_schema(tmp_path):
         con.close()
 
 
-def test_real_system_db_initialized():
+def test_real_system_db_initialized(tmp_path):
+    """核对生产 system.db 结构:必须在 tmp 副本上打开,生产库文件不得被连接。
+
+    只读 URI 连接同样会在生产目录生成 ``-wal``/``-shm`` 边车(实测),所以 C-8 之后
+    一律“复制→读副本”,生产目录在测试前后保持零边车。
+    """
     path = db.system_db_path()
     if not path.exists():
         pytest.skip("system.db 未初始化,请先运行 `ttxt init`")
-    con = sqlite3.connect(path)
+
+    def sidecars(directory: Path, name: str) -> list[str]:
+        return sorted(item.name for item in directory.glob(name + "*") if item.name.endswith(("-wal", "-shm", "-journal")))
+
+    before = sidecars(path.parent, path.name)
+    copy_path = tmp_path / path.name
+    shutil.copyfile(path, copy_path)
+    con = sqlite3.connect(copy_path.as_uri() + "?mode=ro", uri=True)
     try:
         assert con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
         assert con.execute("SELECT COUNT(*) FROM categories").fetchone()[0] >= 5
     finally:
         con.close()
+    assert sidecars(path.parent, path.name) == before, "读取生产库副本时生产目录出现了新的 WAL 边车"
 
 
 def test_housekeep_report_shape():

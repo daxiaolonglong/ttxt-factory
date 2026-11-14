@@ -1,8 +1,14 @@
-"""P5 测试:队列生命周期、失败重试、跨进程文件锁、线程串行、真实模型调用。"""
+"""P5 测试:队列生命周期、失败重试、跨进程文件锁、线程串行、模型客户端契约。
 
+模型侧只做只读探测(/health、/v1/models);chat 契约由进程内桩服务验证,
+测试不对 Strata 发起推理,也不占用 GPU。
+"""
+
+import json
 import sqlite3
 import threading
 import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
@@ -108,17 +114,123 @@ def test_wait_ready_timeout():
         client.wait_ready(base_url="http://127.0.0.1:9", timeout_s=1.0, poll_s=0.2)
 
 
-def test_real_model_health_and_chat():
+def test_strata_readonly_probe():
+    """只读探测 Strata:仅 /health 与 /v1/models,绝不触发推理、不占用 GPU。"""
     health = client.health()
-    if not health or not health.get("loaded"):
-        pytest.skip("Strata 模型未就绪")
+    if health is None:
+        pytest.skip("Strata 未运行(/health 不可达)")
+    assert health.get("service") == "strata"
     model_ids = client.models()
     assert model_ids
-    result = client.chat(
-        [{"role": "user", "content": "只回复两个字母:OK"}],
-        max_tokens=16,
-        temperature=0.0,
-        enable_thinking=False,
-    )
-    assert result["text"].strip() != ""
-    assert result["model"]
+    if health.get("loaded"):
+        assert health.get("model") in model_ids
+
+
+@pytest.fixture()
+def stub_model_server():
+    """进程内桩 OpenAI 兼容服务:验证 chat 客户端契约,替代对真实模型的调用。"""
+
+    class Handler(BaseHTTPRequestHandler):
+        def _respond(self, payload: bytes) -> None:
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+
+        def do_GET(self):  # noqa: N802 - BaseHTTPRequestHandler 命名约定
+            if self.path == "/health":
+                payload = {"status": "ok", "loaded": True, "service": "strata", "model": "stub-model"}
+            else:
+                payload = {"object": "list", "data": [{"id": "stub-model"}]}
+            self._respond(json.dumps(payload).encode("utf-8"))
+
+        def do_POST(self):  # noqa: N802
+            length = int(self.headers.get("Content-Length") or 0)
+            Handler.request_body = json.loads(self.rfile.read(length).decode("utf-8"))
+            Handler.request_path = self.path
+            self._respond(
+                json.dumps(
+                    {
+                        "model": "stub-model",
+                        "choices": [
+                            {"message": {"content": "stub reply", "reasoning_content": ""}, "finish_reason": "stop"}
+                        ],
+                        "usage": {"prompt_tokens": 3, "completion_tokens": 2},
+                    }
+                ).encode("utf-8")
+            )
+
+        def log_message(self, *args):  # 静默访问日志
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    host, port = server.server_address[:2]
+    Handler.request_body = None
+    Handler.request_path = None
+    try:
+        yield f"http://{host}:{port}", Handler
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_client_chat_uses_stub_not_strata(stub_model_server):
+    base_url, handler = stub_model_server
+    client._MODEL_CACHE = []
+    try:
+        result = client.chat(
+            [{"role": "user", "content": "hi"}],
+            max_tokens=32,
+            temperature=0.0,
+            base_url=base_url,
+            timeout_s=5.0,
+            enable_thinking=True,
+        )
+        assert result["text"] == "stub reply"
+        assert result["model"] == "stub-model"
+        assert handler.request_path == "/v1/chat/completions"
+        assert handler.request_body["model"] == "stub-model"  # 由桩的 /v1/models 解析
+        assert handler.request_body["max_tokens"] == 32
+        assert handler.request_body["stream"] is False
+        assert handler.request_body["chat_template_kwargs"] == {"enable_thinking": True}
+        assert handler.request_body["messages"][0]["content"] == "hi"
+    finally:
+        client._MODEL_CACHE = []
+
+
+def test_client_chat_pins_model_id_and_survives_empty_completion(stub_model_server):
+    base_url, handler = stub_model_server
+    client._MODEL_CACHE = []
+    try:
+        result = client.chat([{"role": "user", "content": "x"}], base_url=base_url, timeout_s=5.0, model_id="pinned-model")
+        assert handler.request_body["model"] == "pinned-model"  # 显式 model_id 不再回退 /v1/models
+        assert result["model"] == "stub-model"  # 响应里的 model 原样带出
+    finally:
+        client._MODEL_CACHE = []
+
+    class EmptyHandler(BaseHTTPRequestHandler):
+        def do_POST(self):  # noqa: N802
+            payload = json.dumps({"choices": [{"message": {"content": ""}, "finish_reason": "length"}]}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+
+        def log_message(self, *args):
+            return
+
+    empty_server = ThreadingHTTPServer(("127.0.0.1", 0), EmptyHandler)
+    thread = threading.Thread(target=empty_server.serve_forever, daemon=True)
+    thread.start()
+    host, port = empty_server.server_address[:2]
+    try:
+        with pytest.raises(client.ModelError, match="empty completion"):
+            client.chat([{"role": "user", "content": "x"}], base_url=f"http://{host}:{port}", timeout_s=5.0, model_id="pinned-model")
+    finally:
+        empty_server.shutdown()
+        empty_server.server_close()
+        thread.join(timeout=5)
