@@ -16,6 +16,7 @@ from .analysis import metrics_import, prediction, viral
 from .analysis import rag as analyzer_rag
 from .crawler import dedupe as crawler_dedupe
 from .crawler import keyword_crawl as crawler_keyword_crawl
+from .crawler import metrics_pages as crawler_metrics_pages
 from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
 from .crawler import sources as crawler_sources
@@ -535,6 +536,24 @@ def cmd_metrics(args: argparse.Namespace) -> int:
             report["relabel"] = viral.label_category(args.category)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0 if report["status"] in ("calibrated", "insufficient_sample") else 1
+    if args.fetch_public:
+        conf = ((cfg.load_config().get("metrics", {}) or {}).get("public_pages", {}) or {})
+        limit = args.limit if args.limit is not None else int(conf.get("limit_per_run", 20))
+        sleep_s = args.sleep if args.sleep is not None else float(conf.get("sleep_s", 2.0))
+        try:
+            report = crawler_metrics_pages.collect_with_browser(
+                args.category, limit=limit, apply=bool(args.apply), sleep_s=sleep_s
+            )
+        except PermissionError as exc:
+            print(json.dumps({"error": str(exc)}, ensure_ascii=False))
+            return 2
+        if args.apply and not args.no_relabel:
+            report["relabel"] = metrics_import.relabel_after_import(args.category)
+        if not args.apply:
+            report["note"] = "dry-run:确认无误后加 --apply 才写库"
+        report["pages"] = report["pages"][:50]
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
     if not args.import_file or not args.source:
         print("metrics 需要 --import FILE --source 已授权来源 id(或 --snapshot/--calibrate)")
         return 1
@@ -684,6 +703,11 @@ def build_parser() -> argparse.ArgumentParser:
     metrics.add_argument("--source", default=None, help="数据来源 id(须在白名单)")
     metrics.add_argument("--snapshot", action="store_true", help="为现有指标追加时序快照")
     metrics.add_argument("--calibrate", action="store_true", help="从真实测得样本拟合爆款阈值(样本不足则拒绝改口径)")
+    metrics.add_argument("--fetch-public", action="store_true",
+                         help="采集公开文章页互动数(头条:只取本文章的点赞/评论;默认 dry-run)")
+    metrics.add_argument("--limit", type=int, default=None, help="本轮最多采集多少篇(默认取 config)")
+    metrics.add_argument("--sleep", type=float, default=None, help="两次抓取之间的间隔秒(默认取 config)")
+    metrics.add_argument("--apply", action="store_true", help="真正写库(不加则只报告,不落库)")
     metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
     metrics.set_defaults(func=cmd_metrics)
 

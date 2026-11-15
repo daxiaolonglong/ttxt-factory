@@ -166,3 +166,32 @@
 4. C-5 可信度分档(全 `unverified`)与 9 条空 `evidence_links`(要 DDL 口径,需批准)。
 5. `_element_text` 标题缺陷修复 + `PROCESSOR_VERSION` bump(单独一轮);`D:\ttxt\pytest-of-yangl` 残留清理(需批准)。
 6. 恢复规则 24 的"实现前先失败":本批 P20 断言与实现同批写,已在 P19 报告 §五 如实记录偏差与替代证据。
+
+## 十二、第 4 轮(2026-11-15 16:3x–17:0x)完成账本:P21 头条公开互动指标入库
+
+完整根因、探测读数、改动、前后对账与回滚见 `08_wiki/reports/P21-public-engagement-metrics-20261115.md`;规则新增 **41**。
+
+| 项 | 读数(本轮实测) | 取证 |
+| --- | --- | --- |
+| 开工时仓库 | HEAD `405cc1c`,工作区干净;远端 `main` = `405cc1ca…`(已推送) | `git log --oneline -3`、`git status --porcelain` |
+| 开工时指标底座 | 六类目 `article_metrics` / `metric_snapshots` **全 0**,`viral_labels` 全 `missing_data` / `unscored` | `07_tmp/r24_metrics_probe/inventory.json` |
+| 公开可见性实测 | robots 允许 `/article/`;纯 HTTP 三页同一 72,914 字符 JSVMP 空壳 ⇒ 必须浏览器渲染;渲染后 200 / 2.6–3.8 s | `probe1.json` / `probe2_render.json` / `probe3_selectors.json` |
+| 归属口径 | 本文章只有工具条(点赞 437 / 评论 47)与评论区标题;卡片"16万阅读""1628评论""点赞7"**都不是本文章** ⇒ 代码写死并测试锁住 | `probe3_selectors.json` + `test_p21_public_metrics.py` |
+| 实现前先失败 | **exit 2 `ImportError: cannot import name 'metrics_pages'`** | `07_tmp/r24_metrics_probe/p21_red.txt` |
+| 测试 | 单文件 **28 passed / 1.86 s**;**全量 367 passed / 67.62 s / exit 0**(接手 339,+28) | `p21_cli.txt`、`p21_full_suite.txt` |
+| 真实入库(写前备份 4,874,240 字节) | `--fetch-public --apply --limit 12`:written **12** / snapshots **12** / `filled_from_null 24` / 0 错误;technology 159 行中 112 行是头条可采 | `p21_apply_tech.json`、`backup_pre_p21/` |
+| 入库后状态 | article_metrics **12**(credibility 全 `public_page`)、with_likes 12、**with_reads 0 / with_impressions 0**(老实 NULL)、tiers `{no_impressions 12, missing_data 147}` | `state_before.json` / `state_after_tech.json` |
+| 时序能力 | 重跑 limit 2 → **written 0 / updated 2 / snapshots 2**;累计 metrics 12 / snapshots **14** / 2 篇各 2 次 | `p21_apply_tech_rerun.json` |
+| 体检与闭环 | doctor **29 ok / 0 failed**(WARN 无新增);`analyze technology` exit 0,`gap_keywords ["效率工具"]`、`queued_job_id 54` 不重复入队 | `doctor_after_p21.txt`、`analyze_after_p21.txt` |
+| 网络量 | 19 次文章页 + 2 次 robots,间隔 2.0 s,全 200、0 错误 | 上述回执时间戳 |
+
+第 5 轮待办(优先级从上到下,验收口径写在报告里):
+
+1. **扩样到可标定**:`ttxt metrics --category technology --fetch-public --apply --limit 30`(112 行可采)⇒ `metric_snapshots` 时序继续长;
+   并等用户给头条**后台导出**(展现/收藏)⇒ `--import --source toutiao_admin_export` 补空、`--calibrate` 才能真标定(门槛 30 样本)。
+2. **R2-4b 卡片阅读数**:从推荐卡片"16万阅读"按卡片自己的 `href` 取数,记 `source_id=toutiao_public_card`(近似、万取整、可信度 2 档)+ `source_page` 出处;
+   同时给"只有互动数没有展现"的文章加**互动率评分路径**(点赞+评论 ÷ 阅读,重新归一)与新分档;未标定前 `label` 仍保持 `unscored`。
+3. **R2-5 短正文回填工具**(`ttxt crawl-enrich --category`):已被 feed 挤出去的短行不能只等下一轮。
+4. Worker / Scheduler 上线(队列仍是别的窗口留的 job 54 `toutiao_tech`、job 63 `who_cn_news`)。
+5. C-5 可信度分档(语料本身仍全 `unverified`)与 9 条空 `evidence_links`(需 DDL 批准)。
+6. `_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump(单独一轮);`D:\ttxt\pytest-of-yangl` 残留清理(需批准)。

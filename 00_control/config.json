@@ -83,7 +83,21 @@
   "metrics": {
     "authorized_sources": {
       "toutiao_admin_export": "self_reported",
-      "manual_verified": "verified"
+      "manual_verified": "verified",
+      "toutiao_public_article": "public_page"
+    },
+    "credibility_rank": {
+      "verified": 5,
+      "self_reported": 4,
+      "public_page": 3,
+      "public_card": 2,
+      "unverified": 1
+    },
+    "public_pages": {
+      "source_id": "toutiao_public_article",
+      "hosts": ["www.toutiao.com", "m.toutiao.com"],
+      "limit_per_run": 20,
+      "sleep_s": 2.0
     }
   },
   "prediction": {
