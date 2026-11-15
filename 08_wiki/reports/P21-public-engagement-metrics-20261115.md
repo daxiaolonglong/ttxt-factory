@@ -2,6 +2,14 @@
 
 交接页 §十一 的第 4 轮待办第 1 项(R2-4)本轮完成。新增规则 **41**。
 
+> **⚠️ 更正(2026-11-15,同日 P22)**:本报告里「**收藏 / 展现量公开页根本没有**」这一条**判错了**。
+> P21 只探了渲染后的可见 DOM,没查页面内嵌的结构化 JSON。P22 实测:公开文章页内嵌
+> `<script id="RENDER_DATA">`(percent-encoded JSON)带本文章的 `readCount`(阅读)与 `showCount`(展现),
+> 且 `diggCount/commentCount` 与本报告核验的工具条数值逐位相同(文章 292:437 / 47)。
+> ⇒ **阅读与展现量现在从公开页真值入库**,`no_impressions` 卡死的判断随之作废;只有**收藏**仍然不可得。
+> 取证、实现与真实数据前后对比见 `08_wiki/reports/P22-render-data-metrics-20261115.md`,规则 41 已同步更正、新增规则 42。
+> 本报告其余结论(工具条/评论区归属、卡片数不得归属本文章、可信度分级合并、默认 dry-run)仍然有效。
+
 ## 一、为什么要做(根因)
 
 接手时**六个类目的 `article_metrics` 和 `metric_snapshots` 全是 0 行**,`viral_labels` 全部 `missing_data` / `unscored`

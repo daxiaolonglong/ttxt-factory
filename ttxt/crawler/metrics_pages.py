@@ -1,26 +1,38 @@
-"""P21:头条公开文章页互动指标采集(只采本文章自己的点赞/评论)。
+"""P21 + P22:头条公开文章页互动指标采集(本文章自己的阅读/点赞/评论/展现量)。
 
-取证依据(07_tmp/r24_metrics_probe/,本轮实测):
+取证依据(07_tmp/r24_metrics_probe/、07_tmp/r25_render_counters/):
 - probe1.json:头条 robots.txt 不禁 ``/article/``;但纯 HTTP 抓到的是字节跳动 JSVMP 反爬壳
   (三条不同文章 URL 的响应字节数完全一样,正文与文章 id 都不出现)⇒ 只能走项目正常浏览器渲染通道;
-- probe2_render.json / probe3_selectors.json:渲染后的页面里,**本文章**只有
+- probe2_render.json / probe3_selectors.json:渲染页 DOM 上**本文章**只有
   ``.detail-side-interaction .detail-like[aria-label="点赞N"]`` 与
   ``.detail-interaction-comment[aria-label="…N评论"]``(兜底 ``#comment-area .title`` 的 "评论 N");
-  "16万阅读" 这类数字出现在"推荐阅读"卡片里(**那是别的文章的**阅读数),
-  收藏数与展现量公开页面根本没有。
+  "16万阅读" 这类数字出现在"推荐阅读"卡片里(**那是别的文章的**阅读数,还按万取整);
+- **probe5_offline_keys.json / probe6_render_data.json(对同一批已存页面的离线复核,更正上一轮的结论)**:
+  页面里 ``<script id="RENDER_DATA">`` 是 percent-encoded JSON,其中
+  ``$.data.itemId`` 等于本页 URL 的文章 id(归属可证明),
+  ``$.data.itemCell.itemCounter = {commentCount 47, diggCount 437, readCount 8937,
+  showCount 111790, shareCount 1801, repinCount 1927, forwardCount 15, buryCount 0, danmuCount 0}``,
+  且 diggCount / commentCount 与工具条 aria-label 的 437 / 47 **完全一致**(交叉验证通过)
+  ⇒ 阅读数与展现量公开页**有**精确值,不必再用卡片估算。
 
 诚实边界(07_rules/CORE_RULES.md 规则 41):
 - 主机白名单 + 逐 URL robots 闸门:不放行 ⇒ 一次抓取都不许发生;
-- 只取本文章容器内的计数;推荐卡片、别人评论的点赞数一律不算本文章的指标;
+- 内嵌计数只有 **payload 里的文章 id == 本页 URL 的文章 id** 时才许用;对不上、取不到 id、
+  没有 URL 上下文 ⇒ 整块丢弃,退回 DOM 兜底;
+- 展现量 < 阅读量(物理不可能)⇒ 拒绝 impressions,其余照写;
+- 只取本文章计数;推荐卡片、别人评论的点赞数一律不算本文章的指标;
+- shareCount / repinCount / forwardCount / buryCount / danmuCount 语义未证实
+  ⇒ 只进报告当证据,**绝不入库、绝不改名冒充收藏**;favorites 公开页仍然没有 ⇒ 恒为 NULL;
 - 取不到 ⇒ NULL,绝不折算 0;页面显示真 0 ⇒ 如实写 0;
-  reads / favorites / impressions 公开页没有 ⇒ 恒为 NULL(缺证据 ≠ 表现差);
 - 默认 dry-run(只报告不落库),``apply=True`` 才写;写库走 metrics_import 的可信度合并 + 时序快照。
 """
 
 from __future__ import annotations
 
+import json
 import re
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlsplit
@@ -42,6 +54,27 @@ METRIC_FIELDS = ("reads", "likes", "favorites", "comments", "impressions")
 _COUNT_RE = re.compile(r"^([+]?\d[\d,]*(?:\.\d+)?)([万wkW]?)$")
 _TOOLBAR_SELECTOR = ".detail-side-interaction"
 _READ_SELECTORS = (".article-meta", ".article-header", "header")
+
+# P22:页面内嵌 RENDER_DATA 的计数字段映射(实测 probe6_render_data.json)。
+# 只映射语义已证实的四个;shareCount/repinCount/forwardCount/buryCount/danmuCount 语义未证实,
+# 只作为证据留在报告里,绝不入库,更不許改名成 favorites。
+RENDER_SCRIPT_ID = "RENDER_DATA"
+_COUNTER_FIELD = {
+    "readCount": "reads",
+    "diggCount": "likes",
+    "commentCount": "comments",
+    "showCount": "impressions",
+}
+_ID_KEYS = ("itemId", "item_id", "gid", "group_id", "articleId")
+_RENDER_BLOCK_RE = re.compile(
+    r'<script[^>]+id=["\']' + RENDER_SCRIPT_ID + r'["\'][^>]*>(.*?)</script>', re.S | re.I
+)
+_ARTICLE_ID_PATTERNS = (
+    re.compile(r"/article/(\d{6,25})(?:[/?#]|$)"),
+    re.compile(r"/group/(\d{6,25})(?:[/?#]|$)"),
+    re.compile(r"/w/(\d{6,25})(?:[/?#]|$)"),
+    re.compile(r"/a(\d{12,25})(?:[/?#]|$)"),
+)
 
 
 def public_hosts() -> frozenset[str]:
@@ -78,6 +111,94 @@ def parse_count_text(text: str | None) -> int | None:
         return None
     multiplier = 10_000 if unit in ("万", "w", "W") else (1_000 if unit in ("k", "K") else 1)
     return int(round(value * multiplier))
+
+
+def article_id_from_url(url: str | None) -> str | None:
+    """从头条文章 URL 里取文章 id;取不到返回 None(绝不猜)。
+
+    实测形态:``/article/<id>/``、``/group/<id>/``、``/w/<id>/``、m 站 ``/a<id>/``。
+    栏目页 ``/ch/news_tech/`` 之类没有 id ⇒ None ⇒ 内嵌计数一律不用。
+    """
+    path = urlsplit(str(url or "")).path
+    for pattern in _ARTICLE_ID_PATTERNS:
+        match = pattern.search(path)
+        if match:
+            return match.group(1)
+    return None
+
+
+def _render_payload(page: Any) -> tuple[dict | None, str | None]:
+    """取 ``<script id="RENDER_DATA">`` 里的 JSON(实测为 percent-encoded);返回 (payload, 错误标记)。"""
+    raw: str | None = None
+    try:
+        nodes = page.css(f"#{RENDER_SCRIPT_ID}")
+    except Exception:  # noqa: BLE001 - 不同页面类型兜底
+        nodes = []
+    for node in nodes:
+        text = str(getattr(node, "text", "") or "").strip()
+        if text:
+            raw = text
+            break
+    if raw is None:
+        html = str(getattr(page, "html_content", "") or "")
+        match = _RENDER_BLOCK_RE.search(html)
+        if not match:
+            return None, None
+        raw = match.group(1)
+    raw = str(raw or "").strip()
+    if not raw:
+        return None, "empty"
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        try:
+            data = json.loads(urllib.parse.unquote(raw))
+        except ValueError:
+            return None, "bad_json"
+    if not isinstance(data, dict):
+        return None, "not_object"
+    return data, None
+
+
+def _walk_counter_blocks(node: Any, near_id: str | None, out: list[tuple[str | None, dict]], depth: int = 0) -> None:
+    """收集 (最近的文章 id, itemCounter 字典);深度/数量兜底,防止畸形 JSON 撑爆。"""
+    if depth > 24 or len(out) > 8:
+        return
+    if isinstance(node, dict):
+        ident = near_id
+        for key in _ID_KEYS:
+            value = node.get(key)
+            if value not in (None, "", 0):
+                ident = str(value)
+                break
+        counter = node.get("itemCounter")
+        if isinstance(counter, dict) and any(key in counter for key in _COUNTER_FIELD):
+            clean = {
+                key: value
+                for key, value in counter.items()
+                if isinstance(value, int) and not isinstance(value, bool)
+            }
+            if clean:
+                out.append((ident, clean))
+        for value in node.values():
+            _walk_counter_blocks(value, ident, out, depth + 1)
+    elif isinstance(node, list):
+        for item in node[:40]:
+            _walk_counter_blocks(item, near_id, out, depth + 1)
+
+
+def _apply_counters(counters: dict, metrics: dict[str, int | None], sink: dict | None) -> None:
+    """把已证实语义的四个计数写进指标;展现量 < 阅读量 ⇒ 拒绝 impressions(物理不可能)。"""
+    for key, field in _COUNTER_FIELD.items():
+        value = counters.get(key)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            continue
+        metrics[field] = value
+    reads, impressions = metrics["reads"], metrics["impressions"]
+    if impressions is not None and reads is not None and impressions < reads:
+        metrics["impressions"] = None
+        if sink is not None:
+            sink["sanity_rejected"] = int(sink.get("sanity_rejected", 0)) + 1
 
 
 def _count_near(text: str, keywords: tuple[str, ...]) -> int | None:
@@ -134,30 +255,69 @@ def _own_reads(page: Any) -> int | None:
     return None
 
 
-def extract_public_metrics(page: Any) -> dict[str, int | None]:
-    """只取本文章工具栏的点赞/评论(兜底本文章评论区标题);其余字段 None。"""
+def extract_public_metrics(page: Any, url: str | None = None, detail: dict | None = None) -> dict[str, int | None]:
+    """本文章指标:优先页面内嵌 RENDER_DATA 计数(id 必须与本页 URL 对上),再退 DOM 兜底。
+
+    ``detail``(可选)吸收诊断信息:render_used / render_counters / render_mismatch /
+    render_unattributed / render_error / sanity_rejected。返回值仍只有五个指标字段。
+    """
     metrics: dict[str, int | None] = {field: None for field in METRIC_FIELDS}
+    sink = detail if isinstance(detail, dict) else None
+
+    payload, render_error = _render_payload(page)
+    if render_error and sink is not None:
+        sink["render_error"] = render_error
+    if payload is not None:
+        blocks: list[tuple[str | None, dict]] = []
+        _walk_counter_blocks(payload, None, blocks)
+        if sink is not None:
+            sink["render_blocks"] = len(blocks)
+        our_id = article_id_from_url(url) if url else None
+        matched = [counters for ident, counters in blocks if our_id and ident and str(ident) == our_id]
+        if matched:
+            _apply_counters(matched[0], metrics, sink)
+            if sink is not None:
+                sink["render_used"] = True
+                sink["render_counters"] = dict(matched[0])
+        elif blocks:
+            unattributed = sum(1 for ident, _counters in blocks if not ident)
+            if sink is not None:
+                if unattributed == len(blocks):
+                    sink["render_unattributed"] = int(sink.get("render_unattributed", 0)) + unattributed
+                else:
+                    sink["render_mismatch"] = int(sink.get("render_mismatch", 0)) + (len(blocks) - unattributed)
+
     toolbars = page.css(_TOOLBAR_SELECTOR)
-    if toolbars:
+    if toolbars and (metrics["likes"] is None or metrics["comments"] is None):
         block = toolbars[0]
-        metrics["likes"] = _first_count(block, ".detail-like", ("点赞",))
-        metrics["comments"] = _first_count(block, ".detail-interaction-comment", ("评论",))
+        if metrics["likes"] is None:
+            metrics["likes"] = _first_count(block, ".detail-like", ("点赞",))
+        if metrics["comments"] is None:
+            metrics["comments"] = _first_count(block, ".detail-interaction-comment", ("评论",))
     if metrics["comments"] is None:
         for element in page.css("#comment-area .title"):
             value = _count_near(_element_text(element), ("评论",))
             if value is not None:
                 metrics["comments"] = value
                 break
-    metrics["reads"] = _own_reads(page)
+    if metrics["reads"] is None:
+        metrics["reads"] = _own_reads(page)
     return metrics
 
 
 def _candidates(category: str, db_path: Path | None, limit: int | None) -> tuple[list[dict], int]:
+    """挑本轮要采的文章:没测过的先采,都要采时最久没刷的先刷。
+
+    只按 id 倒序取前 N 篇会反复采同一批新文章,标定样本永远攒不到
+    ``viral.MIN_CALIBRATION_SAMPLE`` ⇒ 必须让每一轮都往前推进(P22 根因修复)。
+    """
     target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
     con = connect(target)
     try:
         rows = con.execute(
-            "SELECT id, url, url_normalized FROM articles ORDER BY id DESC"
+            "SELECT a.id, a.url, a.url_normalized, m.captured_at"
+            " FROM articles a LEFT JOIN article_metrics m ON m.article_id = a.id"
+            " ORDER BY (m.captured_at IS NULL) DESC, m.captured_at ASC, a.id DESC"
         ).fetchall()
     finally:
         con.close()
@@ -204,6 +364,11 @@ def collect_public_metrics(
         "fetched": 0,
         "fetch_errors": 0,
         "no_metrics_skipped": 0,
+        "render_ok": 0,
+        "render_mismatch": 0,
+        "render_unattributed": 0,
+        "render_errors": 0,
+        "sanity_rejected": 0,
         "written": 0,
         "updated": 0,
         "snapshots": 0,
@@ -250,10 +415,19 @@ def collect_public_metrics(
             LOG.warn("metrics.public.fetch_error", url=url, error=str(exc)[:200])
             continue
         report["fetched"] += 1
-        metrics = extract_public_metrics(page)
+        detail: dict[str, Any] = {}
+        metrics = extract_public_metrics(page, url=url, detail=detail)
+        report["render_ok"] += 1 if detail.get("render_used") else 0
+        report["render_mismatch"] += int(detail.get("render_mismatch", 0))
+        report["render_unattributed"] += int(detail.get("render_unattributed", 0))
+        report["render_errors"] += 1 if detail.get("render_error") else 0
+        report["sanity_rejected"] += int(detail.get("sanity_rejected", 0))
         observed = {field: metrics[field] for field in METRIC_FIELDS if metrics[field] is not None}
         entry = {"article_id": candidate["article_id"], "url": url}
         entry.update(metrics)
+        if detail.get("render_used"):
+            # 只把"归属已证明"的原始计数当证据留在报告里;未对上的绝不附在本文章条目上
+            entry["render_counters"] = detail.get("render_counters") or {}
         report["pages"].append(entry)
         if not observed:
             report["no_metrics_skipped"] += 1

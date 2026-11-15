@@ -531,8 +531,12 @@ def cmd_metrics(args: argparse.Namespace) -> int:
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
     if args.calibrate:
+        # 标定统计的是"已测得"的标签行:先按当前指标把标签算出来,再标定;
+        # 标定成功后阈值变了,必须再按新阈值重算一遍,否则库里留着旧口径的标签。
+        if not args.no_relabel:
+            viral.label_category(args.category)
         report = viral.calibrate(args.category)
-        if report["status"] != "calibrated" and not args.no_relabel:
+        if not args.no_relabel:
             report["relabel"] = viral.label_category(args.category)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0 if report["status"] in ("calibrated", "insufficient_sample") else 1
@@ -702,9 +706,13 @@ def build_parser() -> argparse.ArgumentParser:
     metrics.add_argument("--import", dest="import_file", default=None, help="CSV/JSON 指标文件")
     metrics.add_argument("--source", default=None, help="数据来源 id(须在白名单)")
     metrics.add_argument("--snapshot", action="store_true", help="为现有指标追加时序快照")
-    metrics.add_argument("--calibrate", action="store_true", help="从真实测得样本拟合爆款阈值(样本不足则拒绝改口径)")
+    metrics.add_argument(
+        "--calibrate",
+        action="store_true",
+        help="从真实测得样本拟合爆款阈值(先按当前指标重算标签再标定,标定成功后按新阈值再重算;样本不足则拒绝改口径)",
+    )
     metrics.add_argument("--fetch-public", action="store_true",
-                         help="采集公开文章页互动数(头条:只取本文章的点赞/评论;默认 dry-run)")
+                         help="采集公开文章页指标(头条:阅读/点赞/评论/展现量,内嵌计数逐页核对文章 id;默认 dry-run)")
     metrics.add_argument("--limit", type=int, default=None, help="本轮最多采集多少篇(默认取 config)")
     metrics.add_argument("--sleep", type=float, default=None, help="两次抓取之间的间隔秒(默认取 config)")
     metrics.add_argument("--apply", action="store_true", help="真正写库(不加则只报告,不落库)")

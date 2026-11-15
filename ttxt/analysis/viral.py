@@ -1,6 +1,8 @@
 """爆款标签:严格区分"已验证 / 潜力 / 普通 / 低质 / 未评分(缺数据)"。
 
 没有真实曝光与互动数据时,一律标记 unscored + missing_data,禁止臆测。
+有曝光但没有收藏数时(公开页结构上拿不到收藏),只在可观测的率上按同一权重归一化,
+绝不把缺失的收藏数代入 0,并把"用了哪些字段"写进 features_json / reason。
 """
 
 from __future__ import annotations
@@ -26,6 +28,16 @@ TIER_MISSING = "missing_data"
 MIN_CALIBRATION_SAMPLE = 30
 CALIBRATION_META_KEY = "viral_calibration"
 DEFAULT_THRESHOLDS = (0.15, 0.08, 0.02)  # verified / potential / normal 下界(设计假定,未校准)
+
+METRIC_FIELD_ORDER = ("reads", "likes", "favorites", "comments", "impressions")
+# 核心互动字段:任一个缺失 ⇒ 无法计算互动率(incomplete_data)。
+# favorites 不在其中:头条公开页结构上拿不到收藏数,只有后台导出(verified/self_reported)有;
+# 缺失时按可观测率归一化,不代入 0(缺失 ≠ 0,规则 6)。
+CORE_ENGAGEMENT_FIELDS = ("reads", "likes", "comments")
+WEIGHT_READ = 0.40
+WEIGHT_FAVORITE = 0.25
+WEIGHT_LIKE = 0.20
+WEIGHT_COMMENT = 0.15
 
 
 def load_calibration(con) -> dict | None:
@@ -115,8 +127,8 @@ def score_with_metrics(
     impressions = metrics.get("impressions")
     if impressions is None or int(impressions) <= 0:
         return LABEL_UNSCORED, TIER_NO_IMPRESSIONS, None, "缺少曝光量,不得计算完整互动率"
-    # 缺失 ≠ 0:任一互动字段缺失时不得代入 0 计算
-    for field in ("reads", "likes", "favorites", "comments"):
+    # 缺失 ≠ 0:核心互动字段(阅读/点赞/评论)缺失时不得代入 0 计算
+    for field in CORE_ENGAGEMENT_FIELDS:
         if metrics.get(field) is None:
             return (
                 LABEL_UNSCORED,
@@ -125,14 +137,18 @@ def score_with_metrics(
                 f"互动指标 {field} 缺失,不得计算互动率(缺失不等于 0)",
             )
     reads = int(metrics["reads"])
-    likes = int(metrics["likes"])
-    favorites = int(metrics["favorites"])
-    comments = int(metrics["comments"])
-    read_rate = reads / int(impressions)
-    fav_rate = favorites / reads if reads else 0.0
-    like_rate = likes / reads if reads else 0.0
-    comment_rate = comments / reads if reads else 0.0
-    score = 0.4 * read_rate + 0.25 * fav_rate + 0.2 * like_rate + 0.15 * comment_rate
+    # 加权评分:阅读率 40% / 收藏率 25% / 点赞率 20% / 评论率 15%(职责口径)。
+    # P22:收藏数公开页结构上不可得(只有后台导出有);缺失时**不代入 0**,
+    # 只在可观测的率上按同一权重归一化,并在 reason 里如实标注口径。
+    rates: list[tuple[float, float]] = [
+        (WEIGHT_READ, reads / int(impressions)),
+        (WEIGHT_LIKE, int(metrics["likes"]) / reads if reads else 0.0),
+        (WEIGHT_COMMENT, int(metrics["comments"]) / reads if reads else 0.0),
+    ]
+    partial = metrics.get("favorites") is None
+    if not partial:
+        rates.insert(1, (WEIGHT_FAVORITE, int(metrics["favorites"]) / reads if reads else 0.0))
+    score = sum(weight * rate for weight, rate in rates) / sum(weight for weight, _rate in rates)
     verified_min, potential_min, normal_min = thresholds
     if score >= verified_min:
         label = LABEL_VERIFIED
@@ -143,6 +159,8 @@ def score_with_metrics(
     else:
         label = LABEL_LOW
     provenance = "真实曝光与互动数据 + 校准阈值" if calibrated else "真实曝光与互动数据 + 默认阈值(未校准,如实标注)"
+    if partial:
+        provenance += ";收藏指标该来源不可得,按可观测率归一化(未代入 0)"
     return label, TIER_MEASURED, round(score, 4), provenance
 
 
@@ -171,6 +189,10 @@ def label_category(category: str, db_path: Path | None = None) -> dict:
             if metrics is None:
                 label, tier, score, reason = LABEL_UNSCORED, TIER_MISSING, None, "缺少真实表现指标(未接入授权数据)"
             else:
+                # 打分口径留痕:这一条分数是由哪几个真实字段算出来的(缺失的字段不出现)
+                features["metric_fields"] = [
+                    field for field in METRIC_FIELD_ORDER if metrics.get(field) is not None
+                ]
                 label, tier, score, reason = score_with_metrics(features, metrics, thresholds, calibrated)
             con.execute(
                 """

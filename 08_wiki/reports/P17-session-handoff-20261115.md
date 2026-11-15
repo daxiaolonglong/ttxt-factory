@@ -195,3 +195,35 @@
 4. Worker / Scheduler 上线(队列仍是别的窗口留的 job 54 `toutiao_tech`、job 63 `who_cn_news`)。
 5. C-5 可信度分档(语料本身仍全 `unverified`)与 9 条空 `evidence_links`(需 DDL 批准)。
 6. `_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump(单独一轮);`D:\ttxt\pytest-of-yangl` 残留清理(需批准)。
+
+## 十三、第 5 轮(2026-11-15 17:1x–18:1x)完成账本:P22 内嵌 RENDER_DATA 计数 + 阈值第一次真标定
+
+完整根因、取证、改动、前后对账与回滚见 `08_wiki/reports/P22-render-data-metrics-20261115.md`;
+规则 **41 更正**(P21 判错的"展现量公开页根本没有")+ 新增 **42**。
+
+| 项 | 读数(本轮实测) | 取证 |
+| --- | --- | --- |
+| 开工时仓库 | HEAD `757e2e6`(P21),工作区干净;远端 `main` = `757e2e6…` | `git log --oneline -3`、`git status --porcelain` |
+| **推翻上一轮结论** | P21 说"展现量公开页根本没有"⇒ **错**:内嵌 `<script id="RENDER_DATA">` 是 percent-encoded JSON,`data.itemId == 本页 URL 文章 id`,`itemCounter = {readCount 8937, showCount 111790, diggCount 437, commentCount 47, shareCount 1801, repinCount 1927, forwardCount 15, buryCount 0, danmuCount 0}`;437/47 与 P21 核验的工具条逐位相同 ⇒ 归属可证明 | `07_tmp/r24_metrics_probe/probe5_offline_keys.json`、`probe6_render_data.json` |
+| 实现前先失败 | **21 failed / 4 passed**(`unexpected keyword argument 'url'`、`article_id_from_url` 不存在、tiers 全 `incomplete_data`) | `07_tmp/r25_render_counters/p22_red.txt` |
+| 候选轮转先红 | 改前第二批仍会选中同一批:`picked [3,2]` / `[4,3]` ⇒ **2 failed**;改为「未测过优先 + `captured_at` 旧→新」后绿 | 同上文件 `-k "picked_before or refreshed_after"` |
+| CLI 标定先红 | `--calibrate` 标定成功时**不**重算标签,且不先重算导致样本读成 0 ⇒ `'insufficient_sample' == 'calibrated'` **1 failed**;改成「重算→标定→按新阈值再重算」后绿 | 同上文件 `-k calibrate_command` |
+| 测试 | 单文件 **28 passed / 1.41 s**;**全量 395 passed / 77.17 s / exit 0**(接手 367 → 392 → **395**) | `p22_green2.txt`、`p22_full.txt`、`p22_full2.txt`、`p22_full3.txt` |
+| 写库前备份(`Connection.backup()`,不是复制文件) | `11_backups/P22-pre-public-metrics-20261115-173836.zip` **3,483,004 B**;批次 2 前 `P22-pre-batch2-metrics-20261115-175009.zip` **3,483,259 B** | `pre_state_technology_console.txt`、`pre_state_batch2_console.txt` |
+| 真实采集批次 1(20 页,dry-run 后 apply) | fetched 20 / 0 错 / robots 拒 0;**`render_ok 20` / `render_mismatch 0` / `render_unattributed 0` / `render_errors 0` / `sanity_rejected 0`**;written 8 / updated 12 / snapshots 20 / `filled_from_null 56` / `null_kept 0` | `live_dryrun_technology.txt`、`live_apply_technology.txt`、`inspect_dryrun_report.py` |
+| 数值可信度交叉核对 | 文章 292 probe 早间 8937/111790 → 本轮 **8972/112181**(只涨不减),点赞 437 / 评论 47 不变;CTR 0.06%–8.94%(292 为 8.00%) | 同上 |
+| 真实采集批次 2(12 页) | picked ids `257,255,254,…,244` **全是没测过的**(证明轮转生效);`render_ok 12` / written 12 / `filled_from_null 48` | `live_dryrun_batch2.txt`、`live_apply_batch2.txt` |
+| 阈值标定 | 第一次 **`insufficient_sample 20/30`** 老实拒;攒到 32 后 **`calibrated`**,阈值 **`[0.0567, 0.0247, 0.0113]`**(p90/p60/p25),已进 `articles_meta.viral_calibration` | `calibrate_receipt.txt`、`live_calibrate_batch2.txt` |
+| 入库后状态 | `article_metrics` **32 行**(reads/likes/comments/impressions 各 32 有值,**favorites 仍 0 有值**);snapshots **46**;tiers `{measured 32, missing_data 127}`;labels `{unscored 127, normal 11, potential 9, low_quality 9, verified_viral 3}` | `post_state_technology_after_batch1.json`、`post_state_technology_after_batch2.json` |
+| 打分留痕 | `reason = "真实曝光与互动数据 + 校准阈值;收藏指标该来源不可得,按可观测率归一化(未代入 0)"`;`features_json.metric_fields = ["reads","likes","comments","impressions"]` | 同上 |
+
+第 6 轮待办(优先级从上到下):
+
+1. **其余类目复制同一流程**:`--fetch-public` 先看 dry-run 的 `render_ok/render_mismatch`,再 `--apply`;
+   各类目 measured 样本推到 ≥30 才能 `--calibrate`(现在只有 technology 标定过)。
+2. **头条创作后台导出交叉验证**:`ttxt metrics --category technology --import FILE --source toutiao_admin_export`
+   ⇒ 补 `favorites`、并用 `verified` 核对 `showCount` 口径(对不上就说明展现量语义有偏)。
+3. **R2-5 `ttxt crawl-enrich --category`**:短正文回填。
+4. Worker / Scheduler 上线(队列仍是 job 54 `toutiao_tech`、job 63 `who_cn_news`,别的窗口的活儿)。
+5. C-5 可信度分档;9 条空 `evidence_links`(需 DDL 批准);`_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump;
+   `D:\ttxt\pytest-of-yangl` 残留清理(需批准)。
