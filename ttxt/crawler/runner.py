@@ -244,8 +244,24 @@ def _execute_job(
         summary["items_extracted"] = len(items)
         # C-2:来源页/订阅地址不是文章身份(html 列表页把它的 URL 赋给每一条),
         # 必须显式告知去重判定,否则列表页正文会被按 URL 误判为重复。
-        counts = store.insert_items(target_category, source.id, items, page_url=source.url)
+        # C-3:cross_report 是写入侧跨库判定的归属回执(出参),用于 meta 与日志。
+        cross_report: dict[str, object] = {}
+        counts = store.insert_items(
+            target_category, source.id, items, page_url=source.url, cross_report=cross_report
+        )
         summary.update(counts)
+        if cross_report.get("blocked") or cross_report.get("scan_errors"):
+            # C-3:少掉的条目不是“正常重复”,要写明被谁持有;没有命中时不加键,
+            # 保持 meta_json 结构不变(dashboard/metrics 不需要为跨库特判)。
+            summary["cross_db"] = cross_report
+            LOG.warn(
+                "crawl.cross_db_duplicate",
+                source=source.id,
+                category=target_category,
+                blocked=cross_report.get("blocked", 0),
+                holders=sorted(cross_report.get("holders", {})),
+                scan_errors=cross_report.get("scan_errors", []),
+            )
         summary["ok"] = True
         # elapsed 必须在落库前算好:否则 meta_json 里永远是初始 0.0,观测谎报
         summary["elapsed_s"] = round(time.monotonic() - started, 2)

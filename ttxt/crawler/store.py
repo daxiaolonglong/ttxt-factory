@@ -10,10 +10,16 @@ from ttxt import config as cfg
 from ttxt.crawler.clean import content_hash, normalize_url
 from ttxt.crawler.extract import ExtractedItem
 from ttxt.db import connect, system_db_path
+from ttxt.logging import get_logger
+
+LOG = get_logger("crawler.store")
 
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9_\-]{0,63}$")
 PROCESSOR_VERSION = "p2-v1"
 SCHEMA_VERSION = "p12-v1"
+CROSS_READ_CHUNK = 400
+# 跨库只读查询允许使用的列(白名单,防止把外部字符串拼进 SQL)
+CROSS_ID_COLUMNS = {"url_normalized", "content_hash"}
 
 ARTICLES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS articles (
@@ -216,6 +222,160 @@ def articles_db_path(category: str) -> Path:
     return category_dir(category) / "articles.db"
 
 
+# ------------------------------------------------------------------ C-3 命名空间与跨库只读判定
+
+
+def registered_namespaces() -> set[str]:
+    """注册表(``00_control/category_registry.json``)里的正式类目 slug。
+
+    注册表读不出来时返回空集:任何库都不具备拦截写入的所有权。这个方向是故意的——
+    体检/卫生问题不得让采集停摆(``doctor`` 会把注册表本身读失败报成 FAIL)。
+    """
+    try:
+        registry = cfg.load_registry()
+    except (OSError, ValueError):
+        return set()
+    slugs: set[str] = set()
+    for item in registry.get("categories", []):
+        slug = str(item.get("slug", "")) if isinstance(item, dict) else ""
+        if SLUG_RE.match(slug):
+            slugs.add(slug)
+    return slugs
+
+
+def namespaces_on_disk() -> list[str]:
+    """``01_categories`` 下已经存在 ``articles.db`` 的命名空间目录名(排序)。
+
+    注册表之外的目录(如 ``demo``)也算命名空间,只是它没有数据所有权 —— 见
+    ``_namespace_blockers``。空目录(没有库)不参与。
+    """
+    root = Path(cfg.CATEGORIES_DIR)
+    if not root.exists():
+        return []
+    names: list[str] = []
+    for entry in root.iterdir():
+        if entry.is_dir() and SLUG_RE.match(entry.name) and (entry / "articles.db").is_file():
+            names.append(entry.name)
+    return sorted(names)
+
+
+def namespace_of_db(target: Path) -> str | None:
+    """写入目标是否位于类目命名空间根下(``01_categories/<slug>/articles.db``)。
+
+    C-3 判定:命名空间互斥只在类目命名空间库上生效。显式 ``db_path`` 指向命名空间
+    之外的一次性库(单测夹具、临时分析库)没有命名空间身份,也不参与互斥——
+    它们不在 ``01_categories`` 下,不会污染正式语料。生产写入路径(``runner`` 不传
+    ``db_path``)永远落在命名空间内,因此永远受管。
+    """
+    root = Path(cfg.CATEGORIES_DIR)
+    try:
+        resolved_root = root.resolve()
+        rel = Path(target).resolve().relative_to(resolved_root)
+    except (OSError, ValueError):
+        return None
+    parts = rel.parts
+    if len(parts) == 2 and parts[1] == "articles.db" and SLUG_RE.match(parts[0]):
+        return parts[0]
+    return None
+
+
+def read_only_connect(path: Path) -> sqlite3.Connection:
+    """跨库只读连接:不改 journal_mode、不建表、不跑迁移,只允许读。
+
+    不用 ``file:...?mode=ro`` URI:WAL 库在 ``-wal/-shm`` 边车不存在时只读打开会
+    直接失败(SQLite 必须能创建边车),会把正常库误报成不可用。只读约束由
+    ``PRAGMA query_only=ON`` 保证;副作用仅为 WAL 边车的创建与清理,与项目里其它
+    只读路径(``count_articles`` 等)一致。
+    """
+    con = sqlite3.connect(str(path), timeout=30.0)
+    con.execute("PRAGMA query_only=ON")
+    con.execute("PRAGMA busy_timeout=30000")
+    return con
+
+
+def _column_hits(con: sqlite3.Connection, column: str, values: set[str]) -> list[str]:
+    """在单个库内按列查存在性(IN 分片;绝不跨库 JOIN)。"""
+    if column not in CROSS_ID_COLUMNS:  # 防御:列名只允许白名单
+        raise ValueError(f"unsupported identity column: {column!r}")
+    if not values:
+        return []
+    hits: list[str] = []
+    ordered = sorted(values)
+    for start in range(0, len(ordered), CROSS_READ_CHUNK):
+        chunk = ordered[start : start + CROSS_READ_CHUNK]
+        placeholders = ",".join("?" * len(chunk))
+        rows = con.execute(
+            f"SELECT DISTINCT {column} AS value FROM articles WHERE {column} IN ({placeholders})",
+            chunk,
+        )
+        hits.extend(str(row[0]) for row in rows)
+    return hits
+
+
+def cross_namespace_hits(
+    urls: set[str], hashes: set[str], exclude_path: Path | None = None
+) -> tuple[dict[str, dict[str, list[str]]], list[str]]:
+    """只读扫描其它命名空间是否已经持有这些 URL / content_hash。
+
+    返回 ``({命名空间: {"urls": [...], "hashes": [...]}}, 扫描失败的命名空间说明)``。
+    这是写入侧的**只读存在性查询**,不是跨库 JOIN,也不把不同类目库合并成检索
+    上下文(``08_wiki/db_schema.md`` §3 的类目物理隔离仍然成立)。
+    """
+    holders: dict[str, dict[str, list[str]]] = {}
+    failures: list[str] = []
+    if not urls and not hashes:
+        return holders, failures
+    exclude_resolved = None
+    if exclude_path is not None:
+        try:
+            exclude_resolved = Path(exclude_path).resolve()
+        except OSError:
+            exclude_resolved = None
+    for name in namespaces_on_disk():
+        path = articles_db_path(name)
+        if exclude_resolved is not None:
+            try:
+                if path.resolve() == exclude_resolved:
+                    continue
+            except OSError:
+                continue
+        try:
+            con = read_only_connect(path)
+        except sqlite3.Error as exc:
+            failures.append(f"{name}: {type(exc).__name__}: {exc}")
+            continue
+        try:
+            url_hits = _column_hits(con, "url_normalized", urls)
+            hash_hits = _column_hits(con, "content_hash", hashes)
+        except sqlite3.Error as exc:
+            failures.append(f"{name}: {type(exc).__name__}: {exc}")
+            url_hits = hash_hits = []
+        finally:
+            con.close()
+        if url_hits or hash_hits:
+            holders[name] = {"urls": url_hits, "hashes": hash_hits}
+    return holders, failures
+
+
+def _namespace_blockers(holders: dict[str, dict[str, list[str]]]) -> tuple[set[str], set[str]]:
+    """哪些命中真的拦截写入:只有**注册类目**持有才算所有权。
+
+    未注册命名空间(``demo`` 这类测试命名空间)没有数据所有权:它不得拦下正式类目的
+    采集,否则测试数据会饿死正式语料(生产实测 ``sspai_rss``/``ruanyifeng_atom`` 在
+    P12 由 ``demo=true`` 转正,13 篇早期落在 demo 库,若 demo 有拦截权,这 13 篇
+    永远进不了 technology 库)。反过来,注册类目持有的文章不得再复制进 demo 库。
+    """
+    registered = registered_namespaces()
+    blocked_urls: set[str] = set()
+    blocked_hashes: set[str] = set()
+    for name, hit in holders.items():
+        if name not in registered:
+            continue
+        blocked_urls.update(hit["urls"])
+        blocked_hashes.update(hit["hashes"])
+    return blocked_urls, blocked_hashes
+
+
 def init_articles_db(category: str, db_path: Path | None = None) -> Path:
     target = Path(db_path) if db_path is not None else articles_db_path(category)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -238,6 +398,7 @@ def insert_items(
     items: list[ExtractedItem],
     db_path: Path | None = None,
     page_url: str | None = None,
+    cross_report: dict[str, object] | None = None,
 ) -> dict[str, int]:
     """一批条目写入同一个类目库;URL 文章身份 + content_hash 双重去重,整批一个写事务。
 
@@ -260,21 +421,66 @@ def insert_items(
     - URL 规范化沿用 ``clean.normalize_url``(只去跟踪参数),不额外剥离可能
       区分文章的查询参数。
     - 整批一个事务:任一条异常 → 整批回滚,不留半批数据。
+
+    C-3(2026-11-15)追加:类目命名空间之间互斥(一篇正式文章只允许属于一个正式类目)。
+
+    - 实测(``07_tmp/c3_20261115/cross_pre.json``):磁盘上有 6 个命名空间库,注册表只有
+      5 个正式类目,``demo`` 未注册;逐对 url/hash 交集只有 ``demo`` ↔ ``technology``
+      一组(13 URL / 13 hash,``sspai_rss`` 10 + ``ruanyifeng_atom`` 3),根因是这两个源
+      P12 由 ``demo=true`` 转正(``02_crawler/sources.json`` 注释),而写入侧从来没有
+      任何跨库检测,体检也没有任何跨库对账,所以复制是静默发生的。
+    - 拦截权只属于**注册类目**:未注册命名空间(``demo``)不得卡正式类目的采集
+      (否则测试语料会饿死正式语料);注册类目持有的文章不得再写进 ``demo``。
+    - 跨库判定是只读存在性查询(``query_only``,不改对方库、不建库、不跨库 JOIN),
+      且只在写入目标确实位于 ``01_categories/<slug>/articles.db`` 时执行 ——
+      见 ``namespace_of_db``。
+    - 计数仍然诚实:跨库少掉的条目计入 ``duplicates``,绝不静默丢弃。归属写进
+      ``cross_report``(``{"blocked": n, "holders": {命名空间: {urls, hashes}}}``),
+      由 ``runner`` 放进任务 ``meta_json`` 并写日志,运维能看到“为什么少了一条、
+      那条属于谁”。
+    - 已知残留风险(诚实记录):跨库检查与目标库写事务不是同一个原子域,
+      两个类目同时采同一篇文章仍可能双双落库;兜底是 ``doctor`` 的
+      ``db.cross_overlap`` 对账(``ttxt doctor`` 会 FAIL),而不是假装跨文件原子。
     """
     # 规范化放在开库之前:坏 URL 直接失败,不会先创建一个空类目库
     normalized = [normalize_url(item.url) for item in items]
+    hashes = [content_hash(item.title, item.content) for item in items]
     non_identity_urls: set[str] = set()
     if page_url:
         non_identity_urls.add(normalize_url(page_url))
     target = Path(db_path) if db_path is not None else init_articles_db(category)
+    # 跨库只读扫描:开写事务之前做完,避免在持锁期间读别人的库
+    blocked_urls: set[str] = set()
+    blocked_hashes: set[str] = set()
+    holders: dict[str, dict[str, list[str]]] = {}
+    scan_failures: list[str] = []
+    if namespace_of_db(target) is not None:
+        article_urls = {value for value in normalized if value not in non_identity_urls}
+        holders, scan_failures = cross_namespace_hits(article_urls, set(hashes), exclude_path=target)
+        blocked_urls, blocked_hashes = _namespace_blockers(holders)
+    if cross_report is not None:
+        cross_report["blocked"] = 0
+        cross_report["holders"] = {
+            name: {"urls": sorted(hit["urls"]), "hashes": sorted(hit["hashes"])}
+            for name, hit in holders.items()
+        }
+        if scan_failures:
+            cross_report["scan_errors"] = list(scan_failures)
+    for failure in scan_failures:
+        # 卫生检查不能把采集打停:发现失败要喊出来,由 doctor 的跨库对账兜底
+        LOG.warn("insert.cross_db_scan_failed", category=category, detail=failure)
     con = connect(target)
-    inserted = duplicates = 0
+    inserted = duplicates = cross_blocked = 0
     fetched_at = cfg.now_iso()
     batch_urls: set[str] = set()  # 本事务内已占用的文章级 URL(批内同 URL 也算重复)
     try:
         con.execute("BEGIN IMMEDIATE")
-        for item, url_normalized in zip(items, normalized):
-            hash_value = content_hash(item.title, item.content)
+        for item, url_normalized, hash_value in zip(items, normalized, hashes):
+            if url_normalized in blocked_urls or hash_value in blocked_hashes:
+                # 别的注册类目已经持有这篇文章:本类目不得再存一行
+                cross_blocked += 1
+                duplicates += 1
+                continue
             if url_normalized not in non_identity_urls:
                 clash = url_normalized in batch_urls
                 if not clash:
@@ -329,6 +535,8 @@ def insert_items(
         raise
     finally:
         con.close()
+    if cross_report is not None:
+        cross_report["blocked"] = cross_blocked
     return {"inserted": inserted, "duplicates": duplicates}
 
 

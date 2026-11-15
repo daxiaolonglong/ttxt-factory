@@ -10,6 +10,126 @@ from typing import Any
 
 from . import config as cfg
 from . import db, housekeep
+from .crawler import store
+
+
+def _namespace_identity(name: str) -> tuple[set[str], set[str]]:
+    """只读取一个命名空间的 url_normalized / content_hash 全集(不写、不建、不改)。"""
+    path = store.articles_db_path(name)
+    con = store.read_only_connect(path)
+    try:
+        urls = {str(row[0]) for row in con.execute("SELECT DISTINCT url_normalized FROM articles")}
+        hashes = {str(row[0]) for row in con.execute("SELECT DISTINCT content_hash FROM articles")}
+    finally:
+        con.close()
+    return urls, hashes
+
+
+def _namespace_identities() -> tuple[dict[str, tuple[set[str], set[str]]], dict[str, str]]:
+    """读出每个命名空间的身份集合;读失败的命名空间单独报告,不毁掉整项体检。"""
+    identities: dict[str, tuple[set[str], set[str]]] = {}
+    errors: dict[str, str] = {}
+    for name in store.namespaces_on_disk():
+        try:
+            identities[name] = _namespace_identity(name)
+        except Exception as exc:  # noqa: BLE001
+            errors[name] = f"{type(exc).__name__}: {exc}"
+    return identities, errors
+
+
+def namespace_overlap_rows(
+    limit_per_pair: int = 20, identities: dict[str, tuple[set[str], set[str]]] | None = None
+) -> list[dict[str, Any]]:
+    """逐对命名空间的 url/hash 交集(C-3 对账;只读)。
+
+    实测语料规模(千行级)下内存交足够;行数上万后应换成 SQL 分片或落一张对账表,
+    不在这里做跨库 JOIN —— 那会破坏 ``08_wiki/db_schema.md`` §3 的类目物理隔离。
+
+    只返回**有交集**的对;每对含 ``left/right/url_hits/hash_hits/registered_pair``
+    以及样本(``url_samples/hash_samples``),便于人工核对。
+    """
+    names = store.namespaces_on_disk()
+    registered = store.registered_namespaces()
+    if identities is None:
+        identities, _scan_errors = _namespace_identities()
+    rows: list[dict[str, Any]] = []
+    ordered = [name for name in names if name in identities]
+    for index, left in enumerate(ordered):
+        for right in ordered[index + 1 :]:
+            left_urls, left_hashes = identities[left]
+            right_urls, right_hashes = identities[right]
+            url_hits = left_urls & right_urls
+            hash_hits = left_hashes & right_hashes
+            if not url_hits and not hash_hits:
+                continue
+            rows.append(
+                {
+                    "left": left,
+                    "right": right,
+                    "url_hits": len(url_hits),
+                    "hash_hits": len(hash_hits),
+                    "registered_pair": left in registered and right in registered,
+                    "url_samples": sorted(url_hits)[:limit_per_pair],
+                    "hash_samples": sorted(hash_hits)[:limit_per_pair],
+                }
+            )
+    return rows
+
+
+def namespace_checks() -> list[tuple[str, str, str]]:
+    """命名空间卫生 + 跨库交集体检(C-3)。返回 ``(level, name, detail)``。
+
+    - ``namespaces.disk``:磁盘上有库但未登记进注册表(如 ``demo``)→ WARN。
+      测试命名空间不是正式语料,不能与正式类目平起平坐,必须显式可见。
+    - ``db.cross_overlap``:两个**注册类目**持有同一篇文章 → FAIL(违反类目隔离);
+      只涉及未注册命名空间的交集 → WARN(历史遗留,须清理但不阻断采集)。
+    """
+    results: list[tuple[str, str, str]] = []
+    registered = store.registered_namespaces()
+    on_disk = store.namespaces_on_disk()
+    unregistered = sorted(set(on_disk) - registered)
+    missing_dbs = sorted(registered - set(on_disk))
+    _identities, scan_errors = _namespace_identities()
+    if scan_errors:
+        detail = "; ".join(f"{name}: {message}" for name, message in sorted(scan_errors.items()))
+        results.append(("WARN", "db.cross_scan", f"命名空间库读失败,交集判定不完整: {detail}"))
+    results.append(
+        (
+            "PASS" if registered else "FAIL",
+            "namespaces.registered",
+            f"registered={sorted(registered)}",
+        )
+    )
+    if unregistered:
+        results.append(
+            (
+                "WARN",
+                "namespaces.disk",
+                f"磁盘上有库但未注册: {unregistered};注册类目缺库: {missing_dbs or '无'}",
+            )
+        )
+    else:
+        detail = "all on-disk namespaces are registered"
+        if missing_dbs:
+            detail = f"{detail}; registered namespaces without articles.db: {missing_dbs}"
+        results.append(("PASS", "namespaces.disk", detail))
+
+    rows = namespace_overlap_rows()
+    hard = [row for row in rows if row["registered_pair"]]
+    soft = [row for row in rows if not row["registered_pair"]]
+    if hard:
+        summary = "; ".join(
+            f"{row['left']}<->{row['right']} url={row['url_hits']} hash={row['hash_hits']}" for row in hard
+        )
+        results.append(("FAIL", "db.cross_overlap", f"正式类目之间存在同一篇文章: {summary}"))
+    elif soft:
+        summary = "; ".join(
+            f"{row['left']}<->{row['right']} url={row['url_hits']} hash={row['hash_hits']}" for row in soft
+        )
+        results.append(("WARN", "db.cross_overlap", f"仅未注册命名空间与正式类目重叠: {summary}"))
+    else:
+        results.append(("PASS", "db.cross_overlap", f"namespaces={on_disk} 两两无交集"))
+    return results
 
 
 def _strata_health(config: dict[str, Any]) -> dict[str, Any]:
@@ -67,6 +187,12 @@ def run_doctor() -> int:
             check("db.system", integrity == "ok" and count >= 1, f"integrity={integrity}, categories={count}")
         except Exception as exc:  # noqa: BLE001
             check("db.system", False, str(exc))
+
+    # 4b. 命名空间卫生与跨库交集(C-3:类目物理隔离必须被对账,否则复制是静默的)
+    try:
+        results.extend(namespace_checks())
+    except Exception as exc:  # noqa: BLE001 - 卫生检查异常不得让整份体检崩掉
+        check("namespaces.checks", False, f"{type(exc).__name__}: {exc}")
 
     # 5. 磁盘预算
     report = housekeep.report()
