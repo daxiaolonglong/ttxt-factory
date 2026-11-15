@@ -51,6 +51,9 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 ## 3. 隔离与备份
 
 - 类目物理隔离:不同 `articles.db` 文件,禁止跨库 JOIN 或合并检索上下文。
+- 命名空间互斥(C-3,2026-11-15):写入正式类目库之前,对其它命名空间做**只读**存在性查询(`url_normalized` + `content_hash`,分片 `IN`,绝不跨库 JOIN、绝不建库)。拦截权只属于 `00_control/category_registry.json` 里注册的类目;`demo` 这类未注册目录没有数据所有权 —— 它不能卡住正式类目的采集,但注册类目已持有的文章不得再写进 `demo`。被跨库拦下的条目如实计入 `duplicates`(绝不静默丢弃),归属写进任务 `meta_json.cross_db` 与 `crawl.cross_db_duplicate` 日志。
+- 跨库对账:`ttxt doctor` 新增 `namespaces.registered` / `namespaces.disk`(有库未注册 → WARN)/ `db.cross_scan`(扫描失败 → WARN)/ `db.cross_overlap`(正式类目之间同一篇文章 → **FAIL**;只牵涉未注册命名空间 → WARN)。
+- 已知残留风险:跨库检查与目标库写事务不在同一个原子域,两个类目同时采同一篇文章仍可能双双落库;兜底是 `doctor` 的 `db.cross_overlap` FAIL 对账,而不是假装跨文件原子。
 - 演示来源(demo=True)只能写入 demo 命名空间;正式来源必须写入其声明类目。
 - 备份:`scripts\backup.py <label>` → `11_backups`(代码 + 草稿 + 面板 + 角色/技能 + system.db + 各类目库),保留 7 份;恢复见 `operations.md`。
 - 连接参数:WAL、busy_timeout 30s、单写者原则;文章批量写入统一在显式 `BEGIN IMMEDIATE` 写事务内(检查与插入同锁,见 C-2)。

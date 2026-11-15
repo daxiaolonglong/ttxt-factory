@@ -38,4 +38,6 @@
 
 23. **数据身份**:同一类目库内 URL 就是文章身份。`check-then-insert` 必须位于同一个 `BEGIN IMMEDIATE` 写事务内(仅多加一次 SELECT 不算修好并发,因为 Python 默认隐式事务是 DEFERRED,读不加写锁)。来源页/订阅地址不是文章身份:调用 `store.insert_items` 必须传 `page_url`。(2026-11-15,C-2)
 24. **验收必须包含"实现前先失败"的测试证据**:新测试在改实现前必须失败并列出失败项;否则无法证明测试有效。测试期望写错时,修测试不改实现语义,并如实记录。(2026-11-15,C-2)
-25. **测试隔离**:测试不得连接或写入生产库、生产锁与项目正式文件;pytest 临时目录必须在 `07_tmp/pytest_basetemp` 并按保留份数回收。以 `mode=ro` attach WAL 库会刷新 `-shm` 的 mtime(数据未变),核验要先把库复制到 `07_tmp` 再打开。(2026-11-14 C-8 / 2026-11-15 C-2)
+25. **测试隔离**:测试不得连接或写入生产库、生产锁与项目正式文件;pytest 临时目录必须在 `07_tmp/pytest_basetemp` 并按保留份数回收。以 `mode=ro` attach WAL 库会刷新 `-shm` 的 mtime(数据未变),核验要先把库复制到 `07_tmp` 再打开。只读打开 WAL 库会在最后一个连接干净关闭时 checkpoint 空 WAL 并删除 `-wal/-shm` 边车;核验生产库以 `.db` 字节数 + sha 为准,边车存在与否不算改动。(2026-11-14 C-8 / 2026-11-15 C-2 / 2026-11-15 C-3)
+26. **类目命名空间所有权**:一篇正式文章只允许属于一个注册类目 —— 别的注册类目已持有(URL 规范化值或 `content_hash`)就不许再往本类目落一行。跨库判定必须是只读存在性查询,且只在写入目标确实位于 `01_categories/<slug>/articles.db` 时执行;未注册命名空间(`demo`)没有拦截权,但注册类目持有的文章能卡住 `demo`。跨库检查与目标库写事务不是同一原子域,兜底是 `doctor` 的 `db.cross_overlap` 对账,不是假装跨文件原子。(2026-11-15,C-3)
+27. **conftest 的配置期钩子只在 initial conftest 里被调用**:`pytest`(无参数)或 `pytest .` 时 `10_tests/conftest.py` 要到 collection 阶段才加载,它的 `pytest_configure` 不会被调用,basetemp 退回默认值;本执行环境 `tempfile.gettempdir()` 解析成仓库根,临时库落到 `D:\ttxt\pytest-of-*`,C-8 的临时目录/日志/指纹三重隔离同时失效,表现为一片互不相干的 FAIL。仓库根 `conftest.py` 只前转该配置钩子(夹具仍由原 conftest 注册)。核验必须同时跑 `pytest`、`pytest .`、`pytest 10_tests` 三种调用形式。(2026-11-15,C-3)
