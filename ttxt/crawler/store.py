@@ -7,6 +7,7 @@ import sqlite3
 from pathlib import Path
 
 from ttxt import config as cfg
+from ttxt.crawler import cleaner
 from ttxt.crawler.clean import content_hash, normalize_url
 from ttxt.crawler.extract import ExtractedItem
 from ttxt.db import connect, system_db_path
@@ -20,6 +21,22 @@ SCHEMA_VERSION = "p12-v1"
 CROSS_READ_CHUNK = 400
 # 跨库只读查询允许使用的列(白名单,防止把外部字符串拼进 SQL)
 CROSS_ID_COLUMNS = {"url_normalized", "content_hash"}
+
+# C-1:正文完整性取值词表 + 与 Python 侧一致的长度口径(SQL 版,供体检与整改批量用)
+COMPLETENESS_VALUES = cleaner.COMPLETENESS_VALUES
+COMPLETENESS_THRESHOLD = cleaner.MIN_FULL_CHARS
+USABLE_LEN_SQL = (
+    "LENGTH(TRIM(REPLACE(REPLACE(REPLACE(COALESCE(content, ''), char(9), ''),"
+    " char(10), ''), char(13), '')))"
+)
+
+
+class CompletenessConflict(RuntimeError):
+    """整改正文完整性标签时,行的当前值与计划记录不符(有人已经改过)。
+
+    抛出即整笔回滚:绝不做部分提交,也绝不覆盖别人的改动。
+    """
+
 
 ARTICLES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS articles (
@@ -515,7 +532,9 @@ def insert_items(
                     url_normalized,
                     fetched_at,
                     hash_value,
-                    "full" if item.content else "excerpt",
+                    # C-1:如实标注正文完整度(三档见 cleaner.completeness_of);
+                    # 不能只判断“有没有正文”——RSS 摘要、列表页正文都会被谎报成全文
+                    cleaner.completeness_of(item.content),
                     "unverified",
                     PROCESSOR_VERSION,
                 ),
@@ -538,6 +557,157 @@ def insert_items(
     if cross_report is not None:
         cross_report["blocked"] = cross_blocked
     return {"inserted": inserted, "duplicates": duplicates}
+
+
+# ------------------------------------------------------- C-1 历史标签整改(dry-run / 写入 / 回滚)
+
+
+def _require_existing_db(category: str, target: Path) -> None:
+    """整改只针对已经存在的命名空间库:不得顺手建库(与 C-3 的“不创建”纪律一致)。"""
+    if not Path(target).is_file():
+        raise FileNotFoundError(f"命名空间库不存在,整改不会建库: {target}")
+
+
+def distribution_text(counts: dict[str, int]) -> str:
+    """把分布渲染成固定顺序的字符串,词表内的 0 值也要显式写出来(便于对比与体检阅读)。"""
+    parts = [f"{value}={counts.get(value, 0)}" for value in COMPLETENESS_VALUES]
+    extras = sorted(value for value in counts if value not in COMPLETENESS_VALUES)
+    parts.extend(f"{value}={counts[value]}" for value in extras)
+    return " ".join(parts)
+
+
+def completeness_plan(category: str, db_path: Path | None = None) -> dict:
+    """只读:算出每行**应有**的 ``completeness`` 与当前值不一致的行(逐行计划)。
+
+    返回 ``{category, db, threshold, rows_total, current, planned, changes}``;
+    ``changes`` 每项含 ``id / from / to / usable_len``,足以逐行回滚与人工核对。
+    """
+    target = Path(db_path) if db_path is not None else articles_db_path(category)
+    _require_existing_db(category, target)
+    con = read_only_connect(target)
+    try:
+        rows = con.execute(
+            f"SELECT id, completeness, {USABLE_LEN_SQL} AS usable_len FROM articles ORDER BY id"
+        ).fetchall()
+    finally:
+        con.close()
+    current: dict[str, int] = {}
+    planned: dict[str, int] = {}
+    changes: list[dict] = []
+    for row_id, label, usable_len in rows:
+        label = str(label)
+        expected = cleaner.completeness_of_length(int(usable_len))
+        current[label] = current.get(label, 0) + 1
+        planned[expected] = planned.get(expected, 0) + 1
+        if label != expected:
+            changes.append(
+                {"id": int(row_id), "from": label, "to": expected, "usable_len": int(usable_len)}
+            )
+    return {
+        "category": category,
+        "db": str(target),
+        "threshold": COMPLETENESS_THRESHOLD,
+        "values": list(COMPLETENESS_VALUES),
+        "rows_total": len(rows),
+        "current": current,
+        "planned": planned,
+        "current_distribution": distribution_text(current),
+        "planned_distribution": distribution_text(planned),
+        "changes": changes,
+    }
+
+
+def apply_completeness_plan(category: str, changes: list[dict], db_path: Path | None = None) -> int:
+    """在单个 ``BEGIN IMMEDIATE`` 事务里按计划改写标签,逐行 CAS(旧值不符 → 整笔回滚)。
+
+    整改只改派生字段 ``completeness``,不删行、不动正文;``from`` 记录旧值,
+    因此同一份计划可以喂给 ``restore_completeness`` 精确回滚。
+    """
+    if not changes:
+        return 0
+    target = Path(db_path) if db_path is not None else articles_db_path(category)
+    _require_existing_db(category, target)
+    con = connect(target)
+    updated = 0
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        for change in changes:
+            to_value = str(change.get("to", ""))
+            from_value = str(change.get("from", ""))
+            if to_value not in COMPLETENESS_VALUES:
+                raise CompletenessConflict(f"计划里的目标取值不在词表内: {change}")
+            cursor = con.execute(
+                "UPDATE articles SET completeness = ? WHERE id = ? AND completeness = ?",
+                (to_value, int(change["id"]), from_value),
+            )
+            if cursor.rowcount != 1:
+                raise CompletenessConflict(
+                    f"id={change['id']} 的当前 completeness 与计划记录({from_value!r})不符,"
+                    "已有其它写入动过这一行,整笔回滚"
+                )
+            updated += 1
+        con.commit()
+    except BaseException:
+        try:
+            con.rollback()
+        except sqlite3.Error:
+            pass
+        finally:
+            con.close()
+        raise
+    con.close()
+    LOG.info(
+        "store.completeness_relabelled",
+        category=category,
+        db=str(target),
+        updated=updated,
+        threshold=COMPLETENESS_THRESHOLD,
+    )
+    return updated
+
+
+def relabel_completeness(category: str, db_path: Path | None = None, apply: bool = False) -> dict:
+    """按真实正文长度如实改写 ``completeness``;默认干跑,``apply=True`` 才写。"""
+    plan = completeness_plan(category, db_path)
+    if not apply:
+        return {**plan, "applied": False, "updated": 0}
+    updated = apply_completeness_plan(category, plan["changes"], Path(plan["db"]))
+    return {**plan, "applied": True, "updated": updated}
+
+
+def restore_completeness(category: str, changes: list[dict], db_path: Path | None = None) -> dict:
+    """按整改报告逐行恢复旧值(回滚);同样带 CAS,冲突即整笔回滚。"""
+    target = Path(db_path) if db_path is not None else articles_db_path(category)
+    _require_existing_db(category, target)
+    if not changes:
+        return {"category": category, "db": str(target), "restored": 0}
+    con = connect(target)
+    restored = 0
+    try:
+        con.execute("BEGIN IMMEDIATE")
+        for change in changes:
+            cursor = con.execute(
+                "UPDATE articles SET completeness = ? WHERE id = ? AND completeness = ?",
+                (str(change.get("from", "")), int(change["id"]), str(change.get("to", ""))),
+            )
+            if cursor.rowcount != 1:
+                raise CompletenessConflict(
+                    f"id={change['id']} 的当前 completeness 与整改后的值"
+                    f"({change.get('to')!r})不符,回滚整笔撤销"
+                )
+            restored += 1
+        con.commit()
+    except BaseException:
+        try:
+            con.rollback()
+        except sqlite3.Error:
+            pass
+        finally:
+            con.close()
+        raise
+    con.close()
+    LOG.warn("store.completeness_restored", category=category, db=str(target), restored=restored)
+    return {"category": category, "db": str(target), "restored": restored}
 
 
 def count_articles(category: str, db_path: Path | None = None) -> int:

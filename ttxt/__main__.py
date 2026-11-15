@@ -6,6 +6,7 @@ import argparse
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 from . import __version__
 from . import config as cfg
@@ -121,6 +122,75 @@ def cmd_clean(args: argparse.Namespace) -> int:
             results[category] = {"error": f"{type(exc).__name__}: {exc}"}
             ok = False
     print(json.dumps(results, ensure_ascii=False, indent=2))
+    return 0 if ok else 1
+
+
+def cmd_relabel_completeness(args: argparse.Namespace) -> int:
+    """C-1:按真实正文长度如实改写 ``completeness``(默认干跑;``--apply`` 才写;``--rollback`` 回滚)。
+
+    报告必须落文件:整改是一份逐行 ``from → to`` 的可回滚账本,不是“跑一遍就完”的修数脚本。
+    ``--category all`` 只覆盖注册表里的正式类目;未注册命名空间(``demo``)要显式点名,
+    与 C-3 的所有权口径一致。
+    """
+    if args.rollback:
+        source = Path(args.rollback)
+        if not source.is_file():
+            print(f"回滚报告不存在:{source}")
+            return 1
+        try:
+            payload = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"回滚报告读不出来:{exc}")
+            return 1
+        results: dict[str, object] = {}
+        ok = True
+        for category, report in (payload.get("results") or {}).items():
+            changes = list(report.get("changes") or []) if isinstance(report, dict) else []
+            if not changes:
+                results[category] = {"category": category, "restored": 0}
+                continue
+            try:
+                results[category] = crawler_store.restore_completeness(category, changes)
+            except Exception as exc:  # noqa: BLE001 - 类目级错误隔离
+                results[category] = {"error": f"{type(exc).__name__}: {exc}"}
+                ok = False
+        print(
+            json.dumps(
+                {"rollback_from": str(source), "restored_ok": ok, "results": results},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0 if ok else 1
+
+    if args.category == "all":
+        categories = sorted(crawler_store.registered_namespaces())
+    else:
+        categories = [args.category]
+
+    results: dict[str, object] = {}
+    ok = True
+    for category in categories:
+        try:
+            results[category] = crawler_store.relabel_completeness(category, apply=args.apply)
+        except Exception as exc:  # noqa: BLE001 - 类目级错误隔离
+            results[category] = {"error": f"{type(exc).__name__}: {exc}"}
+            ok = False
+    payload: dict[str, object] = {
+        "applied": bool(args.apply),
+        "threshold": crawler_store.COMPLETENESS_THRESHOLD,
+        "values": list(crawler_store.COMPLETENESS_VALUES),
+        "results": results,
+    }
+    if args.out:
+        target = Path(args.out)
+        if not target.resolve().is_relative_to(cfg.PROJECT_ROOT):
+            print(f"报告必须写在项目内:{target}")
+            return 1
+        target.parent.mkdir(parents=True, exist_ok=True)
+        payload["report_file"] = str(target)
+        target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0 if ok else 1
 
 
@@ -381,6 +451,16 @@ def build_parser() -> argparse.ArgumentParser:
     clean = sub.add_parser("clean", help="清洗、时间归一化与相似聚类")
     clean.add_argument("--category", default="all", help="类目 slug 或 all")
     clean.set_defaults(func=cmd_clean)
+
+    relabel = sub.add_parser(
+        "relabel-completeness",
+        help="按真实正文长度如实改写 articles.completeness(默认干跑,报告可回滚)",
+    )
+    relabel.add_argument("--category", default="all", help="类目 slug 或 all(=注册表里的正式类目)")
+    relabel.add_argument("--apply", action="store_true", help="真正写入(默认只出计划,不改库)")
+    relabel.add_argument("--out", default=None, help="把逐行 from→to 报告写到该 JSON 文件(项目内)")
+    relabel.add_argument("--rollback", default=None, help="按 --out 产出的报告精确回滚")
+    relabel.set_defaults(func=cmd_relabel_completeness)
 
     analyze = sub.add_parser("analyze", help="关键词评分/爆款标签/知识资产/FTS5 索引")
     analyze.add_argument("--category", default="all", help="类目 slug 或 all")

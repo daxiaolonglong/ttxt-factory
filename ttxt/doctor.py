@@ -132,6 +132,86 @@ def namespace_checks() -> list[tuple[str, str, str]]:
     return results
 
 
+def _completeness_one(name: str) -> tuple[str, str]:
+    """单个命名空间的正文完整性口径(只读)。返回 ``(level, detail)``。
+
+    口径与写入侧完全一致(``cleaner.completeness_of_length`` + ``store.USABLE_LEN_SQL``):
+
+    - ``full`` 但可用正文 < 阈值 → 谎报全文(下游按“全文语料”筛选会被摘要污染)→ WARN;
+    - ``excerpt``/``short`` 但可用正文 ≥ 阈值 → 低估(明明有全文却当摘要)→ WARN;
+    - ``excerpt`` 但有 1 ~ 阈值之间的零星字符 → 容忍(Python 与 SQL 的空白口径差几个字符,
+      由 ``store.relabel_completeness`` 整改时统一,不因此报警);
+    - 取值不在词表内 → FAIL:这个词已经没有可信含义,必须先修数据再让下游使用。
+    """
+    path = store.articles_db_path(name)
+    threshold = store.COMPLETENESS_THRESHOLD
+    values = store.COMPLETENESS_VALUES
+    placeholders = ",".join("?" * len(values))
+    con = store.read_only_connect(path)
+    try:
+        counts = {str(row[0]): int(row[1]) for row in con.execute(
+            "SELECT completeness, COUNT(*) AS n FROM articles GROUP BY completeness"
+        )}
+        stats = con.execute(
+            "SELECT"
+            f"  SUM(CASE WHEN completeness = ? AND {store.USABLE_LEN_SQL} < ? THEN 1 ELSE 0 END),"
+            f"  SUM(CASE WHEN completeness IN ('excerpt', 'short') AND {store.USABLE_LEN_SQL} >= ? THEN 1 ELSE 0 END),"
+            f"  SUM(CASE WHEN completeness NOT IN ({placeholders}) THEN 1 ELSE 0 END)"
+            " FROM articles",
+            ("full", threshold, threshold, *values),
+        ).fetchone()
+        overclaimed, underclaimed, unknown = (int(value or 0) for value in stats)
+        unknown_values: list[str] = []
+        if unknown:
+            unknown_values = sorted(
+                str(row[0])
+                for row in con.execute(
+                    f"SELECT DISTINCT completeness FROM articles WHERE completeness NOT IN ({placeholders})",
+                    values,
+                )
+            )
+    finally:
+        con.close()
+
+    detail = store.distribution_text(counts)
+    problems: list[str] = []
+    if overclaimed:
+        problems.append(f"谎报全文={overclaimed}(标 full 但可用正文 <{threshold} 字)")
+    if underclaimed:
+        problems.append(f"低估正文={underclaimed}(标 excerpt/short 但可用正文 ≥{threshold} 字)")
+    if unknown:
+        problems.append(f"词表外取值={unknown}: {unknown_values}")
+    if unknown:
+        return (
+            "FAIL",
+            f"{detail}; {'; '.join(problems)}; completeness 已失去可信含义,下游不得按它筛选,先整改再使用",
+        )
+    if problems:
+        return (
+            "WARN",
+            f"{detail}; {'; '.join(problems)}; "
+            f"整改:`ttxt relabel-completeness --category {name} --out <报告> ` 先干跑,确认后再 --apply",
+        )
+    return ("PASS", f"{detail}; 标签与真实正文长度一致(阈值 {threshold})")
+
+
+def completeness_checks() -> list[tuple[str, str, str]]:
+    """逐命名空间的正文完整性体检(C-1)。返回 ``(level, name, detail)``。
+
+    历史缺陷实测:6 个库 257 行**全部**标 ``full``,其中 124 行可用正文不足 400 字
+    (普查 ``07_tmp/c1_20261115/census_c1.json``)。DDL 默认值也是 ``'full'``,
+    任何绕开 ``insert_items`` 的写入都会谎报,所以这里必须天天喊,而不是改一次数据就完事。
+    """
+    results: list[tuple[str, str, str]] = []
+    for name in store.namespaces_on_disk():
+        try:
+            level, detail = _completeness_one(name)
+        except Exception as exc:  # noqa: BLE001 - 单个库读失败不得毁掉整份体检
+            level, detail = "WARN", f"读失败,无法判定 completeness:{type(exc).__name__}: {exc}"
+        results.append((level, f"db.completeness.{name}", detail))
+    return results
+
+
 def _strata_health(config: dict[str, Any]) -> dict[str, Any]:
     base = str(config.get("strata", {}).get("base_url", "http://127.0.0.1:8080")).rstrip("/")
     path = str(config.get("strata", {}).get("health_path", "/health"))
@@ -193,6 +273,12 @@ def run_doctor() -> int:
         results.extend(namespace_checks())
     except Exception as exc:  # noqa: BLE001 - 卫生检查异常不得让整份体检崩掉
         check("namespaces.checks", False, f"{type(exc).__name__}: {exc}")
+
+    # 4c. 正文完整性口径(C-1:completeness 谎报会让摘要冒充全文进入语料与写作取材)
+    try:
+        results.extend(completeness_checks())
+    except Exception as exc:  # noqa: BLE001 - 口径体检异常不得让整份体检崩掉
+        check("db.completeness", False, f"{type(exc).__name__}: {exc}")
 
     # 5. 磁盘预算
     report = housekeep.report()

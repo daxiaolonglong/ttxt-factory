@@ -81,12 +81,19 @@ def snapshot(label: str, db_paths: list[Path]) -> Path:
                 zf.write(file_path, file_path.relative_to(stage))
     shutil.rmtree(stage)
 
-    keep = int(cfg.load_config().get("disk", {}).get("backup_keep", 7))
-    zips = sorted(cfg.BACKUP_DIR.glob("*.zip"), key=lambda p: p.stat().st_mtime)
-    for old in zips[:-keep]:
-        old.unlink()
+    log = get_logger("backup")
+    log.info("backup.created", str(zip_path), size_bytes=zip_path.stat().st_size)
 
-    get_logger("backup").info("backup.created", str(zip_path), size_bytes=zip_path.stat().st_size)
+    # 轮转必须逐条留痕:静默删旧快照等于篡改历史(见 07_rules/CORE_RULES.md 规则 29)。
+    # backup_keep <= 0 表示"全部保留,不轮转"。
+    keep = int(cfg.load_config().get("disk", {}).get("backup_keep", 30))
+    if keep > 0:
+        zips = sorted(cfg.BACKUP_DIR.glob("*.zip"), key=lambda p: p.stat().st_mtime)
+        for old in zips[:-keep]:
+            old.unlink()
+            log.warn("backup.pruned", str(old), keep=keep, reason="backup_keep 轮转")
+    else:
+        log.info("backup.rotation_disabled", "disk.backup_keep<=0:所有快照全部保留")
     return zip_path
 
 

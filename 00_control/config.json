@@ -37,7 +37,7 @@
     "pip_cache_max_gb": 1,
     "log_max_mb": 10,
     "log_keep": 7,
-    "backup_keep": 7,
+    "backup_keep": 30,
     "db_max_mb": {
       "system": 200,
       "article": 2048
