@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import gc
 import hashlib
+import os
 import re
 import shutil
 import sqlite3
@@ -38,7 +39,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 BASETEMP_ROOT = ROOT / "07_tmp" / "pytest_basetemp"
-KEEP_BASETEMP_RUNS = 10
+# 每轮 pytest 的 basetemp 会复制生产库做隔离副本(实测约 50MB/轮)。
+# 规则 17/27:临时目录必须有上限并回收,磁盘不得膨胀。留 4 份足够事后取证
+# (最近一轮 + 失败复现用),更早的轮次证据都在 09_logs 与 08_wiki/reports 里。
+KEEP_BASETEMP_RUNS = 4
 
 CATEGORY_SLUGS = ("technology", "finance", "health", "social", "history", "demo")
 DATA_DIRS = (ROOT / "00_control", ROOT / "01_categories")
@@ -62,6 +66,17 @@ PROTECTED_FILES = [
 PROTECTED_DIR = ROOT / "00_control" / "model_gate"
 
 
+def _dir_size(path: Path) -> int:
+    total = 0
+    for base, _dirs, files in os.walk(path):
+        for name in files:
+            try:
+                total += (Path(base) / name).stat().st_size
+            except OSError:
+                continue
+    return total
+
+
 def pytest_configure(config: pytest.Config) -> None:
     """未显式指定 --basetemp 时,把 pytest 临时根目录限定在 07_tmp 下。"""
     if getattr(config.option, "basetemp", None):
@@ -75,12 +90,26 @@ def pytest_configure(config: pytest.Config) -> None:
             continue
         highest = max(highest, int(match.group(1)))
         stale.append(item)
+    # 规则 29:任何自动删除必须逐条打日志,不得静默。
+    purged: list[tuple[str, int]] = []
     for item in sorted(stale, key=lambda p: int(re.fullmatch(r"pytest-(\d+)", p.name).group(1)))[:-KEEP_BASETEMP_RUNS]:
+        victim = item.with_name(item.name + ".purging")
         try:
-            item.rename(item.with_name(item.name + ".purging"))
-            _rmtree(item.with_name(item.name + ".purging"))
+            item.rename(victim)
+            size = _dir_size(victim)
+            _rmtree(victim)
+            purged.append((item.name, size))
         except OSError:
             continue
+    for name, size in purged:
+        message = (
+            f"basetemp.purged: 已回收旧临时运行目录 07_tmp/pytest_basetemp/{name}"
+            f"({size:,} 字节),按保留份数只留最近 {KEEP_BASETEMP_RUNS} 份"
+        )
+        try:
+            config.issue_config_time_warning(UserWarning(message), stacklevel=2)
+        except Exception:  # pragma: no cover - 兜底,不得静默
+            print(message, file=sys.stderr)
     config.option.basetemp = str(BASETEMP_ROOT / f"pytest-{highest + 1}")
 
 
