@@ -46,6 +46,7 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 - 指标回流(P11):导入仅 `00_control/config.json → metrics.authorized_sources` 白名单来源;`--snapshot` 冻结当前指标进 `metric_snapshots` 并联动重打爆款标签。
 - 预测闭环(P11):无 measured 基线拒绝预测(不凭空);`settle` 仅以 measured 标签回填 outcome;`report` 仅当已回填样本 ≥ `prediction.min_samples`(默认 5)才写 `knowledge_assets`,否则如实记录样本不足。
 - 关键词反哺(P11):覆盖统计对全部关键词进行(含 gap);零覆盖 active → `gap` 并自动为缺口入队非 demo 来源(去重);gap 词重新有覆盖 → 恢复 active;每类目写 `03_intelligence/keyword_feedback/*.json` 证据。
+- 正文完整性(C-1,2026-11-15 起):`completeness` 只有三档 —— `full`(可用正文 ≥400 字)/ `short`(1–399 字)/ `excerpt`(没有可用正文)。判定是**采集侧**事实,只看原始 `content`(去首尾空白后计数),不看标题、不看 `excerpt` 列;唯一定义在 `crawler/cleaner.completeness_of`(SQL 侧同口径表达式 `store.USABLE_LEN_SQL`),写入点 `store.insert_items` 逐行调用,清洗管线**绝不回头改写**它(清洗结果写在 `cleaned_content`/`text_length`,那是另一套口径)。DDL 默认值仍是 `DEFAULT 'full'`(本批不做 schema 迁移),因此兜底在体检:`ttxt doctor` 的 `db.completeness.<类目>` 会抓"标 full 但正文不足 400"(谎报)与"标 excerpt/short 但正文足够长"(低估),词表外的值 → FAIL。历史数据整改:`ttxt relabel-completeness --category all`(默认干跑)→ 出逐行 `id/from/to/usable_len` 报告 → `--apply` 真改(`BEGIN IMMEDIATE` + 逐行 CAS,行标签被他人动过就整笔回滚并报 `CompletenessConflict`)→ `--rollback <报告>` 精确复原。2026-11-15 已对生产 6 库回填 124 行(正式类目 81 + `demo` 43;`--category all` 只覆盖注册类目,`demo` 必须显式点名),回填后分布 full 133 / short 124 / excerpt 0,总行数 257 不变。
 - 保留原始 `content`,清洗结果写入 `cleaned_content`,不覆盖原始数据。
 
 ## 3. 隔离与备份
@@ -55,5 +56,5 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 - 跨库对账:`ttxt doctor` 新增 `namespaces.registered` / `namespaces.disk`(有库未注册 → WARN)/ `db.cross_scan`(扫描失败 → WARN)/ `db.cross_overlap`(正式类目之间同一篇文章 → **FAIL**;只牵涉未注册命名空间 → WARN)。
 - 已知残留风险:跨库检查与目标库写事务不在同一个原子域,两个类目同时采同一篇文章仍可能双双落库;兜底是 `doctor` 的 `db.cross_overlap` FAIL 对账,而不是假装跨文件原子。
 - 演示来源(demo=True)只能写入 demo 命名空间;正式来源必须写入其声明类目。
-- 备份:`scripts\backup.py <label>` → `11_backups`(代码 + 草稿 + 面板 + 角色/技能 + system.db + 各类目库),保留 7 份;恢复见 `operations.md`。
+- 备份:`scripts\backup.py <label>` → `11_backups`(代码 + 草稿 + 面板 + 角色/技能 + system.db + 各类目库),保留份数由 `00_control/config.json → disk.backup_keep` 决定(2026-11-15 起默认/配置为 **30**,`<=0` 表示全部保留);轮转每删一个 zip 都打 `backup.pruned` 日志,静默删除视为篡改历史。恢复见 `operations.md`。
 - 连接参数:WAL、busy_timeout 30s、单写者原则;文章批量写入统一在显式 `BEGIN IMMEDIATE` 写事务内(检查与插入同锁,见 C-2)。

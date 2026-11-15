@@ -77,7 +77,8 @@
 | P13 资产审计 / 质量闭环审计 | ✅ 已出报告(`reports/P13-asset-audit.md`、`reports/P13-quality-audit-20261113.md`) |
 | P13 最小修复 C-7 + C-8(模型闸门锁、测试隔离) | ✅ 已完成(报告:`reports/P13-fix-C7C8-20261114.md`,198 passed) |
 | P13 最小修复 C-2(同类目 URL 重复插入) | ✅ 已完成(报告:`reports/P13-fix-C2-url-dedupe-20261115.md`,214 passed / exit 0) |
-| P13 最小修复 C-3(跨类目归属)、C-1(正文完整性判定) | ⏳ 待做;三者全部通过前不恢复采集 |
+| P13 最小修复 C-3(跨类目归属) | ✅ 已完成(报告:`reports/P13-fix-C3-cross-category-dedupe-20261115.md`,227 passed / exit 0) |
+| P13 最小修复 C-1(正文完整性判定 + 生产回填) | ✅ 已完成(报告:`reports/P14-fix-C1-completeness-label-20261115.md`,255 passed / exit 0;生产 124 行标签已如实回填) |
 
 ## 5. 当前状态(2026-11-12)
 
@@ -87,10 +88,12 @@
 
 ## 6. 当前状态(2026-11-15 实测)
 
-- 测试基线:`python -m pytest 10_tests -q` → **227 passed,44.91s,exit 0**(214 旧 + 13 C-3 新增,0 skip / 0 fail)。`pytest`(无参数)、`pytest .`、`pytest 10_tests` 三种调用形式均 227 passed —— 前两种原先会让 C-8 的 `pytest_configure` 不被调用、临时库落到仓库根 `pytest-of-*`,已用仓库根 `conftest.py` 前转配置钩子修好(规则 27)。
-- 数据现状(只读核验):`01_categories/` 6 个类目库 + `00_control/system.db` 字节与 sha256 未变;technology 137 行、demo 45 行(其中 30 行为列表页形态,合法保留)。只读打开 WAL 库会把空 WAL checkpoint 回主库并删除 `-wal/-shm` 边车,主库 sha 不变(规则 25)。
+- 测试基线:`python -m pytest 10_tests -q` → **255 passed,47.45s,exit 0**(227 旧 + 25 C-1 新增 + 3 备份轮转护栏,0 skip / 0 fail)。`pytest`(无参数)、`pytest .`、`pytest 10_tests` 三种调用形式均 255 passed —— 前两种原先会让 C-8 的 `pytest_configure` 不被调用、临时库落到仓库根 `pytest-of-*`,已用仓库根 `conftest.py` 前转配置钩子修好(规则 27)。
+- 数据现状(2026-11-15 C-1 回填后):`01_categories/` 6 库 + `00_control/system.db` 行数不变(文章共 257 行),但 4 个库的 `.db` sha **因 C-1 整改而变**:回填前快照 `11_backups/C1-pre-relabel-20261115-093705.zip` + 字节级原像 `07_tmp/c1_20261115/db_c1/` + 逐行回滚账本 `07_tmp/c1_20261115/relabel_prod_apply*.json`;逐列比对证明除 `completeness` 外没有任何列变化(`07_tmp/c1_20261115/verify_prod_c1.json`)。只读打开 WAL 库会把空 WAL checkpoint 回主库并删除 `-wal/-shm` 边车,主库 sha 不变(规则 25)。
 - C-2 已修:类目库内同 URL 不再插第二次,重复如实计数,并发实测 4 线程只 1 行(证据 `reports/P13-fix-C2-url-dedupe-20261115.md` §5–§6)。
 - C-3 已修:类目命名空间之间归属互斥。写入前只读扫描其它命名空间(`url_normalized` + `content_hash`),别的**注册**类目已持有就不落第二行,少掉的条目如实计入 `duplicates`,归属进 `meta_json.cross_db` + `crawl.cross_db_duplicate` 日志;`doctor` 新增 `namespaces.*` 与 `db.cross_scan` / `db.cross_overlap` 对账(正式类目之间同一篇文章 = FAIL)。实测真实数据:唯一交集 `demo`↔`technology` 13 行(根因 `sspai_rss`/`ruanyifeng_atom` 在 P12 由 demo 转正),`ttxt doctor` 现在如实报 WARN;副本上四条验证全绿(正式→正式被拦、未注册不卡正式、注册持有者卡 demo、绕过守卫后 doctor FAIL),证据 `reports/P13-fix-C3-cross-category-dedupe-20261115.md` 与 `07_tmp/c3_20261115/proof_c3.json`。
-- 未做/待办:**C-1 正文完整性判定**(`completeness` 仍按“有无正文”写 `full`,212 行里 75 行不足 200 字被标 `full`;改判定 + 回填需单独批准);历史重复行清理(`technology` toutiao ×3、`finance` eastmoney ×2、`demo`↔`technology` 13 行)需单独批准的修复任务;html 列表页抽取器仍不逐条取详情链接(`extract.py:55`),是列表页数据只按 `content_hash` 去重的根因;C-4 `pipeline` 长跑(覆盖率 95.28% 从未清洗)、C-5 可信度分层、C-6 评审元数据(需 DDL)。
-- 采集侧现状:Scrapling 0.5.1 + curl_cffi 0.17.0 + playwright 1.65.1 已装,HTTP 优先(D4);CloakBrowser 未安装(暂缓)。C-1 通过前不恢复真实采集与 Worker/Scheduler。
-- 磁盘与临时文件:项目内临时文件统一到 `07_tmp`(C-8 保留 10 份 basetemp 并自动回收);本轮实测项目占用 1.221GB / 预算 20GB(`ttxt doctor`),无暴涨。仓库根遗留 `pytest-of-yangl\`(pytest 早于 C-8 时留下的临时目录)未删除,按“不得删旧数据”保留,等批准清理。
+- C-1 已修:`completeness` 不再"有正文就 full"。三档 `full`(≥400)/`short`(1–399)/`excerpt`(无正文),判定唯一在 `cleaner.completeness_of`,写入点逐行算,清洗管线不回写;`doctor` 新增 `db.completeness.<类目>` 反查谎报/低估/词表外值;整改命令 `ttxt relabel-completeness`(默认干跑 → `--apply` 逐行 CAS → `--rollback <报告>`)。生产回填 124 行(正式 81 + `demo` 43),分布从 `full=257` 变成 `full 133 / short 124 / excerpt 0`,与 census 预测一字不差;副本演练 A–L 十二条全绿、SQL 与 Python 口径 drift=0(证据 `07_tmp/c1_20261115/proof_c1.json`、`reports/P14-fix-C1-completeness-label-20261115.md`)。
+- 事故与补法(C-1 期间,规则 29):误用 `scripts/backup.py` 的 `snapshot()`(轮转就在该函数内,不在 `main()`),`backup_keep=7` 当场静默删掉 2 个历史快照(`E2E-20261112-142100.zip`、`P10-final-20261112-142130.zip`)。已补:轮转逐条打 `backup.pruned` 日志、`backup_keep<=0` 表示全留、`disk.backup_keep` 7→30,并加 3 条回归测试(`10_tests/test_backup_rotation.py`)。历史备份无法恢复(不在 Git、不进回收站),但当前数据完整、C-1 回滚链完整。
+- 未做/待办:历史重复行清理(`technology` toutiao ×3、`finance` eastmoney ×2、`demo`↔`technology` 13 行)需单独批准的修复任务;html 列表页抽取器仍不逐条取详情链接(`extract.py:55`),是列表页数据只按 `content_hash` 去重的根因;C-4 `pipeline` 长跑(覆盖率 95.28% 从未清洗)、C-5 可信度分层(257 行全是 `unverified`)、C-6 评审元数据(需 DDL)。
+- 采集侧现状:Scrapling 0.5.1 + curl_cffi 0.17.0 + playwright 1.65.1 已装,HTTP 优先(D4);CloakBrowser 未安装(暂缓)。C-1/C-2/C-3 已全部通过,下一步按官方文档核验采集栈后恢复真实采集;Worker/Scheduler 在采集核验前仍不启动。
+- 磁盘与临时文件:项目内临时文件统一到 `07_tmp`(C-8 保留 10 份 basetemp 并自动回收);本轮实测项目占用 1.222GB / 预算 20GB(`ttxt doctor`),无暴涨。仓库根遗留 `pytest-of-yangl\`(pytest 早于 C-8 时留下的临时目录)未删除,按"不得删旧数据"保留,等批准清理。
