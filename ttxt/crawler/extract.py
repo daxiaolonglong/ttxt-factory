@@ -268,3 +268,82 @@ def extract_rss_items(xml_text: str, source: Source) -> list[ExtractedItem]:
             )
         )
     return items
+
+
+# ---------------------------------------------------------------------------
+# P19(2026-11-15):文章页正文补全 + 关键词命中判定
+# ---------------------------------------------------------------------------
+
+# 通用正文猜测顺序(来源未配 item_content_selectors 时用)。
+# 依据是公开站常见容器命名,不是"一定能命中":猜不到就返回空串,调用方保留原摘要,
+# 绝不拿导航/推荐位正文冒充文章正文(编造身份比缺失更糟——见 store/doctor 判定规则)。
+BODY_SELECTORS: tuple[str, ...] = (
+    "article",
+    "div.article-content",
+    "div.article_content",
+    "div.article-body",
+    "div.content-article",
+    "div.RichText",
+    "div.text",
+    "div#content",
+    "section.article",
+)
+
+# 短于此长度不当作正文(实测 probe2/probe3:中新网 RSS 摘要 71–108 字符,
+# 澎湃列表页锚文本更短;取回这么长的东西不算"补到正文")。
+MIN_BODY_CHARS = 160
+
+
+def _full_text(element: object) -> str:
+    """元素**全部后代**的可见文本。
+
+    注意与 ``_element_text`` 的区别:后者只取 ``element.text``(标签自身的首段文本),
+    标题/正文被嵌套标签(如 ``<h2><a>…</a></h2>``、``<p><span>…</span></p>``)时会残缺。
+    Scrapling 0.5.1 提供 ``get_all_text()``;测试桩里没有该方法时退回 ``text``。
+    """
+    getter = getattr(element, "get_all_text", None)
+    if callable(getter):
+        return normalize_text(str(getter() or ""))
+    return _element_text(element)
+
+
+def extract_article_body(page: object, source: Source) -> str:
+    """从**文章页**取正文;取不到返回空串(不猜、不拼导航)。
+
+    选择器顺序:来源自带的 ``item_content_selectors``,否则 ``BODY_SELECTORS``。
+    同一选择器匹配到的多个元素按文档顺序拼接(中文站正文常被切成多个 ``<p>``);
+    第一个达到 ``MIN_BODY_CHARS`` 的结果就直接采用,否则保留最长候选。
+    """
+
+    selectors = list(source.item_content_selectors) or list(BODY_SELECTORS)
+    best = ""
+    for selector in selectors:
+        try:
+            found = list(page.css(selector))  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001 - 选择器语法/库差异不得毁掉整条正文补全
+            continue
+        parts = [_full_text(element) for element in found]
+        text = normalize_text("\n".join(part for part in parts if part))
+        if len(text) > len(best):
+            best = text
+        if len(best) >= MIN_BODY_CHARS:
+            return best
+    return best if len(best) >= MIN_BODY_CHARS else ""
+
+
+def keyword_hit(item: ExtractedItem, keywords: list[str]) -> str | None:
+    """这一条是否命中关键词表里的某个词(标题或正文,大小写不敏感);命中返回该词。
+
+    这是"关键词驱动采集"的**入库侧闸门**:计划阶段决定去哪些地址采,
+    这里决定采回来的东西哪些算这一轮要的。不命中不删除数据源,只是本次不入库,
+    并计数 ``keyword_filtered_out``(可审计,绝不静默丢弃)。
+    """
+    if not keywords:
+        return None
+    haystack = f"{item.title}\n{item.content}".lower()
+    for keyword in keywords:
+        needle = str(keyword).strip().lower()
+        if needle and needle in haystack:
+            return str(keyword).strip()
+    return None
+

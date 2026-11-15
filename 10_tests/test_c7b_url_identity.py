@@ -227,6 +227,60 @@ def test_same_article_url_different_content_is_counted(tmp_path):
     assert store.count_articles("_demo", db_path=path) == 1
 
 
+def _article_row(db_path, url_normalized: str) -> sqlite3.Row:
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        return con.execute(
+            "SELECT * FROM articles WHERE url_normalized = ?", (url_normalized,)
+        ).fetchone()
+    finally:
+        con.close()
+
+
+def test_same_url_same_title_longer_body_upgrades_the_row(tmp_path):
+    """P20:同一 URL、同一标题、正文更长 ⇒ 就地升级这一行,不新增行,也不算塌陷。
+
+    实测依据(job 64 → 66,2026-11-15 15:47 / 15:53):第一轮 RSS 只给 98 字摘要就入库,
+    第二轮同一 URL 抓到文章页 900+ 字,老规则把它判成"身份塌陷"拒之门外 ——
+    语料质量被永久锁死在摘要级,而且每一轮都会重复报 3 次假塌陷。
+    """
+    path = store.init_articles_db("_demo", db_path=tmp_path / "articles.db")
+    short_body = "短摘要" * 10
+    first = store.insert_items("_demo", "src", [_item("同一篇", short_body, "https://example.com/up")], db_path=path)
+    assert first == {"inserted": 1, "duplicates": 0}
+    before = _article_row(path, "https://example.com/up")
+    assert before["completeness"] == "short"
+
+    long_body = "中新网完整正文" * 80  # 560 字 ⇒ full(MIN_FULL_CHARS=400)
+    second = store.insert_items("_demo", "src", [_item("同一篇 ", long_body, "https://example.com/up")], db_path=path)
+    assert second == {"inserted": 0, "duplicates": 1, "bodies_upgraded": 1}, (
+        "正文升级既不是新文章,也不是身份塌陷;标题差一个空格仍算同一篇"
+    )
+
+    after = _article_row(path, "https://example.com/up")
+    assert after["id"] == before["id"], "升级必须落在原行上,不得新增第二行"
+    assert after["fetched_at"] == before["fetched_at"], "首次抓取时间不得被改写"
+    assert after["content"] == long_body and after["content_hash"] != before["content_hash"]
+    assert after["completeness"] == "full"
+    assert store.count_articles("_demo", db_path=path) == 1
+
+
+def test_same_url_different_title_longer_body_is_still_conflict(tmp_path):
+    """标题不同就是另一篇文章:哪怕正文更长也不得覆盖,仍按 C-7b 塌陷计数。"""
+    path = store.init_articles_db("_demo", db_path=tmp_path / "articles.db")
+    store.insert_items("_demo", "src", [_item("甲标题", "短摘要" * 10, "https://example.com/clash")], db_path=path)
+    before = _article_row(path, "https://example.com/clash")
+
+    counts = store.insert_items(
+        "_demo", "src", [_item("乙标题", "中新网完整正文" * 80, "https://example.com/clash")], db_path=path
+    )
+    assert counts == {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
+    assert "bodies_upgraded" not in counts, "悄悄改标题正是 demo 30 条那类事故的做法"
+    after = _article_row(path, "https://example.com/clash")
+    assert after["content"] == before["content"] and after["title"] == "甲标题"
+
+
 def test_page_url_collapse_counted_but_rows_kept(tmp_path):
     """列表页地址当文章地址:正文必须保留(删了毁语料),但塌陷必须当场计数。"""
     path = store.init_articles_db("_demo", db_path=tmp_path / "articles.db")

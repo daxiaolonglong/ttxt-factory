@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated_at": "2026-11-12",
-  "notes": "P12批次3(2026-11-12):正式来源白名单按探测证据注册(eastmoney/tmtpost/ifanr/who)。history/social 暂无合格源:候选探测记录见 99_temp/p12b3_probe_results.json 与 p12b3_fresh_results.json(ftchinese/gmw/geekpark robots 拒绝;chnmuseum/dpm/chinanews 404;people_health/xinhuanet 存档陈旧;zaobao not_feed;dxy SSRF 重定向被拒)。每个来源采集前必须通过 robots.txt 检查。",
+  "updated_at": "2026-11-15",
+  "notes": "P19批次(2026-11-15):补齐 history/social 的合格正式来源。取证链:07_tmp/p19_keyword_crawl/probe3.json(robots 与新鲜度)、probe5.json(通用正文选择器在中新网/澎湃**全部落空**)、probe6_page_forensics(中新网正文 819–1605 字在 HTML 里、澎湃是 Next.js 哈希类名)、probe7_tightest_container.json(自动定位正文容器:中新网 div.left_zw / div.content_maincontent_content 稳定;澎湃只有 wrap__hPMpF 这类构建哈希,不可作为长期选择器)。因此本批只注册中新网两个频道;澎湃列为待办(需要 __NEXT_DATA__ 结构化解析,不用哈希类名)。people.com.cn 全部 rss 停在 2025-06、chinanews /rss/jk.xml 停在 2026-03,均按陈旧拒绝;Google News/头条搜索/360/搜狗/百度新闻 robots 拒绝,不得配置。每个来源采集前必须通过 robots.txt 检查。",
   "sources": [
     {
       "id": "toutiao_tech",
@@ -110,6 +110,38 @@
       "max_articles": 25,
       "demo": false,
       "notes": "2026-11-12 23:14 探测:robots 允许,HTTP 200,25 条(2026-09-15 至 11-10,近两月);health 类目当前唯一新鲜可达源;people.com.cn/gmw 候选分别因存档陈旧(2025-06)与 robots 拒绝未注册"
+    },
+    {
+      "id": "chinanews_society",
+      "name": "中国新闻网 · 社会频道(公开 RSS)",
+      "category": "social",
+      "kind": "rss",
+      "url": "https://www.chinanews.com.cn/rss/society.xml",
+      "enabled": true,
+      "rate_limit_s": 1.5,
+      "max_pages": 1,
+      "max_articles": 20,
+      "fetch_item_pages": true,
+      "max_item_pages": 20,
+      "item_content_selectors": ["div.left_zw", "div.content_maincontent_content"],
+      "demo": false,
+      "notes": "P19 取证(2026-11-15 15:08 probe3):robots 允许,HTTP 200,30 条全部当日发布,RSS 摘要中位数仅 108 字 ⇒ 必须补正文;probe7:文章页正文容器 div.left_zw(819字/9段)与 div.content_maincontent_content(833字),中新网类名无哈希、稳定。keywords 未配置⇒按类目库 gap/高分词驱动。实测(job 64,15:47):feed_total 30 / 入库 20 / 补正文 12 全部成功,平均正文 924 字 ⇒ max_item_pages 12 覆盖不了 20 的入库配额,8 条只能停在摘要级(已知待回填);本批把补全预算提到 20 与配额一致,预算与配额不一致就是明知能补正文却先入库摘要级语料"
+    },
+    {
+      "id": "chinanews_culture",
+      "name": "中国新闻网 · 文化频道(公开 RSS)",
+      "category": "history",
+      "kind": "rss",
+      "url": "https://www.chinanews.com.cn/rss/culture.xml",
+      "enabled": true,
+      "rate_limit_s": 1.5,
+      "max_pages": 1,
+      "max_articles": 20,
+      "fetch_item_pages": true,
+      "max_item_pages": 20,
+      "item_content_selectors": ["div.left_zw", "div.content_maincontent_content"],
+      "demo": false,
+      "notes": "P19 取证(2026-11-15 15:08 probe3):robots 允许,HTTP 200,30 条全部当日发布,摘要中位数 98 字 ⇒ 必须补正文;正文容器与社会频道同一套中新网模板(probe7 实测)。history 类目此前 0 行,本来源是第一个合格正式源。实测(job 65,15:47):feed_total 30 / 入库 20 / 补正文 12 全部成功,平均正文 554 字,补全预算同样提到 20 与配额一致"
     }
   ]
 }

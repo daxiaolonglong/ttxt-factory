@@ -15,6 +15,7 @@ from .analysis import analyze as analyzer
 from .analysis import metrics_import, prediction, viral
 from .analysis import rag as analyzer_rag
 from .crawler import dedupe as crawler_dedupe
+from .crawler import keyword_crawl as crawler_keyword_crawl
 from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
 from .crawler import sources as crawler_sources
@@ -104,6 +105,19 @@ def cmd_crawl(args: argparse.Namespace) -> int:
     )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if summary.get("ok") else 1
+
+
+def cmd_crawl_plan(args: argparse.Namespace) -> int:
+    """P19:关键词 → 采集计划(默认干跑;``--apply`` 才入队,执行仍走 crawl-queue --run)。"""
+    result = crawler_keyword_crawl.plan_and_enqueue(
+        args.category,
+        keywords=args.keyword or None,
+        source_ids=args.source or None,
+        keyword_limit=args.keyword_limit,
+        apply=args.apply,
+    )
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
 
 
 def cmd_clean(args: argparse.Namespace) -> int:
@@ -585,6 +599,17 @@ def build_parser() -> argparse.ArgumentParser:
     crawl.add_argument("--limit", type=int, default=None, help="最多入库条目数")
     crawl.add_argument("--max-pages", type=int, default=None, help="最多翻页数(html 来源)")
     crawl.set_defaults(func=cmd_crawl)
+
+    plan = sub.add_parser(
+        "crawl-plan",
+        help="关键词驱动的采集计划(默认干跑;--apply 入队,执行仍走 crawl-queue --run)",
+    )
+    plan.add_argument("--category", required=True, help="类目 slug")
+    plan.add_argument("--keyword", action="append", default=[], help="指定关键词(可重复;缺省取类目库里 gap/高分词)")
+    plan.add_argument("--source", action="append", default=[], help="限定来源 id(可重复)")
+    plan.add_argument("--keyword-limit", type=int, default=6, help="最多用几个关键词")
+    plan.add_argument("--apply", action="store_true", help="把计划写入采集任务队列(默认只出计划)")
+    plan.set_defaults(func=cmd_crawl_plan)
 
     clean = sub.add_parser("clean", help="清洗、时间归一化与相似聚类")
     clean.add_argument("--category", default="all", help="类目 slug 或 all")

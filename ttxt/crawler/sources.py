@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from ttxt import config as cfg
@@ -36,6 +36,23 @@ class Source:
     extractor: str = "generic"  # generic | toutiao
     render: str = "http"  # http | browser
     max_articles: int = 10
+    # P19(2026-11-15)关键词驱动采集(用户目标 1/2:关键词决定采什么)。
+    # 根因:关键词层只"反哺入队",入队的是同一个固定来源任务,关键词本身
+    # 从来不进入采集动作(见 auto_feedback:154 取 candidates_sources[0])。
+    # keywords:来源自带关键词;为空时由 keyword_crawl 取类目库里 gap/高分词。
+    keywords: list[str] = field(default_factory=list)
+    # url_template:含 ``{keyword}`` 的检索页模板。**只对 robots.txt 放行的地址生效**;
+    # 实测(probe1/probe2)百度/360/搜狗/头条搜索/google news 全部 disallow,
+    # 因此这些站点不得配在这里——不是能力问题,是访问控制问题(规则:永不绕过)。
+    url_template: str | None = None
+    # fetch_item_pages:逐条抓文章页补正文。RSS/列表页只给摘要时必须开
+    # (实测 probe2/probe3:中新网 RSS 摘要中位数 71–108 字符,澎湃列表只有标题)。
+    fetch_item_pages: bool = False
+    # max_item_pages:单次任务最多补几条正文,防止一次任务无限扩张(规则 25 磁盘/时间有界)。
+    max_item_pages: int = 10
+    # item_content_selectors:文章页正文选择器(按顺序试,取到足够长就停);
+    # 为空时用 extract.BODY_SELECTORS 通用猜测,猜不到就保留原摘要,不猜不编造。
+    item_content_selectors: list[str] = field(default_factory=list)
 
 
 def load_sources(path: Path | None = None) -> list[Source]:

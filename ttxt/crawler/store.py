@@ -416,6 +416,11 @@ def init_articles_db(category: str, db_path: Path | None = None) -> Path:
     return target
 
 
+def _same_title(left: str | None, right: str | None) -> bool:
+    """标题是否指向同一篇文章(空白折叠 + 大小写无关;不做任何"猜相似")。"""
+    return " ".join(str(left or "").split()).casefold() == " ".join(str(right or "").split()).casefold()
+
+
 def insert_items(
     category: str,
     source_id: str,
@@ -476,6 +481,11 @@ def insert_items(
     - 现在两种塌陷都计数 + ``LOG.warn``:
       (a) **文章级 URL** 上已经存着别的正文(``content_hash`` 不同)→ 计数
           ``url_identity_conflict``,仍然不插入(一个文章身份只允许一行);
+       (a2) **P20 先判例外**:同一 URL + 同一标题 + 正文更长 ⇒ 这是同一篇文章拿到
+       更完整的正文,按 C-7 保留判据(正文最长者胜)就地升级这一行(保留 id、URL、
+       fetched_at),计数 ``bodies_upgraded``,不算塌陷也不新增行。实测 job 64→66:
+       第一轮 RSS 摘要 98 字,第二轮同一 URL 文章页 900+ 字,旧规则会把语料质量永久
+       锁死在摘要级;标题不同才判塌陷 —— 悄悄改标题才是 demo 30 条那类事故。
       (b) **非身份 URL**(来源页/列表页)上已经存着别的正文 → 照样插入(删了就毁掉
           真实语料,规则 33),同样计数 ``url_identity_conflict``,让塌陷当场可见。
     - 抽取器标了 ``url_is_page_fallback`` 的条目单独计数 ``url_no_item_link``:
@@ -515,7 +525,7 @@ def insert_items(
         # 卫生检查不能把采集打停:发现失败要喊出来,由 doctor 的跨库对账兜底
         LOG.warn("insert.cross_db_scan_failed", category=category, detail=failure)
     con = connect(target)
-    inserted = duplicates = cross_blocked = identity_conflicts = 0
+    inserted = duplicates = cross_blocked = identity_conflicts = upgrades = 0
     # C-7b:抽取器明确标了"这一条没拿到自己的链接"的条目单独计数,不得静默
     no_item_link = sum(1 for item in items if getattr(item, "url_is_page_fallback", False))
     fetched_at = cfg.now_iso()
@@ -549,6 +559,48 @@ def insert_items(
                 if clash:
                     duplicates += 1
                     if not same_content_elsewhere:
+                        # P20(实测 2026-11-15 job 64→66):同一 URL、同一标题,这一轮
+                        # 抓到了更长的正文(第一轮 RSS 摘要 98 字 → 第二轮文章页 900+ 字)。
+                        # 这是**同一篇文章的正文升级**,不是身份塌陷:按 C-7 的保留判据
+                        # (正文最长者胜出)就地升级这一行,不新增行、不删行、不改 id/URL。
+                        # 标题不同则仍是塌陷:绝不悄悄改写别人的标题(那才是 demo 30 条事故)。
+                        existing = (
+                            None
+                            if url_normalized in batch_urls
+                            else con.execute(
+                                "SELECT id, title, content FROM articles WHERE url_normalized = ? LIMIT 1",
+                                (url_normalized,),
+                            ).fetchone()
+                        )
+                        if (
+                            existing is not None
+                            and _same_title(existing["title"], item.title)
+                            and len(str(item.content or "")) > len(str(existing["content"] or ""))
+                        ):
+                            con.execute(
+                                "UPDATE articles SET content = ?, excerpt = ?, content_hash = ?,"
+                                " completeness = ?, processor_version = ? WHERE id = ?",
+                                (
+                                    item.content,
+                                    item.excerpt,
+                                    hash_value,
+                                    cleaner.completeness_of(item.content),
+                                    PROCESSOR_VERSION,
+                                    existing["id"],
+                                ),
+                            )
+                            upgrades += 1
+                            LOG.info(
+                                "insert.body_upgraded",
+                                category=category,
+                                source=source_id,
+                                url=url_normalized,
+                                article_id=existing["id"],
+                                old_chars=len(str(existing["content"] or "")),
+                                new_chars=len(str(item.content or "")),
+                                detail="同一 URL 同一标题,正文由摘要级升级为更完整正文(保留原行与原 id,不新增行)",
+                            )
+                            continue
                         # 同一个文章身份位上存的是**另一篇**文章:身份塌陷,必须喊出来
                         identity_conflicts += 1
                         LOG.warn(
@@ -634,6 +686,16 @@ def insert_items(
             source=source_id,
             conflicts=identity_conflicts,
             detail="同一 URL 位上出现了正文互不相同的文章;逐条原因见 insert.url_identity_conflict / insert.page_url_collapse",
+        )
+    if upgrades:
+        # P20:正文升级只有真的发生才加键(与 cross_report/C-7b 同一做法)
+        counts["bodies_upgraded"] = upgrades
+        LOG.info(
+            "insert.body_upgrade_summary",
+            category=category,
+            source=source_id,
+            upgraded=upgrades,
+            detail="同一 URL 同一标题的旧行被升级为更完整正文;逐条见 insert.body_upgraded",
         )
     if no_item_link:
         counts["url_no_item_link"] = no_item_link
@@ -847,6 +909,34 @@ def find_pending_crawl_job(source_id: str, category: str, db_path: Path | None =
         return int(row["id"]) if row else None
     finally:
         con.close()
+
+
+def crawl_job_params(job_id: int, db_path: Path | None = None) -> dict:
+    """只读:取任务**入队时**写入的 ``meta_json``(P19 采集计划:关键词/检索地址)。
+
+    为什么单独一个只读入口:``finish_crawl_job``(:889)会用执行回执整体覆盖
+    ``meta_json``,所以计划必须在执行前读出来传给 ``runner``,执行后再读就读不到了
+    (回执里由 runner 回显 ``plan`` 键,证据仍然完整)。
+    """
+    import json
+
+    target = Path(db_path) if db_path is not None else system_db_path()
+    con = connect(target)
+    try:
+        row = con.execute("SELECT meta_json FROM crawl_jobs WHERE id=?", (job_id,)).fetchone()
+    finally:
+        con.close()
+    if not row:
+        return {}
+    raw = row["meta_json"]
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(str(raw))
+    except Exception:  # noqa: BLE001 - meta 坏掉不能把采集拖死,按无计划处理并留日志
+        LOG.warn("store.crawl_job_params_unparsable", job_id=job_id)
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
 
 
 def list_queued_crawl_jobs(

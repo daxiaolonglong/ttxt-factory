@@ -103,10 +103,14 @@ def test_same_url_different_content_inserts_only_once(tmp_path):
     # 修复前:second == {"inserted": 1, "duplicates": 0},库里 2 行
     # C-7b(2026-11-15)起同一 URL 位上出现正文不同的文章必须**显式计数**,不得只混进
     # duplicates(实测:老实现把这种塌陷当"正常重复"静默了 3 天,见 P17 §五 待办 2)
-    assert second == {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
+    # P20(2026-11-15,实测 job 64→66)细化了同一判据的另一半:**同一 URL + 同一标题**
+    # 且正文更长 ⇒ 这是同一篇文章拿到更完整正文(第一轮 RSS 摘要 98 字、第二轮文章页
+    # 900+ 字),按 C-7 的保留判据(正文最长者胜)就地升级这一行,不新增行、不改 id;
+    # 只有标题不同才算"另一个身份"。本用例真正的口径没变:库里仍然只有一行。
+    assert second == {"inserted": 0, "duplicates": 1, "bodies_upgraded": 1}
     rows = _rows(path)
     assert len(rows) == 1
-    assert rows[0]["content"] == "第一次抓到的正文内容甲。"  # 已入库正文不被覆盖/改写
+    assert rows[0]["content"] == "第二次重渲染的正文内容乙。", "正文只允许向更完整的方向变,不得越改越短"
     assert _dup_groups(path) == []
 
 

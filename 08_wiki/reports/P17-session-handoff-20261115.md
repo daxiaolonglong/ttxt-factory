@@ -112,3 +112,57 @@
 - 新发现缺陷(未修,待办 9):标题元素是 `<h2 class="title"><a>标题</a></h2>` 时 `_element_text` 取到空串(Scrapling `.text` 只取直接文本),标题退化为整块文本,牵连 `content_hash` 与 FTS。修它必须同时决定 `PROCESSOR_VERSION` 是否 bump —— 本轮**故意没有** bump(仍 `p2-v1`)。
 - 本轮写操作范围:只有代码、测试、Wiki/规则文档;**没有**写生产库、没有改 `02_crawler/sources.json`、没有删任何行(`articles` 仍 312 行)。
 - 遗留风险:GitHub 出口依赖单个 VPN 客户端的单节点,断供时提交只能滞留在本地(本次两个提交滞留约 2 小时)。若要自动重试,需先获用户对定时任务的明确批准。
+
+## 十、本轮(2026-11-15 14:46,新窗口)开工整理:仓库实际状态读数 + 本轮待办
+
+### 10.1 接手时实测(不看上一轮记忆,只看仓库)
+
+| 项 | 读数 | 取证方式 |
+| --- | --- | --- |
+| 远端 ``refs/heads/main`` | **`3d4ea158b56cbc89695b52604c17c15034757810`**(`fix(C-7b): 抽取器不得编造文章地址…`) | ``git ls-remote --heads origin`` |
+| 本地 ``main`` | 同一个提交,**工作区干净**,``ahead 0`` | ``git status --porcelain`` 空 |
+| 全量测试 | **314 passed**,60.25s,exit 0 | ``python -m pytest 10_tests -q`` |
+| 规则文件 | 已编到 **规则 35**(C-7b:假身份比塌陷更隐蔽),本轮追加 36/37 | ``07_rules/CORE_RULES.md`` |
+| 已安装采集栈 | scrapling 0.5.1 / curl-cffi 0.17.0 / playwright 1.65.1 / lxml 6.1.3 / cssselect 1.6.0 / w3lib 2.6.0 | ``importlib.metadata`` |
+| 已注册来源 | 8 个(7 启用):头条科技频道(browser)、sspai/ruanyifeng/ifanr(eastmoney/tmtpost 财经、who 健康)+ 停用 demo 站 | ``02_crawler/sources.json`` |
+
+> 结论:上一轮记忆里的"待推送 d817805""待做 C-7b"**都已过期** —— 另一窗口已推送并完成 C-7b(见 §八、§九)。本轮从 §五 待办 **3** 开始。
+
+### 10.2 本轮(第 2 轮)要做的事与"怎么算完成"
+
+| 序号 | 事项 | 怎么算完成(验收口径) |
+| --- | --- | --- |
+| R2-1 | **按官方文档核验采集栈**:Scrapling 官方文档 vs 本地 0.5.1 实参/用法;CloakBrowser 是否需要在本地部署(磁盘与必要性) | 逐条写出"官方口径 / 本地现状 / 差异 / 决策";决策与差异写进规则或 Wiki;不装无用大件 |
+| R2-2 | **关键词驱动采集**:采集必须能按类目关键词发起(关键词来自 ``03_intelligence/keywords``),不是只盯固定订阅源 | 新增可通过 robots 门禁的关键词检索源;``ttxt`` 一条命令按关键词发起采集;入库仍走 URL/哈希去重;测试先失败后通过;真实数据入库前后对账 |
+| R2-3 | **补齐 history / social 两个 0 行类目**:候选源逐个过 robots + 新鲜度 + feed 可用性探测,合格才注册 | 探测证据 JSON 落 ``07_tmp``;合格源注册后真实采集到**非 0 行**且体检 ``db.*`` 无 FAIL |
+| R2-4 | **头条公开互动数据(阅读/评论/点赞/收藏)入库**(下一轮 R3,本轮只出探测与方案) | 本轮只出:页面是否公开可见的实测读数 + 字段映射 + 白名单口径;不动生产库 |
+| R2-5 | 收尾 | 全量测试 exit 0、``ttxt doctor`` 无 FAIL、报告 P19、交接页追加完成取证、提交并推送 |
+
+### 10.3 本轮明确不做(防止范围失控)
+
+- 不改表结构(DDL)、不动 C-5 可信度分档口径、不修规则 9 的标题抽取(那要决定是否 bump ``PROCESSOR_VERSION``,单独一轮)。
+- 不安装 CloakBrowser 之外的新浏览器/新模型;不启动 Strata 相关操作(只读)。
+- 不删除任何旧文件、日志、备份、WAL/SHM、pytest 残留。
+
+## 十一、第 3 轮(2026-11-15 16:0x–16:2x)完成账本:P19 采集 + P20 三处根因
+
+完整取证与根因见 `08_wiki/reports/P19-keyword-driven-crawl-20261115.md`;规则新增 **38/39/40**。
+
+| 项 | 读数(本轮实测) | 取证 |
+| --- | --- | --- |
+| 远端 / 本地 HEAD(开工) | `3d4ea15`(C-7b),工作区含 P19 未提交改动 | `git log --oneline -6`、`git status --porcelain` → `07_tmp/p19_keyword_crawl/git_status_p20.txt` |
+| 全量测试 | **339 passed / 55.60 s / exit 0**(接手时 314) | `python -m pytest 10_tests -q` |
+| 生产行数 | 312 → **354**(social 0→22、history 0→20) | `07_tmp/p19_keyword_crawl/verify_p20_20261115T1615.json` |
+| 语料质量 | social full 20/short 2,min 136,avg 1127.9;history full 19/short 1,min 402,avg 891.6 | 同上 |
+| 采集任务 | job 64/65(第一轮各 20 行)、66(暴露 P20 三处根因)、**67/68 各 `bodies_upgraded: 8`**、69(闸门:2 页 / 4.31 s / `feed_total 30`) | `crawl_jobs` + `crawl-queue` 回执 |
+| 体检 | **29 ok / 0 failed**;WARN 3 条全是 `demo` 历史残留 + 9 条空 `evidence_links` | `07_tmp/p19_keyword_crawl/p20_doctor.txt` |
+| 索引与知识资产 | `analyze` 后 social indexed 22 / history indexed 20;`viral.tiers.missing_data` 22/20 | `03_intelligence/keyword_feedback/{social,history}-feedback-20261115T1615*.json` |
+
+第 4 轮待办(优先级从上到下):
+
+1. **R2-4 互动指标入库**:头条公开阅读/点赞/收藏/评论,建 `article_metrics` 带 `provenance`(缺失≠0,未授权来源拒绝);没有它 `viral.tiers` 全是 `missing_data`,爆款与垃圾永远分不出,关键词反馈也没有信号。
+2. **R2-5 短正文回填工具**(`ttxt crawl-enrich --category`):已被 feed 挤出去的短行(现 social 2 / history 1 / health / finance / technology / demo 里若干)不能只靠"下一轮再被列出来"补救。
+3. Worker / Scheduler 上线(队列里仍有别的窗口留的 job 54 `toutiao_tech`、job 63 `who_cn_news`)。
+4. C-5 可信度分档(全 `unverified`)与 9 条空 `evidence_links`(要 DDL 口径,需批准)。
+5. `_element_text` 标题缺陷修复 + `PROCESSOR_VERSION` bump(单独一轮);`D:\ttxt\pytest-of-yangl` 残留清理(需批准)。
+6. 恢复规则 24 的"实现前先失败":本批 P20 断言与实现同批写,已在 P19 报告 §五 如实记录偏差与替代证据。

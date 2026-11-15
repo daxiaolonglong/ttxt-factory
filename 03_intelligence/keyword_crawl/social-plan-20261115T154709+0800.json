@@ -1,0 +1,55 @@
+{
+  "category": "social",
+  "generated_at": "2026-11-15T15:47:09+08:00",
+  "keywords": [
+    "城市",
+    "教育",
+    "就业"
+  ],
+  "keyword_rows": [
+    {
+      "keyword": "城市",
+      "status": "gap",
+      "score": 0.0,
+      "collected": 0
+    },
+    {
+      "keyword": "教育",
+      "status": "gap",
+      "score": 0.0,
+      "collected": 0
+    },
+    {
+      "keyword": "就业",
+      "status": "gap",
+      "score": 0.0,
+      "collected": 0
+    }
+  ],
+  "articles_before": 0,
+  "cold_start": true,
+  "sources": [
+    "chinanews_society"
+  ],
+  "plans": [
+    {
+      "source": "chinanews_society",
+      "category": "social",
+      "keywords": [
+        "城市",
+        "教育",
+        "就业"
+      ],
+      "reason": "cold_start",
+      "cold_start": true,
+      "fetch_item_pages": true,
+      "note": "类目库为空:本轮不设关键词闸门,先采集结语料",
+      "job_id": 64
+    }
+  ],
+  "rejected": [],
+  "note": "只出计划;加 --apply 才入队,入队后仍需 crawl-queue --run 或 Worker 执行",
+  "applied": true,
+  "queued_jobs": 1,
+  "reused_jobs": 0
+}
