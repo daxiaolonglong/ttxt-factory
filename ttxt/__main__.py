@@ -14,6 +14,7 @@ from . import db, doctor, housekeep, scheduler
 from .analysis import analyze as analyzer
 from .analysis import metrics_import, prediction, viral
 from .analysis import rag as analyzer_rag
+from .crawler import dedupe as crawler_dedupe
 from .crawler import pipeline as crawler_pipeline
 from .crawler import runner as crawler_runner
 from .crawler import sources as crawler_sources
@@ -191,6 +192,143 @@ def cmd_relabel_completeness(args: argparse.Namespace) -> int:
         payload["report_file"] = str(target)
         target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False, indent=2))
+    return 0 if ok else 1
+
+
+def cmd_dedupe_history(args: argparse.Namespace) -> int:
+    """C-7:清理历史遗留"同一篇文章存了两行"(默认干跑;``--apply`` 才写;``--rollback`` 按报告回滚)。
+
+    报告必须落文件:删行是一份逐行账本(整行原文 + 被搬移/丢弃的引用),
+    没有账本的删数据等于毁数据。跨命名空间的同一篇文章(``demo`` 里 P12 转正遗留的拷贝)
+    默认一起处理,``--skip-cross`` 可以只看类目库内。
+    """
+    if args.rollback:
+        source = Path(args.rollback)
+        if not source.is_file():
+            print(f"回滚报告不存在:{source}")
+            return 1
+        try:
+            payload = json.loads(source.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"回滚报告读不出来:{exc}")
+            return 1
+        try:
+            result = crawler_dedupe.rollback(payload)
+        except Exception as exc:  # noqa: BLE001 - 回滚失败必须整笔停住,不能部分恢复
+            print(f"回滚失败:{type(exc).__name__}: {exc}")
+            return 1
+        print(json.dumps({"rollback_from": str(source), **result}, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.category == "all":
+        categories = sorted(crawler_store.registered_namespaces())
+    else:
+        categories = [args.category]
+
+    results: dict[str, object] = {}
+    ledger: list[dict[str, object]] = []
+    identity_suspect: list[dict[str, object]] = []
+    removed_total = 0
+    planned_total = 0
+    ok = True
+    for category in categories:
+        try:
+            plan = crawler_dedupe.plan_category(category)
+            planned_total += int(plan["removable"])
+            for suspect in plan["identity_suspect"]:
+                identity_suspect.append({"category": category, **suspect})
+            if args.apply:
+                applied = crawler_dedupe.apply_plan(plan)
+                results[category] = {
+                    key: applied[key]
+                    for key in ("removed", "moved_references", "dropped_references", "fts_rows_removed", "db")
+                }
+                results[category]["duplicate_groups"] = plan["duplicate_groups"]
+                ledger.extend(applied["ledger"])
+                removed_total += int(applied["removed"])
+            else:
+                results[category] = {
+                    "db": plan["db"],
+                    "removed": 0,
+                    "planned": int(plan["removable"]),
+                    "duplicate_groups": plan["duplicate_groups"],
+                }
+        except Exception as exc:  # noqa: BLE001 - 类目级错误隔离
+            results[category] = {"error": f"{type(exc).__name__}: {exc}"}
+            ok = False
+
+    cross: dict[str, object] = {"skipped": True}
+    if not args.skip_cross:
+        try:
+            cross_plan = crawler_dedupe.plan_cross()
+            planned_cross = sum(len(block["ids"]) for one in cross_plan["copies"] for block in one["removable"])
+            planned_total += planned_cross
+            if args.apply:
+                cross_result = crawler_dedupe.apply_cross(cross_plan)
+                cross = {
+                    "removed": cross_result["removed"],
+                    "applied_namespaces": cross_result["applied_namespaces"],
+                    "dropped_references": cross_result["dropped_references"],
+                    "ambiguous": cross_plan["ambiguous"],
+                }
+                ledger.extend(cross_result["ledger"])
+                removed_total += int(cross_result["removed"])
+            else:
+                cross = {
+                    "planned": planned_cross,
+                    "copies": cross_plan["copies"],
+                    "ambiguous": cross_plan["ambiguous"],
+                }
+        except Exception as exc:  # noqa: BLE001 - 跨库对账失败不得让类目结果消失
+            cross = {"error": f"{type(exc).__name__}: {exc}"}
+            ok = False
+
+    payload: dict[str, object] = {
+        "applied": bool(args.apply),
+        "removed": removed_total,
+        "planned": planned_total,
+        "categories": categories,
+        "results": results,
+        "cross": cross,
+        "identity_suspect": identity_suspect,
+        "ledger": ledger,
+        "note": "账本含整行原文与被搬移/丢弃的引用;--rollback <本报告> 可按原 id 逐行恢复。"
+        "identity_suspect 里的行不是重复,不得删除。articles_fts 与 article_clusters 是派生索引,"
+        "整改后跑 `ttxt clean --category <类目>` 与检索重建即可。",
+    }
+    if args.apply and not args.out:
+        print("--apply 必须配 --out:删行的逐行账本必须落文件,否则没法回滚。")
+        return 1
+    if args.out:
+        target = Path(args.out)
+        if not target.resolve().is_relative_to(cfg.PROJECT_ROOT):
+            print(f"报告必须写在项目内:{target}")
+            return 1
+        target.parent.mkdir(parents=True, exist_ok=True)
+        payload["report_file"] = str(target)
+        target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        # 账本里含整行原文,全打到屏幕上会把人淹死;屏幕只给可核对的摘要,全文在文件里。
+        summary = {key: value for key, value in payload.items() if key not in ("results", "cross", "ledger")}
+        summary["results"] = {
+            name: (
+                {"error": block["error"]}
+                if "error" in block
+                else {
+                    "db": block.get("db"),
+                    "removed": block.get("removed"),
+                    "planned": block.get("planned", 0),
+                    "groups": len(block.get("duplicate_groups") or []),
+                }
+            )
+            for name, block in results.items()
+        }
+        summary["cross"] = {
+            key: (len(value) if isinstance(value, list) else value) for key, value in cross.items()
+        }
+        summary["ledger_rows"] = len(ledger)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+    else:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0 if ok else 1
 
 
@@ -461,6 +599,17 @@ def build_parser() -> argparse.ArgumentParser:
     relabel.add_argument("--out", default=None, help="把逐行 from→to 报告写到该 JSON 文件(项目内)")
     relabel.add_argument("--rollback", default=None, help="按 --out 产出的报告精确回滚")
     relabel.set_defaults(func=cmd_relabel_completeness)
+
+    dedupe = sub.add_parser(
+        "dedupe-history",
+        help="清理历史遗留的同一篇文章多行(默认干跑,报告是逐行账本,可 --rollback)",
+    )
+    dedupe.add_argument("--category", default="all", help="类目 slug 或 all(=注册表里的正式类目)")
+    dedupe.add_argument("--apply", action="store_true", help="真正删行(默认只出计划,不改库)")
+    dedupe.add_argument("--out", default=None, help="把逐行账本写到该 JSON 文件(项目内)")
+    dedupe.add_argument("--rollback", default=None, help="按 --out 产出的账本按原 id 逐行恢复")
+    dedupe.add_argument("--skip-cross", action="store_true", help="只处理类目库内,跳过跨命名空间拷贝对账")
+    dedupe.set_defaults(func=cmd_dedupe_history)
 
     analyze = sub.add_parser("analyze", help="关键词评分/爆款标签/知识资产/FTS5 索引")
     analyze.add_argument("--category", default="all", help="类目 slug 或 all")

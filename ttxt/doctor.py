@@ -10,7 +10,7 @@ from typing import Any
 
 from . import config as cfg
 from . import db, housekeep
-from .crawler import stackcheck, store
+from .crawler import dedupe, stackcheck, store
 
 
 def _namespace_identity(name: str) -> tuple[set[str], set[str]]:
@@ -213,6 +213,125 @@ def completeness_checks() -> list[tuple[str, str, str]]:
         results.append(_cleaned_coverage_row())
     except Exception as exc:  # noqa: BLE001 - 覆盖率统计失败不得毁掉整段完整性体检
         results.append(("WARN", "db.cleaned_coverage", f"读失败,无法统计清洗覆盖率:{type(exc).__name__}: {exc}"))
+    try:
+        results.extend(_dedupe_rows())
+    except Exception as exc:  # noqa: BLE001 - 判重对账失败不得毁掉整段完整性体检
+        results.append(("WARN", "db.duplicate_rows", f"判重对账读失败,无法判定历史重复行:{type(exc).__name__}: {exc}"))
+    try:
+        results.append(_orphan_reference_row())
+    except Exception as exc:  # noqa: BLE001 - 引用完整性读失败不得毁掉整段完整性体检
+        results.append(("WARN", "db.orphan_references", f"引用完整性读失败:{type(exc).__name__}: {exc}"))
+    return results
+
+
+REFERENCE_TABLES = ("viral_labels", "article_metrics", "metric_snapshots", "evidence_links")
+
+
+def _orphan_reference_row() -> tuple[str, str, str]:
+    """引用完整性:标签/指标/快照/证据链的 ``article_id`` 指向不存在的文章行 = 孤儿引用。
+
+    这些表**没有外键**(``08_wiki/db_schema.md``),断了也没人会报错,所以只能靠体检天天查。
+    C-7 删行时的硬约束就是"绝不制造孤儿",这条检查是那个约束的日常哨兵。
+
+    实测另有 9 条 ``evidence_links`` 的 ``article_id`` 为空(finance 4 条、health 5 条,
+    取证于 ``07_tmp/p17_dedupe_apply_20261115``):只有断言没有出处,那是写作闭环取证没做全,
+    不是引用断链,所以单独提示、不判失败。
+    """
+    orphans: dict[str, int] = {}
+    unattributed = 0
+    for name in store.namespaces_on_disk():
+        path = store.articles_db_path(name)
+        if not path.exists():
+            continue
+        con = store.read_only_connect(path)
+        try:
+            for table in REFERENCE_TABLES:
+                try:
+                    count = int(
+                        con.execute(
+                            f"SELECT COUNT(*) FROM {table} t LEFT JOIN articles a ON a.id = t.article_id"
+                            " WHERE t.article_id IS NOT NULL AND a.id IS NULL"
+                        ).fetchone()[0]
+                    )
+                except sqlite3.Error:
+                    continue  # 旧库没有这张表,不算断链
+                if count:
+                    orphans[f"{name}.{table}"] = count
+            try:
+                unattributed += int(con.execute("SELECT COUNT(*) FROM evidence_links WHERE article_id IS NULL").fetchone()[0])
+            except sqlite3.Error:
+                pass
+        finally:
+            con.close()
+    if orphans:
+        return (
+            "FAIL",
+            "db.orphan_references",
+            "引用指向不存在的文章行(孤儿):" + ", ".join(f"{one}={count}" for one, count in sorted(orphans.items()))
+            + ";先用账本把文章行补回来(``ttxt dedupe-history --rollback <账本>``),再把引用挪到活体文章行",
+        )
+    if unattributed:
+        return (
+            "WARN",
+            "db.orphan_references",
+            f"没有孤儿引用;但 {unattributed} 条 evidence_links 的 article_id 为空"
+            "(只有断言没有出处),写作闭环取证不完整",
+        )
+    return ("PASS", "db.orphan_references", "标签/指标/快照/证据链的 article_id 都能在同一个类目库内找到对应文章行")
+
+
+def _dedupe_rows() -> list[tuple[str, str, str]]:
+    """历史重复行与 URL 身份可疑(C-7)。返回 ``(level, name, detail)`` 两条。
+
+    实测依据(``07_tmp/p16_dedupe_20261115/census.json``):``technology`` 同一 URL 存 3 行
+    (同一篇文章三次抽取),``finance`` 同一 URL 存 2 行(同一篇新闻被更新过),
+    ``demo`` 与 ``technology`` 有 13 行同 URL 同 hash 的跨命名空间拷贝。写入侧 C-2/C-3
+    已经拦住了新增,但**历史遗留没人对账**,库里存着同一篇文章的多行,爆款分析会重复计数。
+
+    反过来 ``demo`` 那 30 行共用来源页地址的**不是重复**(列表页抽取器把来源页赋给每一条),
+    所以另一条检查只报 ``identity_suspect``,并明确写"不得删除,要修抽取器"。
+    """
+    summary = dedupe.summarize()
+    results: list[tuple[str, str, str]] = []
+    if summary["duplicate_rows"] or summary["cross_copy_rows"]:
+        pieces = [
+            f"{item['category']} {item['url_normalized']} 多存 {len(item['ids'])} 行"
+            f"(保留 id={item['keeper_id']};{item['reason']})"
+            for item in summary["duplicates"]
+        ]
+        if summary["cross_copy_rows"]:
+            pieces.append(
+                f"跨命名空间同一篇文章 {summary['cross_copy_rows']} 行(共 {summary['cross_copies']} 篇,"
+                f"归属争议待判定 {summary['cross_ambiguous']} 篇)"
+            )
+        results.append(
+            (
+                "FAIL",
+                "db.duplicate_rows",
+                "; ".join(pieces)
+                + "; 整改:`ttxt dedupe-history --category all --out <报告>` 先干跑,确认后再 --apply(账本可 --rollback)",
+            )
+        )
+    else:
+        results.append(("PASS", "db.duplicate_rows", "每个 URL 在每个命名空间内只有一行,命名空间之间也没有同一篇文章"))
+
+    suspects = summary["identity_suspect"]
+    if suspects:
+        detail = "; ".join(
+            f"{item['category']} {item['url_normalized']} 有 {len(item['ids'])} 行({item['reason']})"
+            for item in suspects[:5]
+        )
+        results.append(
+            (
+                "WARN",
+                "db.identity_suspect",
+                f"{len(suspects)} 组同一 URL 下被存成多条互不相同的文章,不得删除(删了就毁掉真实语料):{detail}"
+                + (";更多组见 `ttxt dedupe-history` 干跑报告" if len(suspects) > 5 else "")
+                + ";根因多为列表页抽取器把来源页地址赋给每一条,要修的是抽取器取每条自己的链接",
+            )
+        )
+    else:
+        results.append(("PASS", "db.identity_suspect", "没有同一 URL 下存着多条互不相同文章的可疑组"))
     return results
 
 

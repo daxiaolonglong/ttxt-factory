@@ -163,15 +163,48 @@ def test_dashboard_never_opens_production_databases(dashboard, session_db_opens,
     assert not new_sidecars, f"面板测试在生产目录新增了 WAL/SHM 边车:{new_sidecars}"
 
 
-def test_category_articles(dashboard):
+def test_category_articles(dashboard, isolated_data_root: Path):
     _, body = _get(dashboard + "/api/category/demo/articles?limit=5")
     data = json.loads(body)
     assert data["total"] >= 20
     assert 0 < len(data["items"]) <= 5
 
-    _, body = _get(dashboard + f"/api/category/demo/articles?limit=5&q={quote('城市')}")
+    # 检索断言不能押在生产内容上。C-7 从 demo 删掉 13 行跨类目重复副本
+    # (整改报告 `07_tmp/p17_dedupe_apply_20261115/ledger_apply.json`)之后,原先唯一命中
+    # 「城市」的那一行没了,这条断言就从"验证筛选功能"退化成"验证某一天的生产数据"。
+    # 现在自己播种一行,命中与不命中各验一次。
+    from ttxt import config as cfg
+    from ttxt.crawler import store
+
+    marker = "面板检索播种标题"
+    path = isolated_data_root / "01_categories" / "demo" / "articles.db"
+    con = sqlite3.connect(str(path))
+    try:
+        con.execute(
+            "INSERT INTO articles(category, source, title, content, excerpt, url, url_normalized,"
+            " fetched_at, content_hash, completeness, credibility, processor_version, text_length)"
+            " VALUES ('demo', 'p7.seed', ?, ?, '', ?, ?, ?, ?, 'full', 'unverified', ?, 120)",
+            (
+                f"{marker} 城市",
+                f"正文 {marker}",
+                "https://example.org/p7-seed",
+                store.normalize_url("https://example.org/p7-seed"),
+                cfg.now_iso(),
+                store.content_hash(marker, marker),
+                store.PROCESSOR_VERSION,
+            ),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    _, body = _get(dashboard + f"/api/category/demo/articles?limit=5&q={quote(marker)}")
     data = json.loads(body)
-    assert data["total"] >= 1
+    assert data["total"] >= 1, "播种的行必须能被检索到"
+    assert marker in data["items"][0]["title"]
+
+    _, body = _get(dashboard + f"/api/category/demo/articles?limit=5&q={quote('绝无此词')}")
+    assert json.loads(body)["total"] == 0, "筛选没有生效"
 
 
 def test_keywords_and_analysis(dashboard):
