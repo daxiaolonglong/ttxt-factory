@@ -218,6 +218,10 @@ def completeness_checks() -> list[tuple[str, str, str]]:
     except Exception as exc:  # noqa: BLE001 - 判重对账失败不得毁掉整段完整性体检
         results.append(("WARN", "db.duplicate_rows", f"判重对账读失败,无法判定历史重复行:{type(exc).__name__}: {exc}"))
     try:
+        results.append(_url_identity_row())
+    except Exception as exc:  # noqa: BLE001 - URL 身份对账失败不得毁掉整段完整性体检
+        results.append(("WARN", "db.url_identity", f"URL 身份对账读失败:{type(exc).__name__}: {exc}"))
+    try:
         results.append(_orphan_reference_row())
     except Exception as exc:  # noqa: BLE001 - 引用完整性读失败不得毁掉整段完整性体检
         results.append(("WARN", "db.orphan_references", f"引用完整性读失败:{type(exc).__name__}: {exc}"))
@@ -333,6 +337,76 @@ def _dedupe_rows() -> list[tuple[str, str, str]]:
     else:
         results.append(("PASS", "db.identity_suspect", "没有同一 URL 下存着多条互不相同文章的可疑组"))
     return results
+
+
+def _url_identity_row() -> tuple[str, str, str]:
+    """URL 身份体检(C-7b):文章行把来源页/列表页/订阅地址写成了自己的地址。
+
+    实测依据:``demo`` 库 30 行 ``quotes_toscrape`` 共用 ``https://quotes.toscrape.com/``,
+    根因是列表页抽取器给每一条赋了来源页地址(老 ``extract.py`` 的 ``url=source.url``),
+    而入库侧当时只把它当"正常重复"计数,所以塌陷静默了 3 天。抽取器已改成逐条取自己的
+    链接(拿不到就标记回退并计数),但**历史塌陷行不能删**(规则 33:删了就毁掉真实语料),
+    所以这条体检按"今天还在不在发生"分级:
+
+    - 责任来源今天仍在 ``enabled`` → **FAIL**:塌陷还在生产,必须配 ``link_selector``、
+      换列表页或停用该来源,不得继续把来源页地址当文章地址;
+    - 只涉及已停用来源 → **WARN**:历史残留,数据保留但不得再增长。
+    """
+    known = dedupe.page_urls()
+    if not known:
+        return (
+            "WARN",
+            "db.url_identity",
+            "来源配置读不出来,无法判定文章行是否把来源页/订阅地址当成了自己的地址",
+        )
+    enabled = {str(entry.id) for entry in dedupe.load_page_urls() if getattr(entry, "enabled", False)}
+    groups: list[str] = []
+    live: list[str] = []
+    rows = 0
+    for name in store.namespaces_on_disk():
+        path = store.articles_db_path(name)
+        if not path.exists():
+            continue
+        con = store.read_only_connect(path)
+        try:
+            for source_id, url_normalized, count in con.execute(
+                "SELECT source, url_normalized, COUNT(*) FROM articles"
+                " GROUP BY source, url_normalized"
+            ):
+                if not url_normalized or str(url_normalized) not in known:
+                    continue
+                count = int(count or 0)
+                rows += count
+                label = (
+                    f"{name}:{source_id or '无来源'} 有 {count} 行把来源页地址 {url_normalized}"
+                    " 当文章地址"
+                )
+                groups.append(label)
+                if str(source_id or "") in enabled:
+                    live.append(label)
+        finally:
+            con.close()
+    if not groups:
+        return ("PASS", "db.url_identity", "没有文章行把来源页/订阅地址写成自己的地址(URL 身份健康)")
+    detail = "; ".join(groups[:5])
+    if len(groups) > 5:
+        detail += ";更多组见 `ttxt dedupe-history` 干跑报告"
+    if live:
+        return (
+            "FAIL",
+            "db.url_identity",
+            f"{len(groups)} 组共 {rows} 行 URL 身份塌陷,其中 {len(live)} 组的责任来源今天仍启用"
+            f"(塌陷还在生产):{live[0]}"
+            + (f"(另有 {len(live) - 1} 组)" if len(live) > 1 else "")
+            + ";整改:抽取器已逐条取自己的链接,来源需配 link_selector 或换列表页,或停用来源;"
+            "历史行不得删除(会毁掉真实语料)",
+        )
+    return (
+        "WARN",
+        "db.url_identity",
+        f"{len(groups)} 组共 {rows} 行把来源页/订阅地址当文章地址,责任来源今天都已停用(历史残留):{detail}"
+        + ";整改:重新启用该来源之前必须配 link_selector 或换列表页;历史行不得删除(会毁掉真实语料)",
+    )
 
 
 def _cleaned_coverage_row() -> tuple[str, str, str]:

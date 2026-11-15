@@ -25,6 +25,11 @@ class Source:
     title_selector: str | None = None
     author_selector: str | None = None
     next_selector: str | None = None
+    # C-7b(2026-11-15):列表卡片里"这条自己的链接"的选择器(如 ``h2 a`` / ``a.title``)。
+    # 不配时抽取器按"标题元素自身/标题内链接 → 锚文本=标题 → 块内第一个可用链接"的顺序猜,
+    # 并且只采信在本页唯一的那个链接;全都不成立就明确标记"没拿到逐条链接"(计数 + 记日志),
+    # 绝不静默把来源页地址当文章地址(见 extract.extract_html_items / store.insert_items)。
+    link_selector: str | None = None
     base_url: str | None = None
     demo: bool = False
     notes: str = ""

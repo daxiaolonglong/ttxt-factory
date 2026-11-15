@@ -38,16 +38,17 @@
 6. C-7 删行后 P7 面板一条测试红:断言押的是生产正文内容("demo 里搜得到『城市』"),已改为播种一行(规则 34)。
 7. **外部网络事故(非代码缺陷,未改本机任何配置)**:12:47–12:59 实测本机到 GitHub 的出口断死——直连 443 的 TLS 握手被切断,走系统代理(`365vpn`,127.0.0.1:57777)对 GitHub 的 CONNECT 返回 502;用户按其客户端侧处理后 13:00:30 同一命令链即恢复(`d817805`/`3bddf38` 已入库;恢复动作不在本机取证,故归因为节点/出口侧,属推断)。读数与判定见 §八。
 
-## 五、待办(按优先级,接手就从 **2** 开始;1 已完成)
+## 五、待办(按优先级,接手就从 **3** 开始;1、2 已完成)
 
 1. **推送 `d817805`** —— **已完成**(2026-11-15 13:00:30 +08:00):`scripts\push.cmd` 推成功,远端 `refs/heads/main` 实测 = `3bddf387ed7bcf67935f6aa66fe7fede9f0ab114`,`git rev-list --left-right --count origin/main...main` = `0 0`,工作区干净。中断期的读数与恢复取证见 §八(当时设想的 `git push origin HEAD` 不必再执行)。
-2. **C-7b 修抽取器身份塌陷**:`ttxt/crawler/extract.py:31-58` 的 `extract_html_items` 把 `url=source.url` 赋给每一条 → 列表页 30 行同一个 URL。要改成取每条自己的链接;入库时"同 URL 不同内容"不得静默,要计数 + 记日志;配一条 `doctor.db.url_identity` 体检。做完才能谈 `demo` 里那 30 行。
+2. **C-7b 修抽取器身份塌陷**:`ttxt/crawler/extract.py:31-58` 的 `extract_html_items` 把 `url=source.url` 赋给每一条 → 列表页 30 行同一个 URL。要改成取每条自己的链接;入库时"同 URL 不同内容"不得静默,要计数 + 记日志;配一条 `doctor.db.url_identity` 体检。做完才能谈 `demo` 里那 30 行。 —— **已完成**(2026-11-15 14:20 +08:00,取证见 `P18-fix-C7b-url-identity-20261115.md`):逐条链接按证据取(配 `link_selector` → 标题元素自身/内部 `<a>` → 锚文本与标题可信相等),取不到就打标 `url_is_page_fallback` 回退,**不猜地址**(实测兜底猜会把 `/tag/...`、`/author/...` 变成假身份);入库计数 `url_identity_conflict` / `url_no_item_link` + 逐条日志;`doctor.db.url_identity` 三级(责任来源仍启用 = FAIL)。那 30 行的处置结论在 P18 §六:**不删不改写**,且实测该站(含 `/js/` 浏览器渲染)根本没有逐条链接,身份修不好,只能长期 WARN。测试 314 passed、doctor 29 ok / 0 failed(见 §九)。
 3. **恢复真实采集并核验采集栈**:按 Scrapling / CloakBrowser 官方文档核验本地部署(Scrapling 0.5.1 + curl_cffi + playwright,HTTP 优先;CloakBrowser 不装新东西)。已知残留风险:Scrapling 发伪装 UA + Google referer,而 robots 判定用项目 UA(`07_rules` 规则 19 相关,需要人拍板口径);浏览器 profile 547MB vs 配额 `disk.browser_max_gb 3`。
 4. **Worker / Scheduler 未启动**:定时采集与模型串行队列还没跑起来(`00_control/scheduler_state.json`)。
 5. **history / social 两个类目 0 行**:缺已批准来源,要人给来源清单才能补采。
 6. **C-5 可信度分档**:现在全 `unverified`,要人批准分档口径。
 7. **C-6 评审元数据 DDL** + **9 条 `evidence_links` 无出处**的修法:涉及改表结构,必须先获批准。
 8. 清理项(需批准才动):`D:\ttxt\pytest-of-yangl` 残留目录 —— 本窗口没有删除任何旧文件/日志/备份/WAL/SHM。
+9. **新发现的标题抽取缺陷**(C-7b 过程中实测出来,未修):标题元素是 `<h2 class="title"><a>标题</a></h2>` 时 `extract._element_text` 取到空串(Scrapling `element.text` 只取直接文本,取证 `07_tmp/p18_c7b_probe/probe_title.py`),于是标题退化成整块文本(标签、作者混进标题),`content_hash` 与 FTS 内容跟着漂。修它=改标题口径=改 `content_hash` 语义,必须先决定 `PROCESSOR_VERSION` 是否 bump(本轮故意没 bump)。详见 `P18-fix-C7b-url-identity-20261115.md` §七。
 
 ## 六、目标与恢复方法
 
@@ -93,4 +94,21 @@
 - 代理来源:注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings` → `ProxyEnable=1`、`ProxyServer=127.0.0.1:57777`;`365vpn` 只监听这一个端口,本机没有第二个代理进程可换。
 - 判定(**推断,非实证**):断点在代理节点的 GitHub 出口侧,本机 git、令牌、`http.sslBackend=openssl` 都不是原因。上一次成功推送是 10:59:37(`→ 1de94a3`),说明中断落在其后、13:00:30 之前。
 - 本轮**没有**做:改 hosts、改注册表代理、安装新代理、新建自动重试定时任务(用户选择手动切节点后再推)、以及 8.1 之外的任何写操作。
+
+## 九、待办 2(C-7b)完成取证(2026-11-15 13:50–14:20,追加不改写)
+
+完整报告在 `P18-fix-C7b-url-identity-20261115.md`;这里只登记交接需要的读数。
+
+| 项 | 修复前 | 修复后(实测) |
+| --- | --- | --- |
+| `pytest -q` | 298 passed | **314 passed**(`10_tests/test_c7b_url_identity.py` 新增 16 条) |
+| `ttxt doctor` | 28 ok / 0 failed,3 WARN | **29 ok / 0 failed**,4 WARN:新增 `[WARN] db.url_identity: 1 组共 30 行把来源页/订阅地址当文章地址,责任来源今天都已停用(历史残留)` |
+| 列表页抽取 | 每条 `url=source.url` | 按证据取逐条链接;取不到 → 打标 `url_is_page_fallback` 回退当前页,**不猜** |
+| 入库账 | 塌陷混进 `duplicates` | `url_identity_conflict` / `url_no_item_link` 计数 + `insert.url_identity_conflict` / `insert.page_url_collapse` 日志 |
+| 真实列表页 | — | books.toscrape **20/20** 取到逐条链接;quotes.toscrape **0/40**(含 `/js/` 浏览器渲染,`a[href^='/quote/']` 命中 0) |
+
+- 关键取舍(**实测推翻了直觉方案**):"兜底取块内第一个链接"会把 `/author/...` 当地址;退一步"只信块内唯一链接 + 锚文本互相包含"实测把 30 条里 **14 条**写成 `/tag/change/page/1/` 假地址。最终版宁可回退计数也不编地址 —— 假身份比塌陷更隐蔽(塌陷会被体检抓到,`/tag/...` 永远不会报警)。已固化为规则 35。
+- 过程读数:改造后一度 **18 failed / 292 passed**(c2 预期 9 处 + c3 1 处 + p12 hardening 6 + p12 worker_lease 2),原因是老预期押的是"静默记账",以及三处 `FakeElement` 替身没实现 `css()`(实测 Scrapling 真实元素有 `tag/text/attrib/css`,老抽取器从不向块元素要链接所以没暴露)。逐条补齐后全绿,**没有**放宽任何产品断言。
+- 新发现缺陷(未修,待办 9):标题元素是 `<h2 class="title"><a>标题</a></h2>` 时 `_element_text` 取到空串(Scrapling `.text` 只取直接文本),标题退化为整块文本,牵连 `content_hash` 与 FTS。修它必须同时决定 `PROCESSOR_VERSION` 是否 bump —— 本轮**故意没有** bump(仍 `p2-v1`)。
+- 本轮写操作范围:只有代码、测试、Wiki/规则文档;**没有**写生产库、没有改 `02_crawler/sources.json`、没有删任何行(`articles` 仍 312 行)。
 - 遗留风险:GitHub 出口依赖单个 VPN 客户端的单节点,断供时提交只能滞留在本地(本次两个提交滞留约 2 小时)。若要自动重试,需先获用户对定时任务的明确批准。

@@ -423,6 +423,7 @@ def insert_items(
     db_path: Path | None = None,
     page_url: str | None = None,
     cross_report: dict[str, object] | None = None,
+    page_urls: list[str] | None = None,
 ) -> dict[str, int]:
     """一批条目写入同一个类目库;URL 文章身份 + content_hash 双重去重,整批一个写事务。
 
@@ -437,11 +438,12 @@ def insert_items(
       ``BEGIN IMMEDIATE`` 先取写锁(与 ``model_gate/queue.py:33`` 同一做法),
       并发者要么等锁,要么在本批提交后看到该行,不会重复插入。
     - 类目库即类目命名空间:URL 身份按整库判定,与行上的 ``category`` 取值无关。
-    - ``page_url`` 是来源页/订阅地址。html 列表页抽取器把来源页地址赋给每一条
-      (``extract.py:55``),RSS 条目缺 link 时也回退到它(``extract.py:91``)。
-      这种 URL 不是文章身份,按它去重会把列表页正文误判为重复(实测:demo 库
-      ``quotes_toscrape`` 30 行共用 ``https://quotes.toscrape.com/``),因此这类
-      条目仍只按 content_hash 去重。调用方(只有 ``runner``)必须传入来源 URL。
+    - ``page_url`` / ``page_urls`` 是来源页/列表页/订阅地址(html 分页每一页都要传进来,
+       RSS 是订阅地址)。它们不是文章身份:列表页抽取器在 C-7b 之前把来源页地址赋给
+       每一条,RSS 条目缺 link 时也回退到它。这种 URL 按文章身份去重会把列表页正文
+       误判为重复(实测:demo 库 ``quotes_toscrape`` 30 行共用
+       ``https://quotes.toscrape.com/``),因此这类条目只按 content_hash 去重。
+       调用方(只有 ``runner``)必须传入实际抓过的每一页地址。
     - URL 规范化沿用 ``clean.normalize_url``(只去跟踪参数),不额外剥离可能
       区分文章的查询参数。
     - 整批一个事务:任一条异常 → 整批回滚,不留半批数据。
@@ -465,6 +467,22 @@ def insert_items(
     - 已知残留风险(诚实记录):跨库检查与目标库写事务不是同一个原子域,
       两个类目同时采同一篇文章仍可能双双落库;兜底是 ``doctor`` 的
       ``db.cross_overlap`` 对账(``ttxt doctor`` 会 FAIL),而不是假装跨文件原子。
+
+    C-7b(2026-11-15)追加:**"同一个 URL 位上装着两篇不同文章"不得静默**。
+
+    - 实测根因:老实现把任何 URL 冲突一律 ``duplicates += 1`` 就继续,既不区分
+      "同一篇被重复抓"与"同一 URL 上是两篇不同文章",也不写日志;``demo`` 库那 30 条
+      互不相同的文章共用来源页地址,靠 C-7 判重普查才被发现(3 天才看见)。
+    - 现在两种塌陷都计数 + ``LOG.warn``:
+      (a) **文章级 URL** 上已经存着别的正文(``content_hash`` 不同)→ 计数
+          ``url_identity_conflict``,仍然不插入(一个文章身份只允许一行);
+      (b) **非身份 URL**(来源页/列表页)上已经存着别的正文 → 照样插入(删了就毁掉
+          真实语料,规则 33),同样计数 ``url_identity_conflict``,让塌陷当场可见。
+    - 抽取器标了 ``url_is_page_fallback`` 的条目单独计数 ``url_no_item_link``:
+      这是"列表页没给逐条链接"的直接信号,整改方向是配 ``link_selector`` 或换列表页,
+      而不是继续把来源页地址当文章地址。
+    - 没有命中时**不加键**(``test_store_dedupe`` 断言两键字典,``meta_json`` 结构
+      也不为特例特判),与 C-3 ``cross_report`` 同一做法。
     """
     # 规范化放在开库之前:坏 URL 直接失败,不会先创建一个空类目库
     normalized = [normalize_url(item.url) for item in items]
@@ -472,6 +490,9 @@ def insert_items(
     non_identity_urls: set[str] = set()
     if page_url:
         non_identity_urls.add(normalize_url(page_url))
+    for extra in page_urls or []:
+        if extra:
+            non_identity_urls.add(normalize_url(extra))
     target = Path(db_path) if db_path is not None else init_articles_db(category)
     # 跨库只读扫描:开写事务之前做完,避免在持锁期间读别人的库
     blocked_urls: set[str] = set()
@@ -494,9 +515,12 @@ def insert_items(
         # 卫生检查不能把采集打停:发现失败要喊出来,由 doctor 的跨库对账兜底
         LOG.warn("insert.cross_db_scan_failed", category=category, detail=failure)
     con = connect(target)
-    inserted = duplicates = cross_blocked = 0
+    inserted = duplicates = cross_blocked = identity_conflicts = 0
+    # C-7b:抽取器明确标了"这一条没拿到自己的链接"的条目单独计数,不得静默
+    no_item_link = sum(1 for item in items if getattr(item, "url_is_page_fallback", False))
     fetched_at = cfg.now_iso()
     batch_urls: set[str] = set()  # 本事务内已占用的文章级 URL(批内同 URL 也算重复)
+    batch_hashes: dict[str, list[str]] = {}  # 本事务内每个 URL 已写入的正文哈希
     try:
         con.execute("BEGIN IMMEDIATE")
         for item, url_normalized, hash_value in zip(items, normalized, hashes):
@@ -505,6 +529,13 @@ def insert_items(
                 cross_blocked += 1
                 duplicates += 1
                 continue
+            same_content_elsewhere = hash_value in (batch_hashes.get(url_normalized) or []) or (
+                con.execute(
+                    "SELECT 1 FROM articles WHERE url_normalized = ? AND content_hash = ? LIMIT 1",
+                    (url_normalized, hash_value),
+                ).fetchone()
+                is not None
+            )
             if url_normalized not in non_identity_urls:
                 clash = url_normalized in batch_urls
                 if not clash:
@@ -517,7 +548,36 @@ def insert_items(
                     )
                 if clash:
                     duplicates += 1
+                    if not same_content_elsewhere:
+                        # 同一个文章身份位上存的是**另一篇**文章:身份塌陷,必须喊出来
+                        identity_conflicts += 1
+                        LOG.warn(
+                            "insert.url_identity_conflict",
+                            category=category,
+                            source=source_id,
+                            url=url_normalized,
+                            title=item.title[:80],
+                            detail="同一 URL 上已存着正文不同的文章,本条未插入(要修的是抽取器,不是删数据)",
+                        )
                     continue
+            elif (
+                url_normalized in batch_urls
+                or con.execute(
+                    "SELECT 1 FROM articles WHERE url_normalized = ? LIMIT 1", (url_normalized,)
+                ).fetchone()
+                is not None
+            ) and not same_content_elsewhere:
+                # 列表页/订阅地址这种**非身份 URL** 下已经存着别的正文:正文照旧保留
+                # (删了就毁掉真实语料,规则 33),但塌陷必须当场计数 + 记日志
+                identity_conflicts += 1
+                LOG.warn(
+                    "insert.page_url_collapse",
+                    category=category,
+                    source=source_id,
+                    url=url_normalized,
+                    title=item.title[:80],
+                    detail="来源页/列表页地址被当成文章地址,该 URL 上已存着另一篇正文(整改:配 link_selector 或换列表页)",
+                )
             cursor = con.execute(
                 """
                 INSERT OR IGNORE INTO articles(
@@ -549,6 +609,7 @@ def insert_items(
             if cursor.rowcount:
                 inserted += 1
                 batch_urls.add(url_normalized)
+                batch_hashes.setdefault(url_normalized, []).append(hash_value)
             else:
                 duplicates += 1
         con.commit()
@@ -563,7 +624,27 @@ def insert_items(
         con.close()
     if cross_report is not None:
         cross_report["blocked"] = cross_blocked
-    return {"inserted": inserted, "duplicates": duplicates}
+    counts: dict[str, int] = {"inserted": inserted, "duplicates": duplicates}
+    # C-7b:只有真的发生才加键,保持两键字典在正常情况下不变(dashboard/meta_json 不用特判)
+    if identity_conflicts:
+        counts["url_identity_conflict"] = identity_conflicts
+        LOG.warn(
+            "insert.url_identity_summary",
+            category=category,
+            source=source_id,
+            conflicts=identity_conflicts,
+            detail="同一 URL 位上出现了正文互不相同的文章;逐条原因见 insert.url_identity_conflict / insert.page_url_collapse",
+        )
+    if no_item_link:
+        counts["url_no_item_link"] = no_item_link
+        LOG.warn(
+            "insert.no_item_link",
+            category=category,
+            source=source_id,
+            count=no_item_link,
+            detail="这些条目没拿到自己的链接,URL 退回来源页/订阅地址;整改:配 link_selector 或换列表页",
+        )
+    return counts
 
 
 # ------------------------------------------------------- C-1 历史标签整改(dry-run / 写入 / 回滚)

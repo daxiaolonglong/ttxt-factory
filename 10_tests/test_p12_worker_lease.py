@@ -63,9 +63,20 @@ class FakeCss:
 
 
 class FakeElement:
-    def __init__(self, text="", attrib=None):
+    """Scrapling 元素的最小替身。实测(``07_tmp/p18_c7b_probe/probe_title.py``):真实元素
+    有 ``tag``/``text``/``attrib`` 并且支持 ``css()``;C-7b 之后抽取器会向块元素要
+    ``a::attr(href)``,替身必须实现,默认"块内没有链接"= 列表页没给逐条链接。"""
+
+    def __init__(self, text="", attrib=None, tag: str = "div", links: dict[str, list[str]] | None = None):
         self.text = text
         self.attrib = attrib or {}
+        self.tag = tag
+        self._links = links or {}
+
+    def css(self, selector: str):
+        return FakeCss(
+            [FakeElement(text=href, attrib={"href": href}, tag="a") for href in self._links.get(selector, [])]
+        )
 
 
 class FakePage:

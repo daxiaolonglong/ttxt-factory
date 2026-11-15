@@ -151,6 +151,9 @@ def _execute_job(
 
         delay = max(float(source.rate_limit_s), float(rules.crawl_delay_s or 0))
         items: list[extract.ExtractedItem] = []
+        # C-7b:本任务实际抓过的每一页地址。它们一律不是文章身份,必须整批告知入库侧
+        # (只传 source.url 会把第 2/3 页漏掉,那些页的回退条目就会被按 URL 误判重复)。
+        listing_pages: list[str] = []
         render = source.render == "browser"
         # P12:需要渲染的来源一次任务只开一个浏览器会话(引用计数共享,页面池复用)
         session_cm = fetcher.browser_session() if render else nullcontext(None)
@@ -213,7 +216,10 @@ def _execute_job(
                     result = fetcher.fetch_page(url, render=render, session=browser_session)
                     summary["pages_fetched"] += 1
                     pages += 1
-                    items.extend(extract.extract_html_items(result.page, source))
+                    listing_pages.append(str(url))
+                    # C-7b:逐条链接按**当前这一页**的地址绝对化。用 source.url 时,
+                    # 第 2/3 页的相对链接会指错页,等于拿不到"这一条自己的文章地址"
+                    items.extend(extract.extract_html_items(result.page, source, page_url=url))
                     summary["items_extracted"] = len(items)
                     if limit and len(items) >= limit:
                         break
@@ -247,9 +253,31 @@ def _execute_job(
         # C-3:cross_report 是写入侧跨库判定的归属回执(出参),用于 meta 与日志。
         cross_report: dict[str, object] = {}
         counts = store.insert_items(
-            target_category, source.id, items, page_url=source.url, cross_report=cross_report
+            target_category,
+            source.id,
+            items,
+            page_url=source.url,
+            cross_report=cross_report,
+            page_urls=listing_pages,
         )
         summary.update(counts)
+        if counts.get("url_identity_conflict"):
+            # C-7b:同一 URL 位上是两篇不同文章 —— 不是"正常重复",必须写进 meta 与日志
+            LOG.warn(
+                "crawl.url_identity_conflict",
+                source=source.id,
+                category=target_category,
+                conflicts=counts["url_identity_conflict"],
+                detail="同一 URL 上出现了正文互不相同的文章;要修的是抽取器(逐条取自己的链接),不得删数据",
+            )
+        if counts.get("url_no_item_link"):
+            LOG.warn(
+                "crawl.no_item_link",
+                source=source.id,
+                category=target_category,
+                count=counts["url_no_item_link"],
+                detail="这些条目没拿到自己的链接,URL 退回列表页地址;整改:来源配 link_selector 或换列表页",
+            )
         if cross_report.get("blocked") or cross_report.get("scan_errors"):
             # C-3:少掉的条目不是“正常重复”,要写明被谁持有;没有命中时不加键,
             # 保持 meta_json 结构不变(dashboard/metrics 不需要为跨库特判)。

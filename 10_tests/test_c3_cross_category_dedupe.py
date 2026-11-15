@@ -266,7 +266,11 @@ def test_two_unregistered_namespaces_do_not_block_each_other(namespaces):
 
 
 def test_page_level_items_are_not_cross_blocked_by_page_url(namespaces):
-    """html 列表页把来源页地址赋给每一条(extract.py:55);两个类目采同一列表页不得被 URL 互斥合并。"""
+    """列表页地址不是文章身份:两个类目采同一列表页,不得因 URL 相同被跨类目互斥合并。
+
+    C-7b(2026-11-15)之后抽取器会逐条取自己的链接,但**列表页本身**仍必须整批声明为
+    非身份地址(``page_urls``),否则回退条目会被按 URL 误判。塌陷本身现在必须显式计数。
+    """
     page = "https://demo.example.com/page1/"
     store.init_articles_db("demo")
     counts_tech = store.insert_items(
@@ -280,7 +284,7 @@ def test_page_level_items_are_not_cross_blocked_by_page_url(namespaces):
         page_url=page,
     )
     # 正文相同 → 被 content_hash 拦下(注册类目持有),但绝不是因为 URL 相同
-    assert counts_tech == {"inserted": 2, "duplicates": 0}
+    assert counts_tech == {"inserted": 2, "duplicates": 0, "url_identity_conflict": 1}
     assert counts_demo == {"inserted": 0, "duplicates": 2}
     assert store.insert_items(
         "health", "htmlsrc",

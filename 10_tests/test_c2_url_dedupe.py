@@ -101,7 +101,9 @@ def test_same_url_different_content_inserts_only_once(tmp_path):
         db_path=path,
     )
     # 修复前:second == {"inserted": 1, "duplicates": 0},库里 2 行
-    assert second == {"inserted": 0, "duplicates": 1}
+    # C-7b(2026-11-15)起同一 URL 位上出现正文不同的文章必须**显式计数**,不得只混进
+    # duplicates(实测:老实现把这种塌陷当"正常重复"静默了 3 天,见 P17 §五 待办 2)
+    assert second == {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
     rows = _rows(path)
     assert len(rows) == 1
     assert rows[0]["content"] == "第一次抓到的正文内容甲。"  # 已入库正文不被覆盖/改写
@@ -117,7 +119,11 @@ def test_third_crawl_still_refused(tmp_path):
             [_item("同一篇文章", f"第{index}次抓到的正文内容。", ARTICLE_URL)],
             db_path=path,
         )
-        assert counts == ({"inserted": 1, "duplicates": 0} if index == 0 else {"inserted": 0, "duplicates": 1})
+        assert counts == (
+            {"inserted": 1, "duplicates": 0}
+            if index == 0
+            else {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
+        )
     assert len(_rows(path)) == 1
 
 
@@ -133,7 +139,8 @@ def test_same_batch_same_url_different_content_keeps_one(tmp_path):
         db_path=path,
     )
     # 修复前:{"inserted": 2, "duplicates": 0}
-    assert counts == {"inserted": 1, "duplicates": 1}
+    # C-7b:同批同 URL 正文不同 → 除 duplicates 还必须显式报 url_identity_conflict
+    assert counts == {"inserted": 1, "duplicates": 1, "url_identity_conflict": 1}
     assert len(_rows(path)) == 1
 
 
@@ -147,6 +154,7 @@ def test_url_identity_is_scoped_to_the_category_database(tmp_path):
     assert store.insert_items("c2other", "src", [_item("标题甲", "正文内容乙。", "https://example.com/c2/scoped")], db_path=path) == {
         "inserted": 0,
         "duplicates": 1,
+        "url_identity_conflict": 1,
     }
     assert len(_rows(path)) == 1
 
@@ -189,7 +197,7 @@ def test_tracking_param_variants_count_as_same_url(tmp_path):
         CATEGORY, "src", [_item("分享链接文章", "正文内容乙一二三。", "https://example.com/c2/utm?utm_medium=x#top")], db_path=path
     )
     assert first == {"inserted": 1, "duplicates": 0}
-    assert second == {"inserted": 0, "duplicates": 1}
+    assert second == {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
     assert [row["url_normalized"] for row in _rows(path)] == ["https://example.com/c2/utm"]
 
 
@@ -231,9 +239,11 @@ def test_page_level_listing_url_items_not_collapsed(tmp_path):
     items = [_item(f"引文{i}", f"引文正文内容{i}一二三。", "https://quotes.toscrape.com/") for i in range(30)]
     counts = store.insert_items(CATEGORY, "quotes_toscrape", items, db_path=path, page_url="https://quotes.toscrape.com/")
     # 修复前:{"inserted": 30, ...};修复后必须仍然是 30,否则就是新增的数据丢失
-    assert counts == {"inserted": 30, "duplicates": 0}
+    # C-7b:同一 URL 上 30 篇不同文章是**塌陷**,必须当场计数(第一条占位不算,后 29 条各计 1);
+    # 计数不改变落库结果:30 行全部保留(删了就毁掉真实语料)
+    assert counts == {"inserted": 30, "duplicates": 0, "url_identity_conflict": 29}
     again = store.insert_items(CATEGORY, "quotes_toscrape", items, db_path=path, page_url="https://quotes.toscrape.com/")
-    assert again == {"inserted": 0, "duplicates": 30}
+    assert again == {"inserted": 0, "duplicates": 30}, "重采同一批是真重复,不得谎报成塌陷"
     assert len(_rows(path)) == 30
 
 
@@ -256,7 +266,7 @@ def test_mixed_batch_counts_match_database(tmp_path):
     )
     # fresh 新插入;same-link 第二条按 URL 重复;seed 已存在;copy-hash 与 seed 标题+正文完全一致
     # (content_hash 覆盖 title+content)→ 按 content_hash 重复
-    assert counts == {"inserted": 2, "duplicates": 3}
+    assert counts == {"inserted": 2, "duplicates": 3, "url_identity_conflict": 1}
     assert len(_rows(path)) - before == counts["inserted"]
     assert _dup_groups(path) == []
 
@@ -293,7 +303,7 @@ def test_write_lock_covers_check_then_insert(tmp_path):
         blocker.close()
         pool.shutdown(wait=True)
     assert not finished_early, "insert_items 在别的写事务持锁期间就已完成检查 → 检查不在写锁之内"
-    assert counts == {"inserted": 0, "duplicates": 1}
+    assert counts == {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
     assert len(_rows(path)) == 1  # 只有种子行:blocker 的 UPDATE 持锁但不新增行,竞争者也没有插入
     assert _dup_groups(path) == []
 
@@ -380,9 +390,20 @@ class FakeCss:
 
 
 class FakeElement:
-    def __init__(self, text="", attrib=None):
+    """Scrapling 元素的最小替身。实测(``07_tmp/p18_c7b_probe/probe_title.py``):真实元素
+    有 ``tag``/``text``/``attrib`` 并且支持 ``css()``;C-7b 之后抽取器会向块元素要
+    ``a::attr(href)``,替身必须实现,默认"块内没有链接"= 列表页没给逐条链接。"""
+
+    def __init__(self, text="", attrib=None, tag: str = "div", links: dict[str, list[str]] | None = None):
         self.text = text
         self.attrib = attrib or {}
+        self.tag = tag
+        self._links = links or {}
+
+    def css(self, selector: str):
+        return FakeCss(
+            [FakeElement(text=href, attrib={"href": href}, tag="a") for href in self._links.get(selector, [])]
+        )
 
 
 class FakePage:
