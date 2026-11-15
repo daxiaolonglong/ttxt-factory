@@ -242,7 +242,9 @@ def _execute_job(
             summary["feed_total"] = len(items)
             items = items[: max(1, int(source.max_articles))]
         summary["items_extracted"] = len(items)
-        counts = store.insert_items(target_category, source.id, items)
+        # C-2:来源页/订阅地址不是文章身份(html 列表页把它的 URL 赋给每一条),
+        # 必须显式告知去重判定,否则列表页正文会被按 URL 误判为重复。
+        counts = store.insert_items(target_category, source.id, items, page_url=source.url)
         summary.update(counts)
         summary["ok"] = True
         # elapsed 必须在落库前算好:否则 meta_json 里永远是初始 0.0,观测谎报

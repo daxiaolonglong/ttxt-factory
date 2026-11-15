@@ -237,15 +237,57 @@ def insert_items(
     source_id: str,
     items: list[ExtractedItem],
     db_path: Path | None = None,
+    page_url: str | None = None,
 ) -> dict[str, int]:
+    """一批条目写入同一个类目库;URL 文章身份 + content_hash 双重去重,整批一个写事务。
+
+    C-2(2026-11-15)判定与理由:
+
+    - 唯一约束只有 ``idx_articles_content_hash``(:37),正文一改就被当成新文章;
+      ``idx_articles_url_norm``(:38)是普通索引,不阻止同 URL 重复。所以 URL 身份
+      必须在插入前显式检查,不能指望索引。
+    - 检查与插入必须处于同一个写事务。``connect()``(``ttxt/db.py:94``)是 WAL +
+      ``busy_timeout=30000``,Python 默认隐式事务是 DEFERRED:读不加写锁,
+      “查 URL → 插入”之间存在 TOCTOU 窗口,两个并发任务会双双插入。这里用
+      ``BEGIN IMMEDIATE`` 先取写锁(与 ``model_gate/queue.py:33`` 同一做法),
+      并发者要么等锁,要么在本批提交后看到该行,不会重复插入。
+    - 类目库即类目命名空间:URL 身份按整库判定,与行上的 ``category`` 取值无关。
+    - ``page_url`` 是来源页/订阅地址。html 列表页抽取器把来源页地址赋给每一条
+      (``extract.py:55``),RSS 条目缺 link 时也回退到它(``extract.py:91``)。
+      这种 URL 不是文章身份,按它去重会把列表页正文误判为重复(实测:demo 库
+      ``quotes_toscrape`` 30 行共用 ``https://quotes.toscrape.com/``),因此这类
+      条目仍只按 content_hash 去重。调用方(只有 ``runner``)必须传入来源 URL。
+    - URL 规范化沿用 ``clean.normalize_url``(只去跟踪参数),不额外剥离可能
+      区分文章的查询参数。
+    - 整批一个事务:任一条异常 → 整批回滚,不留半批数据。
+    """
+    # 规范化放在开库之前:坏 URL 直接失败,不会先创建一个空类目库
+    normalized = [normalize_url(item.url) for item in items]
+    non_identity_urls: set[str] = set()
+    if page_url:
+        non_identity_urls.add(normalize_url(page_url))
     target = Path(db_path) if db_path is not None else init_articles_db(category)
     con = connect(target)
     inserted = duplicates = 0
     fetched_at = cfg.now_iso()
+    batch_urls: set[str] = set()  # 本事务内已占用的文章级 URL(批内同 URL 也算重复)
     try:
-        for item in items:
-            url_normalized = normalize_url(item.url)
+        con.execute("BEGIN IMMEDIATE")
+        for item, url_normalized in zip(items, normalized):
             hash_value = content_hash(item.title, item.content)
+            if url_normalized not in non_identity_urls:
+                clash = url_normalized in batch_urls
+                if not clash:
+                    clash = (
+                        con.execute(
+                            "SELECT 1 FROM articles WHERE url_normalized = ? LIMIT 1",
+                            (url_normalized,),
+                        ).fetchone()
+                        is not None
+                    )
+                if clash:
+                    duplicates += 1
+                    continue
             cursor = con.execute(
                 """
                 INSERT OR IGNORE INTO articles(
@@ -274,9 +316,17 @@ def insert_items(
             )
             if cursor.rowcount:
                 inserted += 1
+                batch_urls.add(url_normalized)
             else:
                 duplicates += 1
         con.commit()
+    except BaseException:
+        # 半批数据不得留下:整批回滚后原异常继续上抛,由 runner 记 failed 任务
+        try:
+            con.rollback()
+        except sqlite3.Error:
+            pass
+        raise
     finally:
         con.close()
     return {"inserted": inserted, "duplicates": duplicates}
