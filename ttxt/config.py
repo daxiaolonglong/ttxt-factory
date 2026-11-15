@@ -23,6 +23,14 @@ LOG_DIR = PROJECT_ROOT / "09_logs"
 TESTS_DIR = PROJECT_ROOT / "10_tests"
 BACKUP_DIR = PROJECT_ROOT / "11_backups"
 TEMP_DIR = PROJECT_ROOT / "99_temp"
+# P23(2026-11-15 体检 §9.1 P1):`07_tmp` 才是测试与取证的真实落盘处 —— 规则 25/32 强制
+# pytest basetemp 在 `07_tmp/pytest_basetemp`,每轮探针脚本也写在这里(实测 0.753 GB、
+# 当日 +333 MB)。而磁盘桶口径里只有 `99_temp`(实测 3.4 MB),于是 temp 的 2 GB 限额和
+# 24h TTL 从来没管到真正在涨的目录,`housekeep.report()` 的 1.301 GB 也远小于根目录实测
+# 6.60 GB。这里登记 `07_tmp` 与 `资产库` 为**计量桶**:纳入统计与告警,不自动删除 ——
+# `07_tmp` 里躺着往轮的账本与取证件,删不删由人决定(规则 29)。
+SCRATCH_DIR = PROJECT_ROOT / "07_tmp"
+ASSET_DIR = PROJECT_ROOT / "资产库"
 VENV_DIR = PROJECT_ROOT / ".venv"
 PIP_CACHE_DIR = PROJECT_ROOT / ".pip-cache"
 

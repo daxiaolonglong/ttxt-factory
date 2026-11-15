@@ -14,7 +14,23 @@
 
 SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 
-## 2. articles.db(每类目一份,同构;当前 `p10-v1`)
+## 2. articles.db(每类目一份,同构;当前 `p12-v1`)
+
+> 2026-11-15 体检 §9.4 实测校正:本节长期写着「当前 `p10-v1`」,而代码 `SCHEMA_VERSION = "p12-v1"`
+> (`ttxt/crawler/store.py:21`)、6 个生产库的 `articles_meta.schema_version` 也全是 `p12-v1`。
+> 文档落后代码三整代 ⇒ 按规则 40 改成实测值,并把两个版本号彻底分清:
+>
+> | 字段 | 写在哪 | 当前取值 | 语义 |
+> |---|---|---|---|
+> | `articles_meta.schema_version` | 每库一行(单值) | `p12-v1` | 该库的**表结构/迁移代次**,由 `migrate_articles_db` 写入 |
+> | `articles.processor_version` | 每一行文章 | `p2-v1`(`store.py:20`) | 该行的**抽取/清洗管线代次**,用来识别老管线产出的行 |
+>
+> 正文升级(`store.py:587-610`)改写 `content/excerpt/content_hash/completeness/processor_version`
+> 并保留 `id / url_normalized / fetched_at / title`;`text_length`、`cleaned_content`、`cleaned_at`、
+> `clean_version` **归清洗阶段所有**(`pipeline.py:29-31` 每次 `ttxt clean` 全量重算),所以升级后
+> 这几列短暂描述的是旧正文,由采集入口当场跑的清洗管线补回(规则 31);`doctor.db.completeness`
+> 与 `db.cleaned_coverage` 会核对标签与真实正文长度、覆盖率,不一致当场可见。
+> 正文与哈希与长度同源于同一次抓取 ⇒ 升级不会让一行自相矛盾。
 
 > P3 清洗/聚类列 + `article_clusters`;P4 分析表 + FTS5;P6 写作/评审/证据链表;P8 `prediction_records`;P10 `writing_history.status`(draft/passed/rejected)与写作 L4 门禁;P11 无 schema 变更,新增行为语义:指标导入白名单、`metric_snapshots` 写入通道、`prediction_records` 回填/知识资产门禁、`keywords.status` active↔gap 状态机。迁移幂等。
 

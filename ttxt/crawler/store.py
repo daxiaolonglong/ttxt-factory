@@ -486,6 +486,13 @@ def insert_items(
        fetched_at),计数 ``bodies_upgraded``,不算塌陷也不新增行。实测 job 64→66:
        第一轮 RSS 摘要 98 字,第二轮同一 URL 文章页 900+ 字,旧规则会把语料质量永久
        锁死在摘要级;标题不同才判塌陷 —— 悄悄改标题才是 demo 30 条那类事故。
+       (a3) **P23 补的反向情形**(取证 2026-11-15 15:53 job 66,复现 21:23):同一 URL +
+        同一标题 + 正文**不比已存长** ⇒ 仍是同一篇文章的重复抓取,不是塌陷。chinanews
+        三篇文章页两轮都取到 708/846/684 字:长度相同、字节不同(``content_hash`` 抖动),
+        旧规则一律喊 url_identity_conflict ⇒ 注册类目平白有假警报,真正的身份塌陷
+        反而被噪声埋掉。现在按"正文最长者胜"保留原行,计数 bodies_kept_existing,
+        不新增行、不改写原行。只有**标题不同**(或同一批内同 URL 两次正文不同、
+        库里没有旧行可比)才算身份塌陷。
       (b) **非身份 URL**(来源页/列表页)上已经存着别的正文 → 照样插入(删了就毁掉
           真实语料,规则 33),同样计数 ``url_identity_conflict``,让塌陷当场可见。
     - 抽取器标了 ``url_is_page_fallback`` 的条目单独计数 ``url_no_item_link``:
@@ -525,7 +532,7 @@ def insert_items(
         # 卫生检查不能把采集打停:发现失败要喊出来,由 doctor 的跨库对账兜底
         LOG.warn("insert.cross_db_scan_failed", category=category, detail=failure)
     con = connect(target)
-    inserted = duplicates = cross_blocked = identity_conflicts = upgrades = 0
+    inserted = duplicates = cross_blocked = identity_conflicts = upgrades = kept_existing = 0
     # C-7b:抽取器明确标了"这一条没拿到自己的链接"的条目单独计数,不得静默
     no_item_link = sum(1 for item in items if getattr(item, "url_is_page_fallback", False))
     fetched_at = cfg.now_iso()
@@ -601,7 +608,27 @@ def insert_items(
                                 detail="同一 URL 同一标题,正文由摘要级升级为更完整正文(保留原行与原 id,不新增行)",
                             )
                             continue
-                        # 同一个文章身份位上存的是**另一篇**文章:身份塌陷,必须喊出来
+                        if existing is not None and _same_title(existing["title"], item.title):
+                            # P23(取证 2026-11-15 15:53 job 66 + 21:23 复现):同一 URL、同一标题,
+                            # 这一轮正文**不比已存长**。chinanews 三篇文章页两轮都取到
+                            # 708/846/684 字:长度一致、字节不同 ⇒ content_hash 抖动。
+                            # 旧规则把这种重复抓取喊成"身份塌陷",与 C-7 保留判据矛盾。
+                            # 正解:同一标题即同一身份,按"正文最长者胜"保留原行,
+                            # 不新增行、不改写原行,单独计数(不得静默)。
+                            kept_existing += 1
+                            LOG.info(
+                                "insert.body_kept_existing",
+                                category=category,
+                                source=source_id,
+                                url=url_normalized,
+                                article_id=existing["id"],
+                                old_chars=len(str(existing["content"] or "")),
+                                new_chars=len(str(item.content or "")),
+                                detail="同一 URL 同一标题,这一轮正文不比已存长 ⇒ 保留原行(C-7 正文最长者胜),不计身份塌陷",
+                            )
+                            continue
+                        # 标题不同(或本批内同 URL 两次正文不同,库里还没有行可比)
+                        # ⇒ 同一文章身份位上是**另一篇**文章:身份塌陷,必须喊出来
                         identity_conflicts += 1
                         LOG.warn(
                             "insert.url_identity_conflict",
@@ -609,7 +636,8 @@ def insert_items(
                             source=source_id,
                             url=url_normalized,
                             title=item.title[:80],
-                            detail="同一 URL 上已存着正文不同的文章,本条未插入(要修的是抽取器,不是删数据)",
+                            in_batch_clash=existing is None,
+                            detail="同一 URL 上标题不同 ⇒ 该 URL 位上是另一篇文章,本条未插入(要修的是抽取器,不是删数据)",
                         )
                     continue
             elif (
@@ -696,6 +724,16 @@ def insert_items(
             source=source_id,
             upgraded=upgrades,
             detail="同一 URL 同一标题的旧行被升级为更完整正文;逐条见 insert.body_upgraded",
+        )
+    if kept_existing:
+        # P23:同一 URL 同一标题、正文不比已存长 ⇒ 保留原行的次数(只有真的发生才加键)
+        counts["bodies_kept_existing"] = kept_existing
+        LOG.info(
+            "insert.body_kept_summary",
+            category=category,
+            source=source_id,
+            kept=kept_existing,
+            detail="同一 URL 同一标题的重复抓取,正文未超过已存版本 ⇒ 保留原行;逐条见 insert.body_kept_existing",
         )
     if no_item_link:
         counts["url_no_item_link"] = no_item_link

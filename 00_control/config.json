@@ -28,12 +28,15 @@
     "logs": "09_logs",
     "tests": "10_tests",
     "backups": "11_backups",
-    "temp": "99_temp"
+    "temp": "99_temp",
+    "scratch": "07_tmp",
+    "assets": "资产库"
   },
   "disk": {
     "project_budget_gb": 20,
     "min_free_gb": 5,
     "temp_max_gb": 2,
+    "scratch_max_gb": 2,
     "pip_cache_max_gb": 1,
     "log_max_mb": 10,
     "log_keep": 7,

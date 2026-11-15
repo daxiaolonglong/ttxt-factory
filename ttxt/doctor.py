@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import urllib.request
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -470,6 +471,80 @@ def _strata_health(config: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "error": str(exc)}
 
 
+# P23(体检 2026-11-15 §4.5 P1):被拒的插入(同一 URL 位上是另一篇文章)以前只写在
+# JSONL 日志里,doctor 只统计库里**已存**的行 ⇒ "保护生效拦下了 3 条"与"根本没发生"
+# 在体检里长得一模一样,这是检测盲区。这里按窗口把入库侧的身份判定事件数出来。
+INSERT_JUDGEMENT_EVENTS: dict[str, str] = {
+    "insert.url_identity_conflict": "identity_conflict",
+    "insert.page_url_collapse": "page_url_collapse",
+    "insert.body_kept_existing": "body_kept_existing",
+    "insert.body_upgraded": "body_upgraded",
+    "insert.no_item_link": "no_item_link",
+}
+
+
+def insert_judgement_rows(window_hours: float = 24.0, now: datetime | None = None) -> list[tuple[str, str, str]]:
+    """近 ``window_hours`` 小时日志里入库侧的身份判定事件计数(只读日志,不改任何东西)。
+
+    身份塌陷(identity_conflict / page_url_collapse)只要非零就 WARN —— 它不是系统故障,
+    是数据质量信号:正解是修抽取器,不是删数据(规则 33)。其余事件只如实列出。
+    """
+    now = now or datetime.now().astimezone()
+    cutoff = now - timedelta(hours=window_hours)
+    counts = {label: 0 for label in INSERT_JUDGEMENT_EVENTS.values()}
+    holders: dict[str, int] = {}
+    unreadable: list[str] = []
+    unparsable = 0
+    scanned = 0
+    for path in sorted(cfg.LOG_DIR.glob("ttxt-*.jsonl*")):
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError as exc:
+            unreadable.append(f"{path.name}:{type(exc).__name__}")
+            continue
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                record = json.loads(line)
+                stamp = datetime.fromisoformat(str(record["ts"]))
+            except (ValueError, TypeError, KeyError):
+                unparsable += 1
+                continue
+            if stamp.tzinfo is None:
+                stamp = stamp.astimezone()
+            if stamp < cutoff:
+                continue
+            event = str(record.get("event", ""))
+            label = INSERT_JUDGEMENT_EVENTS.get(event)
+            if label is None:
+                continue
+            scanned += 1
+            counts[label] += 1
+            if label in ("identity_conflict", "page_url_collapse"):
+                # ``logging.log_event`` 把 ``LOG.warn(..., category=, source=)`` 装进 meta,
+                # 顶层没有这两个键 —— 读错层就会全部显示成 "?/?",等于没有信息。
+                meta = record.get("meta") if isinstance(record.get("meta"), dict) else {}
+                category = meta.get("category") or record.get("category") or "?"
+                source = meta.get("source") or record.get("source") or "?"
+                key = f"{category}/{source}"
+                holders[key] = holders.get(key, 0) + 1
+    detail = (
+        f"近 {window_hours:g}h:身份塌陷 {counts['identity_conflict']} 条、"
+        f"来源页 URL 塌陷 {counts['page_url_collapse']} 条、"
+        f"正文升级 {counts['body_upgraded']} 条、保留原行 {counts['body_kept_existing']} 条、"
+        f"无逐条链接 {counts['no_item_link']} 条"
+    )
+    if holders:
+        detail += ";塌陷集中在 " + ", ".join(f"{key}×{n}" for key, n in sorted(holders.items()))
+    if unreadable or unparsable:
+        detail += f"(日志读取失败 {unreadable or '无'},坏行 {unparsable} 条已跳过)"
+    collapsed = counts["identity_conflict"] + counts["page_url_collapse"]
+    level = "WARN" if collapsed or unreadable or unparsable else "PASS"
+    hint = "" if not collapsed else ";整改:修抽取器(配 link_selector / 正文选择器),不是删数据"
+    return [(level, "crawler.insert_judgements", detail + hint)]
+
+
 def run_doctor() -> int:
     config = cfg.load_config()
     results: list[tuple[str, str, str]] = []  # (level, name, detail)
@@ -546,6 +621,54 @@ def run_doctor() -> int:
         bool(report["within_budget"]),
         f"used={report['project_total_gb']}GB budget={report['budget_gb']}GB",
     )
+    # P23(体检 2026-11-15 §9.1 P1):预算只统计"已进桶"的目录,根目录实测比它大一截
+    # (未登记的 07_tmp / 资产库 / .git)。口径必须当场可见,否则限额是假的。只告警不删。
+    results.append(
+        (
+            "PASS" if report["within_root_budget"] else "FAIL",
+            "disk.root_budget",
+            f"root_used={report['root_total_gb']}GB budget={report['budget_gb']}GB"
+            f" (bucketed={report['project_total_gb']}GB)",
+        )
+    )
+    caps_status = report["caps_status"]
+    results.append(
+        (
+            "PASS" if caps_status["scratch_within"] else "WARN",
+            "disk.scratch",
+            f"07_tmp={caps_status['scratch_bytes'] / (1024 ** 3):.3f}GB"
+            f" cap={report['caps']['scratch_max_gb']}GB"
+            f";99_temp={caps_status['temp_bytes'] / (1024 ** 3):.3f}GB"
+            f" cap={report['caps']['temp_max_gb']}GB(超限额只告警,07_tmp 里是往轮账本与取证件,删不删由人决定)",
+        )
+    )
+    unaccounted = report["unaccounted_dirs"]
+    unaccounted_gb = report["unaccounted_bytes"] / (1024 ** 3)
+    if unaccounted_gb > 0.25 or report["root_scan_error"]:
+        results.append(
+            (
+                "WARN",
+                "disk.accounting",
+                f"根目录 {report['root_total_gb']}GB 中有 {unaccounted_gb:.3f}GB 未进任何磁盘桶:"
+                + ", ".join(f"{item['name']}={item['bytes'] / (1024 ** 3):.3f}GB" for item in unaccounted[:6])
+                + (f";根目录扫描失败:{report['root_scan_error']}" if report["root_scan_error"] else ""),
+            )
+        )
+    else:
+        results.append(
+            (
+                "PASS",
+                "disk.accounting",
+                f"root={report['root_total_gb']}GB 已进桶={report['project_total_gb']}GB,"
+                f"未登记={unaccounted_gb:.3f}GB",
+            )
+        )
+
+    # 5b. 入库侧身份判定(体检 §4.5:被拒插入必须有计数,不然保护生效和啥都没发生看不出差别)
+    try:
+        results.extend(insert_judgement_rows())
+    except Exception as exc:  # noqa: BLE001 - 日志读数异常不得让整份体检崩掉
+        check("crawler.insert_judgements", False, f"{type(exc).__name__}: {exc}")
 
     # 6. Venv
     venv_python = cfg.VENV_DIR / "Scripts" / "python.exe"

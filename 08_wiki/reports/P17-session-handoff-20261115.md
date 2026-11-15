@@ -227,3 +227,37 @@
 4. Worker / Scheduler 上线(队列仍是 job 54 `toutiao_tech`、job 63 `who_cn_news`,别的窗口的活儿)。
 5. C-5 可信度分档;9 条空 `evidence_links`(需 DDL 批准);`_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump;
    `D:\ttxt\pytest-of-yangl` 残留清理(需批准)。
+
+## 十四、第 6 轮(2026-11-15 22:4x → 2026-11-16 03:4x)完成账本:P23 身份判定收口 + 被拒插入可见 + 磁盘口径闭合
+
+起因:用户自己写的日检 `08_wiki/reports/quality-20261115.md`(只读,不改)指出三件事:
+①注册类目 3 次「身份塌陷」告警来源不明;②体检没有统计**被拒插入**,存在检测盲区;
+③预算表报 1.301 GB 而根目录实测 6.60 GB,差额全是没登记的目录。
+
+| 事项 | 实测读数 | 凭据 |
+|---|---|---|
+| 根因 | job 66(15:53)那 3 条 `url_identity_conflict` 就是库里 social id **13/16/20**:标题逐字相同、`full`、正文 **708/846/684 字**;21:23 只读复现同一三页 `div.left_zw` 又取到 708/846/684 字(第二个选择器 `div.content_maincontent_content` 每篇多 14 字)⇒ **content_hash 跨轮抖动**;job 66 `items_enriched=20 / item_page_errors=0` 证明抓的确实是文章页正文 | `07_tmp/r26_identity_conflict/probe_conflict_out.txt`、`probe_item_pages_out.txt`、`probe_job_meta_out.txt` |
+| 代码 | `store.insert_items` 新增分支:同一 URL + **同一标题** + 正文不更长 ⇒ **保留原行**,计 `bodies_kept_existing` + `LOG.info("insert.body_kept_existing")`;`url_identity_conflict` 只留给标题不同(或本批内冲突);`config.SCRATCH_DIR/ASSET_DIR`、`housekeep.MAJOR_PATHS` 补 `07_tmp`/`资产库`/`.git`/`.secrets`,`report()` 按根目录逐子项核算并列出未登记占用;`doctor` 新增 `crawler.insert_judgements`(24h 窗口)+ `disk.root_budget` + `disk.scratch` + `disk.accounting`;`config.json` 加 `paths.scratch/assets`、`disk.scratch_max_gb=2` | `git show`(本轮提交)、`10_tests/test_p23_identity_and_visibility.py` |
+| 既有测试同步 | `test_c2_url_dedupe.py` 三处期望从 `url_identity_conflict` 改成 `bodies_kept_existing`(同标题 + 等长字节不同 = 同一篇重抓);**拒绝插入、只留一行**这些核心断言不变,并新增「等长重抓不得改写正文」断言 | 同上 |
+| 红→绿凭据 | 改动 stash 后跑新测试:**9 failed / 2 passed**;`stash pop` 后:**11 passed**;全量回归:**406 passed,113.60 s,exit 0**(上轮基线 395) | `p23_red.txt`、`p23_green2.txt`、`p23_full_suite.txt` |
+| Worker 上线 | 写库前先备份 `11_backups/P23-pre-worker-20261116-020806.zip`(4,878,116 字节,`Connection.backup()` 一致性副本,system + 6 类目 + 配置);`ttxt worker --owner r26-p23-worker --max-jobs 2 --idle-stop-s 20` 消费 job **54**(toutiao_tech/technology:inserted 9, dup 1)与 **63**(who_cn_news/health:inserted 0, dup 25),`worker.stop reason=max_jobs done=2`;**队列已清空**(queued 2 → 0,done 60 → 63) | `pre_worker_receipt.txt`、`worker_run.txt`、`post_worker_state.json` |
+| 实采复验(修抽取器方向,不删数据) | `ttxt crawl --source chinanews_society`:feed 30 条 → 抽 20、文章页 20 页 0 错、inserted **11**、duplicates 9、**0 身份塌陷**(同来源同批次昨天报 3 次),耗时 33.34 s;social 22 → 33 行,full 20 → 30,short 2 → 3;三条争议行 id 13/16/20 的 `content_hash/fetched_at(15:47:53)/processor_version` **一字未动**,同类目标题无重复组 | `recrawl_social.txt`、`post_worker_state.json`(`disputed_rows_social`、`social_dup_check.dup_titles=0`) |
+| 磁盘口径闭合 | 体检从 29 项 → **33 项 / 0 失败**;`disk.root_budget: root_used=6.293GB budget=20.0GB (bucketed=6.292GB)`、`disk.scratch: 07_tmp=0.548GB cap=2GB;99_temp=0.003GB`、`disk.accounting: 未登记=0.001GB`(以前差 5.3 GB 无人可见);WARN 5 项 = `namespaces.disk`、`db.identity_suspect`、`db.url_identity`、`db.orphan_references`、`crawler.insert_judgements` | `doctor_after_p23.txt`、`doctor_after_worker.txt` |
+| 规则 | 新增 **规则 43**(身份判定收口 / 被拒插入必须计数 / 磁盘口径必须闭合且只告警不自动删);`db_schema.md` §2 按实测校正:文档写 `p10-v1` 而 6 库与代码都是 `p12-v1`,并把 `schema_version`(库)与 `processor_version`(行)分清、写清正文升级改哪些列、`text_length/cleaned_*` 归清洗阶段 | `07_rules/CORE_RULES.md`、`08_wiki/db_schema.md` |
+| 语料总量 | **374 行**(上轮 354,+20);technology 168、finance 96、health 25、social 33、history 20、demo 32 | `post_worker_state.json`、体检 `db.cleaned_coverage` |
+
+诚实说明两条:①今天(11-16 02:47)那次 chinanews 复采**没有**出现哈希抖动,所以 `bodies_kept_existing` 计数为 0,
+生产日志里暂时没有该事件的真实样本 —— 结论只覆盖已探明范围(规则 42(7)),修复由「复现取证 + 单测」证明,不是由「今天没发生」证明;
+②体检 24h 窗口仍显示 3 条身份塌陷,因为 11-15 15:53 那三条是历史事实,窗口滑过(11-16 15:53 之后)才会归零。
+
+第 7 轮待办(优先级从上到下):
+
+1. **指标回流扩到其余类目**:technology 已 `measured=32` 标定过;继续 `--fetch-public` 刷剩余 127 篇,
+   finance/health/social/history 各攒 ≥30 measured 样本后 `--calibrate`(现在 4 个类目全是 `missing_data`)。
+2. **`prediction_records` 仍是 0**:technology 已够 `prediction.min_samples=5`,跑基线预测 + 实测回填 + 准确率报告。
+3. **R2-5 `ttxt crawl-enrich --category`**(health 25 行全是 `short`,avg 119.4 字 ⇒ 正文回填是语料质量最短的一块)。
+4. **调度器**:`ttxt schedule --once` 单轮上线(队列已清空,`crawl_enqueue_4h` 已错过约 17 轮;`scheduler_state.json` 冻结在 11-12 19:57);
+   长期 Worker 常驻需要用户批准(前台进程会一直占网络与浏览器 profile)。
+5. C-5 可信度分档;9 条空 `evidence_links.article_id`(需 DDL 批准);`_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump;
+   `manual ttxt crawl` 路径不做关键词闸门(job 70 无 `keyword_filtered_out`)是否要与队列路径统一,待定。
+6. 磁盘:`07_tmp` 已 0.548 GB(限额 2 GB),**清理必须先出清单交用户批准**,不许自动删(规则 29/43)。

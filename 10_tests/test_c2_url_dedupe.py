@@ -115,7 +115,12 @@ def test_same_url_different_content_inserts_only_once(tmp_path):
 
 
 def test_third_crawl_still_refused(tmp_path):
-    """第三次重采同样被拒绝(不是只挡一次)。"""
+    """第三次重采同样被拒绝(不是只挡一次)。
+
+    P23(取证 2026-11-15 ``07_tmp/r26_identity_conflict/``):同一标题、正文等长但字节不同
+    是同一篇文章被重抓(chinanews 三篇 708/846/684 字实测),以前这里会谎报
+    ``url_identity_conflict``;现在保留原行并计 ``bodies_kept_existing``,拒绝插入这一点不变。
+    """
     path = store.init_articles_db(CATEGORY, db_path=tmp_path / "c2.db")
     for index in range(3):
         counts = store.insert_items(
@@ -126,9 +131,10 @@ def test_third_crawl_still_refused(tmp_path):
         assert counts == (
             {"inserted": 1, "duplicates": 0}
             if index == 0
-            else {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
+            else {"inserted": 0, "duplicates": 1, "bodies_kept_existing": 1}
         )
     assert len(_rows(path)) == 1
+    assert _rows(path)[0]["content"] == "第0次抓到的正文内容。", "正文不得被等长的重抓改写"
 
 
 def test_same_batch_same_url_different_content_keeps_one(tmp_path):
@@ -158,7 +164,9 @@ def test_url_identity_is_scoped_to_the_category_database(tmp_path):
     assert store.insert_items("c2other", "src", [_item("标题甲", "正文内容乙。", "https://example.com/c2/scoped")], db_path=path) == {
         "inserted": 0,
         "duplicates": 1,
-        "url_identity_conflict": 1,
+        # P23:同一标题、正文等长不同 ⇒ 同一篇文章的重复抓取,保留原行(不再是"身份塌陷");
+        # 本用例要证明的仍然是"换个 category 取值也绕不过同一库内的 URL 身份"。
+        "bodies_kept_existing": 1,
     }
     assert len(_rows(path)) == 1
 
@@ -201,8 +209,11 @@ def test_tracking_param_variants_count_as_same_url(tmp_path):
         CATEGORY, "src", [_item("分享链接文章", "正文内容乙一二三。", "https://example.com/c2/utm?utm_medium=x#top")], db_path=path
     )
     assert first == {"inserted": 1, "duplicates": 0}
-    assert second == {"inserted": 0, "duplicates": 1, "url_identity_conflict": 1}
+    # P23:同一标题、正文等长不同 ⇒ 保留原行(计 bodies_kept_existing),不再谎报身份塌陷;
+    # 本用例证明的仍然是"只去跟踪参数后两个 URL 属同一身份",拒绝插入这一点不变。
+    assert second == {"inserted": 0, "duplicates": 1, "bodies_kept_existing": 1}
     assert [row["url_normalized"] for row in _rows(path)] == ["https://example.com/c2/utm"]
+    assert [row["content"] for row in _rows(path)] == ["正文内容甲一二三。"], "等长重抓不得改写正文"
 
 
 def test_identifying_query_params_not_merged(tmp_path):

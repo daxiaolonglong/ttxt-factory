@@ -59,7 +59,13 @@ D:\ttxt\scripts\ttxt.cmd predict report --category technology
 | `09_logs/` | 结构化 JSONL 日志(轮转) |
 | `10_tests/` | pytest 单测/集成/回归/失败场景 |
 | `11_backups/` | 阶段备份与回滚点 |
+| `07_tmp/` | **暂存/取证件**(往轮账本、探针输出、pytest basetemp;限额只告警不自动删,实测 0.753 GB) |
+| `资产库/` | 本地语料/数据库资产(4.544 GB,`.gitignore` 排除,绝不入库) |
 | `99_temp/` | 临时文件(限额 + TTL 清理) |
+
+> 磁盘口径(`ttxt housekeep` / `ttxt doctor`):预算必须覆盖**根目录实测**,不能只统计允许清单里的桶。
+> 2026-11-15 体检实测根目录 6.60 GB 而旧口径只报 1.301 GB,差值全在未登记的 `资产库/` 与 `07_tmp/`;
+> 现在 `disk.root_budget` / `disk.scratch` / `disk.accounting` 三项会把未登记占用当场列出(只告警,不删)。
 
 ## 阶段状态
 
@@ -99,7 +105,7 @@ D:\ttxt\scripts\ttxt.cmd predict report --category technology
 | 远端仓库 | <https://github.com/daxiaolonglong/ttxt-factory>（private） |
 | 默认分支 | `main` |
 | git 客户端 | 便携版 MinGit 2.56.1，位于 `tools/git/`，经 `scripts\git.cmd` 调用（不污染系统 PATH） |
-| 入库范围 | 源码、配置、文档、测试、Wiki、技能文件；`.venv/`、`*.db`、`01_categories/*/rag`、`keywords`、`metrics`、`09_logs/`、`11_backups/`、`99_temp/`、`tools/` 由 `.gitignore` 排除 |
+| 入库范围 | 源码、配置、文档、测试、Wiki、技能文件；`.venv/`、`*.db`、`01_categories/*/rag`、`keywords`、`metrics`、`09_logs/`、`11_backups/`、`99_temp/`、`07_tmp/`、`资产库/`、`tools/` 由 `.gitignore` 排除 |
 | 凭据 | `scripts\login.cmd` 保存一次令牌到 `.secrets/github_token`（已被 git 忽略，ACL 仅当前用户可读）；推送脚本自动读取，无需每次输入 |
 
 ```powershell

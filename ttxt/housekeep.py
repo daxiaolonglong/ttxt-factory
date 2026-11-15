@@ -29,9 +29,18 @@ MAJOR_PATHS: dict[str, Path] = {
     "tests": cfg.TESTS_DIR,
     "backups": cfg.BACKUP_DIR,
     "temp": cfg.TEMP_DIR,
+    # P23(体检 2026-11-15 §9.1):`07_tmp` 与 `资产库` 以前不在任何一个桶里 ⇒ 磁盘预算
+    # 看不见真实根目录占用(housekeep 报 1.301 GB,根目录实测 6.60 GB),temp 的限额与
+    # TTL 也永远管不到真正在涨的 `07_tmp`。登记为**计量桶**:只统计、只告警,不自动删 ——
+    # `07_tmp` 里放着往轮账本与取证件,删不删由人决定(规则 29)。
+    "scratch": cfg.SCRATCH_DIR,
+    "assets": cfg.ASSET_DIR,
     "venv": cfg.VENV_DIR,
     "pip_cache": cfg.PIP_CACHE_DIR,
     "tools": cfg.PROJECT_ROOT / "tools",
+    # 根目录口径要闭合:仓库自身的 .git 与本地凭据目录也占盘,不登记就永远算"未登记占用"
+    "git": cfg.PROJECT_ROOT / ".git",
+    "secrets": cfg.PROJECT_ROOT / ".secrets",
 }
 
 
@@ -229,6 +238,40 @@ def report() -> dict[str, Any]:
         dir_size(p) for p in sorted(cfg.PROJECT_ROOT.glob("pytest-of-*")) if p.is_dir()
     )
     total = sum(sizes.values())
+    # P23:桶是**白名单**,白名单本身就是这次的盲区 —— 根目录里任何没登记的一级目录
+    # 都不会出现在预算里(实测差值 5.3 GB 全是未登记目录)。这里把根目录逐子项核算一遍,
+    # 凡是没进桶的按大小列出,让"看不见的大象"当场可见(只报告,不删除)。
+    bucket_names = {path.name for path in MAJOR_PATHS.values()}
+    entries: list[tuple[str, int]] = []
+    root_scan_error = ""
+    try:
+        root_entries = sorted(cfg.PROJECT_ROOT.iterdir())
+    except OSError as exc:
+        root_entries = []
+        root_scan_error = f"{type(exc).__name__}: {exc}"
+    for entry in root_entries:
+        try:
+            if entry.is_dir():
+                size = dir_size(entry)
+            elif entry.is_file():
+                size = entry.stat().st_size
+            else:
+                size = 0
+        except OSError:
+            size = 0
+        entries.append((entry.name, size))
+    unaccounted = sorted(
+        (
+            {"name": name, "bytes": size}
+            for name, size in entries
+            if name not in bucket_names and not name.startswith("pytest-of")
+        ),
+        key=lambda item: item["bytes"],
+        reverse=True,
+    )
+    unaccounted_bytes = sum(item["bytes"] for item in unaccounted)
+    root_total_bytes = sum(size for _name, size in entries)
+    scratch_max_gb = float(disk_cfg.get("scratch_max_gb", 2))
     free = free_space_gb()
     budget_gb = float(disk_cfg.get("project_budget_gb", 20))
     min_free = float(disk_cfg.get("min_free_gb", 5))
@@ -241,8 +284,17 @@ def report() -> dict[str, Any]:
         "free_gb": round(free, 1),
         "min_free_gb": min_free,
         "free_ok": free >= min_free,
+        # P23:`project_total_gb` 仍是"已进桶"口径(保持既有面板/测试语义不变);
+        # 新增按根目录实测的口径,两个数一起摆出来,口径差本身就是要暴露的问题。
+        "root_total_bytes": root_total_bytes,
+        "root_total_gb": round(root_total_bytes / GB, 3),
+        "within_root_budget": root_total_bytes <= budget_gb * GB,
+        "unaccounted_bytes": unaccounted_bytes,
+        "unaccounted_dirs": unaccounted[:10],
+        "root_scan_error": root_scan_error or None,
         "caps": {
             "temp_max_gb": disk_cfg.get("temp_max_gb"),
+            "scratch_max_gb": disk_cfg.get("scratch_max_gb"),
             "pip_cache_max_gb": disk_cfg.get("pip_cache_max_gb"),
             "log_max_mb": disk_cfg.get("log_max_mb"),
             "backup_keep": disk_cfg.get("backup_keep"),
@@ -251,6 +303,12 @@ def report() -> dict[str, Any]:
         "caps_status": {
             "pip_cache_bytes": sizes["pip_cache"],
             "pip_cache_within": sizes["pip_cache"] <= float(disk_cfg.get("pip_cache_max_gb", 1)) * GB,
+            # P23:temp 桶(99_temp)与 scratch 桶(07_tmp)分开计量:以前只有 temp,
+            # 而真正在涨的是 scratch ⇒ 限额形同虚设。scratch 超限只告警,不自动删。
+            "temp_bytes": sizes["temp"],
+            "temp_within": sizes["temp"] <= float(disk_cfg.get("temp_max_gb", 2)) * GB,
+            "scratch_bytes": sizes["scratch"],
+            "scratch_within": sizes["scratch"] <= scratch_max_gb * GB,
             "browser_bytes": dir_size(cfg.CRAWLER_DIR / ".browser"),
             "browser_within": dir_size(cfg.CRAWLER_DIR / ".browser")
             <= float(disk_cfg.get("browser_max_gb", 3)) * GB,
