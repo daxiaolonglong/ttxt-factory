@@ -73,9 +73,23 @@
 | P9 头条科技来源接入 | ✅ 已完成(报告:`reports/P9-toutiao-tech.md`) |
 | P10 生产可靠性修复 | ✅ 第一批完成(报告:`reports/P10-report.md`) |
 | P11 生产闭环第二批 | ✅ 已完成(报告:`reports/P11-report.md`) |
+| P12 可靠性与硬化(第二批) | ✅ 已完成(报告:`reports/P12-batch2..5*.md`) |
+| P13 资产审计 / 质量闭环审计 | ✅ 已出报告(`reports/P13-asset-audit.md`、`reports/P13-quality-audit-20261113.md`) |
+| P13 最小修复 C-7 + C-8(模型闸门锁、测试隔离) | ✅ 已完成(报告:`reports/P13-fix-C7C8-20261114.md`,198 passed) |
+| P13 最小修复 C-2(同类目 URL 重复插入) | ✅ 已完成(报告:`reports/P13-fix-C2-url-dedupe-20261115.md`,214 passed / exit 0) |
+| P13 最小修复 C-3(跨类目归属)、C-1(正文完整性判定) | ⏳ 待做;三者全部通过前不恢复采集 |
 
 ## 5. 当前状态(2026-11-12)
 
 - P0–P11:框架 + 采集 + 数据库 + 分析 + 串行模型 + 写作门禁 + 面板 + 头条科技真实来源 + 可靠性修复 + **生产闭环(指标回流/预测校准/关键词反哺/本地调度/面板下发)**。
 - 诚实状态:预测与校准环等待头条后台真实指标导出(机制就绪,无数据不伪造);第三批(多类目长跑、故障全矩阵、写作质量回归、磁盘压测)未做。P11 发现并修复三个闭环级缺陷(调度器时区崩溃、IPv6 回环护栏不自洽、gap 关键词评分死锁),见 `reports/P11-report.md` §2。
 - 运维命令见 `operations.md`;回滚快照见 `11_backups/`。
+
+## 6. 当前状态(2026-11-15 实测)
+
+- 测试基线:`python -m pytest 10_tests -q` → **214 passed,44.26s,exit 0**(198 旧 + 16 C-2 新增,0 skip / 0 fail)。
+- 数据现状(只读核验):`01_categories/` 6 个类目库 + `00_control/system.db` 字节与 sha256 未变;technology 137 行、demo 45 行(其中 30 行为列表页形态,合法保留)。
+- C-2 已修:类目库内同 URL 不再插第二次,重复如实计数,并发实测 4 线程只 1 行(证据 `reports/P13-fix-C2-url-dedupe-20261115.md` §5–§6)。
+- 未做/待办:**C-3 跨类目归属**、**C-1 正文完整性判定**;历史 URL 重复行(technology ×3、finance ×2)未清理,需单独批准的修复任务;html 列表页抽取器仍不逐条取详情链接(`extract.py:55`),是列表页数据只按 `content_hash` 去重的根因。
+- 采集侧现状:Scrapling 0.5.1 + curl_cffi 0.17.0 + playwright 1.65.1 已装,HTTP 优先(D4);CloakBrowser 未安装(暂缓)。C-3/C-1 通过前不恢复真实采集与 Worker/Scheduler。
+- 磁盘与临时文件:项目内临时文件统一到 `07_tmp`(C-8 保留 10 份 basetemp 并自动回收);本轮实测项目占用下降约 79 MB,无暴涨。

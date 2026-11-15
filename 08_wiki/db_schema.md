@@ -37,7 +37,8 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 
 关键语义:
 
-- 去重:内容 sha256 唯一索引(主);URL 规范化索引(辅);相似度:64 位 simhash + 汉明距离 ≤3(长度比 ≤2.5)。
+- 去重(C-2,2026-11-15 起):类目库内 **URL 即文章身份** —— `insert_items` 在 `BEGIN IMMEDIATE` 写事务内先查 `url_normalized`(走既有 `idx_articles_url_norm`,无 DDL)再插入,同库同 URL 不再产生第二行,重复如实记 `duplicates`;批内同 URL 也算重复;任一条异常整批回滚。`content_hash`(sha256(title+content))唯一索引仍是第二道闸;相似度:64 位 simhash + 汉明距离 ≤3(长度比 ≤2.5)。
+- 例外:来源页/订阅地址(`page_url`,html 列表页把它的 URL 赋给每一条)不是文章身份,这类条目只按 `content_hash` 去重;调用 `store.insert_items` 必须传 `page_url=source.url`。
 - 检索:FTS5 双字词;AND 优先,短查询(≤3 双字词)严格,长查询 AND 无结果时 OR 回退。
 - 爆款标签:缺曝光 `unscored + missing_data`;互动字段任一缺失 `unscored + incomplete_data`(缺失 ≠ 0);全部有值才评分。
 - 证据链:quote 为来源文章中与声明重叠度最高的句子(启发式,不等同事实核查)。
@@ -52,4 +53,4 @@ SQLite 设置为 WAL、foreign_keys=ON、busy_timeout=30s。
 - 类目物理隔离:不同 `articles.db` 文件,禁止跨库 JOIN 或合并检索上下文。
 - 演示来源(demo=True)只能写入 demo 命名空间;正式来源必须写入其声明类目。
 - 备份:`scripts\backup.py <label>` → `11_backups`(代码 + 草稿 + 面板 + 角色/技能 + system.db + 各类目库),保留 7 份;恢复见 `operations.md`。
-- 连接参数:WAL、busy_timeout 30s、单写者原则。
+- 连接参数:WAL、busy_timeout 30s、单写者原则;文章批量写入统一在显式 `BEGIN IMMEDIATE` 写事务内(检查与插入同锁,见 C-2)。
