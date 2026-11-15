@@ -34,8 +34,11 @@ def test_all_configured_paths_within_project():
 
 
 def test_category_directories():
+    # 这条测的是仓库真实布局,与测试会话把 cfg.CATEGORIES_DIR 重定向到 07_tmp 无关,
+    # 所以显式对着 PROJECT_ROOT 断言(conftest 的会话级类目隔离不应让它跟着落空)。
+    categories_root = config.PROJECT_ROOT / "01_categories"
     for slug in config.load_config()["categories"]:
-        base = config.CATEGORIES_DIR / slug
+        base = categories_root / slug
         assert base.is_dir(), f"missing category dir: {base}"
         for sub in ("rag", "keywords", "metrics"):
             assert (base / sub).is_dir(), f"missing {sub} in {base}"

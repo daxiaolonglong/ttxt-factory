@@ -12,6 +12,9 @@
    整个会话没有任何测试连接过生产 ``system.db`` / 类目 ``articles.db``(只读 URI 也算)。
 5. session 级夹具对生产 ``system.db``、6 个类目 ``articles.db``、``00_control`` 配置、
    ``worker.lock`` 以及 ``09_logs`` 下全部日志做前后指纹比对;任何写入都让会话失败。
+6. session 级夹具把 ``cfg.CATEGORIES_DIR`` / ``ttxt_db.CATEGORIES_DIR`` 默认重定向到
+   ``07_tmp`` 下的空目录:测试里任何"按类目找库"的代码(采集入口串起的清洗管线最容易踩)
+   都只会写临时目录,生产 ``01_categories`` 默认不可达。
 
 另提供可复用夹具 ``isolated_data_root``:把 ``00_control`` 与 ``01_categories`` 的库/配置
 复制成 ``07_tmp`` 下的副本,并把 ``ttxt`` 的路径常量指向副本(面板类测试用它)。
@@ -230,8 +233,35 @@ def isolated_log_dir(tmp_path_factory: pytest.TempPathFactory):
         )
 
 
+@pytest.fixture(scope="session")
+def session_categories_dir(tmp_path_factory: pytest.TempPathFactory):
+    """会话级把类目根重定向到 07_tmp 下的空目录,生产 ``01_categories`` 默认不可达。
+
+    实测根因(C-4):采集入口现在会串起清洗管线(``runner._execute_job`` 调
+    ``pipeline.run_pipeline(category)``)。老测试里凡是只伪造 ``insert_items``、
+    却没有重定向类目根的,管线就会直接打开并改写生产 ``01_categories/<slug>/articles.db``
+    ——文章行没动,但派生字段被测试写进了生产库,而且这类副作用只在会话结束时才被发现。
+    把"类目根默认在 07_tmp 下"做成会话级默认,而不是逐个测试补 patch:新测试忘记隔离
+    最多是把自己的库写在临时目录,不会再污染生产。
+    需要断言真实仓库布局的测试(如 p1 冒烟)应显式对着 ``config.PROJECT_ROOT`` 断言。
+    """
+    from ttxt import config as cfg
+    from ttxt import db as ttxt_db
+
+    mocker = pytest.MonkeyPatch()
+    target = tmp_path_factory.mktemp("session_categories")
+    production = ROOT / "01_categories"
+    assert target.resolve() != production.resolve(), "类目根重定向没有生效"
+    mocker.setattr(cfg, "CATEGORIES_DIR", target)
+    mocker.setattr(ttxt_db, "CATEGORIES_DIR", target)
+    try:
+        yield target
+    finally:
+        mocker.undo()
+
+
 @pytest.fixture(scope="session", autouse=True)
-def production_state_untouched(session_db_opens, isolated_log_dir):
+def production_state_untouched(session_db_opens, isolated_log_dir, session_categories_dir):
     """生产数据库、控制文件与生产日志在测试会话前后必须逐字节一致,且全程未连接生产库。
 
     快照前先 ``gc.collect()``:SQLite WAL 边车(``-wal``/``-shm``)只在“最后一个连接关闭”

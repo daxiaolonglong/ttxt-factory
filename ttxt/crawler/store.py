@@ -202,6 +202,13 @@ CREATE TABLE IF NOT EXISTS prediction_records (
 def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
     """P2 → P3 → P4 → P6:清洗/聚类列、分析表、FTS5 索引与写作表,幂等。"""
     target = init_articles_db(category, db_path=db_path)
+    # 实测教训(P15/C-4):测试里把 init_articles_db 打桩成返回 None,迁移就拿着 None
+    # 去 connect,sqlite 把 str(None) 当相对路径,于是仓库根出现一个名为 ``None`` 的库文件。
+    # 路径没解析出来就必须当场失败,绝不允许"就地造出一个谁都没要的库"。
+    if not isinstance(target, (str, Path)):
+        raise TypeError(
+            f"init_articles_db({category!r}) 没有返回数据库路径(得到 {target!r}),拒绝继续迁移"
+        )
     con = connect(target)
     try:
         existing = {row[1] for row in con.execute("PRAGMA table_info(articles)")}

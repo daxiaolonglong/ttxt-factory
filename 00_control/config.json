@@ -65,7 +65,8 @@
     "headless": true,
     "timeout_ms": 60000,
     "network_idle": true,
-    "page_pool": 2
+    "page_pool": 2,
+    "disk_cache_mb": 64
   },
   "model_gate": {
     "poll_interval_s": 2,

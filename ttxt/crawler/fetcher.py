@@ -31,6 +31,8 @@ LOG = get_logger("crawler.fetcher")
 
 #: 封禁/不存在类:重试无意义,直接终态,绝不继续 hammer 对方站点。
 TERMINAL_STATUSES = frozenset({401, 403, 404, 410, 451})
+#: 浏览器磁盘缓存默认上限(MB);配 ``browser.disk_cache_mb`` 覆盖,``<= 0`` 表示不加旗标(交给 housekeep 兜底)。
+DEFAULT_DISK_CACHE_MB = 64
 #: 临时故障:允许指数退避重试。
 RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 
@@ -85,6 +87,16 @@ def _browser_kwargs() -> dict[str, Any]:
     }
     if executable:
         kwargs["executable_path"] = executable
+    # 浏览器磁盘缓存必须在**源头**封顶:实测头条频道页一次访问就让 profile 涨 16 MB
+    # (P15 smoke,07_tmp/p15_crawler_verify_20261115/smoke_net.json),长时间采集会把
+    # housekeep 的 browser_max_gb 兜底逼到"按最旧文件删"——那是在删 Chromium profile
+    # 内部文件,属于事后抢救,不能当常规手段(规则 30:磁盘不得暴涨)。
+    cache_mb = int(browser_cfg.get("disk_cache_mb", DEFAULT_DISK_CACHE_MB))
+    flags = [str(flag) for flag in (browser_cfg.get("extra_flags") or [])]
+    if cache_mb > 0:
+        flags.append(f"--disk-cache-size={cache_mb * 1024 * 1024}")
+    if flags:
+        kwargs["extra_flags"] = flags
     return kwargs
 
 

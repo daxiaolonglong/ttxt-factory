@@ -327,7 +327,9 @@ def test_run_queued_reuses_claim_channel(system_db, tmp_path, monkeypatch, fake_
     pages = {"https://demo.example.com/page1/": quote_page()}
     monkeypatch.setattr(fetcher, "fetch_page", FetchRecorder(pages))
     monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
-    monkeypatch.setattr(store, "init_articles_db", lambda category, db_path=None: None)
+    # 打桩必须给出真实可解析的路径:采集入口现在会串清洗管线(runner → pipeline),
+    # 桩返回 None 会让迁移拿着 None 去建库(C-4 实测在仓库根拉出一个名为 None 的库文件)。
+    monkeypatch.setattr(store, "init_articles_db", lambda category, db_path=None: tmp_path / f"{category}.articles.db")
     job_id = store.create_crawl_job("fake_html", "demo", db_path=system_db)
     results = runner.run_queued(limit=5)
     assert len(results) == 1 and results[0]["ok"] is True
@@ -364,7 +366,9 @@ def test_worker_processes_jobs_and_honors_max_jobs(system_db, control_dir, tmp_p
     pages = {"https://demo.example.com/page1/": quote_page()}
     monkeypatch.setattr(fetcher, "fetch_page", FetchRecorder(pages))
     monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
-    monkeypatch.setattr(store, "init_articles_db", lambda category, db_path=None: None)
+    # 打桩必须给出真实可解析的路径:采集入口现在会串清洗管线(runner → pipeline),
+    # 桩返回 None 会让迁移拿着 None 去建库(C-4 实测在仓库根拉出一个名为 None 的库文件)。
+    monkeypatch.setattr(store, "init_articles_db", lambda category, db_path=None: tmp_path / f"{category}.articles.db")
     ids = [store.create_crawl_job("fake_html", "demo", db_path=system_db) for _ in range(2)]
 
     summary = worker.run_worker("test-worker", max_jobs=1, idle_stop_s=0.0)

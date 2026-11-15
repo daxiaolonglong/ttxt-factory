@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 from ttxt import config as cfg
 from ttxt.logging import get_logger
 
-from . import clean, extract, fetcher, robots, sources, store
+from . import clean, extract, fetcher, pipeline, robots, sources, store
 
 LOG = get_logger("crawler.runner")
 
@@ -261,6 +261,25 @@ def _execute_job(
                 blocked=cross_report.get("blocked", 0),
                 holders=sorted(cross_report.get("holders", {})),
                 scan_errors=cross_report.get("scan_errors", []),
+            )
+        # C-4:采集与清洗必须是一条链。实测根因:恢复真实采集后 328 行里只有 43 行有
+        # 清洗文本(13%),不是因为清洗跑不动(6 个命名空间 328 行实测 4.3 秒),而是
+        # 采集入口从来没调用清洗管线,派生字段(cleaned_content/text_length/simhash/
+        # cluster_id)长期落后于采集,下游取不到清洗文本还看不出为什么。
+        # 管线失败绝不能吞掉已经落库的文章:单独记 pipeline_error,采集结论保持 ok。
+        try:
+            stats = pipeline.run_pipeline(target_category)
+            summary["pipeline"] = {
+                key: stats.get(key)
+                for key in ("cleaned", "dates_normalized", "clusters", "near_duplicate_pairs", "clean_version")
+            }
+        except Exception as exc:  # noqa: BLE001 - 派生字段落后不能反过来让采集判失败
+            summary["pipeline_error"] = f"{type(exc).__name__}: {exc}"
+            LOG.error(
+                "crawl.pipeline_failed",
+                source=source.id,
+                category=target_category,
+                error=summary["pipeline_error"],
             )
         summary["ok"] = True
         # elapsed 必须在落库前算好:否则 meta_json 里永远是初始 0.0,观测谎报

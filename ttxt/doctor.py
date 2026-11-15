@@ -10,7 +10,7 @@ from typing import Any
 
 from . import config as cfg
 from . import db, housekeep
-from .crawler import store
+from .crawler import stackcheck, store
 
 
 def _namespace_identity(name: str) -> tuple[set[str], set[str]]:
@@ -209,7 +209,61 @@ def completeness_checks() -> list[tuple[str, str, str]]:
         except Exception as exc:  # noqa: BLE001 - 单个库读失败不得毁掉整份体检
             level, detail = "WARN", f"读失败,无法判定 completeness:{type(exc).__name__}: {exc}"
         results.append((level, f"db.completeness.{name}", detail))
+    try:
+        results.append(_cleaned_coverage_row())
+    except Exception as exc:  # noqa: BLE001 - 覆盖率统计失败不得毁掉整段完整性体检
+        results.append(("WARN", "db.cleaned_coverage", f"读失败,无法统计清洗覆盖率:{type(exc).__name__}: {exc}"))
     return results
+
+
+def _cleaned_coverage_row() -> tuple[str, str, str]:
+    """清洗覆盖率(C-4)。返回 ``(level, name, detail)``。
+
+    实测根因:P15 恢复真实采集后普查 6 个命名空间 328 行,只有 43 行有 ``cleaned_content``
+    (13%,``07_tmp/p15_crawler_verify_20261115/pre_clean_proof.json``)。清洗本身不慢
+    (全量 328 行实测 4.3 秒),慢的是**从来没人跑**——采集入口不调用管线。
+    覆盖率低于 100% 必须喊出来:派生字段落后于采集,下游写作取材会取不到清洗文本,
+    但从文章行数上完全看不出来。
+    """
+    lagging: list[str] = []
+    unmerged: list[str] = []
+    total_rows = total_cleaned = 0
+    for name in store.namespaces_on_disk():
+        con = store.read_only_connect(store.articles_db_path(name))
+        try:
+            columns = {str(row[1]) for row in con.execute("PRAGMA table_info(articles)")}
+            if "cleaned_content" not in columns:
+                # 基线 DDL 里没有清洗列,只有清洗管线跑过才由 migrate 补上;
+                # 也就是说这个库从来没被清洗过 —— 比"覆盖率低"更严重,要单独点名。
+                unmerged.append(name)
+                continue
+            rows, cleaned = con.execute(
+                "SELECT COUNT(*), SUM(CASE WHEN cleaned_content IS NOT NULL THEN 1 ELSE 0 END) FROM articles"
+            ).fetchone()
+        finally:
+            con.close()
+        rows, cleaned = int(rows or 0), int(cleaned or 0)
+        total_rows += rows
+        total_cleaned += cleaned
+        if rows and cleaned < rows:
+            lagging.append(f"{name} {cleaned}/{rows}")
+    if unmerged:
+        return (
+            "WARN",
+            "db.cleaned_coverage",
+            f"完全没有清洗列(清洗管线从未跑过):{', '.join(unmerged)};"
+            f"补跑:`ttxt clean --category {unmerged[0]}`(采集入口已内置管线,出现这种库要查是不是绕过入口)",
+        )
+    if not total_rows:
+        return ("WARN", "db.cleaned_coverage", "库里没有文章,清洗覆盖率无从谈起")
+    if lagging:
+        return (
+            "WARN",
+            "db.cleaned_coverage",
+            f"{total_cleaned}/{total_rows} 行有清洗文本;未覆盖:{', '.join(lagging)};"
+            "补跑:`ttxt clean --category <类目>`(采集入口已内置管线,出现落后要查是不是绕过入口)",
+        )
+    return ("PASS", "db.cleaned_coverage", f"{total_cleaned}/{total_rows} 行全部有清洗文本")
 
 
 def _strata_health(config: dict[str, Any]) -> dict[str, Any]:
@@ -279,6 +333,13 @@ def run_doctor() -> int:
         results.extend(completeness_checks())
     except Exception as exc:  # noqa: BLE001 - 口径体检异常不得让整份体检崩掉
         check("db.completeness", False, f"{type(exc).__name__}: {exc}")
+
+    # 4d. 采集栈自检(P15:第三方抓取库的参数词表一旦漂移,故障会在长时间采集中途
+    #     才出现,并且伪装成"网络失败";这里离线把实参与库声明的词表对一遍)
+    try:
+        results.extend(stackcheck.doctor_checks())
+    except Exception as exc:  # noqa: BLE001 - 采集栈体检异常不得让整份体检崩掉
+        check("crawler.stack", False, f"{type(exc).__name__}: {exc}")
 
     # 5. 磁盘预算
     report = housekeep.report()
