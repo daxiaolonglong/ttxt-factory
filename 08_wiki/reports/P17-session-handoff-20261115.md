@@ -11,7 +11,7 @@
 | 2 | **C-3 跨类目库重复**:写入前只读查别的注册类目是否已持有(URL 或 `content_hash`);`demo` 无拦截权但注册类目能卡住它;`doctor.db.cross_overlap` 对账 | `07_tmp/c3_*`、规则 26/27 | 已推送 |
 | 3 | **C-1 正文完整性标签**:`completeness` 三档 `full/short/excerpt`,判定只在一处(`cleaner.completeness_of`,SQL 侧 `store.USABLE_LEN_SQL`),属采集侧语义;历史 328 行谎报 `full` 全部回填 | `07_tmp/c1_20261115/census_c1.json`、`07_tmp/c1_relabel_*`、规则 28/29、报告 `08_wiki/reports/P14-fix-C1-completeness-label-20261115.md` | `6f20a58` + `9dc64d7` |
 | 4 | **P15 采集栈核验 + C-4 采集→清洗一条链**:`doctor crawler.stack.*` 常驻核验 Scrapling/浏览器实参与可执行文件;`runner._execute_job` 采完当场 `pipeline.run_pipeline(category)`;`doctor.db.cleaned_coverage` 覆盖率体检。真实采集跑通(health/technology/finance 落库) | 报告 `08_wiki/reports/P15-crawler-verify-C4-clean-coverage-20261115.md`、规则 30/31/32 | `1de94a3`(已推送) |
-| 5 | **C-7 历史重复行整改**(本窗口最后完成):新增 `ttxt/crawler/dedupe.py`、`doctor` 三项体检、`dedupe-history` 子命令;生产删 16 行(同类目 3 + demo 跨库副本 13),`demo` 那 30 行列表页塌陷行**判为可疑、一行不删**;顺带修好长期滞后的 `articles_fts` | `07_tmp/p16_dedupe_20261115/census.json`、`07_tmp/p17_dedupe_apply_20261115/{state_before,plan_dryrun,ledger_apply,state_after,rollback_rehearsal}.json`、报告 `08_wiki/reports/P16-fix-C7-history-dedupe-20261115.md`、规则 33/34 | `d817805`(**未推送**,见待办 1) |
+| 5 | **C-7 历史重复行整改**(本窗口最后完成):新增 `ttxt/crawler/dedupe.py`、`doctor` 三项体检、`dedupe-history` 子命令;生产删 16 行(同类目 3 + demo 跨库副本 13),`demo` 那 30 行列表页塌陷行**判为可疑、一行不删**;顺带修好长期滞后的 `articles_fts` | `07_tmp/p16_dedupe_20261115/census.json`、`07_tmp/p17_dedupe_apply_20261115/{state_before,plan_dryrun,ledger_apply,state_after,rollback_rehearsal}.json`、报告 `08_wiki/reports/P16-fix-C7-history-dedupe-20261115.md`、规则 33/34 | `d817805`(**已推送**,远端 `refs/heads/main` 现为 `3bddf38`,取证见 §八) |
 
 ## 二、生产数据现在的状态(2026-11-15 11:35 实测)
 
@@ -28,7 +28,7 @@
 - `python -m ttxt doctor` → **28 ok, 0 failed**(仅 WARN:`namespaces.disk`(demo 未注册)、`db.identity_suspect`(quotes 30 行)、`db.orphan_references`(9 条证据无出处))。
 - 隔离夹具:测试不得打开生产库、不得在 `07_tmp` 之外建库、生产 gate.lock 必须不存在 —— 全绿。
 
-## 四、事故如实记录(已全部修掉并写进规则)
+## 四、事故如实记录(1–6 已全部修掉并写进规则;7 为外部网络事故,本机不改配置)
 
 1. C-4 测试里 `monkeypatch.undo()` 撤销了路径隔离,改写生产 `demo/articles.db`(证明无害);规则 32 禁止。
 2. 一次全量测试打开过生产 demo 库(补 `session_categories_dir` 夹具修掉);规则 25/32。
@@ -36,11 +36,11 @@
 4. `backup.py` 的轮转藏在 `snapshot()` 里,曾静默删掉两个历史备份;规则 29:`disk.backup_keep` 提到 30,自动删除必须逐条打日志。
 5. C-7 首版 `read_rows` 用 `sqlite3.Row`,而 `store.read_only_connect` 返回元组 → 11 红;`apply_cross` 首版 CAS 空转 → 重写按 `content_hash` 逐行比对。
 6. C-7 删行后 P7 面板一条测试红:断言押的是生产正文内容("demo 里搜得到『城市』"),已改为播种一行(规则 34)。
+7. **外部网络事故(非代码缺陷,未改本机任何配置)**:12:47–12:59 实测本机到 GitHub 的出口断死——直连 443 的 TLS 握手被切断,走系统代理(`365vpn`,127.0.0.1:57777)对 GitHub 的 CONNECT 返回 502;用户按其客户端侧处理后 13:00:30 同一命令链即恢复(`d817805`/`3bddf38` 已入库;恢复动作不在本机取证,故归因为节点/出口侧,属推断)。读数与判定见 §八。
 
-## 五、待办(按优先级,接手就从 1 开始)
+## 五、待办(按优先级,接手就从 **2** 开始;1 已完成)
 
-1. **推送 `d817805`**:本机到 GitHub 的 TLS 现在被切断(`ls-remote` 也失败,TCP 443 通),`main...origin/main [ahead 1]`。网络恢复后执行:
-   `git push origin HEAD`(用 Cherry Studio 自带 git + `GIT_DIR=D:\ttxt\.git` + `GIT_WORK_TREE=D:\ttxt`)。
+1. **推送 `d817805`** —— **已完成**(2026-11-15 13:00:30 +08:00):`scripts\push.cmd` 推成功,远端 `refs/heads/main` 实测 = `3bddf387ed7bcf67935f6aa66fe7fede9f0ab114`,`git rev-list --left-right --count origin/main...main` = `0 0`,工作区干净。中断期的读数与恢复取证见 §八(当时设想的 `git push origin HEAD` 不必再执行)。
 2. **C-7b 修抽取器身份塌陷**:`ttxt/crawler/extract.py:31-58` 的 `extract_html_items` 把 `url=source.url` 赋给每一条 → 列表页 30 行同一个 URL。要改成取每条自己的链接;入库时"同 URL 不同内容"不得静默,要计数 + 记日志;配一条 `doctor.db.url_identity` 体检。做完才能谈 `demo` 里那 30 行。
 3. **恢复真实采集并核验采集栈**:按 Scrapling / CloakBrowser 官方文档核验本地部署(Scrapling 0.5.1 + curl_cffi + playwright,HTTP 优先;CloakBrowser 不装新东西)。已知残留风险:Scrapling 发伪装 UA + Google referer,而 robots 判定用项目 UA(`07_rules` 规则 19 相关,需要人拍板口径);浏览器 profile 547MB vs 配额 `disk.browser_max_gb 3`。
 4. **Worker / Scheduler 未启动**:定时采集与模型串行队列还没跑起来(`00_control/scheduler_state.json`)。
@@ -64,3 +64,33 @@
 | 派生索引不进账本 | `articles_fts`、`article_clusters` | `python -m ttxt clean --category <类目>` + `python -m ttxt analyze --category <类目>` 重建 |
 
 备份一律用 `Connection.backup()`(纯复制 `.db` 会丢 WAL 内容);轮转保留数 `disk.backup_keep=30`。
+
+---
+
+## 八、待办 1 完成取证 + GitHub 出口中断的实测读数(2026-11-15 12:47–13:02,追加不改写)
+
+### 8.1 推送完成(远端实测,不是本地跟踪 ref)
+
+| 时刻(+08:00) | 观测 | 来源 |
+| --- | --- | --- |
+| 13:00:30 | `.git/logs/refs/remotes/origin/main` 记录 `1de94a3a…2edd178 → 3bddf387…9f0ab114 … update by push` | reflog |
+| 13:02:25 | `tools\git\cmd\git.exe -c http.sslBackend=openssl ls-remote --heads origin refs/heads/main` → `3bddf387ed7bcf67935f6aa66fe7fede9f0ab114` | 远端读数 |
+| 13:02 | `git fetch` 后 `rev-list --left-right --count origin/main...main` → `0  0`;`status --porcelain` 空 | 本会话 |
+
+- 命令:`scripts\push.cmd` 不带 `-m` ⇒ 只推已有提交,**当时没有新建提交**;凭据来源 `D:\ttxt\.secrets\github_token`;git = `tools\git\cmd\git.exe`。
+- 入库的就是滞留的两个提交:`d817805`(12 文件,+1584/−4)、`3bddf38`(本页)。
+- 恢复后的 `ls-remote` 与 `push` **都没有**显式指定 `http.proxy`,git 自行走系统代理 ⇒ 本机未改任何网络配置,恢复发生在代理/节点侧(**推断**,用户未说明客户端里改了什么)。
+- 本页自身的收尾会再构成一个提交,推送后远端 HEAD 再前进一次(不影响以上读数对应的 `3bddf38`)。
+
+### 8.2 中断期三条路径的读数(12:47–12:59,全部只读探测)
+
+| 路径 | 结果 | 读数 |
+| --- | --- | --- |
+| 直连 `github.com:443` | TCP 通、TLS 握手被切断 | 对端 `20.247.166.64:443`;Python 侧 `SSLEOFError: UNEXPECTED_EOF_WHILE_READING`;git 侧 `TLS connect error: error:0A000126:SSL routines::unexpected eof while reading` |
+| 系统代理 `127.0.0.1:57777`(进程 `365vpn`,PID 16152) | GitHub 的 CONNECT 全 502 | `api.github.com`、`codeload.github.com` → `Tunnel connection failed: 502 Bad Gateway`;对照组 `https://www.bing.com/` → **200 OK**(代理本身活着) |
+| 备用 `ssh.github.com:443` | TCP 通、SSH banner 为空 | 对端 `20.205.243.160:443`,`recv()` 返回 0 字节(对端关闭) |
+
+- 代理来源:注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings` → `ProxyEnable=1`、`ProxyServer=127.0.0.1:57777`;`365vpn` 只监听这一个端口,本机没有第二个代理进程可换。
+- 判定(**推断,非实证**):断点在代理节点的 GitHub 出口侧,本机 git、令牌、`http.sslBackend=openssl` 都不是原因。上一次成功推送是 10:59:37(`→ 1de94a3`),说明中断落在其后、13:00:30 之前。
+- 本轮**没有**做:改 hosts、改注册表代理、安装新代理、新建自动重试定时任务(用户选择手动切节点后再推)、以及 8.1 之外的任何写操作。
+- 遗留风险:GitHub 出口依赖单个 VPN 客户端的单节点,断供时提交只能滞留在本地(本次两个提交滞留约 2 小时)。若要自动重试,需先获用户对定时任务的明确批准。
