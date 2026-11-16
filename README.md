@@ -86,7 +86,8 @@ D:\ttxt\scripts\ttxt.cmd predict report --category technology
 | P12 可靠性与质量加固 | ⚠️ 基础设施批次已提交;L4 质量验收未闭合 | `08_wiki/reports/P12-*.md`(**外部执行凭据**,本机未复跑浸泡/盲测) |
 | P13 质量闭环(评审返工) | 🟡 批次0 完成;批次1 进行中;`quality_claim = NOT_AVAILABLE` | `08_wiki/reports/P13-batch0-baseline-verification.md`、`08_wiki/reports/P13-batch1-golden-set-v2.md`、`10_tests/golden/golden_set_v2.schema.md`、`11_backups/P13-batch0-baseline-*.zip` |
 
-> 生产闭环已贯通:指标回流(白名单)→ 快照 → 预测校准 → 知识资产;分析 → 关键词反哺 → 自动入队采集;本地调度器无人值守(仅入队/分析/恢复/清理)。等待的外部输入只剩头条后台真实指标导出。
+> 生产闭环已贯通:指标回流(白名单 + 头条公开页)→ 快照 → 预测校准 → 知识资产;分析 → 关键词反哺 → 自动入队采集;本地调度器无人值守(仅入队/分析/恢复/清理)。
+> 实况(2026-11-16,P24):technology 168 行里 **85 行有实测指标**(读/赞/评/展现;`favorites` 因语义未证实仍 NULL),标定样本 85,`prediction_records` 40 条 / 已回填 16 条 / MAE 0.0168。其余 5 个类目仍是 0 条指标 —— 不是命令坏了,是那些类目语料里**没有头条文章**(先按取证注册 `toutiao_finance` / `toutiao_history`,见 `08_wiki/reports/P24-metrics-and-prediction-loop-20261116.md` 第六节)。等待的外部输入:头条后台真实指标导出(含"收藏"计数)。
 > P12 各基础设施批次(A–I)已提交,但**质量结论仍未验收**:真实指标 0 行(样本 < `MIN_ROWS=30`,禁止校准)、黄金集人工裁定 0 条、72h/7 天浸泡仅有外部凭据。质量闭环现由 **P13** 接管,验收口径见 `08_wiki/reports/P13-batch1-golden-set-v2.md`;任何人不得引用旧的 57 条机器预裁定数据宣称 L4 达标。
 > 日常命令见 [`08_wiki/operations.md`](08_wiki/operations.md)。
 > 定时巡检:本 DSH 环境已建立「每日 18:00(Asia/Shanghai)数据质量巡检」与「每周一 09:30(Asia/Shanghai)P13 质量闭环巡检」两个计划任务(各自独立新会话,只读+建议,不自行执行需批准的动作);你此前在 ChatGPT 建立的每周一巡检属于另一工具,不属于本项目配置。

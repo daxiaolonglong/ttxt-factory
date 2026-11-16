@@ -101,6 +101,14 @@ scratch 桶按自己的限额计量、`config.SCRATCH_DIR` 指向真实暂存根
 
 1. **指标回流扩到其余类目**:technology 已 `measured=32` 标定过;继续 `ttxt metrics --category … --fetch-public` 刷剩余 127 篇,
    finance / health / social / history 各攒 ≥30 measured 样本后 `--calibrate`(现在这 4 个类目 100% `missing_data`)。
+
+   > **更正(2026-11-16,P24)**:这条口径写错,不是执行不到位。只读取证(`07_tmp/r27_metrics_expand/host_inventory_out.txt`)显示
+   > finance / social / history / health / demo 的**头条文章数为 0**(finance=eastmoney+tmtpost、social/history=chinanews.com.cn、
+   > health=who.int、demo=quotes.toscrape+sspai),而 `metrics_pages._candidates` 只按 `host_allowed(url)` 选候选
+   > (结构:`ttxt/crawler/metrics_pages.py:308-334`)⇒ 给这些类目跑 `--fetch-public` 只会是 `candidates: 0 / host_skipped: N`。
+   > 真正的前置是**先给这些类目注册带公开计数的来源**(头条 finance/history 频道已两级取证通过,
+   > 见 `08_wiki/reports/P24-metrics-and-prediction-loop-20261116.md` 第六节),再谈刷指标与标定。
+   > technology 这一支照原计划执行了:第 7 轮三批入库 `written 53 / snapshots 53`,`measured` 32 → **85**,标定样本 85。
 2. **`prediction_records` 仍是 0**:technology 已满足 `prediction.min_samples=5`,跑基线预测 → 实测回填 → 准确率报告。
 3. **R2-5 `ttxt crawl-enrich --category`**:health 25 行全是 `short`(avg **119.4 字**),是语料质量最短的一块。
 4. **调度器**:`ttxt schedule --once` 单轮上线(`scheduler_state.json` 冻结在 11-12 19:57,`crawl_enqueue_4h` 已错过约 17 轮);

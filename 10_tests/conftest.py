@@ -296,6 +296,13 @@ def production_state_untouched(session_db_opens, isolated_log_dir, session_categ
     快照前先 ``gc.collect()``:SQLite WAL 边车(``-wal``/``-shm``)只在“最后一个连接关闭”
     时才被清理;若连接对象还挂在引用环里(如 dashboard 请求处理器),边车会残留在生产目录。
     强制回收让“残留边车”与“真实写入”区分开:回收后仍存在的边车才是真正未清理的副作用。
+
+    P24 根因修正:边车**不能**参与逐字节一致性比较。只读巡检脚本(``mode=ro``)打不开
+    checkpoint,SQLite 会在生产目录留下 ``-wal``/``-shm``,下一次可写连接才收掉;这类
+    **会话开始前就存在**的边车与测试无关(2026-11-16 全量跑因此误报 1 error,
+    _receipt:07_tmp/r27_metrics_expand/p24_full_suite.txt_)。真实风险由两条精确判定兜住:
+    ①所有受保护文件的 sha256/行数必须一致(被改或被删都算失败);
+    ②会话期间**新增**的边车才算违规(配合 ``session_db_opens`` 的连接白名单)。
     """
     before = _snapshot()
     yield before
@@ -303,11 +310,21 @@ def production_state_untouched(session_db_opens, isolated_log_dir, session_categ
     time.sleep(0.2)
     gc.collect()
     after = _snapshot()
-    changed = [key for key in before if before[key] != after.get(key)]
-    assert not changed, (
-        f"测试改动了生产状态: {changed}\nbefore={before}\nafter={after}\n"
-        "若只有 wal_sidecars 变化,说明有测试直接打开了生产库(只读也会生成 -wal/-shm),"
-        "应改为读取 tmp_path 下的副本。"
+    missing = [key for key in before if key not in after]
+    changed = [
+        key for key in before
+        if key != "wal_sidecars" and before[key] != after.get(key)
+    ]
+    assert not missing and not changed, (
+        f"测试改动了生产状态: 变更={changed} 缺失={missing}\nbefore={before}\nafter={after}\n"
+        "受保护文件(库/配置/注册表/日志/model_gate)的内容或行数必须逐字节一致。"
+    )
+    new_sidecars = sorted(set(after.get("wal_sidecars", [])) - set(before.get("wal_sidecars", [])))
+    assert not new_sidecars, (
+        f"测试会话在生产目录新建了 SQLite 边车:{new_sidecars}\n"
+        "说明有测试直接打开了生产库(只读也会生成 -wal/-shm),"
+        "应改为读取 07_tmp 下的副本,或用 isolated_data_root 夹具把路径常量指向副本。\n"
+        f"会话开始前的边车:{before.get('wal_sidecars')}\n会话结束时的边车:{after.get('wal_sidecars')}"
     )
     offenders = sorted({target for target in session_db_opens if opens_production_db(target)})
     assert not offenders, (

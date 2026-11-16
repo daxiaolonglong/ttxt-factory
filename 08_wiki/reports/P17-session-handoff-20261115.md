@@ -254,6 +254,14 @@
 
 1. **指标回流扩到其余类目**:technology 已 `measured=32` 标定过;继续 `--fetch-public` 刷剩余 127 篇,
    finance/health/social/history 各攒 ≥30 measured 样本后 `--calibrate`(现在 4 个类目全是 `missing_data`)。
+
+   > **更正(2026-11-16,P24)**:后半句口径写错。`host_inventory_out.txt` 取证显示 finance/social/history/health/demo 的
+   > **头条文章数为 0**,而候选筛选只认 `host_allowed(url)`(`ttxt/crawler/metrics_pages.py:308-334`)⇒ 那些类目的 `--fetch-public`
+   > 只会返回 `candidates: 0 / host_skipped: N`。前置条件是**先注册带公开计数的来源**:头条 `news_finance` / `news_history`
+   > 频道已用生产适配器两级取证通过(每频道 pages 4 / 逐篇链接 17 / 正文 1450–2985 字 / 当天发布 / robots 放行),
+   > social/health 的频道 slug 不存在(404 或落地 `channel=` 空),需要先渲染导航取真 slug。
+   > technology 一支照原计划做了:三批 `written 53 / snapshots 53`,`measured` 32 → 85,标定样本 85。
+   > 详见 `08_wiki/reports/P24-metrics-and-prediction-loop-20261116.md` 第一、六节。
 2. **`prediction_records` 仍是 0**:technology 已够 `prediction.min_samples=5`,跑基线预测 + 实测回填 + 准确率报告。
 3. **R2-5 `ttxt crawl-enrich --category`**(health 25 行全是 `short`,avg 119.4 字 ⇒ 正文回填是语料质量最短的一块)。
 4. **调度器**:`ttxt schedule --once` 单轮上线(队列已清空,`crawl_enqueue_4h` 已错过约 17 轮;`scheduler_state.json` 冻结在 11-12 19:57);
@@ -261,3 +269,36 @@
 5. C-5 可信度分档;9 条空 `evidence_links.article_id`(需 DDL 批准);`_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump;
    `manual ttxt crawl` 路径不做关键词闸门(job 70 无 `keyword_filtered_out`)是否要与队列路径统一,待定。
 6. 磁盘:`07_tmp` 已 0.548 GB(限额 2 GB),**清理必须先出清单交用户批准**,不许自动删(规则 29/43)。
+
+## 十五、第 7 轮(2026-11-16 04:5x → 07:5x)完成账本:P24 指标回流扩量 + 预测闭环首次真跑 + 两处口径根因
+
+写库前备份:`11_backups/P24-pre-metrics-20261116-050544.zip`(4,866,663 字节,`Connection.backup()` 一致性副本 + 基线状态 JSON)。
+
+| 事项 | 实测读数 | 凭据 |
+|---|---|---|
+| 先取证再定口径 | 各类目主机分布:toutiao 只在 technology(121/168);finance=eastmoney 60+tmtpost 36、social/history=chinanews.com.cn、health=who.int、demo=quotes+sspai ⇒ 其余类目头条文章 **0** 行 ⇒ 上一轮"刷其余类目公开指标"是空话,已在 §十四 与 P23 §九 下加日期更正 | `07_tmp/r27_metrics_expand/host_inventory_out.txt` |
+| 指标回流(technology) | dry-run 预检 19/19 带计数;三批 `--apply`:fetched 19/18/16、fetch_errors 1/2/4、**render_ok 53、mismatch/unattributed/sanity_rejected 全 0**、**written 53、snapshots 53、filled_from_null 212**、updated 0;`host_skipped` 每批 14(非头条主机不猜) | `dryrun_batch3.txt`、`apply_batch3/4/5.txt` |
+| 库内变化 | technology `article_metrics` 32 → **85**(reads/likes/comments/impressions 各 85,`favorites` 仍 0)、`metric_snapshots` 46 → **99**;`measured` 32 → 85,标签 verified_viral 3 → **9**、potential 25、normal 30、low_quality 21、unscored 83 | `post_p24_state.json` |
+| 标定两次 | 样本 69 → 阈值 `0.0462/0.0235/0.0108`(05:58);样本 85 → `0.0551/0.0261/0.0123`(07:15);方法仍是 p90/p60/p25,`MIN_CALIBRATION_SAMPLE=30` | `calibrate_69.txt`、`calibrate_85.txt` |
+| **根因:`prediction_records` 恒 0** | 实跑 `predict` 返回 `recorded 0 / already 0 / skipped_no_baseline 0` 而 `baseline_buckets` 有 69 个 measured 样本 ⇒ 候选 SQL `WHERE v.article_id IS NULL` 只挑"没有标签行"的文章,而生产每轮 relabel 让每篇都有标签行;另外 `LIMIT` 在"是否已有预测"之前生效 ⇒ 即便有候选也原地打转 | `predict1.txt` |
+| 代码修正 | `prediction.predict_articles`:候选=未实测(`tier<>'measured' OR score IS NULL OR 无标签行`);**已实测不许预测**;已有预测下推 SQL 反连接 + `ORDER BY a.id DESC` ⇒ `LIMIT` 只消耗新候选;`already_has_prediction` 语义保持 | `ttxt/analysis/prediction.py`、`10_tests/test_p24_prediction_candidates.py` |
+| 红→绿 | 新测试 5 项:改前 **4 failed / 1 passed**(`assert 0 == 2`、`assert (0,0,0) == (1,1,1)`);改后与新测试同跑的 P11 旧预测断言合计 **24 passed** | `p24_red.txt`、`p24_green.txt` |
+| 闭环真跑 | `predict --limit 40` → **recorded 40**;batch5 实测其中 16 篇 → `settle` → **settled 16 / pending 24**;`report` → **MAE 0.0168 / mean_bias −0.0116 / 16 样本 / asset_written true**;独立 SQL 复核 `AVG(ABS(predicted-outcome))=0.0168` 一致;知识资产 `kind=prediction_accuracy, confidence=measured` | `predict2.txt`、`settle3.txt`、`report3.txt`、`post_p24_state.json` |
+| 头条频道取证(为其余类目) | 静态 6 slug:finance/history 200 且落地 `channel=finance/history`(但静态只有 4,827 字节 JS 外壳、0 链接),health 落地 `channel=` 空,economics/society/culture 404;robots 全放行。用**生产适配器**(`browser_session` + `toutiao.collect(limit=3)`)复探:finance 与 history 各 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1450–2985 字,发布到 11-16 06:26/07:15 ⇒ 第 8 轮注册 `toutiao_finance`/`toutiao_history` 的依据 | `probe_channels_out.txt`、`probe_channels_browser_out.txt` |
+| `favorites` 仍 NULL | 同 URL dry-run 里 `itemCounter` 有 shareCount 54 / repinCount 196 / forwardCount 3 / buryCount 0 / danmuCount 0,但十几分钟后探针再抓**同一 URL** 拿到无 `RENDER_DATA` 外壳(`RENDER_DATA` 0 次、`收藏` 0 次)⇒ 中文标签与数字配对取证没做成,`repinCount=收藏` 仍是猜测,继续只入 4 个已证实计数 | `dryrun_batch3.txt`、`probe_counter_labels_out.txt` |
+| 测试护栏误报根因 | 全量 `411 passed, 1 error`:teardown 断言 `['wal_sidecars']` 变化 —— 会话**开始前**就有 14 个 `-wal/-shm`(我自己的 `mode=ro` 巡检脚本留下,只读连接不能 checkpoint)。`conftest` 改成:受保护文件 sha256/行数必须一致(含缺失),**新增**边车才算违规(配合 `session_db_opens` 白名单);重跑带边车 → **411 passed / 109.69 s / exit 0** | `p24_full_suite.txt`、`p24_full_suite2.txt` |
+| 体检与磁盘 | doctor **33 ok / 0 failed / 5 WARN**(与上一轮同一批 WARN);`disk.root_budget root_used=6.315GB budget=20GB`、`disk.scratch 07_tmp=0.571GB cap=2GB`、`disk.accounting 未登记=0.001GB`;`db.cleaned_coverage 374/374`;队列 `done 63 / aborted 7`(本轮无新采集) | `doctor_after_p24.txt`、`post_p24_state.json` |
+| 语料总量 | 仍 **374 行**(本轮只做指标与预测,没有新增采集) | `post_p24_state.json` |
+
+诚实说明:①`fetch_errors` 1→2→4 没做逐 URL 取证,只证明"同一 URL 会被返回不同外壳",没查明是限流还是别的;②MAE 只有 16 个回填样本,基线是"同类目同标题形态桶均值",不是模型;③其余 5 个类目 `article_metrics` 仍是 0、`prediction_records` 仍是 0(没可测样本,`predict` 如实拒绝);④频道取证 limit=3,只证明"能拿到逐篇链接与正文",没测整频道产量与翻页;⑤没跑 Worker 常驻、没开 `ttxt schedule --once`、没清 `07_tmp`、没改表结构(9 条空 `article_id` 仍等 DDL 批准)。
+
+第 8 轮待办(优先级从上到下):
+
+1. **注册 `toutiao_finance` / `toutiao_history`**(第六节两行取证),启用前逐 URL robots 复核 + 限速 2s + `render: browser`;采集后 analyze → ≥30 measured → `--calibrate` → `predict/settle/report`,把闭环复制到 finance/history。
+2. **social / health 头条频道 slug**:渲染首页导航取真实 slug(不许猜),再走"静态 → 生产适配器"两级取证。
+3. **R2-5 `ttxt crawl-enrich --category`**(health 25 行全 `short`,avg 119.4 字)。
+4. **调度器上线**:`ttxt schedule --once` 单轮;Worker 常驻需用户批准(`scheduler_state.json` 仍冻结在 11-12 19:57,`crawl_enqueue_4h` 已错过约 18 轮)。
+5. C-5 可信度分档;9 条空 `evidence_links.article_id`(需 DDL 批准);`_element_text` 标题缺陷 + `PROCESSOR_VERSION` bump;`ttxt crawl` 手动路径不做关键词闸门是否统一。
+6. **关键词反哺要读爆款标签**:`analysis/keywords.py` 目前不读 `viral_labels` ⇒ 爆款结论回不到选词(用户目标 2 的关键缺口)。
+7. `07_tmp` 0.571 GB(限额 2 GB):清理必须先出清单交用户批准(规则 29/43)。
+

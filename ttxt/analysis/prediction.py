@@ -53,9 +53,16 @@ def predict_articles(
     db_path: Path | None = None,
     limit: int | None = None,
 ) -> dict:
-    """为尚无实测标签、也没有预测记录的文章登记基线预测。"""
+    """为**尚未实测**的文章登记基线预测(已有真值的 measured 文章不许预测)。
+
+    P24 根因修正:旧口径 ``WHERE v.article_id IS NULL`` 只挑"完全没有标签行"的文章,
+    而生产里采集入口每轮都跑 analyze/relabel ⇒ 每篇都有 ``viral_labels`` 行(没指标的记
+    ``missing_data``)⇒ 候选恒为空,``prediction_records`` 永远是 0,闭环空转。
+    另外旧代码 ``LIMIT`` 在"是否已有预测记录"之前生效 ⇒ 即便有候选也会每轮重复挑同一批
+    (与 P22 指标候选轮转同一类根因),所以把"已有预测"下推到 SQL 反连接,保证逐轮往前推进。
+    """
     target = _target(db_path, category)
-    recorded = skipped_no_baseline = already = 0
+    recorded = skipped_no_baseline = 0
     con = connect(target)
     try:
         baselines = _measured_baselines(con)
@@ -66,23 +73,30 @@ def predict_articles(
                 "skipped_no_baseline": 0,
                 "reason": "类目内没有任何 measured 实测样本,拒绝凭空预测",
             }
+        unmeasured = "(v.article_id IS NULL OR v.confidence_tier <> 'measured' OR v.score IS NULL)"
+        already = int(
+            con.execute(
+                "SELECT COUNT(*) FROM articles a"
+                " LEFT JOIN viral_labels v ON v.article_id = a.id"
+                " JOIN prediction_records pr ON pr.category = ? AND pr.subject = 'article:' || a.id"
+                f" WHERE {unmeasured}",
+                (category,),
+            ).fetchone()[0]
+        )
         sql = (
             "SELECT a.id, a.title, a.content, COALESCE(a.text_length, LENGTH(a.content)) AS text_length"
             " FROM articles a"
             " LEFT JOIN viral_labels v ON v.article_id = a.id"
-            " WHERE v.article_id IS NULL"
+            " LEFT JOIN prediction_records pr ON pr.category = ? AND pr.subject = 'article:' || a.id"
+            f" WHERE pr.id IS NULL AND {unmeasured}"
+            " ORDER BY a.id DESC"
         )
-        params: list = []
+        params: list = [category]
         if limit:
             sql += " LIMIT ?"
             params.append(int(limit))
         for row in con.execute(sql, params).fetchall():
             subject = f"article:{row['id']}"
-            if con.execute(
-                "SELECT id FROM prediction_records WHERE category=? AND subject=?", (category, subject)
-            ).fetchone():
-                already += 1
-                continue
             features = compute_features(row["title"] or "", row["content"] or "", int(row["text_length"] or 0))
             bucket = _bucket(features)
             samples = baselines.get(bucket) or baselines.get("all") or []
