@@ -37,6 +37,16 @@ TOKEN_CLAIM_SUPPORTS = {"能核实"}
 TOKEN_CLAIM_BLOCKED = {"对不上", "没出处"}
 VERDICT_BY_TICK1 = {"对": "通过", "不对": "驳回"}
 
+# ① 这一列到底在问什么。P27 第一版辅助稿把它读成"机器判的实对不对",15 行打成「不对」;
+# 本轮(P29)更正为下面这句,并把口径写死在这里,免得第三轮又按旧意思打勾。
+TICK1_SEMANTICS = (
+    "①问的是:机器给这句话贴的处理标签(能核实/对不上/没出处/转述)贴不贴切;"
+    "不是问这句话本身是真是假(那由 ② 和 ③ 分别回答)")
+ADJUDICATOR_KINDS = {"ai", "human"}
+# 裁定者类型写 ai 的行,就算把 provenance/human_signature 伪造成人工,也绝不许写 human_*
+AI_ADJUDICATOR = "ai"
+HUMAN_ADJUDICATOR = "human"
+
 
 class DraftError(ValueError):
     """草案本身不合法(取值越界、缺字段、行号对不上)。"""
@@ -77,6 +87,23 @@ def load_draft(path: Path) -> list[dict[str, Any]]:
             raise DraftError(f"{where}: provenance {row['provenance']!r} 不在 {sorted(KNOWN_PROVENANCE)}")
         if not isinstance(row["web_pages_opened"], bool) or not isinstance(row["human_signature"], bool):
             raise DraftError(f"{where}: web_pages_opened / human_signature 必须是布尔")
+        version = row.get("draft_version")
+        if version is not None and (isinstance(version, bool) or not isinstance(version, int) or version < 1):
+            raise DraftError(f"{where}: draft_version 必须是 ≥1 的整数,收到 {version!r}")
+        adjudicator = row.get("adjudicator_type")
+        if adjudicator is not None and adjudicator not in ADJUDICATOR_KINDS:
+            raise DraftError(f"{where}: adjudicator_type {adjudicator!r} 只允许 ai/human")
+        semantics = row.get("tick1_semantics")
+        if semantics is not None and not isinstance(semantics, str):
+            raise DraftError(f"{where}: tick1_semantics 必须是字符串")
+        reason = row.get("reason")
+        if reason is not None and not isinstance(reason, str):
+            raise DraftError(f"{where}: reason 必须是字符串")
+        if isinstance(version, int) and version >= 2 and not (isinstance(reason, str) and reason.strip()):
+            raise DraftError(f"{where}: 第二版起每一行都必须写明理由(reason 不能为空)")
+        for flag in ("browsed_by_ai", "source_pages_checked"):
+            if flag in row and not isinstance(row[flag], bool):
+                raise DraftError(f"{where}: {flag} 必须是布尔")
         if row["card_id"] in seen:
             raise DraftError(f"{where}: card_id 重复")
         seen.add(row["card_id"])
@@ -93,6 +120,11 @@ def audit(cards: list[dict[str, Any]], draft: list[dict[str, Any]]) -> dict[str,
         "tick3": dict(Counter(r["tick3_tier"] for r in draft)),
         "token_crosstab": {},
         "contradictions": [],
+        "tick1_contradictions": [],
+        "tick1_matches_token": len(draft),
+        "adjudicator_types": dict(Counter(r.get("adjudicator_type", "unspecified") for r in draft)),
+        "draft_versions": dict(Counter(r.get("draft_version", 1) for r in draft)),
+        "tick1_semantics": TICK1_SEMANTICS,
         "tier_mismatch": [],
         "unknown_card_ids": sorted({r["card_id"] for r in draft} - set(by_id)),
     }
@@ -131,6 +163,18 @@ def audit(cards: list[dict[str, Any]], draft: list[dict[str, Any]]) -> dict[str,
                           "opinion": "转述"}.get(expected, "?")
         if token == expected_token:
             machine_token_matches_construction += 1
+        # R3(P29 新增,按更正后的 ① 定义):标签贴切性 = 机器贴的词与构造真值该贴的词是否一致。
+        # 词一致却打「不对」⇒ 说明裁定人还在按"这句话是真是假"打①,口径又跑偏了。
+        label_is_appropriate = token == expected_token
+        if (row["tick1_machine"] == "对") != label_is_appropriate:
+            report["tick1_matches_token"] -= 1
+            report["tick1_contradictions"].append({
+                "card_id": row["card_id"], "printed_row": row["printed_row"],
+                "assist_row": row["assist_row"], "rule": "R3",
+                "why": (f"机器贴的词「{token}」与构造真值 {expected!r} 该贴的词「{expected_token}」"
+                        f"{'一致' if label_is_appropriate else '不一致'},①却打了「{row['tick1_machine']}」"
+                        "——① 问的是标签贴切性,不是句子真假"),
+            })
         is_positive = card.get("kind") == "positive"
         if is_positive and tick2 == "不能":
             assist_false_reject += 1
@@ -140,6 +184,29 @@ def audit(cards: list[dict[str, Any]], draft: list[dict[str, Any]]) -> dict[str,
     report["assist_false_reject"] = assist_false_reject
     report["machine_token_matches_construction"] = machine_token_matches_construction
     return report
+
+
+def diff_drafts(old: list[dict[str, Any]], new: list[dict[str, Any]]) -> dict[str, Any]:
+    """比对两版草案:哪些卡片只增删、哪些字段被改动。改了什么必须看得见。"""
+    old_by = {r["card_id"]: r for r in old}
+    new_by = {r["card_id"]: r for r in new}
+    flips: list[dict[str, Any]] = []
+    for card_id, row in new_by.items():
+        before = old_by.get(card_id)
+        if before is None:
+            continue
+        for key in sorted(set(before) | set(row)):
+            if before.get(key, "<缺>") != row.get(key, "<缺>"):
+                flips.append({"card_id": card_id, "field": key,
+                              "before": before.get(key), "after": row.get(key)})
+    return {
+        "old_total": len(old),
+        "new_total": len(new),
+        "added_ids": sorted(set(new_by) - set(old_by)),
+        "removed_ids": sorted(set(old_by) - set(new_by)),
+        "changed_card_ids": sorted({f["card_id"] for f in flips}),
+        "flips": sorted(flips, key=lambda f: (f["card_id"], f["field"])),
+    }
 
 
 def human_adjudicated_count(cards: list[dict[str, Any]]) -> int:
@@ -156,6 +223,12 @@ def merge_draft_into_cards(cards: list[dict[str, Any]], draft: list[dict[str, An
     errors: list[str] = []
 
     if mode == "human":
+        ai_rows = [r["card_id"] for r in draft if r.get("adjudicator_type") == AI_ADJUDICATOR]
+        if ai_rows:
+            errors.append(
+                f"{len(ai_rows)}/61 行的裁定者 adjudicator_type=ai:AI 自己声明不是自然人,"
+                "即使 provenance/human_signature 被写成人工也拒绝写入 human_* —— 这不是签字,是冒充")
+            return out, errors
         offenders = [r["card_id"] for r in draft
                      if r["provenance"] != HUMAN_PROVENANCE or r["human_signature"] is not True]
         if offenders:
@@ -179,6 +252,12 @@ def merge_draft_into_cards(cards: list[dict[str, Any]], draft: list[dict[str, An
         card["assist_row"] = row["assist_row"]
         card["assist_printed_row"] = row["printed_row"]
         card["assist_recorded_at"] = row["recorded_at"]
+        card["assist_draft_version"] = row.get("draft_version", 1)
+        card["assist_adjudicator_type"] = row.get("adjudicator_type", "unspecified")
+        card["assist_tick1_semantics"] = row.get("tick1_semantics", "未声明口径")
+        card["assist_reason"] = row.get("reason")
+        card["assist_browsed_by_ai"] = row.get("browsed_by_ai")
+        card["assist_changed_from_v1"] = row.get("changed_from_v1")
         if mode == "human":
             card["human_adjudicated"] = True
             card["human_verdict"] = VERDICT_BY_TICK1[row["tick1_machine"]]
@@ -194,6 +273,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--draft", default="10_tests/golden/adjudications/assist_draft_chatgpt_20261116.jsonl")
     parser.add_argument("--mode", choices=("assist", "human"), default="assist")
     parser.add_argument("--out", default="", help="留空 = 只审计不写文件")
+    parser.add_argument("--diff", default="", help="与另一版草案(如上一版)比对,列出被改动的字段")
     args = parser.parse_args(argv)
 
     root = Path(__file__).resolve().parents[1]
@@ -203,7 +283,11 @@ def main(argv: list[str] | None = None) -> int:
     draft = load_draft(draft_path)
     report = audit(cards, draft)
     print(f"草案 {report['total']} 行 | ① {report['tick1']} | ② {report['tick2']} | ③ {report['tick3']}")
-    print(f"机器词与构造真值一致: {report['machine_token_matches_construction']}/{report['total']}")
+    print(f"① 口径:{report['tick1_semantics']}")
+    print(f"裁定者类型:{json.dumps(report['adjudicator_types'], ensure_ascii=False, sort_keys=True)}"
+          f" | 草案版本:{json.dumps(report['draft_versions'], ensure_ascii=False, sort_keys=True)}")
+    print(f"机器词与构造真值一致: {report['machine_token_matches_construction']}/{report['total']}"
+          f" | ① 与标签贴切性自洽: {report['tick1_matches_token']}/{report['total']}")
     print(f"辅助稿把负例判成「能支持」(误接受): {report['assist_false_accept']};"
           f"把正例判成「不能」(误拒): {report['assist_false_reject']}")
     print("词分布:", json.dumps(report["token_crosstab"], ensure_ascii=False, sort_keys=True))
@@ -211,10 +295,23 @@ def main(argv: list[str] | None = None) -> int:
     for item in report["contradictions"]:
         print(f"  印出第 {item['printed_row']} 行 / 本人表第 {item['assist_row']} 行 "
               f"{item['card_id']} [{item['rule']}] {item['why']}")
+    print(f"① 口径跑偏的行(R3:词贴得对却打「不对」/词贴错却打「对」): {len(report['tick1_contradictions'])}")
+    for item in report["tick1_contradictions"]:
+        print(f"  印出第 {item['printed_row']} 行 {item['card_id']} [{item['rule']}] {item['why']}")
     if report["tier_mismatch"]:
         print(f"等级字母与卡片不符: {len(report['tier_mismatch'])}")
     if report["unknown_card_ids"]:
         print(f"卡片集里找不到的 card_id: {report['unknown_card_ids']}")
+    if args.diff:
+        other_path = (root / args.diff) if not Path(args.diff).is_absolute() else Path(args.diff)
+        diff = diff_drafts(load_draft(other_path), draft)
+        judged = [f for f in diff["flips"] if f["field"] in (
+            "tick1_machine", "tick2_fact_support", "tick3_tier", "assist_tier_letter",
+            "printed_row", "assist_row")]
+        print(f"与 {other_path.name} 比对:新增 {len(diff['added_ids'])} / 删除 {len(diff['removed_ids'])}"
+              f" / 三个勾与行号被改动 {len(judged)} 处 / 涉及卡片 {len(diff['changed_card_ids'])} 张")
+        for item in judged:
+            print(f"  {item['card_id']} {item['field']}: {item['before']!r} → {item['after']!r}")
 
     if not args.out:
         return 0

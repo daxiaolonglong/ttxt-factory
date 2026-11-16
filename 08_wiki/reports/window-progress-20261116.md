@@ -235,3 +235,17 @@ health 那一支每次 `inserted 0 / duplicates 25`,gap 词 `睡眠` 永远补�
 
 
 
+
+## 十三、P29:黄金裁定第二版按更正口径入账 + 独立证据覆盖率取证(16:4x–17:1x)
+
+- **本人澄清了 P27 打印表里 ① 的真正含义**:问的是「机器使用的处理标签是否贴切」,不是「机器判断的事实是否正确」。第一版辅助稿按后一种读法在 61 行里打了 15 个「不对」,其中 **10 行机器贴的是「转述」**(观点/归属路由,它并不宣称这句话已被来源证实)——那是口径读反,不是判错。口径已写死 `scripts/golden_v2_assist_audit.py:TICK1_SEMANTICS`,并加 **R3 闸门**:词贴对却打「不对」/词贴错却打「对」= 口径跑偏,`tick1_contradictions` 必须为空(实测 0)。所以 **① 61/61 是标签贴切性自检,不是"事实判断正确率"**,两个词禁止混用。
+- **第二版 sidecar 已入账**:`10_tests/golden/adjudications/assist_draft_chatgpt_20261116_v2.jsonl`(61 行,`python -m scripts.golden_v2_revise_assist_draft` 可复现,重跑逐字节相同)。读数 ① **61 对 / 0 不对**、② **10 能 / 51 不能**、③ **61 同意**;`--diff` 对着上一版看:三个勾 + 行号只有 **15 处**变动,全是 `tick1_machine: '不对' → '对'`,其余 46 行只新增审计元数据(版本/理由/裁定者类型/口径声明/AI 是否浏览过来源)。
+- **5 处理由经机器核对**(`verify_explanations()`,对不上就不落盘):v2h01 工厂句与 WHO 原文逐字一致;v2t13 原文「开售仅3天」被改成「开售仅10天」;v2h02 两个事实陈述被强行加「导致」;v2h03 原文主体是 WHO 被换成「昆仑智能研究院」;v2h16 工厂句讲埃博拉疫苗而绑定的来源是青少年身体活动报告。
+- **没越过的线**:v2 仍是 AI 裁定(`adjudicator_type=ai`、`human_signature=false`、`browsed_by_ai` 只表示 AI 打开过网页,`web_pages_opened` 保持 False);`golden_set_v2.jsonl` **一个字节未改**,门禁照旧 **0/61 真人签署**不过;新闸门把伪造签署也堵住——`--mode human` 见 `adjudicator_type=ai` 直接拒(测试用伪造 `provenance=human_signed` + `human_signature=True` 仍然被拒)。**这条门禁只能本人本人签过。**
+- **覆盖率第一次量到能决策**(只读 `scripts/golden_evidence_coverage.py`,读数 `07_tmp/p29_adjudication_v2/coverage.txt`):61 张卡只覆盖 **10 个网址 / 3 个域名**(who.int 17 / toutiao.com 25 / eastmoney.com 19);**A 级 17、B 级 0、C 级 44**,A/B 占比 **17/61 = 27.9%**;`corroborating_urls` 非空的卡 **0 张**;要过 50% 需**净增 ≥27 张 A/B 卡**。
+- **A 级素材已见顶**:全系统 A 级来源只有 `who_cn_news` 一个,健康 25 篇全在其中;本轮再采 `--source who_cn_news --category health --limit 20` ⇒ **inserted 0 / duplicates 20** ⇒ 重复刷同一频道加不出证据。
+- **B 级证据在当前语料里造不出来**:432 篇里 `cluster_id` 跨域名同题 **0 组**;换成"归一化标题字符二元组 Jaccard≥0.30"再逐类目扫,六个类目**各自 0 对**(`07_tmp/p29_adjudication_v2/cross_source.txt`)。⇒ 必须"同一事件从两家互不相关来源各采一篇",这正是关键词反哺入队要驱动的事。
+- **下一轮(P30)的账**:① 历史 20 + 社会 33 = 53 篇 chinanews.com.cn(中国新闻社官网通稿)在黄金集里**一张卡都没有**,先做一手性小样本取证再决定是否进 `PRIMARY_SOURCES`(等级仍要本人 `human_confirms_tier` 确认);② 黄金集补历史/社会卡片,目标净增 ≥27 张 A/B;③ 用反哺词找跨源同题对(eastmoney×tmtpost、ifanr×sspai×toutiao)做真正的 B 级卡;④ 61 行签署表打印、逐条打勾签名后 `--mode human` 才合并。
+- 回归:新增 `10_tests/test_p29_adjudication_v2.py` 11 条(红 `07_tmp/p29_adjudication_v2/red_evidence.txt` → 绿 `green_evidence.txt`),全量 **453 passed**;`ttxt doctor` **34 ok / 0 failed**;只读取证后按规则 48 收边车(`残留边车=无`,行数未变)。纪律入**规则 49**,写作评审角色加两条纪律并重导项目技能。
+
+完整账本:`08_wiki/reports/P29-adjudication-v2-and-evidence-coverage-20261116.md`。
