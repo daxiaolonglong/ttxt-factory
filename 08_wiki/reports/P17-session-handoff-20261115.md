@@ -369,5 +369,17 @@
    测试 `10_tests/test_p27_assist_draft.py` 8 项(先红 ModuleNotFoundError → 8 passed;全量 **435 passed / 118.93 s**)。
    逐行算术 **①46对/15不对、②10能/51不能**(本人汇总 47/14、9/52 各差 1,已就地更正);自动挑出 **5 处自相矛盾**;
    **「第 49 行漏检」不成立** —— 那行(印出第 13 行 `v2t13`)机器印的是「对不上」,机器已抓到 10 天/3 天。详见 §十一。
+ ⑰第 9 轮 P28 已做完(15:4x–16:0x):**真实爆款表现喂回关键词评分**。老 `score_keywords()` 只读"覆盖几篇 + 正文合格率",
+    `viral_labels` 一个字没读 ⇒ 同一个词采到 4 篇验证爆款与 4 篇真低质,评分完全相同(红凭据
+    `07_tmp/p28_viral_signal/red_evidence.txt`,7 条断言全 `KeyError: 'viral'`)。改法:`score = 0.7*旧公式 + 0.3*真实爆款信号`,
+    信号 = 该词命中文章里 **measured 且 score 非空** 样本的标签均值(1.0/0.6/0.2/0.0);类目真实测得 <30 ⇒ `insufficient_sample` 不加权,
+    单词真实命中 <3 ⇒ 不加权;`unscored/missing_data` **绝不按 0 分**(缺失 ≠ 0)。**零 DDL**,`gap` / 24h 冷却 / 限速 / robots 一律没碰。
+    生产只有 **technology** 过 30 门槛(101 measured:normal 35 / potential 30 / low_quality 26 / verified_viral 10),finance 与 history 各 10、
+    social/health/demo 各 0 ⇒ 那 5 类评分逐位不变并如实标注。真数据干跑(连的是 `Connection.backup()` 副本):数据 1.0→0.8082、
+    开源 0.4451→0.4716、人工智能 0.5259→0.4554、效率工具(gap)0→0,`crawl-plan` 选词顺序随之变成 数据 > 开源 > 人工智能 > 效率工具。
+    `ttxt analyze --category all` 已落库。测试 `10_tests/test_p28_viral_keyword_signal.py` 7 项(红→绿),全量 **442 passed / 113.20 s**,
+    `ttxt doctor` **34 ok / 0 failed**。事故如实:我把只读巡检与全量测试并发跑,`mode=ro` 在生产目录留了 6 对 `-wal/-shm`,
+    被 `conftest` 判 1 error(护栏正确,违规是我),`scripts/p28_wal_sidecar_cleanup.py` 收净(全 `quick_check ok`、WAL 0 字节、
+    行数 32/106/25/30/33/186 = 412 未变),已写进**规则 48**。详见 `P28-viral-keyword-feedback-20261116.md` 与 `window-progress-20261116.md` §十二。
 
 

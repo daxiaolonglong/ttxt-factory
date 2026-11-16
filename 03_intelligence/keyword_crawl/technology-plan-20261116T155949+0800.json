@@ -1,0 +1,121 @@
+{
+  "category": "technology",
+  "generated_at": "2026-11-16T15:59:49+08:00",
+  "keywords": [
+    "效率工具",
+    "数据",
+    "开源",
+    "人工智能"
+  ],
+  "keyword_rows": [
+    {
+      "keyword": "效率工具",
+      "status": "gap",
+      "score": 0.0,
+      "collected": 0
+    },
+    {
+      "keyword": "数据",
+      "status": "active",
+      "score": 0.8082,
+      "collected": 81
+    },
+    {
+      "keyword": "开源",
+      "status": "active",
+      "score": 0.4716,
+      "collected": 11
+    },
+    {
+      "keyword": "人工智能",
+      "status": "active",
+      "score": 0.4554,
+      "collected": 17
+    }
+  ],
+  "articles_before": 186,
+  "cold_start": false,
+  "sources": [
+    "toutiao_tech",
+    "sspai_rss",
+    "ruanyifeng_atom",
+    "ifanr_feed"
+  ],
+  "plans": [
+    {
+      "source": "toutiao_tech",
+      "category": "technology",
+      "keyword_filter": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "keywords": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "reason": "keyword_filter",
+      "fetch_item_pages": false
+    },
+    {
+      "source": "sspai_rss",
+      "category": "technology",
+      "keyword_filter": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "keywords": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "reason": "keyword_filter",
+      "fetch_item_pages": false
+    },
+    {
+      "source": "ruanyifeng_atom",
+      "category": "technology",
+      "keyword_filter": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "keywords": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "reason": "keyword_filter",
+      "fetch_item_pages": false
+    },
+    {
+      "source": "ifanr_feed",
+      "category": "technology",
+      "keyword_filter": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "keywords": [
+        "效率工具",
+        "数据",
+        "开源",
+        "人工智能"
+      ],
+      "reason": "keyword_filter",
+      "fetch_item_pages": false
+    }
+  ],
+  "rejected": [],
+  "note": "只出计划;加 --apply 才入队,入队后仍需 crawl-queue --run 或 Worker 执行",
+  "applied": false
+}

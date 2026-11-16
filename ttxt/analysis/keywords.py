@@ -7,9 +7,32 @@ from datetime import datetime
 from pathlib import Path
 
 from ttxt import config as cfg
+from ttxt.analysis import viral
 from ttxt.db import connect
 
 DEMO_SEEDS = ["人工智能", "开源", "效率工具", "数据"]
+
+# P28(2026-11-16):真实爆款表现要喂回关键词评分。实测缺口:``score_keywords()`` 只看
+# "覆盖了几篇文章 + 正文质量",完全不读 ``viral_labels`` ⇒ 同一个词采到 4 篇验证爆款
+# 和采到 4 篇低质文章,评分一模一样(红证据 07_tmp/p28_viral_signal/red_evidence.txt)。
+# 口径(与 viral.py 同一套词表,不另建一套):
+#   1) 只认 ``confidence_tier='measured'`` 且 ``score`` 非空 的真实测得样本;
+#      unscored / missing_data / incomplete_data / no_impressions 不进分母,更不当 0 分(规则 6);
+#   2) 类目内真实测得样本 < viral.MIN_CALIBRATION_SAMPLE(30)⇒ 标签本身是设计假定阈值,
+#      不宣称已标定,爆款项不参与评分(只如实记录状态);
+#   3) 单个关键词命中的真实测得文章 < MIN_KEYWORD_MEASURED_HITS ⇒ 词级样本不足,不加权;
+#   4) 爆款项最多占 VIRAL_WEIGHT(30%),覆盖与正文质量仍是主干;gap 判定只看 collected,不受影响。
+VIRAL_WEIGHT = 0.30
+MIN_KEYWORD_MEASURED_HITS = 3
+LABEL_VALUE = {
+    viral.LABEL_VERIFIED: 1.0,
+    viral.LABEL_POTENTIAL: 0.6,
+    viral.LABEL_NORMAL: 0.2,
+    viral.LABEL_LOW: 0.0,
+}
+VIRAL_STATUS_APPLIED = "applied"
+VIRAL_STATUS_INSUFFICIENT = "insufficient_sample"
+VIRAL_STATUS_NO_HITS = "no_measured_hits"
 
 # P26 ⓪(2026-11-16):反哺入队的冷却窗口。实测同一天 ``actor=keyword_feedback`` 入队 4 次
 # (job 74/75/76/77),gap 词始终是那两个,health 一支每次 ``inserted 0 / duplicates 25``
@@ -61,6 +84,39 @@ def seed_keywords(category: str, db_path: Path | None = None) -> int:
     return total
 
 
+def _measured_label_map(con) -> dict[int, str]:
+    """本类目库里**真实测得**(tier=measured 且 score 非空)的爆款标签,article_id -> label。
+
+    其余一律不进样本:unscored / missing_data / incomplete_data / no_impressions 没有真实表现数据,
+    把它们当 0 分等于凭空给关键词扣钱(规则 6:缺失 ≠ 0)。
+    """
+    rows = con.execute(
+        "SELECT article_id, label FROM viral_labels WHERE confidence_tier=? AND score IS NOT NULL",
+        (viral.TIER_MEASURED,),
+    ).fetchall()
+    return {int(row["article_id"]): row["label"] for row in rows}
+
+
+def _keyword_signal(article_ids: list[int], measured: dict[int, str]) -> tuple[float | None, int, str]:
+    """一个关键词的真实爆款信号 = 命中文章里真实测得样本的标签均值。
+
+    标签取值:验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0(真低质的词被真实地往下拉)。
+    返回 ``(signal, measured_hits, reason)``;``signal is None`` ⇒ 这个词不加爆款项
+    (既不虚构加分,也不无据扣分)。
+    """
+    hits = [article_id for article_id in article_ids if article_id in measured]
+    if not hits:
+        return None, 0, "命中的文章里没有真实测得表现的数据(缺失不等于 0 分)"
+    if len(hits) < MIN_KEYWORD_MEASURED_HITS:
+        return None, len(hits), (
+            f"命中的真实测得文章 {len(hits)} 篇 < {MIN_KEYWORD_MEASURED_HITS} 篇,词级样本不足")
+    values = [LABEL_VALUE[label] for label in (measured[article_id] for article_id in hits)
+              if label in LABEL_VALUE]
+    if not values:
+        return None, len(hits), "命中的真实测得标签不在已知词表内,不猜"
+    return round(sum(values) / len(values), 4), len(hits), ""
+
+
 def score_keywords(category: str, db_path: Path | None = None) -> dict:
     target = Path(db_path) if db_path is not None else cfg.CATEGORIES_DIR / category / "articles.db"
     con = connect(target)
@@ -68,23 +124,44 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         # 覆盖统计必须覆盖全部关键词(含 gap):若只统计 active,gap 词再也不会被重新计数,
         # auto_feedback 的 gap→active 恢复通道就永远无法触发(闭环断在评分层)。
         rows = con.execute("SELECT id, keyword FROM keywords ORDER BY id").fetchall()
-        articles = con.execute("SELECT cleaned_content, content FROM articles").fetchall()
+        articles = con.execute("SELECT id, cleaned_content, content FROM articles ORDER BY id").fetchall()
+        article_ids = [int(row["id"]) for row in articles]
         texts = [(row["cleaned_content"] or row["content"] or "") for row in articles]
         lengths = [len(text) for text in texts]
+        # P28:真实爆款表现喂回评分。只读本类目库的 viral_labels,严禁跨类目。
+        measured = _measured_label_map(con)
+        calibration = viral.load_calibration(con)
+        calibration_state = "calibrated" if calibration else "default_thresholds"
+        category_ready = len(measured) >= viral.MIN_CALIBRATION_SAMPLE
         now = cfg.now_iso()
-        collected_rows: list[tuple[int, str, int, int, float]] = []
+        collected_rows: list[tuple[int, str, int, int, float, float | None]] = []
+        signal_details: dict[str, dict] = {}
         for row in rows:
             keyword = row["keyword"]
             hits = [index for index, text in enumerate(texts) if keyword in text]
             collected = len(hits)
             quality = sum(1 for index in hits if lengths[index] >= 120)
             average_length = (sum(lengths[index] for index in hits) / collected) if collected else 0.0
-            collected_rows.append((row["id"], keyword, collected, quality, average_length))
+            signal, measured_hits, reason = _keyword_signal([article_ids[index] for index in hits], measured)
+            if signal is not None and not category_ready:
+                signal = None
+                reason = (f"类目真实测得样本 {len(measured)} 条 < {viral.MIN_CALIBRATION_SAMPLE} 条,"
+                          "阈值仍是设计假定,不宣称已标定,爆款项不参与评分")
+            signal_details[keyword] = {
+                "signal": signal,
+                "measured_hits": measured_hits,
+                "matched_articles": collected,
+                "reason": reason,
+            }
+            collected_rows.append((row["id"], keyword, collected, quality, average_length, signal))
         max_collected = max((item[2] for item in collected_rows), default=0)
-        for keyword_id, _keyword, collected, quality, average_length in collected_rows:
+        for keyword_id, _keyword, collected, quality, average_length, signal in collected_rows:
             collected_norm = (collected / max_collected) if max_collected else 0.0
             quality_ratio = (quality / collected) if collected else 0.0
-            score = round(0.6 * collected_norm + 0.4 * quality_ratio, 4)
+            base = 0.6 * collected_norm + 0.4 * quality_ratio
+            # 有真实爆款信号才混合(最多占 VIRAL_WEIGHT);没有就原样保留:不虚构加分,也不因缺数据扣分
+            score = (round((1.0 - VIRAL_WEIGHT) * base + VIRAL_WEIGHT * signal, 4)
+                     if signal is not None else round(base, 4))
             con.execute(
                 """
                 INSERT INTO keyword_performance(
@@ -104,10 +181,30 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         candidates = [item[1] for item in collected_rows if item[2] == 0]
     finally:
         con.close()
+    applied = sum(1 for detail in signal_details.values() if detail["signal"] is not None)
+    if not measured:
+        viral_status = VIRAL_STATUS_NO_HITS
+    elif not category_ready:
+        viral_status = VIRAL_STATUS_INSUFFICIENT
+    elif applied:
+        viral_status = VIRAL_STATUS_APPLIED
+    else:
+        viral_status = VIRAL_STATUS_NO_HITS
     return {
         "keywords": len(collected_rows),
         "zero_coverage": len(candidates),
         "feedback_candidates": candidates,
+        "viral": {
+            "status": viral_status,
+            "measured_samples": len(measured),
+            "required": viral.MIN_CALIBRATION_SAMPLE,
+            "weight": VIRAL_WEIGHT if applied else 0.0,
+            "calibration": calibration_state,
+            "min_keyword_hits": MIN_KEYWORD_MEASURED_HITS,
+            "keywords_with_signal": applied,
+            "keywords_without_signal": len(signal_details) - applied,
+            "details": signal_details,
+        },
     }
 
 

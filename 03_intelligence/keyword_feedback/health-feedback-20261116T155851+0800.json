@@ -1,0 +1,14 @@
+{
+  "category": "health",
+  "generated_at": "2026-11-16T15:58:51+08:00",
+  "gap_keywords": [
+    "睡眠"
+  ],
+  "recovered_keywords": 0,
+  "queued_job_id": 77,
+  "note": "已有排队/运行任务,本次不重复入队",
+  "cooldown_hours": 24.0,
+  "cooldown_remaining_hours": null,
+  "last_enqueued_at": null,
+  "feedback_attempts": null
+}

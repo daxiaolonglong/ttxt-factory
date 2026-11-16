@@ -35,7 +35,9 @@
        │
 类目隔离库(01_categories/<cat>/articles.db + rag/keywords/metrics)
        │
-分析(03_intelligence:指标快照→爆款四级标签+置信度→趋势/生命周期→关键词评分→知识资产/FTS5 RAG
+分析(03_intelligence:指标快照→爆款四级标签+置信度→趋势/生命周期→关键词评分(P28:真实爆款信号按 0.3 权重融进
+      keyword_performance.score;只认 measured 且 score 非空,类目样本<30 或词级命中<3 一律拒发加分,缺失≠0)
+      →知识资产/FTS5 RAG
       →关键词反哺:零覆盖词标 gap 并自动入队采集(去重),gap↔active 状态机,每类目 JSON 证据)
        │
 唯一模型入口(00_control/model_gate:SQLite 队列 + 串行锁 + /health 等待)

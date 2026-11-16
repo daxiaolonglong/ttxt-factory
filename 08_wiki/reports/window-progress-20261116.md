@@ -205,4 +205,25 @@ health 那一支每次 `inserted 0 / duplicates 25`,gap 词 `睡眠` 永远补�
 
 顺带把裁定单首页写清楚(同一份 PDF 重出):**四个短词定义改成"机器怎么处置这句话",不是"这句话真假"**,并加一句「①只问短词贴不贴切」;行号下印卡片编号。重出后仍是 **11 页 / A4 横向 / 双面 6 张**,61/61 网址、61 个超链接、`tblHeader`+`cantSplit` 都在;渲染图比对:主表第 2–6 页表头行**差 0.0**、附录第 8–11 页表头行**差 0.00–0.01**。
 
+## 十二、15:4x–16:0x 起:第 9 轮 P28 —— 真实爆款表现喂回关键词评分(红→绿,本轮已推)
+
+本人主线是 `爆款表现 → 关键词评分 → 关键词采集`。实测断点在中间那一环:`score_keywords()` **一次都没读 `viral_labels`**,同一个词采到 4 篇验证爆款和 4 篇真低质,评分一分不差。红凭据 `07_tmp/p28_viral_signal/red_evidence.txt`(7 条断言全 `KeyError: 'viral'`)。
+
+| 关键点 | 实测/结论 |
+|---|---|
+| 改法 | `score = 0.7*旧公式 + 0.3*真实爆款信号`(`VIRAL_WEIGHT=0.30`);信号 = 该词命中文章里**真实测得**样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0,词表沿用 `analysis/viral.py`)。旧公式一字未改,不加权时分数**逐位**等于改前 |
+| 四道拒发闸门 | ①只认 `confidence_tier='measured'` 且 `score` 非空;②`unscored/missing_data/incomplete_data/no_impressions` 不进分母、**绝不按 0 分**(缺失 ≠ 0);③类目真实测得样本 <30 ⇒ `insufficient_sample` 不加权;④单词真实命中 <3 ⇒ 不加权 |
+| 明确没做 | **零 DDL**、不动 `keyword_performance` 列、不动 `knowledge_assets`/资产库、`gap` 只看 `collected`、入队去重 / 24h 冷却 / 来源限速 / robots 一律没碰 |
+| 测试 | `10_tests/test_p28_viral_keyword_signal.py` **7 项**(先红 `KeyError: 'viral'` → 绿 `7 passed / 1.22 s`);全量 **442 passed / 113.20 s**(改前 435 + 本轮 7);`ttxt doctor` **34 ok / 0 failed** |
+| 生产读数(只读) | 过 30 门槛的**只有 technology**:101 条 measured(normal 35 / potential 30 / low_quality 26 / verified_viral 10)。finance 10、history 10、social 0、health 0、demo 0 ⇒ 这 5 类**评分逐位不变**并如实报 `insufficient_sample` / `no_measured_hits`,不许说成已闭环(`prod_measured_probe.txt`) |
+| 真数据干跑(副本,不碰生产库) | 数据 1.0→**0.8082**(signal 0.3607 / 56 篇真实命中)、开源 0.4451→**0.4716**(0.5333 / 6)、人工智能 0.5259→**0.4554**(0.2909 / 11)、效率工具(gap)0→0。`ttxt crawl-plan --category technology` 干跑排序变成 **数据 > 开源 > 人工智能 > 效率工具**,开源升到第二位(`technology_dryrun.txt`、`crawl_plan_technology.txt`) |
+| 已落库 | `ttxt analyze --category all` 跑完(`prod_analyze_all.txt`):technology `applied/calibrated`、finance+history `insufficient_sample`、social/health/demo `no_measured_hits`;`zero_coverage` 与反哺候选与改前一致 |
+| 事故(护栏抓到我) | 只读巡检(`mode=ro`)与全量测试**并发** ⇒ 生产目录留 6 对 `-wal/-shm`,`conftest.production_state_untouched` 判 1 error。护栏正确、违规是我;`scripts/p28_wal_sidecar_cleanup.py` 逐库 `wal_checkpoint(TRUNCATE)`+`quick_check` 全 ok,边车 WAL 全 0 字节,行数 32/106/25/30/33/186 = **412 未变**,收净后重跑才是 442 passed。已写进 **规则 48**(测试期间禁止连生产库) |
+| 实话(审计性) | 因为本轮不做 DDL,逐词的 `signal/measured_hits` 只在回执与 `03_intelligence/keyword_feedback/*.json` 证据里,查表查不到 —— 下一轮加两列补上 |
+| 下一轮我的活 | finance/history 的 measured 从 10 提到 ≥30(各差 20 条,走 `metrics --fetch-public` 候选轮转);social/health 无可测对象先补语料不凑数;`keyword_performance` 加 `signal/measured_hits` 列走正规迁移+备份+回滚 |
+| 门禁照旧 | 人工裁定仍 **0/61**、A/B 独立证据 **17/61 = 28%**、61 张卡只覆盖 10 篇 / 3 域名;本轮完全没动黄金集与 `human_*`,15 行仍等本人逐行确认 |
+
+完整账本:`08_wiki/reports/P28-viral-keyword-feedback-20261116.md`。
+
+
 
