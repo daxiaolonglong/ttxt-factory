@@ -1,0 +1,46 @@
+{
+  "category": "health",
+  "generated_at": "2026-11-16T21:38:52+08:00",
+  "keywords": [
+    "睡眠",
+    "健康"
+  ],
+  "keyword_rows": [
+    {
+      "keyword": "睡眠",
+      "status": "gap",
+      "score": 0.0,
+      "collected": 0
+    },
+    {
+      "keyword": "健康",
+      "status": "active",
+      "score": 0.84,
+      "collected": 5
+    }
+  ],
+  "articles_before": 25,
+  "cold_start": false,
+  "sources": [
+    "who_cn_news"
+  ],
+  "plans": [
+    {
+      "source": "who_cn_news",
+      "category": "health",
+      "keyword_filter": [
+        "睡眠",
+        "健康"
+      ],
+      "keywords": [
+        "睡眠",
+        "健康"
+      ],
+      "reason": "keyword_filter",
+      "fetch_item_pages": false
+    }
+  ],
+  "rejected": [],
+  "note": "只出计划;加 --apply 才入队,入队后仍需 crawl-queue --run 或 Worker 执行",
+  "applied": false
+}
