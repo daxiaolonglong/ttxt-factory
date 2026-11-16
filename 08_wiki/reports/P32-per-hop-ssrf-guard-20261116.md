@@ -34,7 +34,7 @@
 - 静态路径 `http://example.com/`(真实 301 跳转链)与 `https://example.com/` → 都 200、正文 577 字符 ⇒ 逐跳 walk 没把正常跳转弄断。
 - `robots`:`https://www.bing.com` 拿到 98 条规则(逐跳校验后 robots 仍工作);`http://127.0.0.1:PORT/` → unknown、原因「字面 IP 属于禁止地址:127.0.0.1」(robots 也不能绕过)。
 - Service Worker:会话里出现过 0 个;停用工有单测钉住(出现即 `stop()`)。
-- 生产日志留痕:本轮 `blocked_by_ssrf_guard` 事件 26 条,带 url/reason/ips。
+- 生产日志留痕(`09_logs/ttxt-20261116.jsonl`,含本轮各变体与脚本累计):`crawl.browser.guard_installed` 94 条、`crawl.browser.blocked_by_ssrf_guard` 82 条(带 url/reason/ips)、`crawl.robots.redirect_chain` 3 条、`crawl.robots.blocked_by_ssrf_guard` 3 条、`crawl.fetch.redirect_chain` 2 条。
 
 ## 第二层(host-resolver-rules)的边界与代价 —— 必须如实记
 
@@ -49,7 +49,7 @@
 - **DNS 重绑定残余(未验证,未完全关闭)**:「解析一次」与「真正连接」之间有窗口。本机 `curl_cffi 0.17` 没有 `CURLOPT_RESOLVE` 之类把域名钉死到已校验 IP 的能力,所以静态路径无法把连接目标锁到已验证 IP。缓解:跳转链每一跳重新解析重新判定、浏览器每个请求重新判定(`check_cached`)。要彻底关闭需要换 HTTP 客户端或自己接管 socket,本轮不做。
 - 变体 C 的 `127.0.0.1` GAP 如上,是代理配置造成的结构性代价,不是可配置开关。
 - `robots` 走 urllib 的 TLS 信任链读不到 `https://example.com/robots.txt`(`unable to get local issuer certificate`)。**原生 urllib 基线同样失败**、git HEAD 的旧 robots 也是同一个 `urllib.request.urlopen`(第 85 行)⇒ 改动前就存在,不是本轮引入;curl_cffi 通道能取到 example.com。robots unknown 时既有语义是不采该站,保持不变。
-- 生产进程已换代码:`schedule`/`worker` 子进程已于 21:29:05 重启(见「生产生效与真实站点核查」)。生效性是按「进程启动时刻晚于改动落盘」推断的,**没有逐进程读内存验证**;下一次 `crawl_enqueue_4h`(约 22:54)与 Worker 实际抓取的运行结果属于尚未观测的后续事项。
+- 生产进程已换代码:`schedule`/`worker` 子进程已于 21:29:05 重启(见「生产生效与真实站点核查」),Worker 已用新代码真跑完一次采集(job 91)。**换代码这件事是按「进程启动时刻晚于改动落盘」推断的,没有逐进程读内存验证**;调度自身的下一个周期(`crawl_enqueue_4h` 约 22:54)尚未观测。
 
 ## 测试
 
@@ -65,7 +65,8 @@
   - 文章页(从财经库取真实 URL):`finance.eastmoney.com/news/1354,202611163931759035.html` 与 `.../1345,...html` 都是 302(同站 http→https)后 200,正文 58894 / 55281 字符;`www.tmtpost.com/8206814.html`、`/8206996.html` 直接 200,正文 136157 / 130724 字符。
   - **诚实记录:今天这四个真实文章页没有出现「跳转到 127.0.0.1」**（规则 50 记的是 curl 抓取会撞上,今天的跳转是同站 http→https)。所以「真实外站跳内网被拦」这条**没有**用真实站点验证,只有本机 HTTP 服务(变体 A/B 命中 0)与单测(逐跳 + 字面 IP + 域名解析出私网)证明。规则 50 的 `--render` 结论不变。
   - `example.com` 的 robots 仍是 `unknown=True`,原因「网络失败:SSL CERTIFICATE_VERIFY_FAILED」⇒ 既有环境问题(原生 urllib 同样失败),robots unknown 时既有语义是不采该站,本轮未改。
-- 队列现状(只读):`crawl_jobs` 83 done / 7 aborted / 0 queued;`model_jobs` 70 done;测试期间生产库无写入(受保护清单指纹一致)。调度最近一次 `crawl_enqueue_4h` 是 18:54:25(入队 11 条),四小时周期到 22:54 左右才会再跑。
+- 队列现状(只读):测试结束后 `crawl_jobs` 83 done / 7 aborted / 0 queued;`model_jobs` 70 done;测试期间生产库无写入(受保护清单指纹一致)。调度最近一次 `crawl_enqueue_4h` 是 18:54:25(入队 11 条),四小时周期到 22:54 左右才会再跑。
+- **线上 Worker 用新代码真跑一轮采集(主动入队验证)**:`ttxt crawl-plan --category health --keyword-limit 2 --apply` 入队 job 91(`who_cn_news`),托管 Worker 于 21:39:09 领取、21:39:11 完成(`owner=supervisor`、`ok=true`、`robots_allowed=true`、`pages_fetched=1`、`items_extracted=5`、`duplicates=5`、`inserted=0`、`keyword_filtered_out=20`、耗时 2.06 秒)。⇒ 逐跳校验 + robots 逐跳 + 限速重试 + 去重入库这条无人值守链路在新代码下正常。队列现为 **84 done / 7 aborted / 0 queued**。health 语料仍 25 条全 `short`(WHO 的条目已在库,这次 0 新增),「health 要补全文」这件事仍是待办(`crawl-plan --fetch-item-pages` 方向),与本轮无关。
 
 ## 回滚点
 
