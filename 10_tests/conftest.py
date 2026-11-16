@@ -122,11 +122,16 @@ def _rmtree(path: Path) -> None:
 def _fingerprint(path: Path) -> dict[str, object]:
     if not path.exists():
         return {"missing": True}
+    stat = path.stat()
+    # 区域锁文件(``*.lock``)在活着的 Worker/托管进程持有 msvcrt 排它锁时连本进程都读不出来
+    # (PermissionError),而测试会话现在默认与无人值守托管并存 ⇒ 只能按 stat 比对。
+    # 这仍然能抓到"测试改写了生产锁文件"(字节数或 mtime 变了就报),只是不比内容哈希。
+    if path.name.lower().endswith(".lock"):
+        return {"bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns, "sha256": None, "locked_ok": True}
     digest = hashlib.sha256()
     with path.open("rb") as fh:
         for block in iter(lambda: fh.read(1 << 20), b""):
             digest.update(block)
-    stat = path.stat()
     entry: dict[str, object] = {
         "bytes": stat.st_size,
         "mtime_ns": stat.st_mtime_ns,

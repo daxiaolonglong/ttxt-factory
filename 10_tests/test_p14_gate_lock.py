@@ -370,11 +370,17 @@ def test_production_control_state_untouched_midway(production_state_untouched):
         path = cfg.PROJECT_ROOT / key
         entry = production_state_untouched[key]
         assert path.exists(), f"生产文件消失:{path}"
-        digest = hashlib.sha256()
-        with path.open("rb") as handle:
-            for block in iter(lambda: handle.read(1 << 20), b""):
-                digest.update(block)
         stat = path.stat()
-        live = {"bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns, "sha256": digest.hexdigest()}
+        if key.lower().endswith(".lock"):
+            # 无人值守托管跑起来后,活着的 Worker 一直持有 worker.lock 的 msvcrt 区域锁,
+            # 锁住的字节范围连本进程都读不出来(PermissionError)⇒ 锁文件只比字节数与 mtime。
+            # 这与 conftest 的 _fingerprint 口径一致,仍然能抓到"测试改写了生产锁文件"。
+            live = {"bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns, "sha256": None, "locked_ok": True}
+        else:
+            digest = hashlib.sha256()
+            with path.open("rb") as handle:
+                for block in iter(lambda: handle.read(1 << 20), b""):
+                    digest.update(block)
+            live = {"bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns, "sha256": digest.hexdigest()}
         assert live == entry, f"生产状态已变化:{key}\n快照={entry}\n当前={live}"
     assert not (cfg.CONTROL_DIR / "model_gate" / "gate.lock").exists()

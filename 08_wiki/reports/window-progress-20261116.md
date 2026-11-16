@@ -18,3 +18,15 @@
 - 回归 **484 passed in 108.89s**(467 基线 + 17 新增);全量测试前先把托管停下,不并发动生产库。
 - 限制:计划任务是 Interactive only ⇒ 只在已登录时自动恢复;`onlogon` 需管理员,未安装;整机重启后自动恢复**未验证**。
 - 报告:`08_wiki/reports/P31-process-hosting-and-scheduling-20261116.md`。回滚:`11_backups/p31-before-phase1-20261116-181802.zip`,代码回滚点 `75b5faa`。
+
+## 十六、P31 阶段二:关键词覆盖核查与加固(19:18-19:36)
+
+- **上一轮的假设被实测推翻**:"评分只匹配正文所以漏计标题"在现网上不成立 —— 532/532 条文章的标题都原样出现在清洗正文里;"清洗吃掉命中"和"大小写漏匹配"也都是 0 条(`07_tmp/p31_phase2/probe_title_gap.py`、`probe_gap_kinds.py`、`probe_title_inside.py`)。
+- **「效率工具」0 覆盖是事实不是 bug**:technology 231 条里该短语正文 0 次、标题 0 次;散词是工具 46、效率 34、应用 44。死 seed 词要靠换词解决,不能靠放宽匹配凑数(伪造证据,与"不许改标签让门槛变绿"同一条红线)。health「睡眠」同样是零覆盖。
+- 代码只做加固:`score_keywords` 改成"正文 + 标题"匹配,质量与平均长度仍只看正文,空关键词一律零覆盖。只读对照 `compare_haystack.py`:六个库**覆盖数差异 0 项** ⇒ 现网零影响,防的是将来清洗器剥掉标题后覆盖静默掉一半。
+- 新增 `10_tests/test_p31_keyword_match_haystack.py` 9 条(先红:3 failed/6 passed → 全绿),钉死:不得模糊凑数、标题在正文内只算一次、子串与大小写语义、空正文质量记 0、类目隔离。
+- **真坑**:托管跑起来后 Worker 长期持有 `worker.lock` 区域锁,`conftest._fingerprint` 和 p14 生产状态守卫读它的内容直接 `PermissionError`,每次全量回归都炸。已改成对 `*.lock` 只比"字节数 + mtime",规则 51 追加第四条坑。
+- 验收:关键词相关测试合计 63 passed;全量 **493 passed in 109.01s**(484 + 9),且这次是**托管运行状态下**跑通的;只读体检 exit=0、36 ok/0 failed、`ops.supervisor` 心跳 6s 前;生产目录无新增 `-wal/-shm`,磁盘 97.1 GB;本轮**没写生产库**(类目库全用 `mode=ro`)。
+- 顺带发现(本轮未修):清洗正文里还留着平台样板 —— 「作品声明」83 条、「关注」86、「声明」90、「更多」93 ⇒ 污染覆盖与相似度;修它需要改清洗器 + `PROCESSOR_VERSION` 递增 + 全量重清洗。
+- 阶段一对报告的更正:id 90 在停托管前已 `done`,"任务在飞时靠租约回收"仍**未验证**;补上计划任务实跑 `Last Result: 0` 与今日语料 +210(托管批次回执 inserted 122)。
+- 报告:`08_wiki/reports/P31-keyword-coverage-diagnosis-20261116.md`。回滚:`11_backups/p31-before-phase2-20261116-191859.zip`,代码回滚点 `dc825c5`。

@@ -124,10 +124,15 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         # 覆盖统计必须覆盖全部关键词(含 gap):若只统计 active,gap 词再也不会被重新计数,
         # auto_feedback 的 gap→active 恢复通道就永远无法触发(闭环断在评分层)。
         rows = con.execute("SELECT id, keyword FROM keywords ORDER BY id").fetchall()
-        articles = con.execute("SELECT id, cleaned_content, content FROM articles ORDER BY id").fetchall()
+        # P31:匹配口径同时看「标题 + 正文」。实测现网 532/532 条文章的标题都原样出现在清洗正文里,
+        # 所以这次改动对当下覆盖数是 0 影响;它防的是将来某个清洗器把标题从正文里剥掉之后
+        # 覆盖统计悄悄掉一半(那种掉法是静默的,和调度停摆同一类问题)。
+        articles = con.execute("SELECT id, title, cleaned_content, content FROM articles ORDER BY id").fetchall()
         article_ids = [int(row["id"]) for row in articles]
-        texts = [(row["cleaned_content"] or row["content"] or "") for row in articles]
-        lengths = [len(text) for text in texts]
+        bodies = [(row["cleaned_content"] or row["content"] or "") for row in articles]
+        titles = [(row["title"] or "") for row in articles]
+        # 正文质量与平均长度仍然只看正文:标题命中但正文为空的文章不能算"有效正文"。
+        lengths = [len(body) for body in bodies]
         # P28:真实爆款表现喂回评分。只读本类目库的 viral_labels,严禁跨类目。
         measured = _measured_label_map(con)
         calibration = viral.load_calibration(con)
@@ -138,7 +143,12 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         signal_details: dict[str, dict] = {}
         for row in rows:
             keyword = row["keyword"]
-            hits = [index for index, text in enumerate(texts) if keyword in text]
+            if not keyword:
+                # 空关键词会让 `keyword in text` 命中全库,把覆盖数与评分整体污染 ⇒ 一律按零覆盖处理
+                hits = []
+            else:
+                hits = [index for index in range(len(article_ids))
+                        if keyword in bodies[index] or keyword in titles[index]]
             collected = len(hits)
             quality = sum(1 for index in hits if lengths[index] >= 120)
             average_length = (sum(lengths[index] for index in hits) / collected) if collected else 0.0
