@@ -355,5 +355,9 @@
    `08_wiki/reports/P13-golden-adjudication-sheet.docx` / 同名 PDF(9 页 A4 横向),每行 3 个勾 → `human_verdict` / `human_fact_support` / `human_confirms_tier`;
    配套两个可重跑脚本 `scripts/golden_v2_dump_flat.py`、`scripts/golden_v2_adjudication_sheet.py`(机器结论与 harness 同源,刻意不印 `kind` 防污染)。
    **现在等的只剩本人打勾**;即便全勾完,门禁仍差 `A/B 级证据占比 28% < 50%`,那条是工程侧的活。
+⑭第 9 轮 ⓪ 已做完(14:2x):关键词反哺入队加 **24 小时冷却**,状态存在**类目库 `articles_meta.dispatch_state`**
+   (不是 `crawl_jobs.meta_json` —— 它会被 `finish_crawl_job` 的执行回执整体覆盖),`cooldown_hours=0` 是逃生阀;
+   `crawl.enqueued` 日志新增 `attempt`。5 项红→绿 + 全量 **427 passed / exit 0 / 114.03 s**。
+   取证 `07_tmp/p26_cooldown/`,说明 `window-progress-20261116.md` §十。**生产上第一次看到"冷却中"文案要等 job 76/77(修复前排的队)排干。**
 
 

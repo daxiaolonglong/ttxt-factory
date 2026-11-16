@@ -149,3 +149,21 @@
 | 仍卡着的门禁 | 61 行全勾完也还不达标:`A/B 级独立证据占比 17/61 = 28% < 50%`。这条是**我**的活(补真出处或降级卡片),不麻烦本人 |
 | 回收路径 | 纸或照片交回 → 我写脚本按行号录回 `golden_set_v2.jsonl` 的 `human_*` 三字段(先写红测试:取值只允许 通过/驳回、supported/unsupported/needs_more_evidence、A/B/C/D),再跑 harness 出 `false_accept_rate` 与一致率 |
 
+## 十、14:20 起:第 9 轮 ⓪ 关键词反哺冷却窗口(红→绿,已修)
+
+**根因(不是"排队太多",是状态放错了地方 + 没有窗口)**:`auto_feedback` 每轮看到 gap 词就给该类目的第一个正式来源入一条任务,
+唯一的去重是"已有 queued/running 任务"。任务被 Worker 排干之后去重条件立刻失效 ⇒ 下一轮 `analyze` 又入一条。
+health 那一支每次 `inserted 0 / duplicates 25`,gap 词 `睡眠` 永远补不上,却一天入队 4 次(job 74/75/76/77)。
+
+**修法**:同一来源距上次反哺入队 **24 小时内不再入队**,只写证据;`cooldown_hours=0` 是运维逃生阀(紧急补采/测试)。
+
+| 关键点 | 实测/结论 |
+|---|---|
+| 状态存哪 | 类目库 `articles_meta` 的 `dispatch_state` 键。**不能存 `crawl_jobs.meta_json`**:`finish_crawl_job`(`store.py:1034`)用执行回执**整体覆盖** meta_json,入队时写的 `dispatched_via` 在任务跑完那一刻就消失 —— 红测试里有一条断言专门钉住这件事 |
+| 红名单先跑 | 第一批 `10_tests/test_p26_keyword_cooldown.py` 4 项,先跑 **3 failed / 1 passed**(`07_tmp/p26_cooldown/red_evidence.txt`);通过的那项是 p11 去重语义不被覆盖的回归钉。之后按验收口径("日志要能看出第几次尝试")补第 5 项,**再次先红**(`KeyError: 'attempt'`,`red_attempt_log.txt`)再修 |
+| 红→绿之间修掉的第二个缺陷 | 冷却跳过时**没有把 attempts 计数写回**,第三次尝试仍记成 2 次。测试断言 `feedback_attempts == 3` 抓到它 ⇒ 尝试次数是"这个 gap 词采不动"的证据,不是入队的副产品 |
+| 入队日志补一项 | `crawl.enqueued` 事件新增 `attempt` 字段(`store.create_crawl_job`),关键词反哺入队时 meta 带 `"attempt": N`;下次再排队积压,能直接看出"同一来源第几次反哺" |
+| 全量回归 | 冷却主体完成后 **426 passed / exit 0 / 110.59 s**;补 `attempt` 日志后 **427 passed / exit 0 / 114.03 s**(`full_suite.txt`、`full_suite2.txt`);定向 51 项(冷却 + p25 可观测性 + p11 闭环 + p19 关键词采集)全绿 |
+| 实盘体检 | `ttxt doctor` **34 ok / 0 failed / 5 WARN**(无新增 WARN);`analyze --category health` 落新证据文件 `03_intelligence/keyword_feedback/health-feedback-20261116T141917+0800.json` |
+| 尚未在实盘触发 | 队列里 job 76/77 是**修复前**排的队,仍走 p11 去重通道(`note: 已有排队/运行任务,本次不重复入队`),所以生产上第一次看到"冷却中"文案要等这两条排干之后。不伪造这条证据 |
+

@@ -947,6 +947,7 @@ def create_crawl_job(
         actor=actor,
         db=str(target),
         keywords=len((meta or {}).get("keywords") or []) or None,
+        attempt=(meta or {}).get("attempt"),
     )
     return job_id
 
@@ -962,6 +963,53 @@ def find_pending_crawl_job(source_id: str, category: str, db_path: Path | None =
             (source_id, category),
         ).fetchone()
         return int(row["id"]) if row else None
+    finally:
+        con.close()
+
+
+DISPATCH_STATE_KEY = "dispatch_state"
+
+
+def load_dispatch_state(db_path: Path) -> dict:
+    """只读:类目库 ``articles_meta`` 里的入队状态(目前只有 ``keyword_feedback`` 一支)。
+
+    为什么落在类目库而不是 ``crawl_jobs``:``finish_crawl_job``(:1034)会用执行回执
+    **整体覆盖** ``meta_json``,入队时写的 ``dispatched_via`` 在任务跑完那一刻就消失了
+    —— 冷却窗口必须跨任务存活,红测试 ``10_tests/test_p26_keyword_cooldown.py`` 里
+    有这条实测断言。读不出来(脏数据)时按"没有状态"处理:宁可多采一次,不可永远不采。
+    """
+    import json
+
+    target = Path(db_path)
+    if not target.exists():
+        return {}
+    con = connect(target)
+    try:
+        row = con.execute("SELECT value FROM articles_meta WHERE key=?", (DISPATCH_STATE_KEY,)).fetchone()
+    finally:
+        con.close()
+    if not row:
+        return {}
+    try:
+        state = json.loads(row["value"])
+    except (TypeError, ValueError):
+        LOG.warn("store.dispatch_state_unreadable", db=str(target), key=DISPATCH_STATE_KEY)
+        return {}
+    return state if isinstance(state, dict) else {}
+
+
+def save_dispatch_state(state: dict, db_path: Path) -> None:
+    """写回入队状态(单写者:``analysis.keywords.auto_feedback``)。"""
+    import json
+
+    target = Path(db_path)
+    con = connect(target)
+    try:
+        con.execute(
+            "INSERT OR REPLACE INTO articles_meta(key, value) VALUES(?, ?)",
+            (DISPATCH_STATE_KEY, json.dumps(state, ensure_ascii=False)),
+        )
+        con.commit()
     finally:
         con.close()
 
