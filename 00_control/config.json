@@ -114,5 +114,16 @@
       {"id": "recover_daily", "kind": "recover", "interval_min": 1440, "enabled": true},
       {"id": "housekeep_weekly", "kind": "housekeep", "interval_min": 10080, "enabled": true}
     ]
+  },
+  "supervisor": {
+    "_comment": "P31 进程托管:看护 ttxt schedule --daemon 与 ttxt worker。绝不托管 write/publish/model/draft。计划任务每 5 分钟跑一次 `ttxt supervisor --ensure` 兜底拉起,锁空闲才会起新份,不会有两份。",
+    "scheduler_interval_s": 300,
+    "worker_owner": "supervisor",
+    "restart_delay_s": 5.0,
+    "max_restarts": 10,
+    "window_s": 600.0,
+    "poll_s": 1.0,
+    "heartbeat_s": 10.0,
+    "heartbeat_fresh_s": 900.0
   }
 }

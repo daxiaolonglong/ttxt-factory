@@ -1,17 +1,17 @@
 {
   "crawl_enqueue_4h": {
-    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_run_at": "2026-11-16T18:54:25+08:00",
     "last_status": "ok",
     "last_result": {
-      "enqueued": 2,
-      "deduped": 2,
+      "enqueued": 11,
+      "deduped": 0,
       "routing_rejected": 0,
       "errors": []
     },
     "last_error": null
   },
   "analyze_daily": {
-    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_run_at": "2026-11-16T18:54:27+08:00",
     "last_status": "ok",
     "last_result": {
       "technology": "ok",
@@ -24,12 +24,12 @@
     "last_error": null
   },
   "recover_daily": {
-    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_run_at": "2026-11-16T18:54:27+08:00",
     "last_status": "ok",
     "last_result": {
       "model_stale_requeued": 0,
       "crawl_stale_marked_failed": 0,
-      "crawl_failed_requeued": 1
+      "crawl_failed_requeued": 0
     },
     "last_error": null
   },

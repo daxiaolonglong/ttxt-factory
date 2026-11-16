@@ -10,7 +10,7 @@ from pathlib import Path
 
 from . import __version__
 from . import config as cfg
-from . import db, doctor, housekeep, scheduler
+from . import db, doctor, housekeep, scheduler, supervisor
 from .analysis import analyze as analyzer
 from .analysis import metrics_import, prediction, viral
 from .analysis import rag as analyzer_rag
@@ -595,6 +595,47 @@ def cmd_schedule(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_supervisor(args: argparse.Namespace) -> int:
+    """常驻托管入口:只看护 schedule --daemon 与 worker,写作/发布/模型不在此列。"""
+    if args.stop:
+        path = supervisor.request_stop()
+        print(f"已创建停止标志:{path}")
+        return 0
+    if args.clear_stop:
+        removed = supervisor.clear_stop()
+        print("已删除停止标志,可重新 --ensure" if removed else "停止标志不存在,无需清理")
+        return 0
+    if args.ensure:
+        report = supervisor.ensure()
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
+    if args.run:
+        pol = supervisor.policy()
+        try:
+            report = supervisor.run_forever(
+                scheduler_interval_s=args.scheduler_interval_sec
+                if args.scheduler_interval_sec is not None else pol["scheduler_interval_s"],
+                worker_owner=args.worker_owner or pol["worker_owner"],
+                restart_delay_s=args.restart_delay_sec
+                if args.restart_delay_sec is not None else pol["restart_delay_s"],
+                max_restarts=args.max_restarts if args.max_restarts is not None else pol["max_restarts"],
+                window_s=pol["window_s"],
+                poll_s=args.poll_sec if args.poll_sec is not None else pol["poll_s"],
+                heartbeat_s=pol["heartbeat_s"],
+                run_for_s=args.run_for_sec,
+            )
+        except supervisor.SupervisorAlreadyRunning as exc:
+            print(f"拒绝启动:{exc}")
+            return 2
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
+    alive, info = supervisor.supervisor_running()
+    info["running"] = alive
+    info["stop_flag_present"] = supervisor.default_stop_path().exists()
+    print(json.dumps(info, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     dashboard_server.serve(args.host, args.port)
     return 0
@@ -731,6 +772,32 @@ def build_parser() -> argparse.ArgumentParser:
     schedule.add_argument("--interval-sec", type=int, default=300)
     schedule.add_argument("--status", action="store_true", help="查看计划(默认)")
     schedule.set_defaults(func=cmd_schedule)
+
+    sup_parser = sub.add_parser(
+        "supervisor",
+        help="常驻托管:看护 schedule --daemon 与 worker(单实例;绝不托管写作/发布/模型)",
+    )
+    sup_parser.add_argument("--run", action="store_true", help="前台常驻看护(通常由 --ensure 无窗口拉起)")
+    sup_parser.add_argument(
+        "--ensure",
+        action="store_true",
+        help="幂等保障:没在跑就无窗口拉起一份,已在跑则什么都不做(计划任务可反复调)",
+    )
+    sup_parser.add_argument("--status", action="store_true", help="查看托管状态(默认)")
+    sup_parser.add_argument("--stop", action="store_true", help="创建停止标志,让托管优雅收尾")
+    sup_parser.add_argument("--clear-stop", action="store_true", help="删除停止标志")
+    sup_parser.add_argument("--scheduler-interval-sec", type=int, default=None,
+                            help="调度轮询间隔秒(默认取 config.supervisor)")
+    sup_parser.add_argument("--worker-owner", default=None, help="Worker 执行者标识(默认取 config.supervisor)")
+    sup_parser.add_argument("--restart-delay-sec", type=float, default=None,
+                            help="子进程退出后重启前的等待秒,退避下限(默认取 config.supervisor)")
+    sup_parser.add_argument("--max-restarts", type=int, default=None,
+                            help="窗口内允许的重启次数,超过则放弃并记录原因(默认取 config.supervisor)")
+    sup_parser.add_argument("--poll-sec", type=float, default=None,
+                            help="轮询子进程秒数(默认取 config.supervisor)")
+    sup_parser.add_argument("--run-for-sec", type=float, default=None,
+                            help="只看护 N 秒后收尾退出(验收演练用,默认不限)")
+    sup_parser.set_defaults(func=cmd_supervisor)
 
     write = sub.add_parser("write", help="写作闭环(仅导出草稿,不发布)")
     write.add_argument("--category", required=True)

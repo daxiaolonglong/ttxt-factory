@@ -10,8 +10,106 @@ from pathlib import Path
 from typing import Any
 
 from . import config as cfg
-from . import db, housekeep
+from . import db, housekeep, scheduler, supervisor
 from .crawler import dedupe, stackcheck, store
+
+
+def _as_local(value: Any) -> datetime | None:
+    """把状态文件里的 ISO 时间戳转成本地 naive,便于与 ``datetime.now()`` 比较。"""
+    try:
+        parsed = datetime.fromisoformat(value or "")
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone().replace(tzinfo=None)
+    return parsed
+
+
+def supervisor_checks(config: dict[str, Any] | None = None,
+                      *,
+                      lock_path: str | Path | None = None,
+                      state_path: str | Path | None = None,
+                      stop_path: str | Path | None = None,
+                      scheduler_state_path: str | Path | None = None) -> list[tuple[str, str, str]]:
+    """无人值守托管与调度到期对账(P31)。
+
+    为什么要这两行:2026-11-12 19:57 之后调度器与 Worker 都不在跑了(实测停摆约 94 小时),
+    而旧体检里没有任何"有没有人在跑"的检查 —— 停摆是静默的。现在必须当场可见。
+    """
+    conf = config if config is not None else cfg.load_config()
+    pol = supervisor.policy(conf)
+    rows: list[tuple[str, str, str]] = []
+    stop_file = supervisor.default_stop_path() if stop_path is None else Path(stop_path)
+    state_file = supervisor.default_state_path() if state_path is None else Path(state_path)
+
+    running, info = supervisor.supervisor_running(lock_path, state_path)
+    children = [item for item in (info.get("children") or []) if isinstance(item, dict)]
+
+    def describe(item: dict[str, Any]) -> str:
+        pids = "/".join(str(pid) for pid in (item.get("pids") or [])[-2:]) or "-"
+        text = (f"{item.get('name')}:pid={pids} runs={item.get('runs', 0)}"
+                f" restarts={item.get('restarts', 0)} exit={item.get('exit_code')}")
+        if item.get("giving_up"):
+            text += f" 已放弃({item.get('give_up_reason')})"
+        return text
+
+    child_text = "; ".join(describe(item) for item in children) or "无子进程记录"
+    if running:
+        age = info.get("heartbeat_age_s")
+        if age is None:
+            rows.append(("FAIL", "ops.supervisor",
+                         f"托管进程 pid={info.get('pid')} 在跑,但 {state_file} 里没有心跳"))
+        elif age > pol["heartbeat_fresh_s"]:
+            rows.append(("FAIL", "ops.supervisor",
+                         f"托管进程 pid={info.get('pid')} 还活着,但心跳已 {age / 60:.1f} 分钟未更新"
+                         f"(阈值 {pol['heartbeat_fresh_s'] / 60:.0f} 分钟):{child_text}"))
+        else:
+            rows.append(("PASS", "ops.supervisor",
+                         f"pid={info.get('pid')} 心跳 {age:.0f}s 前;{child_text}"))
+    else:
+        pid = info.get("pid")
+        why = f"PID {pid} 是残留(进程已死)" if pid else "没有 PID 记录"
+        stop_note = ";supervisor_stop 存在(人为停止)" if stop_file.exists() else ""
+        rows.append(("FAIL", "ops.supervisor",
+                     f"没有常驻托管进程({why}{stop_note})—— 调度与 Worker 停摆;"
+                     "跑 `ttxt supervisor --ensure` 或安装计划任务把它拉起来"))
+    if any(item.get("giving_up") for item in children):
+        rows.append(("FAIL", "ops.supervisor_children", "有子进程被放弃自动恢复,需人工介入:" + child_text))
+
+    try:
+        plan = scheduler.load_jobs(conf)
+    except ValueError as exc:
+        rows.append(("FAIL", "ops.scheduler_jobs", str(exc)))
+        return rows
+    if not plan["enabled"]:
+        rows.append(("WARN", "ops.scheduler_jobs",
+                     "config.scheduler.enabled=false —— 调度器按配置停用,不会有自动任务"))
+        return rows
+    state = scheduler.read_state(Path(scheduler_state_path) if scheduler_state_path else None)
+    now = datetime.now()
+    enabled_jobs = [job for job in plan["jobs"] if job.get("enabled", True)]
+    late: list[str] = []
+    last_stamps: list[str] = []
+    for job in enabled_jobs:
+        entry = state.get(job["id"]) or {}
+        stamp = entry.get("last_run_at")
+        if isinstance(stamp, str) and stamp:
+            last_stamps.append(stamp)
+        last = _as_local(stamp)
+        interval_s = float(job.get("interval_min", 60)) * 60.0
+        if last is None:
+            late.append(f"{job['id']} 从未执行")
+            continue
+        age = (now - last).total_seconds()
+        if age > interval_s * 2.0:
+            late.append(f"{job['id']} 已 {age / 3600.0:.1f}h 未执行(间隔 {job.get('interval_min')}min,超过两个周期)")
+    if late:
+        rows.append(("FAIL", "ops.scheduler_heartbeat", ";".join(late)))
+    else:
+        newest = max(last_stamps) if last_stamps else "无"
+        rows.append(("PASS", "ops.scheduler_heartbeat",
+                     f"{len(enabled_jobs)} 个启用任务都在各自间隔内;最近 last_run_at={newest}"))
+    return rows
 
 
 def _namespace_identity(name: str) -> tuple[set[str], set[str]]:
@@ -716,6 +814,12 @@ def run_doctor() -> int:
         results.extend(insert_judgement_rows())
     except Exception as exc:  # noqa: BLE001 - 日志读数异常不得让整份体检崩掉
         check("crawler.insert_judgements", False, f"{type(exc).__name__}: {exc}")
+
+    # 5c. 无人值守托管与调度到期(P31:停摆不得是静默的)
+    try:
+        results.extend(supervisor_checks(config))
+    except Exception as exc:  # noqa: BLE001 - 托管体检异常不得让整份体检崩掉
+        check("ops.supervisor", False, f"{type(exc).__name__}: {exc}")
 
     # 6. Venv
     venv_python = cfg.VENV_DIR / "Scripts" / "python.exe"
