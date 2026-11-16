@@ -555,6 +555,17 @@ def cmd_metrics(args: argparse.Namespace) -> int:
             report["relabel"] = metrics_import.relabel_after_import(args.category)
         if not args.apply:
             report["note"] = "dry-run:确认无误后加 --apply 才写库"
+        if args.evidence:
+            # 完整逐篇证据(结果台账 + 逐字段变更清单)落文件,stdout 只留摘要,
+            # 这样生产写入的对账凭据不会因为终端截断而丢失。
+            evidence_path = cfg.resolve_path(args.evidence)
+            evidence_path.parent.mkdir(parents=True, exist_ok=True)
+            report["evidence"] = str(evidence_path)
+            evidence_path.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+            summary = {key: value for key, value in report.items() if key not in ("pages", "outcomes", "changes")}
+            summary["sample_pages"] = report.get("pages", [])[:10]
+            print(json.dumps(summary, ensure_ascii=False, indent=2))
+            return 0
         report["pages"] = report["pages"][:50]
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
@@ -757,6 +768,8 @@ def build_parser() -> argparse.ArgumentParser:
     metrics.add_argument("--limit", type=int, default=None, help="本轮最多采集多少篇(默认取 config)")
     metrics.add_argument("--sleep", type=float, default=None, help="两次抓取之间的间隔秒(默认取 config)")
     metrics.add_argument("--apply", action="store_true", help="真正写库(不加则只报告,不落库)")
+    metrics.add_argument("--evidence", default=None,
+                         help="把本轮完整逐篇证据(结果台账 + 逐字段前后值变更清单)写成 JSON 文件,便于事后对账与回滚")
     metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
     metrics.set_defaults(func=cmd_metrics)
 

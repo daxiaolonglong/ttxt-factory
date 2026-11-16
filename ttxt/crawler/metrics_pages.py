@@ -51,6 +51,39 @@ PUBLIC_HOSTS = frozenset({"www.toutiao.com", "m.toutiao.com"})
 
 METRIC_FIELDS = ("reads", "likes", "favorites", "comments", "impressions")
 
+# ``favorites`` 的语义在公开页始终没取到证(见模块开头规则 41),所以**永不入库、永不写 0**;
+# 报告里如实标成"语义未取证",避免被误读成"这篇文章没人收藏"。
+UNPROVEN_FIELDS = ("favorites",)
+
+# P33 逐篇结果台账:每条候选必须落到唯一一个可解释状态。
+OUTCOME_OK = "metrics_ok"                      # 拿到本文章自己的真实计数
+OUTCOME_NO_COUNTS = "no_public_counts"         # 页面能打开,但本文章没有任何可归属计数
+OUTCOME_GONE = "article_gone"                  # 404/410/451:内容已不存在(平台删除/下架)
+OUTCOME_BLOCKED = "access_blocked"             # 401/403/429:访问受限(不放宽任何保护)
+OUTCOME_FETCH_FAILED = "fetch_failed"          # 网络/浏览器等其他失败
+OUTCOME_ROBOTS_REFUSED = "robots_refused"      # robots 不放行 ⇒ 一次请求都不发
+_GONE_STATUSES = frozenset({404, 410, 451})
+_BLOCKED_STATUSES = frozenset({401, 403, 429})
+
+
+def _classify_fetch_failure(exc: BaseException) -> tuple[str, int | None]:
+    """把抓取异常归类;状态码来自 fetcher 的 FetchError,没有状态码就是网络/渲染失败。"""
+    raw = getattr(exc, "status", None)
+    status = int(raw) if isinstance(raw, int) and not isinstance(raw, bool) else None
+    if status in _GONE_STATUSES:
+        return OUTCOME_GONE, status
+    if status in _BLOCKED_STATUSES:
+        return OUTCOME_BLOCKED, status
+    return OUTCOME_FETCH_FAILED, status
+
+
+def _record_outcome(report: dict, outcome: dict) -> None:
+    """台账条目入报告并计数(计数与条目必须永远一致,否则验收对不上账)。"""
+    report["outcomes"].append(outcome)
+    key = str(outcome["outcome"])
+    report["outcome_counts"][key] = report["outcome_counts"].get(key, 0) + 1
+
+
 _COUNT_RE = re.compile(r"^([+]?\d[\d,]*(?:\.\d+)?)([万wkW]?)$")
 _TOOLBAR_SELECTOR = ".detail-side-interaction"
 _READ_SELECTORS = (".article-meta", ".article-header", "header")
@@ -377,6 +410,9 @@ def collect_public_metrics(
         "null_kept": 0,
         "dry_run": not apply,
         "pages": [],
+        "outcomes": [],
+        "outcome_counts": {},
+        "changes": [],
         "row_errors": [],
     }
     if not candidates:
@@ -392,6 +428,16 @@ def collect_public_metrics(
 
     for candidate in candidates:
         url = candidate["url"]
+        outcome: dict[str, Any] = {
+            "article_id": candidate["article_id"],
+            "url": url,
+            "outcome": None,
+            "status": None,
+            "reason": None,
+            "fetched": False,
+            "metrics_written": False,
+            "observed": {},
+        }
         parts = urlsplit(url)
         base = f"{parts.scheme or 'https'}://{parts.netloc}/"
         rules = rules_cache.get(base)
@@ -405,6 +451,12 @@ def collect_public_metrics(
         if rules.unknown or not rules.allowed(robots.target_path(url)):
             report["robots_refused"] += 1
             LOG.warn("metrics.public.robots_refused", url=url)
+            outcome["outcome"] = OUTCOME_ROBOTS_REFUSED
+            outcome["reason"] = (
+                "robots.txt 取不到,按不抓取处理" if rules.unknown
+                else f"robots 禁止抓取 {robots.target_path(url)}"
+            )
+            _record_outcome(report, outcome)
             continue
         if report["fetched"] and delay > 0:
             nap(delay)
@@ -412,9 +464,19 @@ def collect_public_metrics(
             page = fetch_page(url)
         except Exception as exc:  # noqa: BLE001 - 单页失败不影响整批
             report["fetch_errors"] += 1
-            LOG.warn("metrics.public.fetch_error", url=url, error=str(exc)[:200])
+            classified, status = _classify_fetch_failure(exc)
+            outcome["outcome"] = classified
+            outcome["status"] = status
+            outcome["reason"] = str(exc)[:200]
+            if classified == OUTCOME_GONE:
+                # 文章已失效:不写指标、不写 0,只留可解释状态(P25 那 4 条 404 的根因归到这里)
+                LOG.warn("metrics.public.article_gone", url=url, status=status, error=str(exc)[:200])
+            else:
+                LOG.warn("metrics.public.fetch_error", url=url, error=str(exc)[:200])
+            _record_outcome(report, outcome)
             continue
         report["fetched"] += 1
+        outcome["fetched"] = True
         detail: dict[str, Any] = {}
         metrics = extract_public_metrics(page, url=url, detail=detail)
         report["render_ok"] += 1 if detail.get("render_used") else 0
@@ -423,6 +485,8 @@ def collect_public_metrics(
         report["render_errors"] += 1 if detail.get("render_error") else 0
         report["sanity_rejected"] += int(detail.get("sanity_rejected", 0))
         observed = {field: metrics[field] for field in METRIC_FIELDS if metrics[field] is not None}
+        outcome["observed"] = observed
+        outcome["unproven_fields"] = list(UNPROVEN_FIELDS)
         entry = {"article_id": candidate["article_id"], "url": url}
         entry.update(metrics)
         if detail.get("render_used"):
@@ -432,7 +496,12 @@ def collect_public_metrics(
         if not observed:
             report["no_metrics_skipped"] += 1
             LOG.warn("metrics.public.no_counts", url=url)
+            outcome["outcome"] = OUTCOME_NO_COUNTS
+            outcome["reason"] = "页面里没有属于本文章的可归属计数"
+            _record_outcome(report, outcome)
             continue
+        outcome["outcome"] = OUTCOME_OK
+        _record_outcome(report, outcome)
         rows.append({"article_id": candidate["article_id"], **metrics, "captured_at": captured})
 
     if rows and apply:
@@ -453,7 +522,11 @@ def collect_public_metrics(
             "null_kept",
         ):
             report[key] = written.get(key, 0)
+        report["changes"] = written.get("changes", [])
         report["row_errors"] = written.get("row_errors", [])
+        written_ids = {entry["article_id"] for entry in report["changes"]}
+        for outcome in report["outcomes"]:
+            outcome["metrics_written"] = outcome["article_id"] in written_ids
     elif rows:
         report["would_write"] = len(rows)
 
@@ -465,6 +538,7 @@ def collect_public_metrics(
         robots_refused=report["robots_refused"],
         fetch_errors=report["fetch_errors"],
         no_metrics=report["no_metrics_skipped"],
+        outcome_counts=report["outcome_counts"],
         applied=apply,
     )
     return report

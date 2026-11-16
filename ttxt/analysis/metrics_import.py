@@ -138,13 +138,19 @@ def write_metric_rows(
     credibility = allow[source_id]
     new_rank = credibility_rank(credibility)
     if not rows:
-        return {"written": 0, "updated": 0, "snapshots": 0, "row_errors": ["没有指标可写入"]}
+        return {"written": 0, "updated": 0, "snapshots": 0, "changes": [], "row_errors": ["没有指标可写入"]}
 
     target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
     captured = captured_at or cfg.now_iso()
     written = updated = snapshots = 0
     filled_from_null = protected_by_credibility = null_kept = value_changed = 0
     row_errors: list[str] = []
+    # P33:逐篇逐字段的"前值→后值"变更清单,让生产写入可事后按 article_id/来源/抓取时间对账。
+    # 注意 fields[].new 记录的是**本轮来值**;是否真正生效由 action 说明:
+    # inserted/filled_from_null/value_changed = 生效;unchanged = 没变;
+    # null_kept = 本轮没证据但保住了已有值;protected_by_credibility = 来值可信度更低被保住;
+    # stayed_null = 这个字段本来就没有,也依然没有(缺失绝不是 0)。
+    changes: list[dict] = []
     con = connect(target)
     try:
         for row_no, row in enumerate(rows, start=1):
@@ -175,34 +181,60 @@ def write_metric_rows(
             ).fetchone()
             if old is None:
                 merged = dict(values)
+                ledger = [
+                    {
+                        "field": field,
+                        "old": None,
+                        "new": values[field],
+                        "action": "inserted" if values[field] is not None else "stayed_null",
+                    }
+                    for field in _INT_FIELDS
+                ]
                 row_source, row_cred = source_id, credibility
                 written += 1
                 filled_from_null += sum(1 for value in merged.values() if value is not None)
             else:
                 old_rank = credibility_rank(old["credibility"])
                 merged = {}
+                ledger = []
                 for field in _INT_FIELDS:
                     incoming, stored = values[field], old[field]
                     if incoming is None:
                         merged[field] = stored
                         if stored is not None:
                             null_kept += 1
+                            action = "null_kept"
+                        else:
+                            action = "stayed_null"
                     elif stored is None:
                         merged[field] = incoming
                         filled_from_null += 1
+                        action = "filled_from_null"
                     elif new_rank >= old_rank:
                         merged[field] = incoming
                         if incoming != stored:
                             value_changed += 1
+                            action = "value_changed"
+                        else:
+                            action = "unchanged"
                     else:
                         merged[field] = stored
                         protected_by_credibility += 1
+                        action = "protected_by_credibility"
+                    ledger.append({"field": field, "old": stored, "new": incoming, "action": action})
                 if new_rank >= old_rank:
                     row_source, row_cred = source_id, credibility
                 else:  # 弱来源不能把强来源的溯源降级
                     row_source, row_cred = old["data_source"], old["credibility"]
                     baseline = baseline or old["account_baseline"]
                 updated += 1
+            changes.append({
+                "article_id": article_id,
+                "captured_at": row_captured,
+                "data_source": row_source,
+                "credibility": row_cred,
+                "fields": ledger,
+            })
             con.execute(
                 "INSERT INTO article_metrics(article_id, reads, likes, favorites, comments, impressions,"
                 " account_baseline, data_source, credibility, captured_at) VALUES(?,?,?,?,?,?,?,?,?,?) "
@@ -253,6 +285,7 @@ def write_metric_rows(
         "protected_by_credibility": protected_by_credibility,
         "null_kept": null_kept,
         "value_changed": value_changed,
+        "changes": changes,
         "row_errors": row_errors,
     }
 
