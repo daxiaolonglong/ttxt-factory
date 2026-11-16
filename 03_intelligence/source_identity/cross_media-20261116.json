@@ -1,0 +1,990 @@
+{
+  "inventory": "03_intelligence\\source_identity\\chinanews-20261116.jsonl",
+  "categories": {
+    "demo": {
+      "articles": 32,
+      "identity_kinds": {
+        "own_report": 3
+      },
+      "agencies": {
+        "sspai": 2,
+        "quotes_toscrape": 1
+      },
+      "pairs": [],
+      "rejected_sample": [
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“It is our choices, Harry, that show what we truly are, far more than our abilities.”",
+            "source": "quotes_toscrape",
+            "article_id": 15,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.2,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is ",
+            "source": "quotes_toscrape",
+            "article_id": 16,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.194,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The person, be it gentleman or lady, who has not pleasure in a good novel, must be intolerably stupid.”",
+            "source": "quotes_toscrape",
+            "article_id": 17,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.196,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“Imperfection is beauty, madness is genius and it's better to be absolutely ridiculous than absolutely boring.”",
+            "source": "quotes_toscrape",
+            "article_id": 18,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.206,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“Try not to become a man of success. Rather become a man of value.”",
+            "source": "quotes_toscrape",
+            "article_id": 19,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.153,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“It is better to be hated for what you are than to be loved for what you are not.”",
+            "source": "quotes_toscrape",
+            "article_id": 20,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.241,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“I have not failed. I've just found 10,000 ways that won't work.”",
+            "source": "quotes_toscrape",
+            "article_id": 21,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.151,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“A woman is like a tea bag; you never know how strong it is until it's in hot water.”",
+            "source": "quotes_toscrape",
+            "article_id": 22,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.179,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“A day without sunshine is like, you know, night.”",
+            "source": "quotes_toscrape",
+            "article_id": 23,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.129,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“This life is what you make it. No matter what, you're going to mess up sometimes, it's a universal truth. But the good ",
+            "source": "quotes_toscrape",
+            "article_id": 24,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.223,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“It takes a great deal of bravery to stand up to our enemies, but just as much to stand up to our friends.”",
+            "source": "quotes_toscrape",
+            "article_id": 25,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.146,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.”",
+            "source": "quotes_toscrape",
+            "article_id": 14,
+            "domain": "quotes.toscrape.com"
+          },
+          "right": {
+            "url": "https://quotes.toscrape.com/",
+            "title": "“If you can't explain it to a six year old, you don't understand it yourself.”",
+            "source": "quotes_toscrape",
+            "article_id": 26,
+            "domain": "quotes.toscrape.com"
+          },
+          "score": 0.124,
+          "reason": "同一域名 quotes.toscrape.com,不构成两家独立媒体"
+        }
+      ],
+      "rejected_reasons": {
+        "同一域名 quotes.toscrape.com": 351
+      }
+    },
+    "finance": {
+      "articles": 106,
+      "identity_kinds": {
+        "own_report": 96,
+        "aggregator": 10
+      },
+      "agencies": {
+        "eastmoney": 60,
+        "tmtpost": 36,
+        "toutiao": 10
+      },
+      "pairs": [
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929926773.html",
+            "title": "英伟达宣布CEO黄仁勋辞职 CFO科莱特·克雷斯出任临时CEO",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8204575.html",
+            "title": "黄仁勋传",
+            "agency": "tmtpost"
+          },
+          "score": 0.6
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/11137,202611123929721073.html",
+            "title": "“黄仁勋风波”催化行情！国产AI芯片份额猛增",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8204575.html",
+            "title": "黄仁勋传",
+            "agency": "tmtpost"
+          },
+          "score": 0.6
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1351,202611153931382830.html",
+            "title": "黄仁勋被撤换 英伟达创14年来最长连跌纪录 超5万人请愿黄仁勋复职",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8204575.html",
+            "title": "黄仁勋传",
+            "agency": "tmtpost"
+          },
+          "score": 0.6
+        }
+      ],
+      "rejected_sample": [
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929818842.html",
+            "title": "11月12日东方财富财经晚报（附新闻联播）",
+            "source": "eastmoney_rss",
+            "article_id": 8,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929869854.html",
+            "title": "11月12日晚间上市公司利好消息一览(附名单)",
+            "source": "eastmoney_rss",
+            "article_id": 9,
+            "domain": "finance.eastmoney.com"
+          },
+          "score": 0.152,
+          "reason": "同一域名 finance.eastmoney.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929818842.html",
+            "title": "11月12日东方财富财经晚报（附新闻联播）",
+            "source": "eastmoney_rss",
+            "article_id": 8,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929779813.html",
+            "title": "11月12日晚间沪深上市公司重大事项公告最新快递",
+            "source": "eastmoney_rss",
+            "article_id": 14,
+            "domain": "finance.eastmoney.com"
+          },
+          "score": 0.139,
+          "reason": "同一域名 finance.eastmoney.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929818842.html",
+            "title": "11月12日东方财富财经晚报（附新闻联播）",
+            "source": "eastmoney_rss",
+            "article_id": 8,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://stock.eastmoney.com/news/11783,202611123929718775.html",
+            "title": "11月12日龙虎榜复盘：襄阳轴承净买额居首",
+            "source": "eastmoney_rss",
+            "article_id": 25,
+            "domain": "stock.eastmoney.com"
+          },
+          "score": 0.152,
+          "reason": "来源不独立:eastmoney/own_report 与 eastmoney/own_report"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929818842.html",
+            "title": "11月12日东方财富财经晚报（附新闻联播）",
+            "source": "eastmoney_rss",
+            "article_id": 8,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://stock.eastmoney.com/news/11780,202611123929705449.html",
+            "title": "11月12日北向资金最新动向（附十大成交股）",
+            "source": "eastmoney_rss",
+            "article_id": 29,
+            "domain": "stock.eastmoney.com"
+          },
+          "score": 0.156,
+          "reason": "来源不独立:eastmoney/own_report 与 eastmoney/own_report"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929869854.html",
+            "title": "11月12日晚间上市公司利好消息一览(附名单)",
+            "source": "eastmoney_rss",
+            "article_id": 9,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929779813.html",
+            "title": "11月12日晚间沪深上市公司重大事项公告最新快递",
+            "source": "eastmoney_rss",
+            "article_id": 14,
+            "domain": "finance.eastmoney.com"
+          },
+          "score": 0.303,
+          "reason": "同一域名 finance.eastmoney.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929869854.html",
+            "title": "11月12日晚间上市公司利好消息一览(附名单)",
+            "source": "eastmoney_rss",
+            "article_id": 9,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://stock.eastmoney.com/news/11783,202611123929718775.html",
+            "title": "11月12日龙虎榜复盘：襄阳轴承净买额居首",
+            "source": "eastmoney_rss",
+            "article_id": 25,
+            "domain": "stock.eastmoney.com"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:eastmoney/own_report 与 eastmoney/own_report"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929869854.html",
+            "title": "11月12日晚间上市公司利好消息一览(附名单)",
+            "source": "eastmoney_rss",
+            "article_id": 9,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://stock.eastmoney.com/news/11780,202611123929705449.html",
+            "title": "11月12日北向资金最新动向（附十大成交股）",
+            "source": "eastmoney_rss",
+            "article_id": 29,
+            "domain": "stock.eastmoney.com"
+          },
+          "score": 0.147,
+          "reason": "来源不独立:eastmoney/own_report 与 eastmoney/own_report"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929869854.html",
+            "title": "11月12日晚间上市公司利好消息一览(附名单)",
+            "source": "eastmoney_rss",
+            "article_id": 9,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8205442.html",
+            "title": "价值判断：跌停板的投资机会和风险提示（11月13日）｜上市公司观察",
+            "source": "tmtpost_rss",
+            "article_id": 176,
+            "domain": "tmtpost.com"
+          },
+          "score": 0.136,
+          "reason": "标题相似度 0.136 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1353,202611123929869854.html",
+            "title": "11月12日晚间上市公司利好消息一览(附名单)",
+            "source": "eastmoney_rss",
+            "article_id": 9,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8205437.html",
+            "title": "价值判断：涨停板的投资机会和风险提示（11月13日）｜上市公司观察",
+            "source": "tmtpost_rss",
+            "article_id": 177,
+            "domain": "tmtpost.com"
+          },
+          "score": 0.136,
+          "reason": "标题相似度 0.136 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929779813.html",
+            "title": "11月12日晚间沪深上市公司重大事项公告最新快递",
+            "source": "eastmoney_rss",
+            "article_id": 14,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://stock.eastmoney.com/news/11783,202611123929718775.html",
+            "title": "11月12日龙虎榜复盘：襄阳轴承净买额居首",
+            "source": "eastmoney_rss",
+            "article_id": 25,
+            "domain": "stock.eastmoney.com"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:eastmoney/own_report 与 eastmoney/own_report"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929779813.html",
+            "title": "11月12日晚间沪深上市公司重大事项公告最新快递",
+            "source": "eastmoney_rss",
+            "article_id": 14,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "http://stock.eastmoney.com/news/11780,202611123929705449.html",
+            "title": "11月12日北向资金最新动向（附十大成交股）",
+            "source": "eastmoney_rss",
+            "article_id": 29,
+            "domain": "stock.eastmoney.com"
+          },
+          "score": 0.167,
+          "reason": "来源不独立:eastmoney/own_report 与 eastmoney/own_report"
+        },
+        {
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929779813.html",
+            "title": "11月12日晚间沪深上市公司重大事项公告最新快递",
+            "source": "eastmoney_rss",
+            "article_id": 14,
+            "domain": "finance.eastmoney.com"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8205442.html",
+            "title": "价值判断：跌停板的投资机会和风险提示（11月13日）｜上市公司观察",
+            "source": "tmtpost_rss",
+            "article_id": 176,
+            "domain": "tmtpost.com"
+          },
+          "score": 0.128,
+          "reason": "标题相似度 0.128 < 0.3,不足以判定同一事件"
+        }
+      ],
+      "rejected_reasons": {
+        "同一域名 finance.eastmoney.com": 3,
+        "来源不独立": 8,
+        "标题相似度 0.136 < 0.3": 2,
+        "标题相似度 0.128 < 0.3": 2,
+        "同一域名 stock.eastmoney.com": 1,
+        "同一域名 tmtpost.com": 3
+      }
+    },
+    "health": {
+      "articles": 25,
+      "identity_kinds": {
+        "own_report": 25
+      },
+      "agencies": {
+        "who": 25
+      },
+      "pairs": [],
+      "rejected_sample": [
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/28-10-2026-statement-by-who-director-general-dr-tedros-adhanom-ghebreyesus-concerning-the-train-accident-in-spain",
+            "title": "世卫组织总干事谭德塞博士就西班牙列车事故发表的声明",
+            "source": "who_cn_news",
+            "article_id": 7,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/29-10-2026-announcement-of-candidates-for-the-position-of-who-director-general",
+            "title": "公布世卫组织总干事候选人",
+            "source": "who_cn_news",
+            "article_id": 8,
+            "domain": "who.int"
+          },
+          "score": 0.207,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/29-10-2026-announcement-of-candidates-for-the-position-of-who-director-general",
+            "title": "公布世卫组织总干事候选人",
+            "source": "who_cn_news",
+            "article_id": 8,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/25-09-2026-recommendations-announced-for-influenza-vaccine-composition-for-the-2027-southern-hemisphere-influenza-season",
+            "title": "世卫组织公布2027年南半球流感季节的流感疫苗成分建议",
+            "source": "who_cn_news",
+            "article_id": 21,
+            "domain": "who.int"
+          },
+          "score": 0.125,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/29-10-2026-announcement-of-candidates-for-the-position-of-who-director-general",
+            "title": "公布世卫组织总干事候选人",
+            "source": "who_cn_news",
+            "article_id": 8,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/25-09-2026-who-announces-expansion-of-prequalification-programme-for-medical-devices",
+            "title": "世卫组织宣布扩大医疗器械预认证规划",
+            "source": "who_cn_news",
+            "article_id": 22,
+            "domain": "who.int"
+          },
+          "score": 0.125,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/29-10-2026-announcement-of-candidates-for-the-position-of-who-director-general",
+            "title": "公布世卫组织总干事候选人",
+            "source": "who_cn_news",
+            "article_id": 8,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/23-09-2026-who-expands-safe-options-for-contraception",
+            "title": "世卫组织扩大安全避孕选择",
+            "source": "who_cn_news",
+            "article_id": 23,
+            "domain": "who.int"
+          },
+          "score": 0.158,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/16-10-2026-interpol-and-who-sign-agreement-to-strengthen-global-health-and-security-protection",
+            "title": "国际刑警组织与世卫组织签署协议，加强全球卫生与安全保护",
+            "source": "who_cn_news",
+            "article_id": 11,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/23-09-2026-who-expands-safe-options-for-contraception",
+            "title": "世卫组织扩大安全避孕选择",
+            "source": "who_cn_news",
+            "article_id": 23,
+            "domain": "who.int"
+          },
+          "score": 0.129,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/16-10-2026-interpol-and-who-sign-agreement-to-strengthen-global-health-and-security-protection",
+            "title": "国际刑警组织与世卫组织签署协议，加强全球卫生与安全保护",
+            "source": "who_cn_news",
+            "article_id": 11,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/15-09-2026-who-and-commonwealth-secretariat-renew-partnership-to-strengthen-health-systems-and-advance-universal-health-coverage",
+            "title": "世卫组织与英联邦秘书处续签伙伴关系协议，共同加强卫生系统并推进全民健康覆盖",
+            "source": "who_cn_news",
+            "article_id": 25,
+            "domain": "who.int"
+          },
+          "score": 0.135,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/07-10-2026-who-issues-first-global-guidelines-on-child-and-adolescent-obesity",
+            "title": "世卫组织发布首份全球儿童和青少年肥胖症指南",
+            "source": "who_cn_news",
+            "article_id": 17,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/30-09-2026-who-releases-new-guidance-to-prevent-heat-related-illness-at-mass-gatherings",
+            "title": "世卫组织发布新指导，旨在预防大型集会期间高温相关疾病",
+            "source": "who_cn_news",
+            "article_id": 18,
+            "domain": "who.int"
+          },
+          "score": 0.128,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.who.int/zh/news-room/25-09-2026-who-announces-expansion-of-prequalification-programme-for-medical-devices",
+            "title": "世卫组织宣布扩大医疗器械预认证规划",
+            "source": "who_cn_news",
+            "article_id": 22,
+            "domain": "who.int"
+          },
+          "right": {
+            "url": "https://www.who.int/zh/news-room/23-09-2026-who-expands-safe-options-for-contraception",
+            "title": "世卫组织扩大安全避孕选择",
+            "source": "who_cn_news",
+            "article_id": 23,
+            "domain": "who.int"
+          },
+          "score": 0.174,
+          "reason": "同一域名 who.int,不构成两家独立媒体"
+        }
+      ],
+      "rejected_reasons": {
+        "同一域名 who.int": 8
+      }
+    },
+    "history": {
+      "articles": 30,
+      "identity_kinds": {
+        "own_report": 19,
+        "reprint_external": 1,
+        "aggregator": 10
+      },
+      "agencies": {
+        "chinanews": 19,
+        "cctv_news": 1,
+        "toutiao": 10
+      },
+      "pairs": [],
+      "rejected_sample": [
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cul/2026/11-14/10731937.shtml",
+            "title": "2026中国电影表演艺术周在南京开幕",
+            "source": "chinanews_culture",
+            "article_id": 10,
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.chinanews.com.cn/cul/2026/11-13/10731833.shtml",
+            "title": "2026中意陶瓷艺术展在北京开幕",
+            "source": "chinanews_culture",
+            "article_id": 16,
+            "domain": "chinanews.com.cn"
+          },
+          "score": 0.28,
+          "reason": "同一域名 chinanews.com.cn,不构成两家独立媒体"
+        }
+      ],
+      "rejected_reasons": {
+        "同一域名 chinanews.com.cn": 1
+      }
+    },
+    "social": {
+      "articles": 33,
+      "identity_kinds": {
+        "own_report": 23,
+        "reprint_external": 10
+      },
+      "agencies": {
+        "chinanews": 23,
+        "cctv_news": 5,
+        "people_daily": 1,
+        "中央广播电视总台中国之声": 2,
+        "weather_cn": 1,
+        "“浙江宣传”微信公众号": 1
+      },
+      "pairs": [],
+      "rejected_sample": [],
+      "rejected_reasons": {}
+    },
+    "technology": {
+      "articles": 206,
+      "identity_kinds": {
+        "aggregator": 159,
+        "own_report": 47
+      },
+      "agencies": {
+        "toutiao": 159,
+        "sspai": 15,
+        "ruanyifeng": 4,
+        "ifanr": 28
+      },
+      "pairs": [],
+      "rejected_sample": [
+        {
+          "left": {
+            "url": "https://www.toutiao.com/article/7707106918711493135/",
+            "title": "马斯克回应聘用黄仁勋：我的荣幸",
+            "source": "toutiao_tech",
+            "article_id": 6,
+            "domain": "toutiao.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707135760947741234/",
+            "title": "马斯克给黄仁勋留了个工位",
+            "source": "toutiao_tech",
+            "article_id": 233,
+            "domain": "toutiao.com"
+          },
+          "score": 0.19,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.toutiao.com/article/7706932199543358015/",
+            "title": "为什么上太空要带一名女航天员？内行人说出实情，看完让人心酸",
+            "source": "toutiao_tech",
+            "article_id": 8,
+            "domain": "toutiao.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7696079365624431154/",
+            "title": "为什么上太空要带一名女航天员？内行人说出实情，看完让人心酸",
+            "source": "toutiao_tech",
+            "article_id": 289,
+            "domain": "toutiao.com"
+          },
+          "score": 1.0,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.toutiao.com/article/7706841999491531327/",
+            "title": "稀土牌更值钱了：中国用稀土造“超级橡胶”，换遍全世界轮胎！",
+            "source": "toutiao_tech",
+            "article_id": 19,
+            "domain": "toutiao.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7706731227357495848/",
+            "title": "60年磨一剑！中国用稀土造橡胶，10万吨装置投产，换掉全世界轮胎",
+            "source": "toutiao_tech",
+            "article_id": 75,
+            "domain": "toutiao.com"
+          },
+          "score": 0.233,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://sspai.com/post/118366",
+            "title": "城市漫步指南｜夏末大阪，「青黄不接」的时节刚刚好",
+            "source": "sspai_rss",
+            "article_id": 24,
+            "domain": "sspai.com"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118781",
+            "title": "城市漫步指南 | 安特卫普，时尚就在生活中",
+            "source": "sspai_rss",
+            "article_id": 28,
+            "domain": "sspai.com"
+          },
+          "score": 0.152,
+          "reason": "同一域名 sspai.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://www.ruanyifeng.com/blog/2026/11/weekly-issue-418.html",
+            "title": "科技爱好者周刊（第 418 期）：如果科技停止在21世纪初",
+            "source": "ruanyifeng_atom",
+            "article_id": 34,
+            "domain": "ruanyifeng.com"
+          },
+          "right": {
+            "url": "http://www.ruanyifeng.com/blog/2026/10/weekly-issue-417.html",
+            "title": "科技爱好者周刊（第 417 期）：不要让 AI 代表你",
+            "source": "ruanyifeng_atom",
+            "article_id": 35,
+            "domain": "ruanyifeng.com"
+          },
+          "score": 0.303,
+          "reason": "同一域名 ruanyifeng.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://www.ruanyifeng.com/blog/2026/11/weekly-issue-418.html",
+            "title": "科技爱好者周刊（第 418 期）：如果科技停止在21世纪初",
+            "source": "ruanyifeng_atom",
+            "article_id": 34,
+            "domain": "ruanyifeng.com"
+          },
+          "right": {
+            "url": "http://www.ruanyifeng.com/blog/2026/10/weekly-issue-416.html",
+            "title": "科技爱好者周刊（第 416 期）：编程已经面目全非",
+            "source": "ruanyifeng_atom",
+            "article_id": 36,
+            "domain": "ruanyifeng.com"
+          },
+          "score": 0.303,
+          "reason": "同一域名 ruanyifeng.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://www.ruanyifeng.com/blog/2026/11/weekly-issue-418.html",
+            "title": "科技爱好者周刊（第 418 期）：如果科技停止在21世纪初",
+            "source": "ruanyifeng_atom",
+            "article_id": 34,
+            "domain": "ruanyifeng.com"
+          },
+          "right": {
+            "url": "http://www.ruanyifeng.com/blog/2026/11/weekly-issue-419.html",
+            "title": "科技爱好者周刊（第 419 期）：机房来了，写字楼走了",
+            "source": "ruanyifeng_atom",
+            "article_id": 274,
+            "domain": "ruanyifeng.com"
+          },
+          "score": 0.294,
+          "reason": "同一域名 ruanyifeng.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://www.ruanyifeng.com/blog/2026/10/weekly-issue-417.html",
+            "title": "科技爱好者周刊（第 417 期）：不要让 AI 代表你",
+            "source": "ruanyifeng_atom",
+            "article_id": 35,
+            "domain": "ruanyifeng.com"
+          },
+          "right": {
+            "url": "http://www.ruanyifeng.com/blog/2026/10/weekly-issue-416.html",
+            "title": "科技爱好者周刊（第 416 期）：编程已经面目全非",
+            "source": "ruanyifeng_atom",
+            "article_id": 36,
+            "domain": "ruanyifeng.com"
+          },
+          "score": 0.333,
+          "reason": "同一域名 ruanyifeng.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://www.ruanyifeng.com/blog/2026/10/weekly-issue-417.html",
+            "title": "科技爱好者周刊（第 417 期）：不要让 AI 代表你",
+            "source": "ruanyifeng_atom",
+            "article_id": 35,
+            "domain": "ruanyifeng.com"
+          },
+          "right": {
+            "url": "http://www.ruanyifeng.com/blog/2026/11/weekly-issue-419.html",
+            "title": "科技爱好者周刊（第 419 期）：机房来了，写字楼走了",
+            "source": "ruanyifeng_atom",
+            "article_id": 274,
+            "domain": "ruanyifeng.com"
+          },
+          "score": 0.323,
+          "reason": "同一域名 ruanyifeng.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "http://www.ruanyifeng.com/blog/2026/10/weekly-issue-416.html",
+            "title": "科技爱好者周刊（第 416 期）：编程已经面目全非",
+            "source": "ruanyifeng_atom",
+            "article_id": 36,
+            "domain": "ruanyifeng.com"
+          },
+          "right": {
+            "url": "http://www.ruanyifeng.com/blog/2026/11/weekly-issue-419.html",
+            "title": "科技爱好者周刊（第 419 期）：机房来了，写字楼走了",
+            "source": "ruanyifeng_atom",
+            "article_id": 274,
+            "domain": "ruanyifeng.com"
+          },
+          "score": 0.323,
+          "reason": "同一域名 ruanyifeng.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.toutiao.com/article/7700170148967236138/",
+            "title": "iPhone XS Max终极寿命实测！2026年还能用？答案说透",
+            "source": "toutiao_tech",
+            "article_id": 38,
+            "domain": "toutiao.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7706203367751582248/",
+            "title": "iPhone 20 Pro新消息，意想不到的改动！",
+            "source": "toutiao_tech",
+            "article_id": 42,
+            "domain": "toutiao.com"
+          },
+          "score": 0.136,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.toutiao.com/article/7700170148967236138/",
+            "title": "iPhone XS Max终极寿命实测！2026年还能用？答案说透",
+            "source": "toutiao_tech",
+            "article_id": 38,
+            "domain": "toutiao.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707158098665882162/",
+            "title": "一代神机！iPhone 13，突然又火了",
+            "source": "toutiao_tech",
+            "article_id": 235,
+            "domain": "toutiao.com"
+          },
+          "score": 0.122,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体"
+        }
+      ],
+      "rejected_reasons": {
+        "同一域名 toutiao.com": 21,
+        "同一域名 sspai.com": 1,
+        "同一域名 ruanyifeng.com": 6,
+        "来源不独立": 7,
+        "标题相似度 0.194 < 0.3": 1,
+        "同一域名 ifanr.com": 2
+      }
+    }
+  },
+  "totals": {
+    "pairs": 3,
+    "rejected": 417,
+    "reject_reasons": {
+      "同一域名 quotes.toscrape.com": 351,
+      "同一域名 finance.eastmoney.com": 3,
+      "来源不独立": 15,
+      "标题相似度 0.136 < 0.3": 2,
+      "标题相似度 0.128 < 0.3": 2,
+      "同一域名 stock.eastmoney.com": 1,
+      "同一域名 tmtpost.com": 3,
+      "同一域名 who.int": 8,
+      "同一域名 chinanews.com.cn": 1,
+      "同一域名 toutiao.com": 21,
+      "同一域名 sspai.com": 1,
+      "同一域名 ruanyifeng.com": 6,
+      "标题相似度 0.194 < 0.3": 1,
+      "同一域名 ifanr.com": 2
+    }
+  }
+}

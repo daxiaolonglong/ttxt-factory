@@ -1,0 +1,22 @@
+{
+  "probed": 4,
+  "kinds": {
+    "reprint_external": 2,
+    "own_report": 1,
+    "unknown": 1
+  },
+  "agencies": {
+    "财联社": 1,
+    "eastmoney": 1,
+    "国是直通车": 1,
+    "(unknown)": 1
+  },
+  "reprint_agencies": {
+    "财联社": 1,
+    "国是直通车": 1
+  },
+  "independent_eligible": 3,
+  "first_hand_of_event": 1,
+  "probed_at": "2026-11-16T17:53:36+08:00",
+  "out": "03_intelligence\\source_identity\\finance-pairs-20261116.jsonl"
+}

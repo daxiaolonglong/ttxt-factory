@@ -1,0 +1,26 @@
+{
+  "probed": 53,
+  "kinds": {
+    "own_report": 42,
+    "reprint_external": 11
+  },
+  "agencies": {
+    "chinanews": 42,
+    "cctv_news": 6,
+    "people_daily": 1,
+    "中央广播电视总台中国之声": 2,
+    "weather_cn": 1,
+    "“浙江宣传”微信公众号": 1
+  },
+  "reprint_agencies": {
+    "cctv_news": 6,
+    "people_daily": 1,
+    "中央广播电视总台中国之声": 2,
+    "weather_cn": 1,
+    "“浙江宣传”微信公众号": 1
+  },
+  "independent_eligible": 53,
+  "first_hand_of_event": 42,
+  "probed_at": "2026-11-16T17:46:12+08:00",
+  "out": "03_intelligence\\source_identity\\chinanews-20261116.jsonl"
+}
