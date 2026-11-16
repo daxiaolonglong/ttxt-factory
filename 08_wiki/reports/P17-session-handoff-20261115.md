@@ -363,5 +363,11 @@
    0 行缺失,没有一条手写或猜测)。**页数 9 → 11**(A4 横向,双面 6 张纸);61 行裁定内容、三个勾、行号一律没动,
    陷阱卡 `v2t13` 仍在**印出的第 13 行**(本人记成第 49 行 —— 就地纠正)。翻页核验:`tblHeader` + `cantSplit` + 渲染图像素比对(表头行差 0.0)。
    详见 `window-progress-20261116.md` §九·补。
+⑯61 行裁定交回,但交的是 **ChatGPT 辅助初审**(自述没打开过任何网页)。**已录 sidecar**
+   `10_tests/golden/adjudications/assist_draft_chatgpt_20261116.jsonl`(provenance=chatgpt_assisted_draft,web_pages_opened=false),
+   `golden_set_v2.jsonl` **未改**:`human_adjudicated` 仍 0/61。护栏脚本 `scripts/golden_v2_assist_audit.py`(human 模式只接受 human_signed),
+   测试 `10_tests/test_p27_assist_draft.py` 8 项(先红 ModuleNotFoundError → 8 passed;全量 **435 passed / 118.93 s**)。
+   逐行算术 **①46对/15不对、②10能/51不能**(本人汇总 47/14、9/52 各差 1,已就地更正);自动挑出 **5 处自相矛盾**;
+   **「第 49 行漏检」不成立** —— 那行(印出第 13 行 `v2t13`)机器印的是「对不上」,机器已抓到 10 天/3 天。详见 §十一。
 
 
