@@ -100,7 +100,7 @@ signal= 该关键词命中的文章里,真实测得样本的标签均值
 
 ## 8. 下一步(我接着做,不等人)
 
-1. **把 finance/history 的 measured 样本从 10 提到 ≥30**(各差 20 条)——走 `ttxt metrics --fetch-public` 的候选轮转(P22/P24 已修好候选口径),每轮点名这两个类目。完成标准:`prod_measured_probe` 里两行 ≥30,且 `analyze` 报 `status=applied`。
+1. **把 finance/history 的 measured 样本从 10 提到 ≥30**——**16:1x 只读干跑后就地更正(规则 44)**:原写"各差 20 条,走 `ttxt metrics --fetch-public` 候选轮转"漏了取证前提。实跑 `ttxt metrics --fetch-public --category <finance|history> --limit 20`(不加 `--apply`,不写库)回执:finance **candidates 10 / host_skipped 96**,history **candidates 10 / host_skipped 20**(`07_tmp/p28_viral_signal/dryrun_metrics_finance.txt`、`dryrun_metrics_history.txt`)。⇒ **现有语料里最多还能测 10 篇**,两类都只能到 20 条 < 30,**靠刷指标跨不过这道门槛**。真正的下一环是**先扩采集**(这两类落在指标白名单主机上的文章太少),再刷指标;在此之前它们必须继续报 `insufficient_sample`,**不许**为了让加分生效去调低 30 的门槛。完成标准不变:`prod_measured_probe` 两行 ≥30 且 `analyze` 报 `status=applied`。
 2. social/health 各 0 条 measured:先解决语料侧(health 25 行全 `short`,要 `crawl-enrich`),没有可测对象时**不许**凑数。
 3. `keyword_performance` 加 `signal/measured_hits` 两列(下轮,单独走 DDL 迁移 + 备份 + 回滚取证)。
 4. P26 的 24 小时冷却在生产上第一次看到"冷却中"文案,等 job 76/77 排干后取数。

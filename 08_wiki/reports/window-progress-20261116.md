@@ -220,7 +220,7 @@ health 那一支每次 `inserted 0 / duplicates 25`,gap 词 `睡眠` 永远补�
 | 已落库 | `ttxt analyze --category all` 跑完(`prod_analyze_all.txt`):technology `applied/calibrated`、finance+history `insufficient_sample`、social/health/demo `no_measured_hits`;`zero_coverage` 与反哺候选与改前一致 |
 | 事故(护栏抓到我) | 只读巡检(`mode=ro`)与全量测试**并发** ⇒ 生产目录留 6 对 `-wal/-shm`,`conftest.production_state_untouched` 判 1 error。护栏正确、违规是我;`scripts/p28_wal_sidecar_cleanup.py` 逐库 `wal_checkpoint(TRUNCATE)`+`quick_check` 全 ok,边车 WAL 全 0 字节,行数 32/106/25/30/33/186 = **412 未变**,收净后重跑才是 442 passed。已写进 **规则 48**(测试期间禁止连生产库) |
 | 实话(审计性) | 因为本轮不做 DDL,逐词的 `signal/measured_hits` 只在回执与 `03_intelligence/keyword_feedback/*.json` 证据里,查表查不到 —— 下一轮加两列补上 |
-| 下一轮我的活 | finance/history 的 measured 从 10 提到 ≥30(各差 20 条,走 `metrics --fetch-public` 候选轮转);social/health 无可测对象先补语料不凑数;`keyword_performance` 加 `signal/measured_hits` 列走正规迁移+备份+回滚 |
+| 下一轮我的活 | **16:1x 就地更正(规则 44)**:原先写"finance/history 的 measured 从 10 提到 ≥30,走 `metrics --fetch-public` 候选轮转"——只读干跑实测 finance **candidates 10 / host_skipped 96**、history **candidates 10 / host_skipped 20**(两类都只能到 20 条 <30)⇒ **靠刷指标跨不过门槛**,得**先扩采集**再刷指标;门槛 30 不许为生效而调低,两类继续如实报 `insufficient_sample`(`07_tmp/p28_viral_signal/dryrun_metrics_{finance,history}.txt`)。social/health 无可测对象先补语料不凑数;`keyword_performance` 加 `signal/measured_hits` 列走正规迁移+备份+回滚 |
 | 门禁照旧 | 人工裁定仍 **0/61**、A/B 独立证据 **17/61 = 28%**、61 张卡只覆盖 10 篇 / 3 域名;本轮完全没动黄金集与 `human_*`,15 行仍等本人逐行确认 |
 
 完整账本:`08_wiki/reports/P28-viral-keyword-feedback-20261116.md`。
