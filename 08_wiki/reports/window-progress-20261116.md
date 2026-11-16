@@ -136,3 +136,16 @@
 **新增工具坑(规则 47)**:后台 pwsh 作业只要 stderr 有输出就回传 `exit code 1`,与被调程序真实退出码无关
 ⇒ `ttxt worker` / `ttxt metrics` 的 exit 1 不代表失败,判成败看回执 JSON、日志事件与库内读数。
 
+## 九、14:00 补:黄金核验 61 张卡压成一张打勾裁定单(本人唯一卡住的那件事,已出纸)
+
+| 项 | 实测 |
+|---|---|
+| 交付物 | `08_wiki/reports/P13-golden-adjudication-sheet.docx`(47,684 B)+ 同名 PDF(**769,243 B / 9 页 A4 横向**,双面打印 5 张纸) |
+| 结构 | 61 行 × **3 个勾**:①机器说得对吗(对/不对→`human_verdict`)②原句撑得住吗(能/不能/说不清→`human_fact_support`)③证据级同意吗(同意/改字母→`human_confirms_tier`);附录按行号给来源机构、域名、独立性说明 |
+| 刻意不印 | `kind` 与 `expected_by_construction` —— 印了就等于把答案写在脸上,人工裁定被污染,`false_accept_rate` 失真 |
+| 新工具 | `scripts/golden_v2_dump_flat.py`(项目 venv 跑,机器结论走 `golden_v2_harness::machine_result`,与度量器同源)→ `scripts/golden_v2_adjudication_sheet.py`(需带 python-docx 的解释器);两步重跑即可再生成 |
+| 自查 | 主表 **65 行**(1 表头 + 3 分组 + 61 行),61 条 claim **全在、无截断**;PDF 签名 `%PDF-` ✓。**第一版渲染出 24 页**,根因:python-docx 只设 `autofit=False` 不生效,必须写 `tblLayout=fixed` + `tblGrid` 列宽 + 每个 `tc` 的 `tcW`(合并格按跨列合计)⇒ 修后 9 页 |
+| 未完成的检查 | 内容与结构检查通过;**视觉检查未完成**——当前模型不接图像,预览图无法读,只核对了页数与文本完整性 |
+| 仍卡着的门禁 | 61 行全勾完也还不达标:`A/B 级独立证据占比 17/61 = 28% < 50%`。这条是**我**的活(补真出处或降级卡片),不麻烦本人 |
+| 回收路径 | 纸或照片交回 → 我写脚本按行号录回 `golden_set_v2.jsonl` 的 `human_*` 三字段(先写红测试:取值只允许 通过/驳回、supported/unsupported/needs_more_evidence、A/B/C/D),再跑 harness 出 `false_accept_rate` 与一致率 |
+

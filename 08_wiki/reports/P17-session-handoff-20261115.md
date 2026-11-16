@@ -336,7 +336,7 @@
 第 9 轮待办(P26,优先级与每项"怎样算做到"见 P25 报告第十三节):①**旧资产迁移为唯一主线**(六步硬前置:红名单测试 → 只读映射表 → 碰撞预演 → 新鲜度隔离 → 管线增量化 → 分批导入对账);②管线增量化(5 万行单任务 < 60 s);
 ③`keywords.py` 读 `viral_labels`;④404 根因;⑤`crawl-enrich`(health 全 `short`);⑥`schedule --once`;
 ⑦C-5 分档 + 9 条空 `article_id`(需 DDL 批准)+ `_element_text` 标题缺陷;⑧`07_tmp` 526 MB 与项目外 `pytest-of-yangl` 50.8 MB
-**必须先出逐项清单交批准**;⑨黄金集人工裁定(只有本人能做)。
+**必须先出逐项清单交批准**;⑨黄金集人工裁定(只有本人能做;裁定单已于 2026-11-16 14:00 出纸,见 §十六 补记 ⑬,现在只等打勾)。
 
 **补记(13:31 → 13:45,规则 44:上面的账是中途读数,不改写,就地更正)**:
 ⑧反哺出来的 job 74/75 已排干(`worker --owner p25b --max-jobs 2`,`stop_reason=max_jobs done=2`,64.19 s):
@@ -350,6 +350,10 @@
    (`crawl.enqueued actor=keyword_feedback`:13:03:23 job 74 / 13:04:55 job 75 / 13:34:25 **job 76** / 13:34:27 **job 77**,
    关键词仍是 `效率工具` / `睡眠`),而 health 那一支永远 `inserted 0 / duplicates 25` ⇒ gap 补不上却每轮重新排队,白烧限速预算。
    验收:同一 gap 词 24h 冷却内不重复入队,红→绿测试证明"连跑两次 analyze 只入队一次",日志带第几次尝试;
-⑫交班时队列 `aborted 7 / done 68 / queued 2`(job 76/77)—— 是上述循环的产物,**故意不再排干**,等冷却机制修好后再消费。
+⑫交班时队列 `aborted 7 / done 68 / queued 2`(job 76/77)—— 是上述循环的产物,**故意不再排干**,等冷却机制修好后再消费;
+⑬14:00 追加(不占本轮账,但把卡了三轮的那件事解开了):黄金核验 61 张卡压成**一张打勾裁定单**
+   `08_wiki/reports/P13-golden-adjudication-sheet.docx` / 同名 PDF(9 页 A4 横向),每行 3 个勾 → `human_verdict` / `human_fact_support` / `human_confirms_tier`;
+   配套两个可重跑脚本 `scripts/golden_v2_dump_flat.py`、`scripts/golden_v2_adjudication_sheet.py`(机器结论与 harness 同源,刻意不印 `kind` 防污染)。
+   **现在等的只剩本人打勾**;即便全勾完,门禁仍差 `A/B 级证据占比 28% < 50%`,那条是工程侧的活。
 
 
