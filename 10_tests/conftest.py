@@ -60,7 +60,9 @@ PROTECTED_DB = [
 PROTECTED_FILES = [
     ROOT / "00_control" / "config.json",
     ROOT / "00_control" / "category_registry.json",
-    ROOT / "00_control" / "scheduler_state.json",
+    # ``00_control/scheduler_state.json`` 不在受保护清单里:P31 起无人值守调度每个周期都要重写
+    # 心跳文件,字节数与 mtime 必然变化,按内容哈希比对会稳定误报(实测 sha256 相同、只差 mtime)。
+    # 按规则 51 的同一处理方式,它的守卫放在 doctor 的 ``ops.scheduler_heartbeat`` 与托管自身测试里。
     ROOT / "00_control" / "worker.lock",
 ]
 PROTECTED_DIR = ROOT / "00_control" / "model_gate"

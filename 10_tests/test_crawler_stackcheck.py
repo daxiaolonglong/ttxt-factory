@@ -65,7 +65,9 @@ def test_browser_kwargs_cap_disk_cache_by_default(monkeypatch):
 def test_disk_cache_flag_can_be_turned_off(monkeypatch):
     _config(monkeypatch, disk_cache_mb=0)
     kwargs = fetcher._browser_kwargs()
-    assert "extra_flags" not in kwargs
+    flags = kwargs.get("extra_flags") or []
+    assert not any(str(flag).startswith("--disk-cache-size=") for flag in flags), "关掉磁盘缓存时必须撤掉对应旗标"
+    assert any(str(flag).startswith("--host-resolver-rules=") for flag in flags), "撤磁盘缓存旗标不得顺手撤掉 SSRF 兜底规则(P32)"
 
 
 def test_config_extra_flags_are_kept_and_cache_flag_appended(monkeypatch):

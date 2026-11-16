@@ -23,6 +23,17 @@ from ttxt import db, housekeep
 from ttxt.crawler import fetcher, robots, runner, store
 from ttxt.crawler import sources as source_loader
 from ttxt.crawler import toutiao
+from ttxt.crawler import url_safety
+
+
+@pytest.fixture(autouse=True)
+def _stub_public_dns(monkeypatch: pytest.MonkeyPatch) -> None:
+    """本模块只测状态码与重试语义,域名解析统一喂一个公网 IP。
+
+    P32 之后抓取前必须先解析域名做 SSRF 判定,这里的替身域名(a.example 之类)本来就不存在,
+    会被安全边界判成「解析失败」而与状态码语义无关。SSRF 判定本身由 ``test_p32_ssrf.py`` 覆盖。
+    """
+    monkeypatch.setattr(url_safety, "resolve_host", lambda host: ["93.184.216.34"])
 
 
 # ---------------------------------------------------------------- 替身基础设施

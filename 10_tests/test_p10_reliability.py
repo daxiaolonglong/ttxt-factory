@@ -75,7 +75,8 @@ def _start_http(status_code: int) -> HTTPServer:
 def test_robots_404_allows():
     httpd = _start_http(404)
     try:
-        rules = robots.fetch_robots(f"http://127.0.0.1:{httpd.server_address[1]}/page", "test/1.0")
+        # allow_private 只因为是本机测试夹具才放行;生产调用一律不传(P32 规则 52)。
+        rules = robots.fetch_robots(f"http://127.0.0.1:{httpd.server_address[1]}/page", "test/1.0", allow_private=True)
         assert rules.unknown is False
         assert rules.allow_all is True
     finally:
@@ -85,7 +86,7 @@ def test_robots_404_allows():
 def test_robots_500_is_unknown():
     httpd = _start_http(500)
     try:
-        rules = robots.fetch_robots(f"http://127.0.0.1:{httpd.server_address[1]}/page", "test/1.0")
+        rules = robots.fetch_robots(f"http://127.0.0.1:{httpd.server_address[1]}/page", "test/1.0", allow_private=True)
         assert rules.unknown is True
         assert rules.allowed("/x") is False
     finally:
@@ -93,7 +94,7 @@ def test_robots_500_is_unknown():
 
 
 def test_robots_connection_error_is_unknown():
-    rules = robots.fetch_robots("http://127.0.0.1:9/page", "test/1.0", timeout=2)
+    rules = robots.fetch_robots("http://127.0.0.1:9/page", "test/1.0", timeout=2, allow_private=True)
     assert rules.unknown is True
 
 
