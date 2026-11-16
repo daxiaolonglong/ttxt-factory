@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated_at": "2026-11-15",
-  "notes": "P19批次(2026-11-15):补齐 history/social 的合格正式来源。取证链:07_tmp/p19_keyword_crawl/probe3.json(robots 与新鲜度)、probe5.json(通用正文选择器在中新网/澎湃**全部落空**)、probe6_page_forensics(中新网正文 819–1605 字在 HTML 里、澎湃是 Next.js 哈希类名)、probe7_tightest_container.json(自动定位正文容器:中新网 div.left_zw / div.content_maincontent_content 稳定;澎湃只有 wrap__hPMpF 这类构建哈希,不可作为长期选择器)。因此本批只注册中新网两个频道;澎湃列为待办(需要 __NEXT_DATA__ 结构化解析,不用哈希类名)。people.com.cn 全部 rss 停在 2025-06、chinanews /rss/jk.xml 停在 2026-03,均按陈旧拒绝;Google News/头条搜索/360/搜狗/百度新闻 robots 拒绝,不得配置。每个来源采集前必须通过 robots.txt 检查。",
+  "updated_at": "2026-11-16",
+  "notes": "P19批次(2026-11-15):补齐 history/social 的合格正式来源。取证链:07_tmp/p19_keyword_crawl/probe3.json(robots 与新鲜度)、probe5.json(通用正文选择器在中新网/澎湃**全部落空**)、probe6_page_forensics(中新网正文 819–1605 字在 HTML 里、澎湃是 Next.js 哈希类名)、probe7_tightest_container.json(自动定位正文容器:中新网 div.left_zw / div.content_maincontent_content 稳定;澎湃只有 wrap__hPMpF 这类构建哈希,不可作为长期选择器)。因此本批只注册中新网两个频道;澎湃列为待办(需要 __NEXT_DATA__ 结构化解析,不用哈希类名)。people.com.cn 全部 rss 停在 2025-06、chinanews /rss/jk.xml 停在 2026-03,均按陈旧拒绝;Google News/头条搜索/360/搜狗/百度新闻 robots 拒绝,不得配置。每个来源采集前必须通过 robots.txt 检查。P25(2026-11-16)新增 toutiao_finance / toutiao_history:两级取证在先(静态抓频道页只拿到 4827 字节 JS 外壳 0 条逐篇链接;生产适配器 browser_session+toutiao.collect 实测每频道 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1450-2985 字,当天发布),robots 放行,不登录;动机见 08_wiki/reports/P24-metrics-and-prediction-loop-20261116.md 第一、六节 —— finance/history 类目此前头条文章 0 行,公开互动指标无从谈起。news_society / news_health / news_economics / news_culture 这些 slug 实测 404 或落地 channel= 空,**不得凭猜测配置**;social/health 需先从渲染后的首页导航取真实 slug 再取证。",
   "sources": [
     {
       "id": "toutiao_tech",
@@ -17,6 +17,36 @@
       "max_articles": 10,
       "demo": false,
       "notes": "robots 未禁止频道页与 /article/;使用本机 Edge 浏览器渲染,逐篇限速 2s,逐 URL 检查 robots;不登录、不绕过访问控制"
+    },
+    {
+      "id": "toutiao_finance",
+      "name": "今日头条 · 财经频道",
+      "category": "finance",
+      "kind": "html",
+      "url": "https://www.toutiao.com/ch/news_finance/",
+      "enabled": true,
+      "rate_limit_s": 2.0,
+      "max_pages": 1,
+      "extractor": "toutiao",
+      "render": "browser",
+      "max_articles": 10,
+      "demo": false,
+      "notes": "P25 取证(2026-11-16,07_tmp/r27_metrics_expand/probe_channels_out.txt + probe_channels_browser_out.txt):静态 Fetcher 抓频道页只有 4827 字节 JS 外壳、0 条逐篇链接,必须浏览器渲染;用生产适配器 fetcher.browser_session()+toutiao.collect(limit=3) 实测 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1450/1534/2377 字,发布时间到 11-16 07:15。robots 对 /ch/news_finance/ 与 /article/ 均放行(unknown=false),不登录、不绕过访问控制,逐 URL 复核。配额说明:extractor=toutiao 时逐篇正文由适配器在浏览器会话内自取,toutiao.collect:122 用 limit or max_articles 封顶,不用 fetch_item_pages/max_item_pages(那是 RSS 列表页补正文那条路)。注册动机:finance 类目 96 行全是 eastmoney(60)+tmtpost(36),头条文章 0 行 ⇒ 公开互动指标无从谈起,metrics 候选恒 host_skipped"
+    },
+    {
+      "id": "toutiao_history",
+      "name": "今日头条 · 历史频道",
+      "category": "history",
+      "kind": "html",
+      "url": "https://www.toutiao.com/ch/news_history/",
+      "enabled": true,
+      "rate_limit_s": 2.0,
+      "max_pages": 1,
+      "extractor": "toutiao",
+      "render": "browser",
+      "max_articles": 10,
+      "demo": false,
+      "notes": "P25 取证(同上两份取证件):/ch/news_history/ HTTP 200 且落地 channel=history&source=ch(slug 真实存在,不是编造);生产适配器实测 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1562/2692/2985 字,发布到 11-16 06:26。robots 放行。配额说明同上:toutiao.collect:122 用 limit or max_articles 封顶,不用 max_item_pages。注册动机:history 类目 20 行全是 chinanews.com.cn,头条文章 0 行 ⇒ 该类目无法进入实测/标定/预测闭环"
     },
     {
       "id": "quotes_toscrape",

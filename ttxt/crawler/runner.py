@@ -454,7 +454,7 @@ def _execute_job(
             stats = pipeline.run_pipeline(target_category)
             summary["pipeline"] = {
                 key: stats.get(key)
-                for key in ("cleaned", "dates_normalized", "clusters", "near_duplicate_pairs", "clean_version")
+                for key in ("cleaned", "dates_normalized", "clusters", "near_duplicate_pairs", "clean_version", "indexed")
             }
         except Exception as exc:  # noqa: BLE001 - 派生字段落后不能反过来让采集判失败
             summary["pipeline_error"] = f"{type(exc).__name__}: {exc}"

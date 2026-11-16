@@ -30,6 +30,8 @@
 采集(02_crawler:Scrapling HTTP 优先 → 浏览器按需)→ 清洗/去重/聚类
        │  ↑ C-4(2026-11-15):采集与清洗是同一条链 —— runner._execute_job 插入之后当场
        │    跑 pipeline.run_pipeline(category),统计进 summary["pipeline"] 与 crawl_jobs.meta_json
+        │  ↑ P25(2026-11-16):同一条链还要补齐检索索引 —— 管线末尾调 rag.rebuild_index 写 articles_fts,
+        │    回执新增 indexed;对账在 doctor.db.fts_coverage(不一致即 FAIL)。analyze 退为每日兜底。
        │
 类目隔离库(01_categories/<cat>/articles.db + rag/keywords/metrics)
        │

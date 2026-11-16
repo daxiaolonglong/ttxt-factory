@@ -45,11 +45,21 @@ def run_pipeline(category: str, db_path: Path | None = None) -> dict[str, int]:
         con.close()
 
     stats = clusters.cluster_category(category, db_path=path)
+    # 检索索引必须在采集当场补上,不能等 `ttxt analyze`。
+    # 根因(2026-11-16 生产实测):`articles_fts` 原先只在 `analyze → rag.rebuild_index` 里写,
+    # 采集任务只跑本管线 ⇒ `doctor.db.fts_coverage` 抓到 374 行只有 354 行可搜,
+    # 当天采回来的文章在 `ttxt search` / 写作取材里看不见。
+    # 依赖方向是单向的:`analysis.rag` 只依赖 `crawler.simhash` 的分词,不回头依赖采集层,
+    # 所以这里用函数内导入,避免模块级循环导入。
+    from ttxt.analysis import rag
+
+    index_stats = rag.rebuild_index(category, db_path=path)
     stats.update(
         {
             "cleaned": len(rows),
             "dates_normalized": dates_normalized,
             "clean_version": CLEAN_VERSION,
+            "indexed": index_stats["indexed"],
         }
     )
     return stats

@@ -929,9 +929,26 @@ def create_crawl_job(
             (category, source_id, cfg.now_iso(), json.dumps(meta or {}, ensure_ascii=False)),
         )
         con.commit()
-        return int(cursor.lastrowid)
+        job_id = int(cursor.lastrowid)
     finally:
         con.close()
+    # P25(2026-11-16):入队必须留日志。实测根因见用户周报
+    # ``08_wiki/reports/P13-weekly-20261116.md`` §6 —— job 71(``toutiao_tech`` queued,
+    # created 2026-11-16T08:28:54+08:00)**无法从日志归因**:`system_log` 0 行,
+    # 全周 jsonl grep ``enqueue / crawl_enqueue / feedback_gap`` 0 命中。
+    # 面板(``dashboard``)、调度器(``scheduler``)、关键词计划(``keyword_plan``)、人工 CLI(``manual``)
+    # 四种来源写进同一张表,不记 actor 就永远分不清是谁排的队、为什么排队积压。
+    actor = str((meta or {}).get("dispatched_via") or (meta or {}).get("reason") or "manual")
+    LOG.info(
+        "crawl.enqueued",
+        job_id=job_id,
+        source=source_id,
+        category=category,
+        actor=actor,
+        db=str(target),
+        keywords=len((meta or {}).get("keywords") or []) or None,
+    )
+    return job_id
 
 
 def find_pending_crawl_job(source_id: str, category: str, db_path: Path | None = None) -> int | None:

@@ -302,3 +302,54 @@
 6. **关键词反哺要读爆款标签**:`analysis/keywords.py` 目前不读 `viral_labels` ⇒ 爆款结论回不到选词(用户目标 2 的关键缺口)。
 7. `07_tmp` 0.571 GB(限额 2 GB):清理必须先出清单交用户批准(规则 29/43)。
 
+## 十六、第 8 轮(2026-11-16 12:4x → 13:3x)完成账本:P25 新频道排干队列 + FTS 索引根因 + 旧资产取证
+
+写库前备份:`11_backups/p25-pre-20261116-125627.zip`(6,578,403 字节)。完整账本与全部证据路径见
+`08_wiki/reports/P25-two-new-channels-and-fts-index-20261116.md`;本节只记结论与更正。
+
+| 事项 | 实测读数 | 凭据 |
+|---|---|---|
+| 注册新频道 | `toutiao_finance` / `toutiao_history` 写入 `02_crawler/sources.json`(`render: browser`、`rate_limit_s: 2.0`、取证写进 `notes`) | `02_crawler/sources.json` |
+| **改判:不各入队 3 次** | `toutiao.collect` = 1 个频道页 + ≤10 篇文章页,连开 3 任务等于同一批 17 条链接抓三遍,第 2、3 次几乎全落去重 ⇒ 各入队 1 次 | `ttxt/crawler/toutiao.py:120-139`、`07_tmp/r29_channels/enqueue_p25_new_channels.py` |
+| 排干队列 | Worker `--owner p25 --max-jobs 3`:job 71/72/73 全 `done`,`worker.stop reason=max_jobs done=3`;每任务 pages 11 / links 17 / extracted 10 / inserted 9+10+10 / duplicates 1+0+0 / elapsed ≤58.7 s | `09_logs/ttxt-20261116.jsonl`、Worker 回执 |
+| 语料增长 | technology 168→**177**、finance 96→**106**、history 20→**30**;全库 **374→403 行** | `07_tmp/r29_channels/post_p25_state.json` |
+| 指标回流 | finance candidates 10 / fetched 10 / errors 0;history 同;technology candidates 20 / fetched 16 / **fetch_errors 4(未查明)**;`render_mismatch=0`、`render_unattributed=0` | `metrics.public.summary` 13:03:42 / 13:04:24 / 13:07:53 |
+| 标定 | technology 样本 85→**101**,阈值 **0.0562/0.0272/0.0115**(p90/p60/p25,`articles_meta.viral_calibration` 13:09:10);`verified_viral` 9→**10**;finance/history 各 **10 条 < `MIN_CALIBRATION_SAMPLE=30`** ⇒ 拒绝标定(如实) | `post_p25_state.json`、`ttxt/analysis/viral.py:28` |
+| 预测闭环扩类目 | finance `recorded 20`、history `recorded 20`(全部 pending);technology `settle` → **settled 3 / pending 21**;`report` → **19 样本 / MAE 0.018 / mean_bias −0.0127** | 命令回执 |
+| **根因:FTS 只在 analyze 里建** | 新体检项 `db.fts_coverage` 抓到 374 行只有 354 行可搜(social 22/33、technology 159/168);`articles_fts` 只由 `rag.rebuild_index` 写,采集路径 `pipeline.run_pipeline` 不写 ⇒ 当天采的文章搜不到、写作取不到材 | `ttxt/analysis/rag.py:22-42`、`ttxt/crawler/pipeline.py` |
+| 修根因 | `run_pipeline` 末尾 `rag.rebuild_index(...)`(单向依赖,函数内导入避免循环),回执新增 `indexed`;红→绿:新测试 **3 failed → 46 passed** | `10_tests/test_p25_fts_after_crawl.py`、`p25_fts_red.txt` / `p25_fts_green.txt` |
+| **根因:入队无审计** | P24 说"job 70/71 疑似面板触发"只有"时间相隔 11 秒"这一条,是推断不是证据;现 `create_crawl_job` 打 `crawl.enqueued` 带 `actor=dashboard/scheduler/keyword_plan/manual`,job 72/73 实测 `actor: "manual"` | `ttxt/crawler/store.py`、`09_logs/ttxt-20261116.jsonl` |
+| 全库索引与清洗 | `db.fts_coverage 403/403 PASS`、`db.cleaned_coverage 403/403 PASS`、`db.duplicate_rows PASS` | `ttxt doctor` 收账 |
+| 体检与磁盘 | doctor **34 ok / 0 failed / 5 WARN**(全是 P24 已知那批);`disk.root_budget 6.43GB/20GB`、`07_tmp 0.635GB/2GB`、浏览器 profile 608MB/3.0GB | 同上 |
+| **旧资产取证(只读)** | `资产库/01_语料库/factory.db`:**53,678 篇**全为 `toutiao.com/article/<gid>/` 且 URL 全唯一;`search_ssr` 计数 53,289 行,`read_count>0` **19,970** 行(0 值 33,708 行**必须当缺失**);正文 ≥400 字且有阅读 **33,412 行**、有阅读且有赞 **17,313 行**;发布 2026 年 51,651 篇(最新 2026-11-06);正文均值 2,208 字、**8,000 字是旧采集截断**;`keywords` **28,171** 条(ACTIVE 16,796);旧模型 AUC **0.8803**(2026-11-04,deployed) | `07_tmp/r29_legacy_asset_probe/*` |
+| 规模石头(实测+外推) | `rebuild_index` 实测 177 行/317,017 字/0.60 s = 295 行/s;按 53,678 行外推 **3.0–3.7 分钟/任务** ⇒ `run_pipeline` 全表重算必须先增量化 | `07_tmp/r29_channels/fts_cost_out.txt` |
+| 测试 | 本轮新增 **11 项**(观测 4 + 频道 4 + FTS 3);全量 **422 passed / exit 0 / 138.26 s** | `p25_full_suite.txt` |
+| **口径更正** | 上一份交接清单写"P25 新增 9 项、应 420",实际新增 8 项 / 419 passed —— 是清单数错,不是测试缺失(`--collect-only` 419) | `--collect-only` 输出 |
+| 工具踩坑 | ①后台 pwsh 作业**只要 stderr 有输出就回传 exit 1**(最小复现见报告第十四节),`worker`/`metrics` 的 exit 1 不代表失败;②只读旧库排序要先 `PRAGMA temp_store=MEMORY`;③`git` 不在 PATH,须前置 `D:\ttxt\tools\git\cmd` | 报告第十四节 |
+
+诚实说明:①finance/history 仍不能标定(样本 10),闭环只复制了采集/指标/预测三段;②technology 的 4 条 404 未查明根因;
+③`favorites` 仍未证实,继续 NULL;④job 71 是谁触发的**永远不可证**(审计在修好之后才生效);
+⑤analyze 关键词反哺本轮自动入队 **job 75**(health),这是收账时队列非空的唯一来源,不是残留;
+⑥没跑 `schedule --once`、没上常驻 Worker、没做 `crawl-enrich`、没改 DDL、`keywords.py` 仍不读 `viral_labels`;
+⑦`quality_claim` 仍 **NOT_AVAILABLE**(黄金集 61 张卡片人工裁定 0/61,只有本人能做)。
+
+第 9 轮待办(P26,优先级与每项"怎样算做到"见 P25 报告第十三节):①**旧资产迁移为唯一主线**(六步硬前置:红名单测试 → 只读映射表 → 碰撞预演 → 新鲜度隔离 → 管线增量化 → 分批导入对账);②管线增量化(5 万行单任务 < 60 s);
+③`keywords.py` 读 `viral_labels`;④404 根因;⑤`crawl-enrich`(health 全 `short`);⑥`schedule --once`;
+⑦C-5 分档 + 9 条空 `article_id`(需 DDL 批准)+ `_element_text` 标题缺陷;⑧`07_tmp` 526 MB 与项目外 `pytest-of-yangl` 50.8 MB
+**必须先出逐项清单交批准**;⑨黄金集人工裁定(只有本人能做)。
+
+**补记(13:31 → 13:45,规则 44:上面的账是中途读数,不改写,就地更正)**:
+⑧反哺出来的 job 74/75 已排干(`worker --owner p25b --max-jobs 2`,`stop_reason=max_jobs done=2`,64.19 s):
+   job 74 `toutiao_tech` 净增 **9 行**(pages 11 / links 16 / extracted 10 / dup 1),job 75 `who_cn_news` **inserted 0 / duplicates 25**;
+⑨最终读数:全库 **412 行**(technology **186** / finance 106 / history 30 / social 33 / health 25 / demo 32),
+   `db.fts_coverage` **412/412 PASS**、`db.cleaned_coverage` **412/412 PASS**、`ttxt doctor` **34 ok / 0 failed / 5 WARN**、
+   `disk.root_budget 6.534GB/20GB`、`07_tmp 0.634GB`;全量回归 **422 passed / exit 0 / 137.57 s**;
+⑩**又抓到同源第二缺陷并修掉**:`runner.py:452-458` 拷贝管线统计是**键白名单**,新键 `indexed` 被静默丢掉 ⇒ 生产 Worker 回执看不见索引计数;
+   红 `KeyError: 'indexed'`(1 failed / 7 passed)→ 绿(与 FTS 测试同跑 **11 passed**),凭据 `07_tmp/r29_channels/p25_indexed_red.txt`;
+⑪**新缺陷,未修,列为第 9 轮 ⓪(半天,排在旧资产迁移之前)**:关键词反哺入队是**无界循环** —— 同一 gap 词今天入队 4 次
+   (`crawl.enqueued actor=keyword_feedback`:13:03:23 job 74 / 13:04:55 job 75 / 13:34:25 **job 76** / 13:34:27 **job 77**,
+   关键词仍是 `效率工具` / `睡眠`),而 health 那一支永远 `inserted 0 / duplicates 25` ⇒ gap 补不上却每轮重新排队,白烧限速预算。
+   验收:同一 gap 词 24h 冷却内不重复入队,红→绿测试证明"连跑两次 analyze 只入队一次",日志带第几次尝试;
+⑫交班时队列 `aborted 7 / done 68 / queued 2`(job 76/77)—— 是上述循环的产物,**故意不再排干**,等冷却机制修好后再消费。
+
+

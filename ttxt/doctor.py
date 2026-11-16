@@ -215,6 +215,10 @@ def completeness_checks() -> list[tuple[str, str, str]]:
     except Exception as exc:  # noqa: BLE001 - 覆盖率统计失败不得毁掉整段完整性体检
         results.append(("WARN", "db.cleaned_coverage", f"读失败,无法统计清洗覆盖率:{type(exc).__name__}: {exc}"))
     try:
+        results.append(_fts_coverage_row())
+    except Exception as exc:  # noqa: BLE001 - 索引覆盖率统计失败不得毁掉整段完整性体检
+        results.append(("WARN", "db.fts_coverage", f"读失败,无法统计检索索引覆盖率:{type(exc).__name__}: {exc}"))
+    try:
         results.extend(_dedupe_rows())
     except Exception as exc:  # noqa: BLE001 - 判重对账失败不得毁掉整段完整性体检
         results.append(("WARN", "db.duplicate_rows", f"判重对账读失败,无法判定历史重复行:{type(exc).__name__}: {exc}"))
@@ -458,6 +462,49 @@ def _cleaned_coverage_row() -> tuple[str, str, str]:
             "补跑:`ttxt clean --category <类目>`(采集入口已内置管线,出现落后要查是不是绕过入口)",
         )
     return ("PASS", "db.cleaned_coverage", f"{total_cleaned}/{total_rows} 行全部有清洗文本")
+
+
+def _fts_coverage_row() -> tuple[str, str, str]:
+    """检索索引(FTS)覆盖率(P25,2026-11-16)。返回 ``(level, name, detail)``。
+
+    实测根因(用户只读周报 ``08_wiki/reports/P13-weekly-20261116.md`` §6):
+    social ``33/22``(−11)、technology ``168/159``(−9),缺的正好是当天凌晨 02:25/02:47
+    最后一批入库的文章 —— 采集入口只自动跑**清洗管线**(C-4),FTS 索引只有
+    ``analysis/analyze.py:31 → rag.rebuild_index`` 会重建;调度器自 11-12 起冻结,
+    于是"文章在库里、检索搜不到"这种状态从文章行数上完全看不出来,也没有任何体检项。
+    写作取材走的就是 ``rag.search``,索引滞后等于新语料不参与取材 —— 必须天天喊。
+    """
+    lagging: list[str] = []
+    total_rows = total_indexed = 0
+    for name in store.namespaces_on_disk():
+        con = store.read_only_connect(store.articles_db_path(name))
+        try:
+            rows = int(con.execute("SELECT COUNT(*) FROM articles").fetchone()[0])
+            has_fts = con.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='articles_fts'"
+            ).fetchone()
+            if not has_fts:
+                if rows:
+                    lagging.append(f"{name} 索引表不存在(0/{rows})")
+                continue
+            indexed = int(con.execute("SELECT COUNT(*) FROM articles_fts").fetchone()[0])
+        finally:
+            con.close()
+        total_rows += rows
+        total_indexed += indexed
+        if indexed < rows:
+            lagging.append(f"{name} {indexed}/{rows}")
+    if not total_rows:
+        return ("WARN", "db.fts_coverage", "库里没有文章,检索索引覆盖率无从谈起")
+    if lagging:
+        return (
+            "WARN",
+            "db.fts_coverage",
+            f"{total_indexed}/{total_rows} 行进检索索引;滞后:{', '.join(lagging)};"
+            "补跑:`ttxt analyze --category <类目>`(索引只在 analyze → rag.rebuild_index 里重建,"
+            "采集入口只自动跑清洗管线,不重建索引;滞后一批通常等于最近一次采集的批次)",
+        )
+    return ("PASS", "db.fts_coverage", f"{total_indexed}/{total_rows} 行全部进检索索引")
 
 
 def _strata_health(config: dict[str, Any]) -> dict[str, Any]:

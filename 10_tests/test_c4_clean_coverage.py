@@ -132,6 +132,10 @@ def test_crawl_summary_and_job_meta_carry_pipeline_stats(one_rss_crawl, system_d
     finally:
         con.close()
     assert meta["pipeline"]["cleaned"] == 1
+    # P25(2026-11-16):索引计数也必须进回执与 meta_json。`runner` 这里原本是**白名单**拷贝,
+    # 管线新增了 `indexed` 也会被丢掉 ⇒ "当天没进检索索引"在任务账上完全看不见。
+    assert meta["pipeline"]["indexed"] == 1
+    assert runs[0]["pipeline"]["indexed"] == 1
     assert meta["ok"] is True
 
 

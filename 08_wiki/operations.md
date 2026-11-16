@@ -51,6 +51,20 @@
 .venv\Scripts\python.exe -X utf8 -m ttxt predict settle   --category technology
 .venv\Scripts\python.exe -X utf8 -m ttxt predict report   --category technology
 
+# ---- 每轮闭环标准动作(2026-11-16 P25 定版,顺序不能反) ----
+# 0) 写库前备份:python scripts\backup.py <label>   → 11_backups(保留 30 份)
+# 1) 排干队列:有界 Worker(跑完自己退,三选一即停;lease 默认 1800s)
+.venv\Scripts\python.exe -X utf8 -m ttxt worker --owner <名字> --max-jobs 3 --idle-stop-s 45
+.venv\Scripts\python.exe -X utf8 -m ttxt worker --stop          # 请求优雅停止
+# 2) 公开页计数回流(默认干跑,--apply 才写库;robots 不放行就拒)
+.venv\Scripts\python.exe -X utf8 -m ttxt metrics --category <类目> --fetch-public --limit 20 --apply
+# 3) 标定(实测样本 < 30 一律如实拒绝,不猜阈值)
+.venv\Scripts\python.exe -X utf8 -m ttxt metrics --category <类目> --calibrate
+# 4) 收账:analyze(索引与关键词反哺兜底)→ predict settle/report → ttxt doctor
+# 归因:日志 crawl.enqueued 的 actor = dashboard | scheduler | keyword_plan | manual
+# 判成败:只看回执 JSON、日志事件与库内读数。**后台 pwsh 作业只要 stderr 有输出就回 exit 1**,
+#   与被调程序真实退出码无关(Playwright 常写 stderr);见规则 47 与 P25 报告第十四节。
+
 # 本地调度器(任务定义在 00_control/config.json → scheduler.jobs;状态存 scheduler_state.json)
 .venv\Scripts\python.exe -X utf8 -m ttxt schedule            # 查看到期状态
 .venv\Scripts\python.exe -X utf8 -m ttxt schedule --once     # 跑一遍到期任务(只入队/分析/恢复/清理)
