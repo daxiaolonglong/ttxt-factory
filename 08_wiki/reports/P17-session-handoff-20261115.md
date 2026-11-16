@@ -381,5 +381,10 @@
     `ttxt doctor` **34 ok / 0 failed**。事故如实:我把只读巡检与全量测试并发跑,`mode=ro` 在生产目录留了 6 对 `-wal/-shm`,
     被 `conftest` 判 1 error(护栏正确,违规是我),`scripts/p28_wal_sidecar_cleanup.py` 收净(全 `quick_check ok`、WAL 0 字节、
     行数 32/106/25/30/33/186 = 412 未变),已写进**规则 48**。详见 `P28-viral-keyword-feedback-20261116.md` 与 `window-progress-20261116.md` §十二。
+    同窗收尾账本(16:1x–16:2x):Worker 排干 job 76/77/78(technology +20 行 ⇒ 语料 **412→432**,六类目 FTS 行数 == articles;
+    health 的反哺词「睡眠」inserted 0 / duplicates 25 ⇒ 那个源补不出新文章);**P26 的 24 小时冷却第一次在生产上生效并被写下**:
+    `note:"冷却中:距上次反哺入队还需 23.97 小时(窗口 24 小时),本次不入队;该来源累计第 2 次反哺尝试"`、`queued_job_id=null`
+    (`03_intelligence/keyword_feedback/technology-feedback-20261116T162226+0800.json`)。`ttxt doctor` 仍 **34 ok / 0 failed**,
+    收工前把只读巡检留下的 `-shm` 用清理脚本收净后才重跑全量测试定稿。
 
 

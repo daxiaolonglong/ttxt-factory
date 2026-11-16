@@ -1,0 +1,14 @@
+{
+  "category": "technology",
+  "generated_at": "2026-11-16T16:20:55+08:00",
+  "gap_keywords": [
+    "效率工具"
+  ],
+  "recovered_keywords": 0,
+  "queued_job_id": 78,
+  "note": "已有排队/运行任务,本次不重复入队",
+  "cooldown_hours": 24.0,
+  "cooldown_remaining_hours": null,
+  "last_enqueued_at": null,
+  "feedback_attempts": null
+}

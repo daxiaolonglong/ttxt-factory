@@ -223,6 +223,14 @@ health 那一支每次 `inserted 0 / duplicates 25`,gap 词 `睡眠` 永远补�
 | 下一轮我的活 | **16:1x 就地更正(规则 44)**:原先写"finance/history 的 measured 从 10 提到 ≥30,走 `metrics --fetch-public` 候选轮转"——只读干跑实测 finance **candidates 10 / host_skipped 96**、history **candidates 10 / host_skipped 20**(两类都只能到 20 条 <30)⇒ **靠刷指标跨不过门槛**,得**先扩采集**再刷指标;门槛 30 不许为生效而调低,两类继续如实报 `insufficient_sample`(`07_tmp/p28_viral_signal/dryrun_metrics_{finance,history}.txt`)。social/health 无可测对象先补语料不凑数;`keyword_performance` 加 `signal/measured_hits` 列走正规迁移+备份+回滚 |
 | 门禁照旧 | 人工裁定仍 **0/61**、A/B 独立证据 **17/61 = 28%**、61 张卡只覆盖 10 篇 / 3 域名;本轮完全没动黄金集与 `human_*`,15 行仍等本人逐行确认 |
 
+**16:1x–16:2x 顺带把队列排干,并在生产上第一次验到 P26 的 24 小时冷却(实测,不是推断)**
+
+- Worker(`--owner cli-worker-p28 --max-jobs 2`)消费掉排了 2.7 小时的两条:job 76 technology/toutiao_tech **inserted 10 / duplicates 0**;job 77 health/who_cn_news **inserted 0 / duplicates 25**(反哺词「睡眠」在 who.cn 源上没带来任何新文章——health 的 gap 不是靠这个源能补的)。凭据 `07_tmp/p28_viral_signal/worker_drain.txt`。
+- 再 `analyze --category technology`:反哺词 `效率工具` 仍 gap ⇒ **真入队 job 78**,并第一次把冷却状态写进 `articles_meta.dispatch_state`:`last_enqueued_at=16:20:31`、`feedback_attempts=1`。Worker 消费 job 78(**inserted 10**)后再 `analyze` ⇒ `note:"冷却中:距上次反哺入队还需 23.97 小时(窗口 24 小时),本次不入队;该来源累计第 2 次反哺尝试"`、`queued_job_id=null`、`cooldown_remaining_hours=23.97`(`03_intelligence/keyword_feedback/technology-feedback-20261116T162226+0800.json`)。⇒ **P26 的冷却第一次在生产上看到文案并真的拦住入队**;分层顺序也确认正确:先看"已有排队/运行任务不重复入队"(16:20:55 那次),再进冷却判定。
+- 语料 412 → **432** 行(technology 186 → **206**),六类目 `articles_fts` 行数 == `articles` ✓(`indexed=25` 每轮都在写)。`measured` 仍是 101:新 20 篇没有公开指标 ⇒ 继续 `missing_data`,**不臆测、也不进爆款信号的分母**。
+- 收工前 `ttxt doctor` **34 ok / 0 failed**,再用 `scripts/p28_wal_sidecar_cleanup.py` 把只读巡检留下的 `-shm` 收净(全部 `quick_check=ok`,行数 32/106/25/30/33/206 = 432 未变),然后全量测试**重跑一遍**才算最终状态(`07_tmp/p28_viral_signal/full_suite_final.txt`)。
+- 下一轮新增的活:technology 这 20 篇新文章走 `metrics --fetch-public --category technology --apply` 刷指标(measured 从 101 往上走);`效率工具` 的补采要等冷却窗口到 **11-17 16:20** 才允许再入队——**不许**为了快点补上而把 `cooldown_hours` 调成 0。
+
 完整账本:`08_wiki/reports/P28-viral-keyword-feedback-20261116.md`。
 
 

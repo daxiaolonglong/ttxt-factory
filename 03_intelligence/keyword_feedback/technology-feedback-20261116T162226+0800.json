@@ -1,0 +1,14 @@
+{
+  "category": "technology",
+  "generated_at": "2026-11-16T16:22:26+08:00",
+  "gap_keywords": [
+    "效率工具"
+  ],
+  "recovered_keywords": 0,
+  "queued_job_id": null,
+  "note": "冷却中:距上次反哺入队还需 23.97 小时(窗口 24 小时),本次不入队;该来源累计第 2 次反哺尝试",
+  "cooldown_hours": 24.0,
+  "cooldown_remaining_hours": 23.97,
+  "last_enqueued_at": "2026-11-16T16:20:31+08:00",
+  "feedback_attempts": 2
+}
