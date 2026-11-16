@@ -47,6 +47,9 @@
 - **真链路跑通**:`crawl_jobs` 从 72 done 变成 **82 done(+10)**,新任务 `meta.dispatched_via="scheduler"`、`owner="supervisor"`、带终态回执(`robots_allowed=true`、`inserted/duplicates/pipeline` 统计)。实例:eastmoney_rss 新入 30、tmtpost_rss 17、ifanr_feed 11、chinanews_society 20。`model_jobs` 仍 70 done **没有新增** ⇒ 没有越界调模型。
 - **优雅停止**:`--stop` ⇒ `stop_reason=stop_flag`、`stopped_at` 写入、两子进程 `terminated=True / killed=False`、无残留进程、`stale_lock=false`。
 - **体检双向可见**:托管在跑 ⇒ `[PASS] ops.supervisor` + `[PASS] ops.scheduler_heartbeat`;停掉后 ⇒ `[FAIL] ops.supervisor: 没有常驻托管进程(没有 PID 记录;supervisor_stop 存在(人为停止))—— 调度与 Worker 停摆`,doctor 退出码 1。
+- **计划任务实跑(生产路径)**:`schtasks /run /tn "ttxt-supervisor-watchdog"` ⇒ `Last Result: 0`、`Status: Ready`、下一次 `2026-11-17 0:01:00`;跑完之后状态里仍是同一个 pid,**没有第二份托管**(进程表里托管/调度/Worker 各只有"外壳 + 真解释器"一对)。
+- **语料实测**:`01_categories/*/articles.db` 今天新增 **210 条**(technology 72、finance 67、history 40、social 31、health 0),总计 564 条(含 demo 32)。托管批次(任务 id 81–90,全部 `done`)回执里 `inserted` 合计 **122** 条、`duplicates` 约 43 条,`robots_allowed=true` 无一例外。
+- **最终体检(只读)**:exit=0,**31 PASS / 5 WARN / 0 FAIL**,其中 `ops.supervisor` 与 `ops.scheduler_heartbeat` 均 PASS;5 条 WARN 全是本轮之前就存在的旧条目(demo 未注册、history 谎报全文 1 条、demo 的 quotes 来源页地址 2 条、9 条 `evidence_links.article_id` 为空)。
 - **回归**:**484 passed in 108.89s**(基线 467 + 本轮新增 17),`--basetemp=D:\ttxt\07_tmp\pytest_basetemp`;跑全量前先把托管停下来,没有并发动生产库。
 - **卫生**:新增/改动文件全部 UTF-8 无 BOM、LF(与仓库既有脚本一致);无密钥泄漏(`config.json` 里只有 `api_key_env` 这种环境变量名);D: 可用 104.3 GB;生产库目录没有新增 WAL/SHM 边车。
 
@@ -54,7 +57,8 @@
 
 - 计划任务是 **`Logon Mode: Interactive only`**(非管理员不能保存密码):只在**已登录**状态下自动恢复,**注销或未登录时不会跑**;`/sc onlogon`(登录瞬间拉起)实测 `Access is denied`,需要管理员,本轮**未安装**。
 - 兜底周期 5 分钟 ⇒ 托管死掉后最长 5 分钟没人采集/入队;要更短需改任务的 `/ri`。
-- **未验证**:整机重启后面板与托管的自动恢复(没做重启实验);`max_restarts` 触发"放弃"之后的生产表现(只有单测覆盖);被强杀时正在跑的采集任务(id 90 `chinanews_culture`)靠租约过期回收 —— 只观察到 `running→租约 19:14:07`,尚未观察它最终回到终态。
+- **未验证**:整机重启后面板与托管的自动恢复(没做重启实验);`max_restarts` 触发"放弃"之后的生产表现(只有单测覆盖);**"托管被杀时正在跑的任务靠租约回收"这条路径至今没有真实样本** —— 更正:任务 id 90(`chinanews_culture`)在我 19:00:00 停托管之前已于 18:59:41 正常 `done`,当时并没有任务在飞,所以租约回收只在单测里验过。
+- **顺带暴露(不在本轮范围)**:`health` 类目 25 条全是 `short` 且这一轮 `who_cn_news` 回执 `inserted=0 / duplicates=25` ⇒ 该类目要跨门槛必须做 `crawl-enrich` 或补第二来源,与 P30 的"history/social 缺第二家合规来源"是同一类问题(阶段四)。
 - 面板仍只有 `serve --port 8765` 一个实例(不是两个),面板本身没有托管,也不该被托管(`serve` 在禁止清单里)。
 
 ## 六、回滚位置
