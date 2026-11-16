@@ -23,6 +23,7 @@ from docx import Document
 from docx.enum.section import WD_ORIENT
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
@@ -38,7 +39,7 @@ MACHINE_ZH = {
 TIER_ZH = {"A": "A 官方/一手原文件", "B": "B 两家以上互不相关的大媒体都这么说",
            "C": "C 只有一家,或自媒体转载", "D": "D 没出处"}
 COLS = [1.0, 16.6, 1.5, 0.9, 1.9, 3.0, 2.4]  # 合计 27.3cm(可打印宽 27.5cm);来源机构挪到附录,句子栏才够宽
-AP_COLS = [1.0, 2.6, 5.0, 4.6, 0.9, 13.2]
+AP_COLS = [1.0, 2.2, 12.6, 2.6, 0.9, 8.0]  # 网址列 12.6cm(最长网址 122 字符 → 两行),说明列 8.0cm(42 字 → 两行)
 
 
 def set_font(run, size=9.0, bold=False, color=None, italic=False, name="Microsoft YaHei"):
@@ -101,6 +102,60 @@ def fix_table(table, widths_cm):
             # tcW 在 tcPr 里必须排在 gridSpan 之前,所以 insert(0, ...)
             tc_pr.insert(0, tc_pr.makeelement(qn("w:tcW"), {qn("w:w"): str(int(width * 567)), qn("w:type"): "dxa"}))
             idx += span
+
+
+def repeat_header(row) -> None:
+    """表头行跨页重复:双面打印翻到下一页还看得见列名,不然勾到第三页就不知道哪列是哪列。"""
+    tr_pr = row._tr.get_or_add_trPr()
+    tr_pr.append(tr_pr.makeelement(qn("w:tblHeader"), {}))
+
+
+def no_row_split(row, min_height_cm: float | None = None) -> None:
+    """一行不许被拆到两页(打勾最忌半行在上一页);min_height 给手写留出空间。"""
+    tr_pr = row._tr.get_or_add_trPr()
+    tr_pr.append(tr_pr.makeelement(qn("w:cantSplit"), {}))
+    if min_height_cm:
+        tr_pr.append(tr_pr.makeelement(qn("w:trHeight"), {
+            qn("w:val"): str(int(min_height_cm * 567)), qn("w:hRule"): "atLeast"}))
+
+
+def url_cell(cell, primary: str, extras: list[str], size: float = 7.5) -> None:
+    """附录里的网址格:完整原始文章网址,一行一个;查不到就印「原始网址缺失」,不猜不编。
+
+    写成超链接是为了"在电脑/手机上看 PDF 能直接点开核对原文";打印出来仍是明文,手抄也能用。
+    """
+    p = cell.paragraphs[0]
+    p.paragraph_format.space_after = Pt(1)
+    p.paragraph_format.space_before = Pt(0)
+    if not primary:
+        set_font(p.add_run("原始网址缺失"), size=size + 1.0, bold=True, color=(150, 30, 30))
+    else:
+        _append_link(p, primary, size)
+    for extra in extras:
+        par = cell.add_paragraph()
+        par.paragraph_format.space_after = Pt(1)
+        par.paragraph_format.space_before = Pt(0)
+        _append_link(par, extra, size)
+
+
+def _append_link(par, url: str, size: float) -> None:
+    """段落里手写一个 w:hyperlink(python-docx 没有单元格级 API);文本就是网址本身。"""
+    hyper = par._p.makeelement(qn("w:hyperlink"), {})
+    hyper.set(qn("r:id"), par.part.relate_to(url, RT.HYPERLINK, is_external=True))
+    run = par._p.makeelement(qn("w:r"), {})
+    rpr = par._p.makeelement(qn("w:rPr"), {})
+    rpr.append(rpr.makeelement(qn("w:rFonts"), {
+        qn("w:ascii"): "Microsoft YaHei", qn("w:hAnsi"): "Microsoft YaHei", qn("w:eastAsia"): "Microsoft YaHei"}))
+    rpr.append(rpr.makeelement(qn("w:sz"), {qn("w:val"): str(int(size * 2))}))
+    rpr.append(rpr.makeelement(qn("w:color"), {qn("w:val"): "1F4E79"}))
+    rpr.append(rpr.makeelement(qn("w:u"), {qn("w:val"): "single"}))
+    run.append(rpr)
+    text = par._p.makeelement(qn("w:t"), {})
+    text.set(qn("xml:space"), "preserve")
+    text.text = url
+    run.append(text)
+    hyper.append(run)
+    par._p.append(hyper)
 
 
 def add_field(par, instr):
@@ -170,7 +225,9 @@ def build(rows: list[dict], out: Path, generated_at: str) -> None:
          size=9.5, space_after=3)
     para(doc, "【「机器说」那栏只有四个短词】能核实 = 它说这句话能在来源里逐字对上;对不上 = 它说来源在,可句子跟来源对不上;"
               "没出处 = 它说这句话找不到出处;转述 = 它说这句只是「某某媒体报道称」。", size=9.5, space_after=3)
-    para(doc, "【来源是哪来的】每行的来源机构、网址、以及这些来源是不是互相抄的,都写在最后的附录里(按行号对应),不用翻页找。",
+    para(doc, "【来源是哪来的】最后的附录按「同一行号」列出每条材料的完整原始文章网址(不是网站域名):"
+              "在电脑或手机上看 PDF 可以直接点开核对原文,打印出来也能照网址手抄打开;"
+              "卡片里没有网址的,附录会印「原始网址缺失」,不猜不编。附录还给出来源机构与「这些来源是不是互相抄的」。",
          size=9.5, space_after=3)
     para(doc, "【表里为什么不标哪张是陷阱题】故意不标。标了就不用判断了,这张单子就白做。", size=9.5, space_after=3)
     para(doc, "【勾完之后我做什么】我按行号把每个勾录回卡片文件(字段 human_verdict / human_fact_support / human_confirms_tier),"
@@ -197,6 +254,7 @@ def build(rows: list[dict], out: Path, generated_at: str) -> None:
              "① 机器说得对吗\n□对  □不对", "② 原句撑得住吗\n□能 □不能 □说不清", "③ 证据级\n□同意 改:___"]
     for i, title in enumerate(heads):
         cell_text(table.rows[0].cells[i], [(title, {"size": 8.5, "bold": True})])
+    repeat_header(table.rows[0])
 
     row_no = 0
     for cat in CAT_ORDER:
@@ -204,6 +262,7 @@ def build(rows: list[dict], out: Path, generated_at: str) -> None:
         if not group:
             continue
         sep = table.add_row()
+        no_row_split(sep, 0.5)
         merged = sep.cells[0]
         for other in sep.cells[1:]:
             merged = merged.merge(other)
@@ -212,6 +271,7 @@ def build(rows: list[dict], out: Path, generated_at: str) -> None:
         for card in group:
             row_no += 1
             row = table.add_row()
+            no_row_split(row, 0.62)
             values = [
                 (str(row_no), {"size": 9, "bold": True}),
                 (card["claim"], {"size": 8.5}),
@@ -232,22 +292,25 @@ def build(rows: list[dict], out: Path, generated_at: str) -> None:
     para(doc, "附录 · 第③勾参考:每条来源的「独立性说明」(机器记的一句话)", size=12, bold=True, space_after=6)
     appendix = doc.add_table(rows=1, cols=len(AP_COLS))
     appendix.style = "Table Grid"
-    for i, title in enumerate(["行", "卡片编号", "来源机构", "网址域名", "级", "独立性说明(打第③勾时参考)"]):
-        cell_text(appendix.rows[0].cells[i], [(title, {"size": 9, "bold": True})])
+    repeat_header(appendix.rows[0])
+    for i, title in enumerate(["行", "卡片编号", "完整原始文章网址(电脑/手机上看 PDF 可直接点开)", "来源机构", "级",
+                               "独立性说明(打第③勾时参考)"]):
+        cell_text(appendix.rows[0].cells[i], [(title, {"size": 8, "bold": True})])
     row_no = 0
     for cat in CAT_ORDER:
         for card in [r for r in rows if r["category"] == cat]:
             row_no += 1
             row = appendix.add_row()
-            publisher = card["source_publisher"]
-            if card["corroborating"]:
-                publisher += f"(另 {card['corroborating']} 条并列)"
-            values = [(str(row_no), {"size": 8.5}), (card["card_id"], {"size": 8.5}),
-                      (publisher, {"size": 8.5}), (card["source_host"], {"size": 8}),
+            no_row_split(row)
+            values = [(str(row_no), {"size": 8}), (card["card_id"], {"size": 8}),
+                      None,  # 网址格由 url_cell 填(超链接要手写 XML)
+                      (card["source_publisher"], {"size": 7.5}),
                       (card["source_tier"], {"size": 8.5, "bold": True}),
-                      (card["independence_note"] or "(卡片里没写)", {"size": 8.5})]
-            for i, (text, style) in enumerate(values):
-                cell_text(row.cells[i], [(text, style)])
+                      (card["independence_note"] or "(卡片里没写)", {"size": 7.5})]
+            for i, item in enumerate(values):
+                if item is not None:
+                    cell_text(row.cells[i], [item])
+            url_cell(row.cells[2], str(card.get("source_url") or ""), list(card.get("corroborating_urls") or []))
     fix_table(appendix, AP_COLS)
 
     para(doc, "", size=6, space_after=2)
@@ -259,15 +322,31 @@ def build(rows: list[dict], out: Path, generated_at: str) -> None:
     doc.save(out)
     print(f"已生成:{out}({out.stat().st_size} 字节)")
 
-    # 自查:重新打开,确认 61 行都在、句子没缺
+    # 自查:重新打开,确认 61 行都在、句子没缺、每行的**完整原始网址**都印出来了
+    import zipfile
+    from xml.sax.saxutils import escape
+
     back = Document(str(out))
     main_table = [t for t in back.tables if len(t.columns) == len(COLS)][0]
     text = "\n".join(p.text for r in main_table.rows for c in r.cells for p in c.paragraphs)
     missing = [r["card_id"] for r in rows if r["claim"][:18] not in text]
+    appendix = [t for t in back.tables if len(t.columns) == len(AP_COLS)][0]
+    xml = zipfile.ZipFile(str(out)).read("word/document.xml").decode("utf-8")
+    no_url = [r["card_id"] for r in rows if not str(r.get("source_url") or "").strip()]
+    not_printed = [r["card_id"] for r in rows
+                   if str(r.get("source_url") or "").strip() and escape(str(r["source_url"])) not in xml]
     print(f"复查:主表行数={len(main_table.rows)}(1 表头 + 3 分组 + {len(rows)} 行),"
           f"缺句={len(missing)} 卡片总数={len(rows)}")
-    if missing:
-        print("缺失卡片:", missing[:10])
+    print(f"复查:附录行数={len(appendix.rows)}(1 表头 + {len(rows)} 行),"
+          f"有完整网址={len(rows) - len(no_url)},原始网址缺失={len(no_url)},网址未印出={len(not_printed)},"
+          f"超链接={xml.count('<w:hyperlink')}")
+    print(f"复查:跨页重复表头={xml.count('<w:tblHeader')} 处,整行不拆页={xml.count('<w:cantSplit')} 处"
+          f"(应 ≥ {2 * len(rows) + 3})")
+    if missing or not_printed or len(appendix.rows) != len(rows) + 1:
+        if missing:
+            print("缺失卡片:", missing[:10])
+        if not_printed:
+            print("网址未印出:", not_printed[:10])
         raise SystemExit(1)
 
 

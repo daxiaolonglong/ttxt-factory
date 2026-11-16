@@ -52,6 +52,9 @@ def main(argv: list[str] | None = None) -> int:
                 "fact_type": card["fact_type"],
                 "kind": card["kind"],  # 裁定单上**不印**,只留作事后对账,防止人工被答案污染
                 "claim": card["claim"],
+                # 完整原始网址(不是域名):裁定单附录必须能一一对上,查不到就印"原始网址缺失",不猜不编。
+                "source_url": (card.get("source_url") or "").strip(),
+                "corroborating_urls": [str(u).strip() for u in (card.get("corroborating_urls") or []) if str(u).strip()],
                 "source_publisher": card["source_publisher"],
                 "source_title": card.get("source_title") or "",
                 "source_tier": card["source_tier"],
