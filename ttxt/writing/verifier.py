@@ -6,7 +6,17 @@
    (quote 必为 source_text[start:end] 的连续切片,offset 入库可复核);
 2. 分维度核验:数字 / 日期 / 人物 / 机构 / 因果 各自独立提取并在来源全文中
    逐一验证,缺失记入 checks.missing,绝不合并成单一分数;
-3. 事实-观点分离:观点句(我认为/显然/预计…)不进入事实核验,单独记录;
+   **数字与日期锚定在「绑定引句 ±1 句」的连续窗口内**(P13 批次2 根因②修复):
+   只要求全文出现,等于允许把正文别处的数字挪到别的断言上冒充真(移花接木);
+   窗口内缺失但全文别处出现的锚点单独记入 `checks["numbers_outside_quote"]` /
+   `checks["dates_outside_quote"]`,并在 critical 文案里写明,供人工裁定识别。
+   人物/机构仍按全文锚定(修复范围克制,不顺手加严),但引句外的命中同样留痕。
+3. 事实-观点分离:观点句不进入事实核验,单独记录。
+   **路由只认「归属 + 谓语」的明确观点标记**(我认为/笔者/业内人士预计/分析人士判断/
+   据 X 报道/据报道/据悉…),**裸 hedge 词不再整句豁免**(P13 批次2 根因①修复):
+   「专家小组建议纳入 X」「预计3126年11月15日后有货」这类含日期/数字的机构立场与预测,
+   必须继续走事实门禁。显然/或将/可能/或许/应该/必须/建议/预计 等裸 hedge 词只作为
+   `checks["opinion_markers"]` 留痕,不构成豁免。
 4. 标题-正文一致性(标题兑现):标题中的数字/日期/人物/机构与词面覆盖必须在
    正文出现;
 5. 启发式边界(必须如实记录):人物/机构提取依赖后缀与谓词线索,存在漏检与
@@ -14,12 +24,14 @@
    事实为真,只能证明「草稿陈述与来源文本一致」;与来源本身是否为真无关。
 
 credibility 语义(门禁据此判定):
-- verified     :引句绑定成功且所有维度锚点都在来源中找到;
+- verified     :引句绑定成功,且数字/日期锚点都在「引句 ±1 句」窗口内找到、人物/机构在来源全文找到;
 - unverified   :锚点缺失或引句重叠过低(不通过);
 - no_source    :claim 无有效来源编号(不通过);
-- opinion      :观点句,不参与事实门禁,单独记录。
-   已知边界:句中出现任一 hedge 词即整句路由到观点(即使含数字锚点);
-   hedge 词表刻意收紧过「个人/评论」这类高碰撞词,但仍可能漏检其他变体。
+- opinion      :带明确归属观点标记的句子,不参与事实门禁,单独记录。
+   已修的边界:裸 hedge 词(建议/预计/或将/可能…)不再把整句豁免出事实门禁 ——
+   豁免只按「归属 + 谓语」判定,具名人物/机构的「表示/称/建议」不算观点。
+   仍存在的边界:归属表是有限词表,换一种写法(如「圈内普遍认为」未列词)仍可能被漏判为
+   事实句去做核验;漏判的方向是「更严」(多走一次门禁),不是放行。
 """
 
 from __future__ import annotations
@@ -57,9 +69,26 @@ ORG_RE = re.compile(
     r"[\u4e00-\u9fff]{2,8}?(?:公司|集团|研究院|研究所|科学院|大学|学院|银行|委员会|协会|学会|机构|部门|医院|学校|总局|总部|组织|部委|基金会)"
 )
 CAUSAL_RE = re.compile(r"因为|由于|导致|因此|所以|使得|致使|引发|造成|促使|带动|使得")
+# 裸 hedge 词:只留痕,不豁免事实门禁(遗留常量,v1 构造脚本 scripts/build_golden_set.py 仍引用)
 OPINION_RE = re.compile(
     r"我认为|我们认为|笔者|我个人|个人看来|就个人|显然|据称|据说|传闻|网友|点评|评论员"
     r"|预计|或将|可能|或许|应该|必须|建议|期待|展望|看法|感觉"
+)
+# 路由到观点的唯一依据:明确「归属 + 谓语」。
+# 故意不含「具名人物/机构 + 表示|称|建议|预计」——那是可核验的事实陈述
+# (P13 批次1 报告 §7:v2h01 A 级正样本被「建议」整句豁免,完全跳过事实门禁)。
+OPINION_ATTRIBUTION_RE = re.compile(
+    r"我认为|我们认为|我觉得|笔者|我个人|个人看来|就个人|依我看|在我看来"
+    r"|业内人士(?:预计|或将|认为|判断|分析|显然|透露)"
+    r"|分析人士(?:认为|预计|预测|判断|看来)"
+    r"|业界(?:预计|认为|普遍|猜测)|圈内(?:普遍|预计|认为)"
+    r"|据[\u4e00-\u9fffA-Za-z0-9（）()·]{2,14}?(?:报道|消息|爆料|统计|了解|称)"
+    r"|据报道|据悉|有消息(?:称|显示|透露)|外媒(?:报道|消息)"
+    r"|(?:媒体|博主|网友|评论员)[\u4e00-\u9fff]{0,6}?(?:称|爆料|透露|点评|认为)"
+    r"|点评|看法是|我的判断"
+)
+HEDGE_RE = re.compile(
+    r"显然|据称|据说|传闻|预计|或将|可能|或许|应该|必须|建议|期待|展望|看法|感觉"
 )
 _SENT_END = re.compile(r"[。！？!?；;\n]")
 
@@ -95,7 +124,65 @@ def extract_anchors(text: str) -> dict[str, list[str]]:
 
 
 def is_opinion(text: str) -> list[str]:
-    return _dedup(OPINION_RE.findall(text or ""))
+    """路由依据:只返回「明确归属 + 谓语」的观点标记。
+
+    裸 hedge 词(建议/预计/或将/可能…)不再让整句豁免事实门禁 —— 机构立场陈述
+    「专家小组建议纳入 X」与日期造假「预计3126年11月15日后有货」都必须继续核验。
+    """
+    return _dedup(OPINION_ATTRIBUTION_RE.findall(text or ""))
+
+
+def hedge_markers(text: str) -> list[str]:
+    """裸 hedge 词留痕:不参与路由、不豁免门禁,只让人工裁定看见句子带的语气。"""
+    return _dedup(HEDGE_RE.findall(text or ""))
+
+
+def _anchor_in(needle: str, haystack: str) -> bool:
+    """数字/日期锚点的包含判断必须带**数字边界**,否则短数字会被长数字吞掉。
+
+    黄金集实测漏洞(v2t13):把「开售仅3天」改成「开售仅10天」后,裸数字 `10`
+    被 `10000台` 里的 "10" 命中,伪造数字照样 verified。
+    """
+    if not needle:
+        return False
+    if not any(ch.isdigit() for ch in needle):
+        return needle in haystack
+    # 尾部只在锚点本身以数字结尾时收紧(「2.4亿」后面紧跟「11-17岁」是原文连写,合法);
+    # 首部禁止数字/小数点,防止 25 亿元 被 125 亿元、3.5 被 13.5 吞掉。
+    tail = r"(?!\d)" if needle[-1].isdigit() else ""
+    pattern = rf"(?<![\d.]){re.escape(needle)}{tail}"
+    return re.search(pattern, haystack) is not None
+
+
+def anchor_window(source_text: str, quote: str, quote_offset: int) -> tuple[str, int]:
+    """数字/日期的核验窗口:绑定引句所在句 ±1 句的**连续原文**窗口。
+
+    只查来源全文 = 允许把正文别处出现的数字挪到别的断言上冒充真(移花接木);
+    只查引句本身会误伤跨句直引,因此取连续三句。窗口本身仍是原文连续切片,
+    offset 可复核。
+    """
+    text = source_text or ""
+    if not quote:
+        return text, 0
+    idx = text.find(quote, max(quote_offset or 0, 0))
+    if idx < 0:
+        idx = text.find(quote)
+    if idx < 0:
+        return quote, 0
+    slices = _source_slices(text)
+    hit = None
+    for i, (chunk, off) in enumerate(slices):
+        if off <= idx < off + len(chunk):
+            hit = i
+            break
+    if hit is None:
+        return quote, idx
+    lo = max(0, hit - 1)
+    hi = min(len(slices) - 1, hit + 1)
+    start = slices[lo][1]
+    end = slices[hi][1] + len(slices[hi][0])
+    return text[start:end], start
+
 
 
 def _source_slices(text: str) -> list[tuple[str, int]]:
@@ -167,13 +254,29 @@ def verify_claim(claim: str, article: dict | None) -> dict:
     bound = bind_quote(claim, text)
     anchors = extract_anchors(claim)
     norm_text = norm(text)
+    window, window_offset = anchor_window(text, bound[0], bound[1]) if bound else ("", 0)
+    norm_window = norm(window)
     checks: dict = {}
     all_ok = True
     for dim in ("numbers", "dates", "persons", "orgs"):
-        found = [item for item in anchors[dim] if norm(item) in norm_text]
-        missing = [item for item in anchors[dim] if norm(item) not in norm_text]
+        # 根因②修复:数字/日期必须在「绑定引句 ±1 句」窗口内出现;
+        # 人物/机构仍按全文锚定(不顺手加严),但引句外的命中会留痕。
+        scoped = dim in ("numbers", "dates")
+        scope = norm_window if scoped else norm_text
+        found = [item for item in anchors[dim] if _anchor_in(norm(item), scope)]
+        missing = [item for item in anchors[dim] if not _anchor_in(norm(item), scope)]
         checks[dim] = {"found": found, "missing": missing}
+        if scoped:
+            displaced = [item for item in missing if _anchor_in(norm(item), norm_text)]
+            if displaced:
+                checks[f"{dim}_outside_quote"] = displaced
         all_ok = all_ok and not missing
+    hedge = hedge_markers(claim)
+    if hedge:
+        checks["opinion_markers"] = hedge
+        checks["note_opinion"] = "裸 hedge 词留痕,不豁免事实门禁;观点路由只按明确归属判定"
+    if bound:
+        checks["anchor_window"] = {"offset": window_offset, "chars": len(window)}
     quote_norm = norm(bound[0]) if bound else ""
     if anchors["causal"]:
         # 因果连接词必须与「绑定引句」共现(回退全文会放过无关因果句)
@@ -216,10 +319,12 @@ def check_title(title: str, body: str) -> dict:
     """标题兑现:标题锚点与词面覆盖必须在正文出现。"""
     anchors = extract_anchors(title)
     body_norm = norm(body)
-    missing = {
-        dim: [item for item in anchors[dim] if norm(item) not in body_norm]
-        for dim in ("numbers", "dates", "persons", "orgs")
-    }
+    missing = {}
+    for dim in ("numbers", "dates", "persons", "orgs"):
+        missing[dim] = [
+            item for item in anchors[dim] if not _anchor_in(norm(item), body_norm)
+        ]
+    missing = {dim: vals for dim, vals in missing.items() if vals}
     title_tokens = set(tokenize(title))
     body_tokens = set(tokenize(body))
     coverage = (
@@ -246,6 +351,16 @@ def deterministic_findings(evidence: list[dict], title: str, body: str) -> tuple
                 if dim in ("numbers", "dates", "persons", "orgs", "causal") and payload.get("missing")
             }
             detail = ";".join(f"{dim}:{','.join(vals)}" for dim, vals in missing.items())
+            displaced = {
+                dim[: -len("_outside_quote")]: payload
+                for dim, payload in (item.get("checks") or {}).items()
+                if dim.endswith("_outside_quote") and payload
+            }
+            if displaced:
+                detail += ";" + ";".join(
+                    f"{dim}锚点不在引句窗口但在正文别处出现(移花接木嫌疑):{','.join(vals)}"
+                    for dim, vals in displaced.items()
+                )
             critical.append(
                 f"事实未通过来源核验:{item['claim'][:50]}" + (f"({detail})" if detail else "(原文引句未绑定)")
             )

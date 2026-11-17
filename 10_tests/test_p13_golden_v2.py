@@ -104,13 +104,24 @@ def test_machine_result_binds_quote_and_flags_perturbed_number():
     assert any(dim.startswith("numbers:") for dim in result["missing_dims"])
 
 
-def test_hedge_word_routes_whole_claim_to_opinion_known_boundary():
-    # 已记录的设计边界:句中出现 hedge 词即整句路由为观点,数字锚点不再走事实门禁
+def test_bare_hedge_word_no_longer_exempts_fact_gate():
+    """P13 批次2(T-03)口径修正:裸 hedge 词不再整句路由为观点。
+
+    旧断言把「王芳预计,该模型训练成本为 999 亿元」当成 opinion,等于让捏造数字
+    绕过事实门禁(批次1 报告 §7 根因①)。现在它必须进门禁并被数字锚点拦下,
+    语气词只作为 markers 留痕。
+    """
     result = harness.machine_result(_card(claim="王芳预计,该模型训练成本为 999 亿元",
-                                          kind="opinion_attributed",
-                                          expected_by_construction="opinion"))
-    assert result["credibility"] == "opinion"
-    assert result["opinion_markers"]
+                                          kind="negative_perturbed",
+                                          expected_by_construction="unverified"))
+    assert result["credibility"] == "unverified"
+    assert any(dim.startswith("numbers:") for dim in result["missing_dims"])
+
+    attributed = harness.machine_result(_card(claim="业内人士预计,该模型训练成本为 999 亿元将继续发酵",
+                                              kind="opinion_attributed",
+                                              expected_by_construction="opinion"))
+    assert attributed["credibility"] == "opinion"
+    assert attributed["opinion_markers"]
 
 
 def test_quality_claim_not_available_without_human_adjudication():
