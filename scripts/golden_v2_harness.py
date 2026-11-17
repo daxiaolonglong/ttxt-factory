@@ -511,5 +511,20 @@ def main(argv: list[str] | None = None) -> int:
     return 0 if metrics["quality_claim"] == "AVAILABLE" else 2
 
 
+def _force_utf8_streams() -> None:
+    """门禁结论不得被控制台代码页吃掉。
+
+    实测(2026-11-17):测试用 `subprocess`(无 `-X utf8`)调本脚本时,stdout 落到 GBK,
+    `print` 判据文案里的 `⇒` 直接 `UnicodeEncodeError`,退出码从 2 变成 1 —— 门禁的真实
+    结论被编码问题替换掉了。脚本自己保证 UTF-8,调用方加不加 `-X utf8` 都必须给出同一结论。
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
+
+
 if __name__ == "__main__":
+    _force_utf8_streams()
     raise SystemExit(main())

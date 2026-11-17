@@ -23,6 +23,7 @@ from .crawler import sources as crawler_sources
 from .crawler import store as crawler_store
 from .crawler import worker as crawler_worker
 from .dashboard import server as dashboard_server
+from .legacy import migrate as legacy_migrate
 from .model_gate import client as model_client
 from .model_gate import gate as model_gate
 from .model_gate import queue as model_queue
@@ -48,7 +49,18 @@ def cmd_doctor(_args: argparse.Namespace) -> int:
 
 
 def cmd_housekeep(args: argparse.Namespace) -> int:
-    result = housekeep.run(clean=args.clean, temp_max_age_hours=args.temp_max_age_hours)
+    if getattr(args, "reclaim_apply", False) and not getattr(args, "reclaim_scratch", False):
+        print("--reclaim-apply 必须与 --reclaim-scratch 同用(先 dry-run 看清清单再回收)")
+        return 2
+    result = housekeep.run(
+        clean=args.clean,
+        temp_max_age_hours=args.temp_max_age_hours,
+        reclaim_scratch=getattr(args, "reclaim_scratch", False),
+        reclaim_apply=getattr(args, "reclaim_apply", False),
+        reclaim_keep_runs=getattr(args, "reclaim_keep_runs", 1),
+        checkpoint_wals=getattr(args, "checkpoint_wals", False),
+        checkpoint_wals_dry_run=getattr(args, "checkpoint_wals_dry_run", False),
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
@@ -584,6 +596,40 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0 if not report["row_errors"] else 0
 
 
+def cmd_legacy_migrate(args: argparse.Namespace) -> int:
+    """旧资产迁移(账本 T-14):默认只读预演,加 ``--apply`` 才写类目库。"""
+    try:
+        policy = legacy_migrate.load_policy(cfg.resolve_path(args.policy) if args.policy else None)
+    except (ValueError, json.JSONDecodeError) as exc:
+        print(json.dumps({"error": str(exc)}, ensure_ascii=False))
+        return 2
+    stamp = cfg.now_iso().replace(":", "").replace("+", "")
+    receipt_path = (
+        cfg.resolve_path(args.receipt)
+        if args.receipt
+        else cfg.LOG_DIR / "legacy_migrate" / f"{stamp}-{'apply' if args.apply else 'dry_run'}.json"
+    )
+    backup_dir = cfg.resolve_path(args.backup_dir) if args.backup_dir else cfg.BACKUP_DIR
+    try:
+        report = legacy_migrate.run(
+            policy,
+            legacy_db=cfg.resolve_path(args.legacy_db) if args.legacy_db else None,
+            apply=bool(args.apply),
+            batch_size=args.batch_size,
+            limit=args.limit,
+            backup_dir=backup_dir,
+            receipt_path=receipt_path,
+        )
+    except (FileNotFoundError, RuntimeError) as exc:
+        print(json.dumps({"error": str(exc)}, ensure_ascii=False))
+        return 2
+    report["batches"] = report["batches"][:20]  # stdout 只留前 20 批,完整批次在回执文件里
+    if not args.apply:
+        report["note"] = "预演:未写一个字节。核对新增/碰撞/拒绝数后再加 --apply"
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if not report["errors"] and not report["index_errors"] else 1
+
+
 def cmd_predict(args: argparse.Namespace) -> int:
     if args.action == "predict":
         report = prediction.predict_articles(args.category, limit=args.limit)
@@ -670,6 +716,11 @@ def build_parser() -> argparse.ArgumentParser:
     house = sub.add_parser("housekeep", help="磁盘/限额报告与清理")
     house.add_argument("--clean", action="store_true", help="执行临时文件清理与日志轮转")
     house.add_argument("--temp-max-age-hours", type=float, default=24.0)
+    house.add_argument("--reclaim-scratch", action="store_true", help="巡检 07_tmp 下的 pytest 运行目录(默认 dry-run)")
+    house.add_argument("--reclaim-apply", action="store_true", help="实际回收运行目录(需与 --reclaim-scratch 同用)")
+    house.add_argument("--reclaim-keep-runs", type=int, default=1, help="保留最近几轮运行目录,默认 1")
+    house.add_argument("--checkpoint-wals", action="store_true", help="把超阈值的 -wal 合并回主库并截断(只合并不删数据)")
+    house.add_argument("--checkpoint-wals-dry-run", action="store_true", help="只列出将要检查点的 -wal,不执行")
     house.set_defaults(func=cmd_housekeep)
 
     sub.add_parser("status", help="查看数据库与任务状态").set_defaults(func=cmd_status)
@@ -782,6 +833,19 @@ def build_parser() -> argparse.ArgumentParser:
                               "默认跳过这些文章,避免反复请求已删除的内容)")
     metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
     metrics.set_defaults(func=cmd_metrics)
+
+    legacy = sub.add_parser(
+        "legacy-migrate",
+        help="旧资产迁移(资产库/01_语料库/factory.db → 类目库):默认只读预演,加 --apply 才写库",
+    )
+    legacy.add_argument("--policy", default=None, help="迁移口径(默认 00_control/legacy_migration.json)")
+    legacy.add_argument("--legacy-db", default=None, help="旧库路径(默认取口径里的 legacy_db)")
+    legacy.add_argument("--apply", action="store_true", help="真正导入(不加=只预演,不写一个字节)")
+    legacy.add_argument("--batch-size", type=int, default=500, help="每批写入行数(默认 500)")
+    legacy.add_argument("--limit", type=int, default=None, help="只扫旧库前 N 行(冒烟用)")
+    legacy.add_argument("--backup-dir", default=None, help="类目库备份目录(默认 11_backups)")
+    legacy.add_argument("--receipt", default=None, help="回执 JSON 路径(默认 09_logs/legacy_migrate/)")
+    legacy.set_defaults(func=cmd_legacy_migrate)
 
     predict = sub.add_parser("predict", help="预测闭环:基线预测/实测回填/准确率报告")
     predict.add_argument("action", choices=["predict", "settle", "report"])

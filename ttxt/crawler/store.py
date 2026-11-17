@@ -38,6 +38,8 @@ class CompletenessConflict(RuntimeError):
     """
 
 
+ARTICLES_FTS_DDL = "CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(article_id UNINDEXED, title, body)"
+
 ARTICLES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS articles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,7 +151,7 @@ CREATE TABLE IF NOT EXISTS knowledge_assets (
   confidence TEXT NOT NULL DEFAULT 'exploratory',
   updated_at TEXT NOT NULL
 );
-CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts USING fts5(article_id UNINDEXED, title, body);
+""" + ARTICLES_FTS_DDL + """
 """
 
 V4_SCHEMA = """
@@ -310,10 +312,17 @@ def read_only_connect(path: Path) -> sqlite3.Connection:
     直接失败(SQLite 必须能创建边车),会把正常库误报成不可用。只读约束由
     ``PRAGMA query_only=ON`` 保证;副作用仅为 WAL 边车的创建与清理,与项目里其它
     只读路径(``count_articles`` 等)一致。
+
+    ``temp_store=MEMORY`` 不是性能调优,是读路径的可用性开关:P12 批次4 只在写连接
+    (``ttxt/db.py:102``)上修过这个坑,只读连接漏了,于是 2026-11-17 social 库涨到
+    40,506 行后 ``doctor.db.url_identity`` 的 ``GROUP BY`` 当场
+    ``unable to open database file``。库小的时候临时 B-tree 永远不升级到磁盘,所以
+    这个漏修潜伏了很久(规则 27 的 TMP 不可写边界防线)。
     """
     con = sqlite3.connect(str(path), timeout=30.0)
     con.execute("PRAGMA query_only=ON")
     con.execute("PRAGMA busy_timeout=30000")
+    con.execute("PRAGMA temp_store=MEMORY")
     return con
 
 

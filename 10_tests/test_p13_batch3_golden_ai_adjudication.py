@@ -21,6 +21,7 @@
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -261,6 +262,25 @@ def test_harness_still_exits_2_with_ai_sidecar_present():
         [sys.executable, str(ROOT / "scripts" / "golden_v2_harness.py"), "--no-report"],
         cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8")
     assert proc.returncode == 2, proc.stdout[-800:] + proc.stderr[-800:]
+
+
+def test_harness_exit_code_survives_gbk_console():
+    """控制台代码页不得改写门禁结论:GBK 下也必须退 2,而不是编码崩了退 1。
+
+    真实缺陷(2026-11-17 全量回归实测):判据文案里有 `⇒`,上一条测试那样用
+    `subprocess` 但不带 `-X utf8` 时子进程 stdout 落到 GBK,`print` 抛
+    `UnicodeEncodeError` ⇒ 退出码 1,`quality_claim` 根本没被打出来。
+    修复在脚本侧(`_force_utf8_streams`),调用方加不加 `-X utf8` 结论必须一致。
+    """
+    env = dict(os.environ, PYTHONIOENCODING="gbk")
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "golden_v2_harness.py"), "--no-report"],
+        cwd=str(ROOT), capture_output=True, env=env)
+    stdout = proc.stdout.decode("utf-8", "replace")
+    stderr = proc.stderr.decode("utf-8", "replace")
+    assert proc.returncode == 2, stdout[-800:] + stderr[-800:]
+    payload = json.loads(stdout)          # 输出必须是 UTF-8 且可解析的 JSON
+    assert payload["quality_claim"] == "NOT_AVAILABLE"
 
 
 def test_harness_rejects_human_fields_leaked_into_sidecar(tmp_path, cards):

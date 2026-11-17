@@ -1,0 +1,14 @@
+{
+  "_comment": "旧资产迁移口径(账本 T-14 / P25 §九 硬前置2)。类目映射只写在这里,`ttxt/legacy/migrate.py` 默认空映射:未映射的 primary_type 一律拒绝入库并计数,不许就近塞进某个类目(规则 29 类目隔离)。",
+  "legacy_db": "资产库/01_语料库/factory.db",
+  "source_id": "legacy_factory_search_ssr",
+  "category_map": {
+    "赚钱案例": "finance",
+    "真人故事": "social"
+  },
+  "min_body_chars": 400,
+  "zero_as_missing_fields": ["reads", "likes", "comments"],
+  "_zero_comment": "旧库 read_count=0 有 19,970 行,那是『这一轮 search SSR 没吐计数』而不是『没人看』,按缺失(NULL)入库,绝不折算 0(规则 6)。collect_count / hot_score / hot_level / tier_v2 / is_elite / is_viral 语义未证实或口径不可比,整列不迁(规则 41)。",
+  "_map_comment": "旧库只有两个标签:真人故事 41,057 / 赚钱案例 12,621。映射沿用 P25 §九 的假设,但旧标签很粗(例:标题写『6个最赚钱没人干的生意』的行被旧系统标成 真人故事),类目纯度欠一次审计,已登记为待办,不当成已验证事实。",
+  "max_rows_per_category": null
+}
