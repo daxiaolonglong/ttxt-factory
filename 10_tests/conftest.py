@@ -385,6 +385,40 @@ def isolated_data_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.fixture(autouse=True)
+def browser_profile_isolated(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """任何测试都不得取生产浏览器 profile 的跨进程锁(P36)。
+
+    生产 Worker 与调度进程共用 ``02_crawler/.browser/profile``,P36 起取锁上限 600 秒。
+    测试一旦走生产路径,要么把正在跑的 Worker 卡住,要么自己卡 600 秒。
+    逐测试把 ``fetcher.browser_profile_dir`` 换到 tmp 下,锁文件也跟着落到 tmp
+    (锁在 profile 目录**之外**,由同一个函数派生)。
+
+    注:生产锁文件在本轮开始前就存在是正常的(常驻进程正持有),因此只在
+    "跑之前不存在、跑之后出现"时判定测试污染了生产路径。
+    """
+    from ttxt import config as cfg
+    from ttxt.crawler import fetcher
+
+    production_lock = cfg.CRAWLER_DIR / ".browser" / "profile.lock"
+    had_lock_before = production_lock.exists()
+    isolated_root = tmp_path / "browser-crawler"
+
+    def isolated_profile() -> Path:
+        target = isolated_root / ".browser" / "profile"
+        target.mkdir(parents=True, exist_ok=True)
+        return target
+
+    monkeypatch.setattr(fetcher, "browser_profile_dir", isolated_profile)
+    started = time.monotonic()
+    yield
+    if not had_lock_before and production_lock.exists():
+        pytest.fail(
+            f"测试创建了生产浏览器 profile 锁 {production_lock}"
+            f"(耗时 {time.monotonic() - started:.2f}s),说明它没有走临时 profile 路径。"
+        )
+
+
+@pytest.fixture(autouse=True)
 def model_gate_lock_isolated(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """默认闸门锁路径重定向到 tmp,生产 gate.lock 在任何测试前后都必须不存在。"""
     from ttxt.model_gate import gate

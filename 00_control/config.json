@@ -69,7 +69,10 @@
     "timeout_ms": 60000,
     "network_idle": true,
     "page_pool": 2,
-    "disk_cache_mb": 64
+    "disk_cache_mb": 64,
+    "_lock_comment": "P36:浏览器 profile 跨进程锁。Worker 与调度进程共用同一份 profile,取不到锁就等待,超过 lock_wait_s 明确报忙(不是假成功)。锁文件在 02_crawler/.browser/profile.lock(profile 目录之外),由操作系统释放,进程被强杀也不会留死锁。",
+    "lock_wait_s": 600,
+    "lock_poll_s": 2.0
   },
   "model_gate": {
     "poll_interval_s": 2,
@@ -108,11 +111,11 @@
   },
   "scheduler": {
     "enabled": true,
-    "_comment": "P35:metrics_fetch 把公开互动指标自动回流接进闭环(采集→重标定爆款标签→关键词评分→反哺关键词)。它直接用浏览器,而 Worker 是另一个进程、共用同一份 02_crawler/.browser/profile,所以 wait_for_queue_s 先让开队列;排在 crawl_enqueue 之前是有意安排的:同一个 tick 里两个任务都到期时先采指标(此时队列必然空闲),再入队采集。apply=false 是干跑开关,核实过数字才改成 true。",
+    "_comment": "P35:metrics_fetch 把公开互动指标自动回流接进闭环(采集→重标定爆款标签→关键词评分→反哺关键词)。它直接用浏览器,而 Worker 是另一个进程、共用同一份 02_crawler/.browser/profile,所以 wait_for_queue_s 先让开队列;排在 crawl_enqueue 之前是有意安排的:同一个 tick 里两个任务都到期时先采指标(此时队列必然空闲),再入队采集。apply=false 是干跑开关,核实过数字才改成 true。P36 之后还有第二道保险:浏览器 profile 跨进程锁,lock_wait_s=300 比 Worker 的 600 短,抢不到就整轮记 skipped_browser_busy 明确跳过(不烧浏览器、不发请求),绝不把 Worker 正在用的浏览器抢过来。",
     "jobs": [
       {"id": "metrics_fetch_6h", "kind": "metrics_fetch", "interval_min": 360, "enabled": true,
        "limit": 12, "sleep_s": 2.5, "apply": true, "retry_gone": false,
-       "wait_for_queue_s": 300, "queue_poll_s": 20},
+       "wait_for_queue_s": 300, "queue_poll_s": 20, "lock_wait_s": 300},
       {"id": "crawl_enqueue_4h", "kind": "crawl_enqueue", "interval_min": 240, "enabled": true},
       {"id": "analyze_daily", "kind": "analyze", "interval_min": 1440, "enabled": true},
       {"id": "recover_daily", "kind": "recover", "interval_min": 1440, "enabled": true},

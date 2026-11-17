@@ -21,6 +21,21 @@ P32 安全边界(SSRF,不得为了采集成功率而放宽):
   并给 Chromium 进程加 ``--host-resolver-rules`` 把本机/私网域名解析直接判死,作为拦截器
   漏网时的第二层。该层必须先恒等映射本机代理主机,否则本机代理(回环地址)会被打死,
   公网采集全断 —— 见 ``ssrf_host_resolver_rules`` 的注释与 07_tmp/p32 实测记录。
+
+P36 浏览器 Profile 跨进程互斥(2026-11-17):
+- 采集 Worker 与调度进程(``metrics_fetch``)是**两个进程**,共用同一份
+  ``02_crawler/.browser/profile``。P36 之前只有进程内引用计数 + ``threading.Lock``,
+  跨进程零互斥。实测(07_tmp/p36/probe_collision.py):第二个进程 1.9 秒失败,报的是
+  ``TargetClosedError ... browser has been closed`` —— 不会静默损坏,但根因完全看不出来,
+  代价是白烧一次采集 ``attempts`` 或白烧 ``metrics_fetch`` 的 6 小时间隔。
+- 现在最外层 ``browser_session()`` 进入时**先取操作系统级跨进程锁**(锁语义见
+  ``browser_lock`` 模块注释),取到锁才启动浏览器;最外层退出时**先关浏览器再交锁**;
+  启动失败或关闭异常都必须把锁交出去。同进程嵌套仍走引用计数,只取一次锁。
+- 等待有上限(配 ``browser.lock_wait_s``,默认 600 秒),超时抛 ``BrowserBusyError``:
+  这是明确状态,不是假成功。
+- 启动失败**绝不再无条件删 profile 里的锁文件**(旧代码删的 ``Singleton*`` 在本机这台
+  Edge 上根本不存在,实测见 07_tmp/p36);只有能证明"没有活进程持有"才清理残留,
+  证明不了就保留文件、记录错误、安全失败。
 """
 
 from __future__ import annotations
@@ -38,10 +53,14 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from ttxt import config as cfg
-from ttxt.crawler import url_safety
+from ttxt.crawler import browser_lock, url_safety
 from ttxt.logging import get_logger
 
 LOG = get_logger("crawler.fetcher")
+
+#: P36:profile 被**另一个进程**占着时抛这个,调用方据此让路(重新排队/明确跳过),
+#: 而不是当成一次普通的抓取失败。别名保留在 fetcher 层,免得调用方去猜内部模块名。
+BrowserBusyError = browser_lock.ProfileBusyError
 
 #: 封禁/不存在类:重试无意义,直接终态,绝不继续 hammer 对方站点。
 TERMINAL_STATUSES = frozenset({401, 403, 404, 410, 451})
@@ -169,16 +188,77 @@ def browser_profile_dir() -> Path:
     return target
 
 
-def _clear_profile_locks(profile: Path) -> None:
-    """上次进程被强杀后 Chromium 系会残留 Singleton* 锁文件,清理后允许重新开会话。"""
-    for name in ("SingletonLock", "SingletonCookie", "SingletonSocket"):
-        lock = profile / name
+#: 浏览器自己放在 profile 目录里的锁类文件。**只是"发现了就去证明归属"**,
+#: 绝不是"发现了就删"——P36 之前的 `_clear_profile_locks()` 就是后者,已拆掉。
+#: 实测(2026-11-17,07_tmp/p36/probe_singleton.py):本机 Edge/Chromium 只创建
+#: ``lockfile``,**从不创建** ``Singleton*``;强杀整棵进程树后一个都不剩。
+PROFILE_LOCK_FILES = ("lockfile", "SingletonLock", "SingletonCookie", "SingletonSocket")
+
+
+def _clear_stale_locks(profile: Path) -> tuple[list[str], list[str]]:
+    """清理**已证明无人持有**的残留锁文件;证明不了的保留原样。
+
+    判定依据不是 PID、不是时间戳,而是操作系统的共享冲突:能独占打开(``r+b``)=
+    没有活进程持有 ⇒ 是陈旧残留,可以删;打不开(PermissionError)= 有活进程正在用
+    ⇒ 绝不能删(删了就是把别人正在用的浏览器底座拆了)。非 Windows 平台无法用同一
+    手段证明,一律按"无法确认"处理,只记日志不动文件。
+
+    返回 ``(已清理, 未能确认/仍被占用)``。
+    """
+    cleared: list[str] = []
+    unresolved: list[str] = []
+    for name in PROFILE_LOCK_FILES:
+        path = profile / name
         try:
-            if lock.is_symlink() or lock.exists():
-                lock.unlink()
-                LOG.warn("crawl.browser.lock_cleared", path=str(lock))
-        except OSError:
-            pass
+            if not path.exists():
+                continue
+        except OSError as exc:  # noqa: BLE001
+            LOG.warn("crawl.browser.lock_stat_failed", path=str(path), error=str(exc)[:160])
+            unresolved.append(name)
+            continue
+        try:
+            busy = browser_lock.held_by_live_process(path)
+        except RuntimeError as exc:  # noqa: BLE001 - 证明不了归属就不删,这是安全边界
+            LOG.error("crawl.browser.lock_undeterminable", path=str(path), error=str(exc)[:200])
+            unresolved.append(name)
+            continue
+        if busy:
+            LOG.error(
+                "crawl.browser.lock_held_by_live_process",
+                path=str(path),
+                detail="该文件被活进程独占(共享冲突),不是残留;不得删除",
+            )
+            unresolved.append(name)
+            continue
+        try:
+            path.unlink()
+            cleared.append(name)
+            LOG.warn(
+                "crawl.browser.stale_lock_cleared",
+                path=str(path),
+                proof="独占打开成功⇒内核证明无活进程持有",
+            )
+        except OSError as exc:  # noqa: BLE001 - 删不掉也不硬来
+            LOG.warn("crawl.browser.stale_lock_delete_failed", path=str(path), error=str(exc)[:160])
+            unresolved.append(name)
+    return cleared, unresolved
+
+
+def _foreign_browser_using(profile: Path) -> bool:
+    """profile 是否正被**另一个**浏览器进程占用(实测:运行时 ``lockfile`` 连读都读不开)。
+
+    这一层只是把根因说清楚:走到这里我们已经持有项目级跨进程锁,所以占用者不是
+    另一个 ttxt 进程,而是人为启动的浏览器或外部工具。与其等 Chromium 抛
+    ``TargetClosedError ... browser has been closed``(运维看不懂),不如直接点名。
+    证明不了(非 Windows / 其它错误)时返回 False,让正常启动流程去试。
+    """
+    path = profile / "lockfile"
+    try:
+        if not path.exists():
+            return False
+        return browser_lock.held_by_live_process(path)
+    except (RuntimeError, OSError):  # noqa: BLE001 - 判不了就当没占用,交给启动流程
+        return False
 
 
 def _browser_kwargs() -> dict[str, Any]:
@@ -247,17 +327,36 @@ def _open_session() -> Any:
         os.environ[var] = pw_tmp
 
     kwargs = _browser_kwargs()
-    profile = browser_profile_dir()
+    profile = Path(kwargs["user_data_dir"])
+    if _foreign_browser_using(profile):
+        # 明确根因,不要让运维去猜一句和 profile 毫无关系的浏览器日志。
+        raise FetchError(
+            f"浏览器 profile 正被另一个浏览器进程使用,拒绝启动:{profile}"
+            "(profile/lockfile 被活进程独占)。先确认是不是有人手工用这个 profile 开了浏览器",
+            terminal=False,
+        )
     try:
         session = StealthySession(**kwargs)
         session.start()
-    except Exception as first_exc:  # noqa: BLE001 - 可能是上次强杀残留的 profile 锁
-        _clear_profile_locks(profile)
+    except Exception as first_exc:  # noqa: BLE001
+        # P36:不再"失败就先删锁文件再试"。先证明残留无人持有,证明确实清掉了才重试;
+        # 什么都没清成(说明没有残留、或残留正被占用)就直接失败,失败原因还是原始异常。
+        cleared, unresolved = _clear_stale_locks(profile)
+        LOG.error(
+            "crawl.browser_session.open_failed",
+            error=str(first_exc)[:300],
+            profile=str(profile),
+            stale_cleared=cleared,
+            unresolved=unresolved,
+        )
+        if not cleared:
+            raise FetchError(f"browser session start failed: {first_exc}") from first_exc
+        LOG.warn("crawl.browser_session.retry_after_stale_cleanup", cleared=cleared)
         try:
             session = StealthySession(**kwargs)
             session.start()
-        except Exception:
-            raise FetchError(f"browser session start failed: {first_exc}") from first_exc
+        except Exception as exc:  # noqa: BLE001
+            raise FetchError(f"browser session start failed: {exc}") from exc
     LOG.info(
         "crawl.browser_session.open",
         page_pool=kwargs["max_pages"],
@@ -278,17 +377,42 @@ _session_lock = threading.Lock()
 _active: dict[str, Any] = {}
 
 
-@contextmanager
-def browser_session():
-    """共享浏览器会话:同线程嵌套(如 runner→toutiao.collect)只计一次引用。
+def _lock_settings() -> tuple[float, float]:
+    """跨进程锁的等待参数(配 ``browser.lock_wait_s`` / ``browser.lock_poll_s``)。"""
+    browser_cfg = cfg.load_config().get("browser", {})
+    wait = float(browser_cfg.get("lock_wait_s", browser_lock.DEFAULT_WAIT_S))
+    poll = float(browser_cfg.get("lock_poll_s", browser_lock.DEFAULT_POLL_S))
+    return max(0.0, wait), max(0.05, poll)
 
-    最外层进入时启动唯一会话,最外层退出时关闭;期间所有 render=browser 的
-    fetch_page 复用该会话的页面池。采集 Worker 并发固定为 1,这里加锁只是
-    防御性护栏。
+
+@contextmanager
+def browser_session(wait_s: float | None = None):
+    """共享浏览器会话:同进程嵌套(如 runner→toutiao.collect)只计一次引用。
+
+    最外层进入时**先拿跨进程锁再启动浏览器**(P36):Worker 与调度进程是两个进程、
+    共用同一份 profile,进程内引用计数管不到另一个进程,必须由操作系统的文件锁兜住。
+    顺序是硬的:**先取锁 → 再开浏览器;最外层退出时先关浏览器 → 再交锁**。
+    启动失败、关闭抛异常,锁都必须交出去,否则全厂再也开不了浏览器。
+
+    ``wait_s``:等不到锁最多等多久(默认取配 ``browser.lock_wait_s``);超时抛
+    ``BrowserBusyError``,调用方按"让路/可重试"处理,不能当抓取成功。
     """
     with _session_lock:
         if not _active:
-            _active["session"] = _open_session()
+            profile = browser_profile_dir()
+            default_wait, poll = _lock_settings()
+            handle = browser_lock.acquire(
+                profile,
+                wait_s=default_wait if wait_s is None else max(0.0, float(wait_s)),
+                poll_s=poll,
+                tag="browser_session",
+            )
+            try:
+                _active["session"] = _open_session()
+            except BaseException:  # noqa: BLE001 - 起浏览器失败也必须立刻交锁
+                handle.release()
+                raise
+            _active["handle"] = handle
         _active["users"] = int(_active.get("users", 0)) + 1
     # 锁必须在 yield 之外:runner→toutiao 同线程嵌套若持锁会自锁死。
     try:
@@ -298,10 +422,18 @@ def browser_session():
             users = int(_active.get("users", 0)) - 1
             if users <= 0:
                 session = _active.pop("session", None)
+                handle = _active.pop("handle", None)
                 # 必须整体清空:残留 {"users":0} 会让下次进入误判已有会话 → KeyError
                 _active.clear()
                 if session is not None:
-                    _close_session(session)
+                    try:
+                        _close_session(session)
+                    finally:
+                        # 关浏览器抛异常也不能把锁永久占住(finally 保证交锁)。
+                        if handle is not None:
+                            handle.release()
+                elif handle is not None:
+                    handle.release()
             else:
                 _active["users"] = users
 

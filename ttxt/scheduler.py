@@ -214,6 +214,7 @@ def _write_metrics_evidence(evidence_dir: Path, category: str, stamp: str, paylo
 def _job_metrics_fetch(job: dict) -> dict:
     from ttxt.analysis import analyze as analyzer
     from ttxt.analysis import metrics_import
+    from ttxt.crawler import fetcher
     from ttxt.crawler import metrics_pages
 
     conf = cfg.load_config()
@@ -222,6 +223,9 @@ def _job_metrics_fetch(job: dict) -> dict:
     sleep_s = float(job.get("sleep_s", page_cfg.get("sleep_s", 2.0)))
     apply = bool(job.get("apply", False))          # 没显式打开就一律 dry-run,不碰生产库
     retry_gone = bool(job.get("retry_gone", False))
+    # P36:调度进程与采集 Worker 是两个进程、共用同一份浏览器 profile。这里等锁的时间
+    # 必须比 Worker 那侧短:抢不到就明确跳过本轮,而不是把 Worker 正在用的浏览器抢过来。
+    lock_wait_s = job.get("lock_wait_s")
     system_db = Path(job["system_db"]) if job.get("system_db") else None
     evidence_dir = Path(job["evidence_dir"]) if job.get("evidence_dir") else cfg.INTELLIGENCE_DIR / "metrics_public"
     categories = [str(job["category"])] if job.get("category") else [str(c) for c in conf.get("categories", [])]
@@ -247,8 +251,16 @@ def _job_metrics_fetch(job: dict) -> dict:
     # 浏览器用完再同步口径:重标定之后的关键词评分会触发"关键词反哺采集"入队,Worker 是另一个进程、
     # 共用同一份浏览器 profile。先让本轮所有页面采集收尾,再入队,才不会两边同时开浏览器。
     pending_sync: list[str] = []
+    browser_busy: list[str] = []
 
     for category in categories:
+        if browser_busy:
+            # 已经确认浏览器被别的进程占着,后面的类目没必要再各等一遍 lock_wait_s。
+            per[category] = {
+                "status": "skipped_browser_busy",
+                "reason": f"本轮已确认浏览器 profile 被占用({browser_busy[0]}),该类目不排队",
+            }
+            continue
         try:
             # 先只读算一遍"这轮打算采谁":没活可干就不开浏览器(起一次浏览器十几秒,还白动 profile)
             plan = metrics_pages.round_plan(category, limit=limit)
@@ -260,7 +272,8 @@ def _job_metrics_fetch(job: dict) -> dict:
                 }
                 continue
             report = metrics_pages.collect_with_browser(
-                category, limit=limit, apply=apply, sleep_s=sleep_s, retry_gone=retry_gone
+                category, limit=limit, apply=apply, sleep_s=sleep_s, retry_gone=retry_gone,
+                lock_wait_s=lock_wait_s,
             )
             _write_metrics_evidence(evidence_dir, category, stamp,
                                     {"category": category, "job": job.get("id"), "run_at": cfg.now_iso(),
@@ -288,6 +301,29 @@ def _job_metrics_fetch(job: dict) -> dict:
                 "outcome_counts": report.get("outcome_counts", {}),
             }
             pending_sync.append(category)
+        except fetcher.BrowserBusyError as exc:
+            # P36:浏览器被采集 Worker 占着 —— 这是"让路",不是故障,不能记成 error。
+            # 也不重试、不硬抢:本轮跳过,下一轮(6 小时后)再来。
+            holder = exc.holder or {}
+            waited = round(float(exc.waited_s), 1)
+            browser_busy.append(category)
+            LOG.warn(
+                "scheduler.metrics.skipped_browser_busy",
+                category=category,
+                waited_s=waited,
+                holder_tag=holder.get("tag") or "未知",
+                holder_pid=holder.get("pid") or "?",
+                lock=str(exc.lock_path),
+            )
+            per[category] = {
+                "status": "skipped_browser_busy",
+                "reason": (
+                    f"等浏览器 profile 锁 {waited}s 没等到"
+                    f"(持有者 tag={holder.get('tag') or '未知'} pid={holder.get('pid') or '?'});"
+                    "该类目不启动浏览器、不发请求,等采集 Worker 用完"
+                ),
+                "browser_wait_s": waited,
+            }
         except Exception as exc:  # noqa: BLE001 - 类目之间互不牵连,但必须留下明确状态
             message = f"{type(exc).__name__}: {exc}"
             errors.append(f"{category}: {message}")
@@ -325,20 +361,27 @@ def _job_metrics_fetch(job: dict) -> dict:
             per[category].update({"status": "written_sync_failed", "sync_error": message})
             LOG.error("scheduler.metrics.sync_failed", category=category, error=message)
 
+    # 忙导致跳过的类目不算故障;但只要有一个类目真跑成了,整轮就是 partial,不能报 ok
+    worked = [c for c, r in per.items() if r.get("status") in {"ok", "written", "written_sync_failed", "dry_run"}]
     if errors and len(errors) == len(categories):
         status = "error"
-    elif errors:
+    elif errors or (browser_busy and worked):
         status = "partial"
+    elif browser_busy:
+        status = "skipped_browser_busy"
     else:
         status = "ok"
     LOG.info("scheduler.metrics.round", status=status, apply=apply, limit=limit,
-             categories=len(categories), failed=len(errors), queue_waited_s=gate["waited_s"])
+             categories=len(categories), failed=len(errors), browser_busy_skipped=len(browser_busy),
+             queue_waited_s=gate["waited_s"])
     return {
         "scheduler_status": status,
         "apply": apply,
         "limit": limit,
         "sleep_s": sleep_s,
         "queue": gate,
+        "browser_lock_wait_s": lock_wait_s,
+        "browser_busy_skipped": browser_busy,
         "categories": per,
         "errors": errors,
     }

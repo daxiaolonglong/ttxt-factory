@@ -78,12 +78,30 @@
 #   开跑前先看 crawl_jobs 里有没有 queued/running,有就等,等满 wait_for_queue_s(300s)还忙 ⇒ 本轮
 #   记 skipped_queue_busy 直接让路,不硬抢。它排在 crawl_enqueue_4h **之前**是有意安排的:
 #   同一个 tick 两个任务都到期时,先采指标(此时队列必然空闲),再入队采集。
-#   每轮结果进 scheduler_state.json(last_status:ok / partial / error / skipped_queue_busy / dry_run)
+#   每轮结果进 scheduler_state.json(last_status:ok / partial / error / skipped_queue_busy / skipped_browser_busy / dry_run)
 #   + 证据文件 03_intelligence/metrics_public/<类目>-<轮次时间戳>.json;某类目 0 候选 ⇒ 不开浏览器,只记 no_candidates。
 #   类目明细里的键:fetched / written / updated / snapshots / known_gone_skipped / link_status_recorded|cleared /
 #   row_errors / outcome_counts / labels / analysis / measured / calibration_hint。
 #   **重标定用的是现有阈值,不自动重算阈值**(爆款的定义不能悄悄漂移):实测样本涨了而阈值快照还是旧的,
 #   回执里会给 calibration_hint,由人决定要不要跑第 3)步 ttxt metrics --category <类目> --calibrate。
+# 浏览器 profile 跨进程互斥(P36,2026-11-17):上面"不能同时开浏览器"从 P36 起是**操作系统级真锁**,不再靠排队自觉。
+#   锁文件 `02_crawler/.browser/profile.lock` 在 profile 目录**之外**(Chromium 清 profile 清不掉它),
+#   Windows 用 `msvcrt.locking` 锁 1MB 偏移处的一个字节(POSIX 走 `fcntl.flock`,本机未实测);
+#   进程正常退出或被 taskkill 强杀,内核都自动释放 ⇒ 不看 PID、不看时间戳、不做"陈旧锁清账"。
+#   实现 `ttxt/crawler/browser_lock.py`;起浏览器只有 `fetcher.browser_session()` 一个入口,
+#   Worker(runner)与指标采集(scheduler.metrics_fetch)都走它 ⇒ 同一把锁,嵌套只起一个浏览器。
+#   等锁预算:`browser.lock_wait_s`(默认 600s)/ `browser.lock_poll_s`(2s),单个任务可给 `lock_wait_s`
+#   (metrics_fetch_6h 给 300s)。等不到锁:指标采集该类目不启动浏览器、不发请求,记 `skipped_browser_busy`
+#   (带持锁者 pid/tag),本轮后续类目直接让路;Worker 侧任务保持 running 干等,锁放掉就继续,不用人工干预。
+#   旧的"启动失败就无条件删 lockfile/Singleton*"已删除:现在先用内核的共享冲突证明无人持有
+#   (`browser_lock.held_by_live_process`),证明不了就保留并记 error,绝不删还在用的锁文件。
+#   静态 HTTP 抓取(http/rss 来源)完全不碰这把锁:锁被别人占着它照跑。
+#   生产实测(2026-11-17 12:19–12:34,队列空闲、真进程持锁):metrics_fetch 等满 300.0s ⇒ `skipped_browser_busy`,
+#   30 次采样 chrome 进程数恒为 0、profile 目录 2221 个文件 / 662,727,551 字节与 mtime 前后一模一样;
+#   同一时段静态任务 8.03s 完成;放锁后 Worker 那条已等了 152s 的浏览器任务立刻起浏览器并 done(10 条入库)。
+#   **改锁相关代码必须重启被托管的进程才生效**:`taskkill /T /F /PID <worker_pid>` 和 `/PID <scheduler_pid>`
+#   (整棵进程树,venv 的 python.exe 是外壳),supervisor 约 30 秒内用新代码重新拉起,不必动 supervisor。
+#   回滚:`git revert` 这三处(fetcher/scheduler/metrics_pages)+ 删 `browser_lock.py`,或直接 `11_backups\p36-before-profile-lock-*.zip`。
 
 # 崩溃恢复与任务重排
 .venv\Scripts\python.exe -X utf8 -m ttxt recover
@@ -122,7 +140,8 @@
 | 模型未就绪 | `model --status` 查看队列;`wait_ready` 会自动等待;任务保持 queued,不会并发 |
 | 模型任务失败 | 自动重试 3 次后 failed;`last_error` 记录根因;`model --drain` 重跑队列 |
 | 进程崩溃遗留 running 任务 | `ttxt recover`:模型侧超 900s 重置 queued,采集侧超 30 分钟标记 failed(根因:进程中断) |
-| 锁文件残留 | 只有「mtime 超 30 分钟且持有进程已死」才会被接管;`ttxt recover` 与任务执行前自动清理 |
+| 进程单实例锁残留(`00_control/*.lock`) | `doctor` 会报「PID 是残留(进程已死)」;这类锁由内核句柄持有,进程一死就释放,直接 `ttxt supervisor --ensure` 重新拉起即可 |
+| 浏览器 profile 互斥(P36) | 没有"陈旧锁接管"这回事:持锁进程一死(包括被强杀)内核自动释放锁。`02_crawler/.browser/profile.lock` **不是垃圾文件**,还在被占用时删它等于放行两个浏览器抢同一个 profile;要立刻让路就停掉持锁进程(`taskkill /T /F /PID`),日志里 `crawl.browser_lock.timeout` 会给出持锁者 pid/tag |
 | 不合格草稿 | 写入 `04_writing/drafts/<类目>/rejected/`(含拒绝原因),成品目录不出现;通过门禁的草稿才在类目目录 |
 | 数据库损坏 | `doctor` 报 integrity;从 `11_backups` 解压恢复对应 `db/<类目>/articles.db` |
 | 磁盘不足 | `housekeep --clean` 清理 temp/日志/pip 缓存/浏览器缓存;检查 99_temp TTL |
@@ -147,7 +166,7 @@
 | pip 缓存 | 1 GB |
 | 日志 | 10 MB × 7 |
 | 备份 | 7 份 |
-| 浏览器目录 | 3 GB(当前未启用浏览器) |
+| 浏览器目录 | 3 GB(2026-11-17 实测 `02_crawler/.browser/profile` = 2221 个文件 / 662.7 MB;渲染来源与指标回流都在用,不是"未启用") |
 
 ## 6. 角色与技能
 

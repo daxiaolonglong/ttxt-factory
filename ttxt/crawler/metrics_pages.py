@@ -727,10 +727,16 @@ def collect_with_browser(
     db_path: Path | None = None,
     limit: int | None = 20,
     apply: bool = False,
+    lock_wait_s: float | None = None,
     **kwargs: Any,
 ) -> dict:
-    """正式入口:整次采集共用一个浏览器会话(正常渲染,不登录、不反检测)。"""
-    with fetcher.browser_session() as session:
+    """正式入口:整次采集共用一个浏览器会话(正常渲染,不登录、不反检测)。
+
+    ``lock_wait_s``:等不到浏览器 profile 跨进程锁最多等多久(P36)。默认走配
+    ``browser.lock_wait_s``;调度进程应给得比采集 Worker 短,等不到就明确跳过,
+    不去抢 Worker 正在用的浏览器。等不到时抛 ``fetcher.BrowserBusyError``。
+    """
+    with fetcher.browser_session(wait_s=lock_wait_s) as session:
 
         def fetch(url: str) -> Any:
             return fetcher.fetch_page(url, render=True, session=session).page
