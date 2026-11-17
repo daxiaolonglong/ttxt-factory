@@ -168,6 +168,23 @@ def test_perturbed_day_count_is_rejected_even_when_digits_appear_in_a_bigger_num
     assert "10" in ev["checks"]["numbers"]["missing"]
 
 
+def test_pure_chinese_numeral_anchor_is_advisory_not_a_hard_gate():
+    """纯中文数量词降为建议项:生产实测里「三名航天员」「单一国家」被当成数字 critical 误杀草稿。
+
+    「二」这个锚点在夹具里只出现在窗口外(「重组了两个算法部门」隔在第三句),
+    按窗口硬判定会造假 critical;黄金集 61 张里这类锚点没有一张是决定性的。
+    """
+    base = "王芳表示,该模型推理速度提升 3.5%,长文本处理成本大幅下降"
+    assert verifier.verify_claim(base, DISPLACE_ARTICLE)["credibility"] == "verified"
+    ev = verifier.verify_claim(base + "。这是第二次公开发布", DISPLACE_ARTICLE)
+    assert ev["quote"]
+    assert ev["credibility"] == "verified", ev
+    assert ev["checks"]["numbers"]["missing"] == []
+    advisory = ev["checks"].get("numbers_advisory") or []
+    assert any(item["anchor"] == "二" for item in advisory)
+    assert "numbers_outside_quote" not in ev["checks"]
+
+
 def test_anchor_window_is_contiguous_source_slice():
     quote = "王芳表示,该模型推理速度提升 3.5%,长文本处理成本大幅下降。"
     offset = DISPLACE_SRC_TEXT.index(quote)

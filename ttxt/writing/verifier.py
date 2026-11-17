@@ -68,6 +68,27 @@ PERSON_RE = re.compile(
 ORG_RE = re.compile(
     r"[\u4e00-\u9fff]{2,8}?(?:公司|集团|研究院|研究所|科学院|大学|学院|银行|委员会|协会|学会|机构|部门|医院|学校|总局|总部|组织|部委|基金会)"
 )
+# 指示代词做核心的机构锚点不可核验(「这是该公司」「相关机构」这种),按硬门禁会造假 critical。
+# 生产实测:神舟草稿被 「orgs:这是该公司」 这类锚点拦下过。锚点仍留痕,但不决定结论。
+ANAPHORIC_ORG_CORES = frozenset(
+    """
+    这 那 该 此 其 本 这是 那是 这是 这家 那家 这种 那种 上述 前述 本次 此次 这次 各地 多家 相关 旗下
+    该公司 该机构 该部门 本公司 此公司 此机构 这些公司 那些公司
+    """.split()
+)
+_ORG_SUFFIXES = (
+    "公司", "集团", "研究院", "研究所", "科学院", "大学", "学院", "银行", "委员会", "协会",
+    "学会", "机构", "部门", "医院", "学校", "总局", "总部", "组织", "部委", "基金会",
+)
+
+
+def is_anaphoric_org(anchor: str) -> bool:
+    """机构锚点去掉后缀后的核心是否只是指示代词/泛指词。"""
+    for suffix in _ORG_SUFFIXES:
+        if anchor.endswith(suffix):
+            core = anchor[: len(anchor) - len(suffix)]
+            return core in ANAPHORIC_ORG_CORES or core.startswith(("这", "该", "此", "上述", "前述"))
+    return False
 CAUSAL_RE = re.compile(r"因为|由于|导致|因此|所以|使得|致使|引发|造成|促使|带动|使得")
 # 裸 hedge 词:只留痕,不豁免事实门禁(遗留常量,v1 构造脚本 scripts/build_golden_set.py 仍引用)
 OPINION_RE = re.compile(
@@ -262,14 +283,30 @@ def verify_claim(claim: str, article: dict | None) -> dict:
         # 根因②修复:数字/日期必须在「绑定引句 ±1 句」窗口内出现;
         # 人物/机构仍按全文锚定(不顺手加严),但引句外的命中会留痕。
         scoped = dim in ("numbers", "dates")
-        scope = norm_window if scoped else norm_text
-        found = [item for item in anchors[dim] if _anchor_in(norm(item), scope)]
-        missing = [item for item in anchors[dim] if not _anchor_in(norm(item), scope)]
+        found, missing, displaced, advisory = [], [], [], []
+        for item in anchors[dim]:
+            clean = norm(item)
+            has_ascii_digit = any(ch.isdigit() and ch.isascii() for ch in clean)
+            # 纯中文数量词(一/两/三…)不参与硬门禁:它们在生产实测里大量落在「单一」「一些」
+            # 「一次」这类词中,也常与来源的阿拉伯写法(3 名 vs 三名)对不上,按窗口判定会
+            # 误杀真实草稿(神舟二十四号草稿被三条这类 critical 拦下)。黄金集 61 张里
+            # 这类锚点没有一张是决定性的(带/不带两种口径都是 61/61),因此降为建议项留痕。
+            if dim == "numbers" and not has_ascii_digit:
+                advisory.append({"anchor": item, "in_source": _anchor_in(clean, norm_text)})
+                continue
+            if dim == "orgs" and is_anaphoric_org(item):
+                advisory.append({"anchor": item, "in_source": _anchor_in(clean, norm_text), "note": "泛指机构锚点不参与硬判定"})
+                continue
+            windowed = scoped
+            hit = _anchor_in(clean, norm_window if windowed else norm_text)
+            (found if hit else missing).append(item)
+            if not hit and windowed and _anchor_in(clean, norm_text):
+                displaced.append(item)
         checks[dim] = {"found": found, "missing": missing}
-        if scoped:
-            displaced = [item for item in missing if _anchor_in(norm(item), norm_text)]
-            if displaced:
-                checks[f"{dim}_outside_quote"] = displaced
+        if displaced:
+            checks[f"{dim}_outside_quote"] = displaced
+        if advisory:
+            checks[f"{dim}_advisory"] = advisory
         all_ok = all_ok and not missing
     hedge = hedge_markers(claim)
     if hedge:

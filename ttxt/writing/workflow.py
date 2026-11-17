@@ -209,10 +209,21 @@ def _save_version(
         con.close()
 
 
-def _set_draft_status(db_path: Path, draft_id: str, status: str) -> None:
+def _set_draft_status(db_path: Path, draft_id: str, version: int, status: str) -> None:
+    """按**版本**回写门禁结论,不得把最终状态刷到所有历史版本上。
+
+    旧实现 `WHERE draft_id=?` 让同一个草稿的所有版本行都变成最终状态:
+    v1 明明被门禁拦下,却因 v2 通过而显示 passed(P13 报告实测 13 行全 passed、
+    全表 0 行 rejected,版本账目失真)。循环语义本身就说明:比当前版本更早的版本
+    都在门禁上失败过,因此它们的状态是 rejected。
+    """
     con = connect(db_path)
     try:
-        con.execute("UPDATE writing_history SET status=? WHERE draft_id=?", (status, draft_id))
+        con.execute(
+            "UPDATE writing_history SET status = CASE WHEN version < ? THEN 'rejected' ELSE ? END "
+            "WHERE draft_id = ?",
+            (version, status, draft_id),
+        )
         con.commit()
     finally:
         con.close()
@@ -454,8 +465,10 @@ def write_article(
 
     draft_id = _new_draft_id(category, topic)
     version = 1
-    _save_version(db_path, draft_id, category, topic, version, draft, None)
     model_meta = _model_meta(model_call)
+    # 版本行必须记录实际出稿模型(P13 实测 13/13 行 model_id 为 NULL,无法追责到模型)
+    served_model = model_meta.get("served_model")
+    _save_version(db_path, draft_id, category, topic, version, draft, served_model)
     review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
     _save_evaluation(db_path, draft_id, version, review, model_meta)
 
@@ -471,7 +484,7 @@ def write_article(
         complete = _is_complete(draft, gate_min_chars)
         version += 1
         revisions += 1
-        _save_version(db_path, draft_id, category, topic, version, draft, None)
+        _save_version(db_path, draft_id, category, topic, version, draft, served_model)
         # 修订后的草稿必须重新抽取声明并重新核验(旧证据不覆盖新文本)
         claims_text = model_call(
             prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
@@ -486,7 +499,7 @@ def write_article(
         passed = _passed(complete, review, gate_min_score)
 
     status = "passed" if passed else "rejected"
-    _set_draft_status(db_path, draft_id, status)
+    _set_draft_status(db_path, draft_id, version, status)
     _save_evidence(db_path, draft_id, evidence)
 
     notes = None
