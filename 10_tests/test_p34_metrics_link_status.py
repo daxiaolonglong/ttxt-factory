@@ -370,3 +370,84 @@ def test_cli_retry_gone_flag_reaches_the_collector(tmp_path, monkeypatch, capsys
     assert cli.main(["metrics", "--category", "demo", "--fetch-public", "--retry-gone", "--no-relabel",
                      "--limit", "1", "--sleep", "0"]) == 0
     assert seen == [True], "--retry-gone 必须传到采集器"
+
+
+# ---------------------------------------------------------------------------
+# 四、P35 真人复核提出的两个时间边界
+#   ① 未来时间的台账记录(系统时钟错乱)不能算"有效期内",否则反而会把好文章永久跳过;
+#   ② checked_at 必须是**这篇文章自己的取证时刻**,不能整批共用批次开始时间 ——
+#      否则 90 天有效期会被批次开始时间悄悄推后/提前,对账时也说不清"哪一刻看到的 404"。
+
+
+def test_status_fresh_rejects_future_stamps_but_tolerates_small_skew():
+    now = datetime.now().astimezone()
+
+    def entry(days: float) -> dict:
+        return {"status": 404, "outcome": metrics_pages.OUTCOME_GONE, "url": "https://x/",
+                "checked_at": (now + timedelta(days=days)).isoformat(timespec="seconds")}
+
+    assert metrics_pages._status_fresh(entry(-30), now) is True, "30 天内的记录仍然有效"
+    assert metrics_pages._status_fresh(entry(-(metrics_pages.GONE_RETRY_DAYS + 1)), now) is False, "过期要重新取证"
+    assert metrics_pages._status_fresh(entry(7), now) is False, "未来 7 天 = 时钟错乱,记录不可信"
+    assert metrics_pages._status_fresh(entry(3 / 1440), now) is True, "几分钟的时差是正常抖动,不该重新请求"
+    assert metrics_pages._status_fresh({"status": 451, "checked_at": now.isoformat()}, now) is False
+
+
+def test_future_checked_at_does_not_keep_an_article_skipped(tmp_path):
+    db_path = _demo_db(tmp_path, TOUTIAO_URLS[:1])
+    future = (datetime.now().astimezone() + timedelta(days=7)).isoformat(timespec="seconds")
+    _put_link_status(db_path, {"1": {"status": 404, "outcome": metrics_pages.OUTCOME_GONE,
+                                     "url": TOUTIAO_URLS[0], "checked_at": future, "reason": "时钟错乱"}})
+    called: list[str] = []
+
+    def fetch(url: str) -> Selector:
+        called.append(url)
+        return _page(TOOLBAR)
+
+    report = _run(db_path, fetch, limit=1)
+    assert called == [TOUTIAO_URLS[0]], "台账里的未来时间不可信,必须重新取证"
+    assert report["known_gone_skipped"] == 0, "坏记录不能计入'已跳过',否则掩盖了真实请求数"
+
+
+def test_gone_record_stamps_each_article_its_own_evidence_time(tmp_path):
+    db_path = _demo_db(tmp_path, TOUTIAO_URLS[:2])
+    ticks = iter(["2026-11-17T09:00:00+08:00", "2026-11-17T09:01:30+08:00"])
+
+    def fetch(url: str) -> Selector:
+        raise _gone(url)
+
+    report = metrics_pages.collect_public_metrics(
+        "demo", db_path=db_path, apply=True,
+        fetch_page=fetch, authorized=AUTHORIZED, sleeper=lambda _s: None,
+        rules_provider=lambda _b: RobotsRules(allow_all=True),
+        captured_at="2026-11-17T09:00:00+08:00",   # 批次时刻(整批共用)
+        clock=lambda: next(ticks),                 # 每篇文章各自的取证时刻
+    )
+    assert [o["outcome"] for o in report["outcomes"]] == ["article_gone", "article_gone"]
+    stamps = {o["checked_at"] for o in report["outcomes"]}
+    assert stamps == {"2026-11-17T09:00:00+08:00", "2026-11-17T09:01:30+08:00"}, \
+        "每条结果要带自己的取证时刻,不能整批共用批次开始时间"
+    ledger = _link_status(db_path)
+    assert {ledger["1"]["checked_at"], ledger["2"]["checked_at"]} == stamps, \
+        "台账里的 checked_at 必须是这篇文章自己的时刻"
+
+
+def test_round_plan_is_read_only_and_matches_the_round(tmp_path):
+    """调度器要先判断"这轮有没有活可干",不值得为空轮次开浏览器 ⇒ 提供只读的 round_plan。"""
+    db_path = _demo_db(tmp_path, TOUTIAO_URLS[:3])
+    plan = metrics_pages.round_plan("demo", db_path=db_path, limit=2)
+    assert plan["candidates"] == 2 and plan["picked_ids"] == [3, 2]
+    assert plan["host_skipped"] == 0 and plan["known_gone_skipped"] == 0
+
+    fresh = {"status": 404, "outcome": metrics_pages.OUTCOME_GONE, "url": TOUTIAO_URLS[2],
+             "checked_at": datetime.now().astimezone().isoformat(timespec="seconds"), "reason": "404"}
+    _put_link_status(db_path, {"3": fresh})
+    again = metrics_pages.round_plan("demo", db_path=db_path, limit=2)
+    assert again["picked_ids"] == [2, 1], "已确认下架的文章在计划里就该被排除"
+    assert again["known_gone_skipped"] == 1 and again["known_gone_ids"] == [3]
+    assert again["candidates"] == 2
+
+    assert list(_link_status(db_path)) == ["3"], "只读计划不得改写台账"
+    assert _metrics_rows(db_path) == [], "只读计划不得写指标"
+    tables, columns = _schema(db_path)
+    assert "articles_meta" in tables and "checked_at" not in columns

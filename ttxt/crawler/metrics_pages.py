@@ -33,7 +33,7 @@ import json
 import re
 import time
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlsplit
@@ -109,6 +109,11 @@ def _record_outcome(report: dict, outcome: dict) -> None:
 # 3. dry-run 什么都不写;只有 ``apply=True`` 才落库(与"默认不改生产数据"口径一致)。
 LINK_STATUS_KEY = "metrics_link_status"
 GONE_RETRY_DAYS = 90
+# P35(真人复核第 1 条):台账里的时间如果**在未来**(系统时钟错乱、手工填错),
+# 用 ``(now - checked).days < 90`` 判断会得出"负数 < 90 ⇒ 仍有效",文章反而被永久跳过。
+# 宁可多查一次,也不能把好文章永久拉黑 ⇒ 未来时间超过容忍窗口的记录一律作废、重新取证。
+# 容忍窗口只用于正常的时钟抖动(几秒到几分钟),不用于真正的未来时间。
+FUTURE_TOLERANCE_MIN = 15
 
 
 def _read_link_status(con) -> dict[str, dict]:
@@ -138,7 +143,7 @@ def load_link_status(category: str, db_path: Path | None = None) -> dict[str, di
 
 
 def _status_fresh(entry: dict, now: datetime) -> bool:
-    """台账记录是否仍在有效期内。时间读不出来 ⇒ 当过期处理(宁可多查一次,不做永久拉黑)。"""
+    """台账记录是否仍在有效期内。时间读不出来/在未来 ⇒ 当过期处理(宁可多查一次,不做永久拉黑)。"""
     if int(entry.get("status") or 0) not in _GONE_STATUSES:
         return False
     raw = str(entry.get("checked_at") or "")
@@ -148,6 +153,11 @@ def _status_fresh(entry: dict, now: datetime) -> bool:
         return False
     if checked.tzinfo is None:
         checked = checked.astimezone()  # naive 时间按本机时区解释,和 now 同一口径才能相减
+    if checked > now + timedelta(minutes=FUTURE_TOLERANCE_MIN):
+        # 未来的取证时刻不可信(时钟错乱):不能让它把有效期整体往后推,更不能让文章被跳过
+        LOG.warn("metrics.link_status.future_stamp", url=str(entry.get("url") or ""),
+                 checked_at=raw, tolerated_min=FUTURE_TOLERANCE_MIN)
+        return False
     return (now - checked).days < GONE_RETRY_DAYS
 
 
@@ -168,7 +178,10 @@ def _update_link_status(category: str, db_path: Path | None, report: dict, apply
                     "status": outcome["status"],
                     "outcome": OUTCOME_GONE,
                     "url": outcome["url"],
-                    "checked_at": stamp,
+                    # P35(真人复核第 2 条):用**这篇文章自己的取证时刻**,不能整批共用批次开始时间 ——
+                    # 整批共用会让 90 天窗口按批次时间漂移,对账时也说不清"哪一刻看到的 404"。
+                    # 老记录里没有这个字段时退回批次时刻(向后兼容,不产生假时间)。
+                    "checked_at": str(outcome.get("checked_at") or stamp),
                     "reason": str(outcome.get("reason") or "")[:200],
                 }
                 recorded += 1
@@ -487,6 +500,26 @@ def _candidates(
     return picked, host_skipped, known_gone
 
 
+def round_plan(category: str, db_path: Path | None = None, limit: int | None = 20,
+               retry_gone: bool = False) -> dict:
+    """只读:这一轮打算采谁、会跳过谁。**不发任何请求、不写任何状态**。
+
+    存在理由(不是新功能,是给调度器用的判断件):调度器要先知道"这轮有没有活可干",
+    没有文章可采就不该开浏览器(启动一次浏览器要十几秒,还白白动 profile)。
+    口径与 ``_candidates`` 完全一致 ⇒ 计划里的数字和真正跑起来对得上。
+    """
+    picked, host_skipped, known_gone = _candidates(category, db_path, limit, retry_gone=retry_gone)
+    return {
+        "category": category,
+        "candidates": len(picked),
+        "picked_ids": [int(entry["article_id"]) for entry in picked],
+        "host_skipped": host_skipped,
+        "known_gone_skipped": len(known_gone),
+        "known_gone_ids": list(known_gone),
+        "retry_gone": bool(retry_gone),
+    }
+
+
 def collect_public_metrics(
     category: str,
     db_path: Path | None = None,
@@ -500,10 +533,13 @@ def collect_public_metrics(
     captured_at: str | None = None,
     source_id: str = SOURCE_ID,
     retry_gone: bool = False,
+    clock: Callable[[], str] | None = None,
 ) -> dict:
     """采集头条公开文章页互动数。默认 dry-run;``apply=True`` 才写库。
 
     ``retry_gone=True``:忽略"已确认下架"台账,强制重新取证(事后核查用,默认 False)。
+    ``clock``:取证时刻的来源(默认 ``cfg.now_iso``)。每篇文章**各自**记一次取证时刻,
+    不整批共用批次开始时间 —— 台账的 90 天窗口必须是这篇文章自己的时间(P35 真人复核第 2 条)。
     """
     allow = authorized if authorized is not None else metrics_import.load_authorized_sources()
     if source_id not in allow:
@@ -552,7 +588,8 @@ def collect_public_metrics(
     user_agent = str(crawler_cfg.get("user_agent", "TouTiaoSmartFactory/0.1"))
     delay = float(sleep_s if sleep_s is not None else crawler_cfg.get("min_delay_s", 1.0) or 0)
     nap = sleeper or time.sleep
-    captured = captured_at or cfg.now_iso()
+    captured = captured_at or cfg.now_iso()   # 批次时刻:指标行的 captured_at 用它(一次采集一个口径)
+    tick = clock or cfg.now_iso               # 取证时刻:每篇文章各取一次,不共用批次时刻
     rules_cache: dict[str, robots.RobotsRules] = {}
     rows: list[dict] = []
 
@@ -582,6 +619,7 @@ def collect_public_metrics(
             report["robots_refused"] += 1
             LOG.warn("metrics.public.robots_refused", url=url)
             outcome["outcome"] = OUTCOME_ROBOTS_REFUSED
+            outcome["checked_at"] = tick()  # 没发请求也要留时刻:台账不吃这条,但报告要能说清是哪一刻的判断
             outcome["reason"] = (
                 "robots.txt 取不到,按不抓取处理" if rules.unknown
                 else f"robots 禁止抓取 {robots.target_path(url)}"
@@ -590,6 +628,8 @@ def collect_public_metrics(
             continue
         if report["fetched"] and delay > 0:
             nap(delay)
+        # 取证时刻取在**发请求之前**:宁可略早(到期时间只会提前,不会因为批次时间被推后)
+        outcome["checked_at"] = tick()
         try:
             page = fetch_page(url)
         except Exception as exc:  # noqa: BLE001 - 单页失败不影响整批

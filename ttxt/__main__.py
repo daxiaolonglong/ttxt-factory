@@ -600,6 +600,12 @@ def cmd_schedule(args: argparse.Namespace) -> int:
         report = scheduler.run_due()
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
+    if args.run_job:
+        # 手动跑一个任务并照常记账:验证新接上的任务不必改间隔、也不必等时钟到期。
+        # 状态不是 ok 就返回非 0,免得"失败"在命令行里看起来像成功。
+        report = scheduler.run_specific(args.run_job)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0 if report["ran"][0]["status"] == "ok" else 1
     if args.daemon:
         scheduler.daemon(interval_s=args.interval_sec)
         return 0
@@ -786,6 +792,7 @@ def build_parser() -> argparse.ArgumentParser:
     schedule = sub.add_parser("schedule", help="本地调度器(只入队采集与本地分析,绝不写作/发布)")
     schedule.add_argument("--once", action="store_true", help="执行一轮到期任务后退出")
     schedule.add_argument("--daemon", action="store_true", help="常驻轮询")
+    schedule.add_argument("--run-job", metavar="JOB_ID", help="手动执行指定任务并记账(不等到期;状态非 ok 返回码非 0)")
     schedule.add_argument("--interval-sec", type=int, default=300)
     schedule.add_argument("--status", action="store_true", help="查看计划(默认)")
     schedule.set_defaults(func=cmd_schedule)

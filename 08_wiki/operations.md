@@ -57,6 +57,7 @@
 .venv\Scripts\python.exe -X utf8 -m ttxt worker --owner <名字> --max-jobs 3 --idle-stop-s 45
 .venv\Scripts\python.exe -X utf8 -m ttxt worker --stop          # 请求优雅停止
 # 2) 公开页计数回流(默认干跑,--apply 才写库;robots 不放行就拒)
+#    P35 起这一步由调度器 metrics_fetch 每 6 小时自动做,人工命令只用来核查/补量
 .venv\Scripts\python.exe -X utf8 -m ttxt metrics --category <类目> --fetch-public --limit 20 --apply
 # 3) 标定(实测样本 < 30 一律如实拒绝,不猜阈值)
 .venv\Scripts\python.exe -X utf8 -m ttxt metrics --category <类目> --calibrate
@@ -67,8 +68,18 @@
 
 # 本地调度器(任务定义在 00_control/config.json → scheduler.jobs;状态存 scheduler_state.json)
 .venv\Scripts\python.exe -X utf8 -m ttxt schedule            # 查看到期状态
-.venv\Scripts\python.exe -X utf8 -m ttxt schedule --once     # 跑一遍到期任务(只入队/分析/恢复/清理)
+.venv\Scripts\python.exe -X utf8 -m ttxt schedule --once     # 跑一遍到期任务(入队/分析/恢复/清理/指标回流)
 .venv\Scripts\python.exe -X utf8 -m ttxt schedule --daemon   # 常驻循环(默认 300s 一轮)
+.venv\Scripts\python.exe -X utf8 -m ttxt schedule --run-job metrics_fetch_6h   # 手动跑指定任务并记账(不等到期)
+# 互动数据自动回流(P35):调度器里的 metrics_fetch 任务每 6 小时一轮,把公开页计数自动接回闭环
+#   (采集 → 重标定爆款标签 → 关键词评分 → 关键词反哺入队),不再需要人工跑第 2)步。
+#   每类目每轮 limit 12 篇、每篇间隔 sleep_s 2.5s(不得低于 metrics.public_pages 的下限);apply=false 是干跑。
+#   **它和 Worker 是两个进程,共用同一份 02_crawler/.browser/profile,不能同时开浏览器**:
+#   开跑前先看 crawl_jobs 里有没有 queued/running,有就等,等满 wait_for_queue_s(300s)还忙 ⇒ 本轮
+#   记 skipped_queue_busy 直接让路,不硬抢。它排在 crawl_enqueue_4h **之前**是有意安排的:
+#   同一个 tick 两个任务都到期时,先采指标(此时队列必然空闲),再入队采集。
+#   每轮结果进 scheduler_state.json(last_status:ok / partial / error / skipped_queue_busy / dry_run)
+#   + 证据文件 03_intelligence/metrics_public/<类目>-<轮次时间戳>.json;某类目 0 候选 ⇒ 不开浏览器,只记 no_candidates。
 
 # 崩溃恢复与任务重排
 .venv\Scripts\python.exe -X utf8 -m ttxt recover
