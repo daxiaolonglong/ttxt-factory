@@ -80,6 +80,10 @@
 #   同一个 tick 两个任务都到期时,先采指标(此时队列必然空闲),再入队采集。
 #   每轮结果进 scheduler_state.json(last_status:ok / partial / error / skipped_queue_busy / dry_run)
 #   + 证据文件 03_intelligence/metrics_public/<类目>-<轮次时间戳>.json;某类目 0 候选 ⇒ 不开浏览器,只记 no_candidates。
+#   类目明细里的键:fetched / written / updated / snapshots / known_gone_skipped / link_status_recorded|cleared /
+#   row_errors / outcome_counts / labels / analysis / measured / calibration_hint。
+#   **重标定用的是现有阈值,不自动重算阈值**(爆款的定义不能悄悄漂移):实测样本涨了而阈值快照还是旧的,
+#   回执里会给 calibration_hint,由人决定要不要跑第 3)步 ttxt metrics --category <类目> --calibrate。
 
 # 崩溃恢复与任务重排
 .venv\Scripts\python.exe -X utf8 -m ttxt recover

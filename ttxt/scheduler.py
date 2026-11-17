@@ -307,6 +307,18 @@ def _job_metrics_fetch(job: dict) -> dict:
                 "labels": labels if isinstance(labels, dict) else {},
                 "analysis": analysis if isinstance(analysis, dict) else {},
             })
+            # 重标定用的是**现有阈值**,不是重新算阈值。实测样本涨了但阈值快照还是旧的,
+            # 要在回执里说清(重新标定是每轮标准动作第 3 步,不自动做:爆款的定义不能悄悄漂移)。
+            viral = analysis.get("viral", {}) if isinstance(analysis, dict) else {}
+            tiers = viral.get("tiers", {}) if isinstance(viral, dict) else {}
+            calib = viral.get("calibration", {}) if isinstance(viral, dict) else {}
+            measured = int(tiers.get("measured", 0) or 0)
+            cal_sample = int(calib.get("sample", 0) or 0)
+            per[category]["measured"] = measured
+            if measured >= 30 and cal_sample < measured:
+                per[category]["calibration_hint"] = (
+                    f"实测样本已有 {measured} 条,阈值快照还是 {cal_sample} 条时的;"
+                    f"要更新爆款口径就执行 ttxt metrics --category {category} --calibrate")
         except Exception as exc:  # noqa: BLE001
             message = f"{type(exc).__name__}: {exc}"
             errors.append(f"{category} 口径同步: {message}")

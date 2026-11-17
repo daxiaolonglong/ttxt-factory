@@ -380,3 +380,38 @@ def test_sync_failure_keeps_written_rows_visible_and_is_not_reported_ok(tmp_path
     assert spy.args_for("analyze") == [], "重标定失败就不该继续往下跑分析"
     assert result["scheduler_status"] == "error"
     assert result["errors"], "失败必须进 errors,不能只写在类目明细里"
+
+
+# --------------------------------------------------------------------------- 七、阈值快照落后要说清
+
+def test_stale_threshold_snapshot_is_flagged(tmp_path, monkeypatch):
+    """实测样本涨上去了、阈值快照还是旧样本时的:回执必须提示,不能装作口径已经跟上。"""
+    def analyze(category, **kwargs):
+        return {"viral": {"tiers": {"measured": 177}, "calibration": {"sample": 165}}}
+
+    _install_spy(monkeypatch, analyze=analyze)
+    row = scheduler.run_job(_job(tmp_path))["categories"]["demo"]
+    assert row["measured"] == 177
+    hint = row.get("calibration_hint", "")
+    assert "177" in hint and "165" in hint and "--calibrate" in hint
+    assert row["status"] == "ok", "提示不是错误:数据已入库、口径按现有阈值同步完成"
+
+
+def test_no_calibration_hint_when_sample_too_small(tmp_path, monkeypatch):
+    """实测样本不足 30 条时阈值本来就没标定(如实拒绝),这种情形不必提示去标定。"""
+    def analyze(category, **kwargs):
+        return {"viral": {"tiers": {"measured": 22}, "calibration": {"sample": 0}}}
+
+    _install_spy(monkeypatch, analyze=analyze)
+    row = scheduler.run_job(_job(tmp_path))["categories"]["demo"]
+    assert "calibration_hint" not in row
+
+
+def test_no_calibration_hint_when_snapshot_is_up_to_date(tmp_path, monkeypatch):
+    """阈值快照就是用当前样本标定的:不再提示。"""
+    def analyze(category, **kwargs):
+        return {"viral": {"tiers": {"measured": 40}, "calibration": {"sample": 40}}}
+
+    _install_spy(monkeypatch, analyze=analyze)
+    row = scheduler.run_job(_job(tmp_path))["categories"]["demo"]
+    assert row["measured"] == 40 and "calibration_hint" not in row
