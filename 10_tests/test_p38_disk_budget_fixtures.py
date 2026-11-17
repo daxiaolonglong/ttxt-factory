@@ -455,3 +455,17 @@ def test_housekeep_run_can_dry_run_the_wal_checkpoint(tmp_path, monkeypatch):
         "results": [],
     }
     assert "wal_warnings" in out["report"]["caps_status"]
+
+
+def test_repo_root_stray_detector_fires_on_tempfile_names(tmp_path):
+    (tmp_path / "tmpab12cd34").mkdir()
+    (tmp_path / "pytest-of-yangl").mkdir()
+    (tmp_path / "07_tmp").mkdir()
+    (tmp_path / "ttxt").mkdir()
+    (tmp_path / "tmp_not_a_stray_at_all").mkdir()
+    assert _HARNESS._root_stray_dirs(tmp_path) == {"tmpab12cd34", "pytest-of-yangl"}
+
+
+def test_repo_root_has_no_stray_temp_dirs():
+    """仓库根实测残留过 3 个 tmp******** 与 53 MB 的 pytest-of-yangl,今天必须为 0。"""
+    assert _HARNESS._root_stray_dirs(cfg.PROJECT_ROOT) == set()

@@ -140,6 +140,18 @@ def _announce(config: pytest.Config, message: str) -> None:
         print(message, file=sys.stderr)
 
 
+STRAY_ROOT_PATTERNS = (re.compile(r"tmp[A-Za-z0-9_]{8}"), re.compile(r"pytest-of-.+"))
+
+
+def _root_stray_dirs(root: Path) -> set[str]:
+    """仓库根下"看起来就是临时残留"的一级目录名(tempfile 默认名、pytest 老 basetemp)。"""
+    return {
+        item.name
+        for item in root.iterdir()
+        if item.is_dir() and any(pat.fullmatch(item.name) for pat in STRAY_ROOT_PATTERNS)
+    }
+
+
 def _purge_basetemp_to_budget(budget_gb: float = BASETEMP_MAX_GB) -> list[tuple[str, int]]:
     """按最旧优先回收 basetemp 运行目录,直到总量压进字节预算;被占用的跳过并回报。"""
     limit = int(budget_gb * 1024**3)
@@ -373,6 +385,24 @@ def session_categories_dir(tmp_path_factory: pytest.TempPathFactory):
         yield target
     finally:
         mocker.undo()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def no_stray_temp_at_repo_root():
+    """临时文件必须待在 07_tmp,不许在仓库根造 `tmp<8位>` / `pytest-of-*` 目录(P38)。
+
+    仓库根实测残留过 3 个 `tmp********`(里面全是临时 SQLite)和一个 53 MB 的
+    `pytest-of-yangl`:那是更早的 conftest 把 TMPDIR 指到项目根造成的。今天没有这条
+    重定向,但缺了守卫就等于没人证明它没回来。
+    """
+    before = _root_stray_dirs(ROOT)
+    yield
+    new = sorted(_root_stray_dirs(ROOT) - before)
+    assert not new, (
+        f"测试会话在仓库根新建了临时目录:{new}\n"
+        "正确做法:用 pytest 的 tmp_path/tmp_path_factory,或在 07_tmp 下自建目录;"
+        "不许改 TMPDIR 到项目根,也不许在仓库根 mkdtemp。"
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)

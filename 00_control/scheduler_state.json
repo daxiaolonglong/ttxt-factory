@@ -1,6 +1,6 @@
 {
   "crawl_enqueue_4h": {
-    "last_run_at": "2026-11-16T18:54:25+08:00",
+    "last_run_at": "2026-11-17T23:15:00+08:00",
     "last_status": "ok",
     "last_result": {
       "enqueued": 11,
@@ -11,7 +11,7 @@
     "last_error": null
   },
   "analyze_daily": {
-    "last_run_at": "2026-11-16T18:54:27+08:00",
+    "last_run_at": "2026-11-17T18:55:11+08:00",
     "last_status": "ok",
     "last_result": {
       "technology": "ok",
@@ -24,7 +24,7 @@
     "last_error": null
   },
   "recover_daily": {
-    "last_run_at": "2026-11-16T18:54:27+08:00",
+    "last_run_at": "2026-11-17T18:55:11+08:00",
     "last_status": "ok",
     "last_result": {
       "model_stale_requeued": 0,
@@ -77,6 +77,52 @@
           "db_warnings": []
         }
       }
+    },
+    "last_error": null
+  },
+  "metrics_fetch_6h": {
+    "last_run_at": "2026-11-17T22:10:00+08:00",
+    "last_status": "skipped_browser_busy",
+    "last_result": {
+      "scheduler_status": "skipped_browser_busy",
+      "apply": true,
+      "limit": 12,
+      "sleep_s": 2.5,
+      "queue": {
+        "queued": 0,
+        "running": 0,
+        "busy": false,
+        "waited_s": 0.0,
+        "wait_budget_s": 300.0
+      },
+      "browser_lock_wait_s": 300,
+      "browser_busy_skipped": [
+        "technology"
+      ],
+      "categories": {
+        "technology": {
+          "status": "skipped_browser_busy",
+          "reason": "等浏览器 profile 锁 300.0s 没等到(持有者 tag=browser_session pid=31704);该类目不启动浏览器、不发请求,等采集 Worker 用完",
+          "browser_wait_s": 300.0
+        },
+        "finance": {
+          "status": "skipped_browser_busy",
+          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
+        },
+        "social": {
+          "status": "skipped_browser_busy",
+          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
+        },
+        "history": {
+          "status": "skipped_browser_busy",
+          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
+        },
+        "health": {
+          "status": "skipped_browser_busy",
+          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
+        }
+      },
+      "errors": []
     },
     "last_error": null
   }
