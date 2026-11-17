@@ -110,6 +110,8 @@ def test_bare_hedge_word_no_longer_exempts_fact_gate():
     旧断言把「王芳预计,该模型训练成本为 999 亿元」当成 opinion,等于让捏造数字
     绕过事实门禁(批次1 报告 §7 根因①)。现在它必须进门禁并被数字锚点拦下,
     语气词只作为 markers 留痕。
+    T-15(批次4)进一步收紧:第三方归属(业内人士预计/据 X 报道…)还必须在来源里
+    逐字存在,否则连「转述」资格都没有。
     """
     result = harness.machine_result(_card(claim="王芳预计,该模型训练成本为 999 亿元",
                                           kind="negative_perturbed",
@@ -119,9 +121,28 @@ def test_bare_hedge_word_no_longer_exempts_fact_gate():
 
     attributed = harness.machine_result(_card(claim="业内人士预计,该模型训练成本为 999 亿元将继续发酵",
                                               kind="opinion_attributed",
-                                              expected_by_construction="opinion"))
-    assert attributed["credibility"] == "opinion"
-    assert attributed["opinion_markers"]
+                                              expected_by_construction="unverified"))
+    # T-15(批次4,2026-11-17)之后:SRC_TEXT 里根本没有「业内人士预计」这个归属,
+    # 所以这句话不再贴「转述」放行 —— 修复前这里的断言是 credibility == "opinion",
+    # 等于给「凭空造一个出处」背书。现在数字与归属两道锚点都把它拦在门禁里。
+    assert attributed["credibility"] == "unverified"
+    assert any(dim.startswith("attribution:") for dim in attributed["missing_dims"])
+    assert any(dim.startswith("numbers:") for dim in attributed["missing_dims"])
+
+    # 来源里确实写了这个归属时,转述通道照旧合法(收紧不误杀真转述)。
+    genuine_src = (
+        "2026年3月,星海科技公司发布新一代开源模型。"
+        "王芳表示,该模型训练成本为 25 亿元,推理速度提升 3.5%。"
+        "业内人士预计,这一成本数字还会继续发酵。"
+        "由于采用了稀疏注意力架构,长文本处理成本大幅下降。"
+    )
+    genuine = harness.machine_result(_card(claim="业内人士预计,该模型训练成本为 25 亿元将继续发酵",
+                                           kind="opinion_attributed", source_text=genuine_src,
+                                           quote_offset=genuine_src.index("王芳表示"),
+                                           source_excerpt="王芳表示,该模型训练成本为 25 亿元",
+                                           expected_by_construction="opinion"))
+    assert genuine["credibility"] == "opinion"
+    assert genuine["opinion_markers"]
 
 
 def test_quality_claim_not_available_without_human_adjudication():

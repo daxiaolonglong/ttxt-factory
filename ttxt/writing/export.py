@@ -46,7 +46,7 @@ def render_markdown(
             quote = str(item.get("quote") or "—").replace("|", "/")[:160]
             url = str(item.get("source_url") or "—").replace("|", "/")
             missing_parts = []
-            for dim in ("numbers", "dates", "persons", "orgs", "causal"):
+            for dim in ("numbers", "dates", "persons", "orgs", "causal", "attribution"):
                 payload = (item.get("checks") or {}).get(dim) or {}
                 if payload.get("missing"):
                     missing_parts.append(f"{dim}:{','.join(payload['missing'])}")

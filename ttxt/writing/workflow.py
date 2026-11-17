@@ -298,7 +298,7 @@ def _describe_evidence_item(item: dict) -> str:
     if quote:
         head += f"\n  原文引句(连续切片,offset={item.get('quote_offset')}):{quote[:120]}"
     checks = item.get("checks") or {}
-    for dim in ("numbers", "dates", "persons", "orgs", "causal"):
+    for dim in ("numbers", "dates", "persons", "orgs", "causal", "attribution"):
         payload = checks.get(dim) or {}
         missing = payload.get("missing") or []
         if missing:

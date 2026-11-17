@@ -11,6 +11,10 @@
 2. 15 行改的就是上一版打「不对」的那 15 行,不能顺手多改别行;
 3. 逐行理由必须与卡里存的原文对得上(不许只走形式);
 4. `adjudicator_type == "ai"` 的草案,即使把 `human_signature` 伪造成 True 也绝不许写 `human_*`。
+
+T-15(P13 批次4,2026-11-17)之后如实登记的后果:那 10 行机器当时贴的是「转述」,
+修好路由器后构造真值变成「对不上」⇒ 纸面 ①=「对」与钥匙不再自洽(61 → 51),
+修订器也拒绝再批量重生成这份草案。两者都是**变严**,不是回归。
 """
 from __future__ import annotations
 
@@ -28,6 +32,12 @@ ROOT = Path(__file__).resolve().parents[1]
 CARDS_PATH = ROOT / "10_tests" / "golden" / "golden_set_v2.jsonl"
 V1_PATH = ROOT / "10_tests" / "golden" / "adjudications" / "assist_draft_chatgpt_20261116.jsonl"
 V2_PATH = ROOT / "10_tests" / "golden" / "adjudications" / "assist_draft_chatgpt_20261116_v2.jsonl"
+
+# T-15 的 10 张伪造归属卡(P13 批次4,2026-11-17 已修路由器)。
+# 纸面(2026-11-16)印的机器词是「转述」,而答案钥匙跟着修好的机器结论变成了「对不上」
+# ⇒ 这 10 行的 ①=「对」失去了依据,审计按 R3 记矛盾,重生成也必须被拒绝。
+T15_CARDS = {"v2f06", "v2f12", "v2f17", "v2h04", "v2h09", "v2h15",
+             "v2t05", "v2t11", "v2t17", "v2t23"}
 
 
 def _cards() -> list[dict]:
@@ -86,10 +96,16 @@ def test_v2_totals_are_pinned_and_label_definition_is_self_consistent():
     assert report["tick1"] == {"对": 61}          # 第二版汇总:61 对 / 0 不对
     assert report["tick2"] == {"不能": 51, "能": 10}
     assert report["tick3"] == {"同意": 61}
-    # ① 现在定义成"标签贴不贴切" ⇒ 与构造真值应当 61/61 一致(这条本身不是准确率,只是口径自洽)
-    assert report["machine_token_matches_construction"] == 61
-    assert report["tick1_matches_token"] == 61
-    assert report["tick1_contradictions"] == []
+    # ① 现在定义成"标签贴不贴切" ⇒ 与构造真值应当自洽(这条本身不是准确率,只是口径自洽)。
+    # T-15(批次4,2026-11-17)之后自洽数从 61 掉到 51:那 10 张伪造归属卡的构造真值
+    # 随修好的机器结论变成 unverified(该贴「对不上」),而 2026-11-16 纸面印的机器词仍是
+    # 「转述」⇒ 审计按 R3 记 10 条矛盾。这是修复的**代价**:这 10 行得重裁一轮,
+    # 绝不许把纸面或答案钥匙改回去凑数。
+    assert report["machine_token_matches_construction"] == 51
+    assert report["tick1_matches_token"] == 51
+    assert len(report["tick1_contradictions"]) == 10
+    assert {c["card_id"] for c in report["tick1_contradictions"]} == T15_CARDS
+    assert all(c["rule"] == "R3" and "对不上" in c["why"] for c in report["tick1_contradictions"])
 
 
 def test_row_numbers_and_card_ids_still_agree_with_printed_sheet():
@@ -134,12 +150,19 @@ def test_every_v2_row_carries_a_non_empty_reason():
         assert isinstance(row["reason"], str) and len(row["reason"].strip()) >= 8
 
 
-def test_reviser_is_idempotent_regenerating_the_same_file(tmp_path):
+def test_reviser_now_refuses_to_regenerate_v2_after_t15(tmp_path):
+    """T-15 修复前:重跑修订器逐字复现已提交的 v2 草案(转录不可漂)。
+    T-15 修复后:构造真值变了(10 张伪造归属卡 ⇒ 「对不上」),纸面上印的机器词还是「转述」,
+    修订器必须**拒绝**批量沿用旧草案的 ①=「对」,要求这 10 行单独重裁,而不是悄悄照抄。
+    这条变红 = 要么有人把钥匙/纸面改回去凑数,要么这道护栏被削弱。
+    """
     out = tmp_path / "v2_regen.jsonl"
-    revise.write_draft(V1_PATH, out)
-    regen = assist.load_draft(out)
-    committed = assist.load_draft(V2_PATH)
-    assert regen == committed
+    with pytest.raises(assist.DraftError) as raised:
+        revise.write_draft(V1_PATH, out)
+    message = str(raised.value)
+    assert "机器贴的词 '转述'" in message and "'unverified'" in message and "对不上" in message, message
+    assert any(cid in message for cid in T15_CARDS), message
+    assert not out.exists(), "护栏拦下了却仍然写出草案 = 沿用旧判定"
 
 
 def test_ai_draft_cannot_be_written_as_human_adjudication():

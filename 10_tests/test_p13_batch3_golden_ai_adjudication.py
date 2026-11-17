@@ -9,10 +9,14 @@
 2. **T-03 的回归**:2026-11-17 修掉了 6 张「造假句被放行」的卡。这里把
    其中 5 张(第 6 张 v2h01 是正样本,走另一条断言)钉成回归样本,
    验证系统现在**拦得住**这些错误标签,以后改回去就红。
-3. **T-15 的登记**:剩下 10 张 `opinion_attributed` 卡走的是「转述」通道 ——
-   伪造的「业内人士预计」把句子送进 opinion,事实门禁根本不跑。
-   AI 初审 10/10 判机器贴得不贴切。这是**已知未修的缺陷**,这里只登记现状,
-   不在本测试里偷偷改路由器,也不改答案钥匙(改了 A/B 口径就失真)。
+3. **T-15 的登记(2026-11-16 建档,2026-11-17 批次4 已修)**:剩下 10 张 `opinion_attributed`
+   卡过去走「转述」通道 —— 伪造的「业内人士预计」把句子送进 opinion,事实门禁根本不跑。
+   现在路由器要求第三方归属必须在绑定引句 ±1 句内**逐字**存在
+   (`verifier.attribution_check`,详见 `10_tests/test_p13_batch4_attribution_routing.py`),
+   这 10 张的机器结论变成 `unverified`,答案钥匙也按构造真值迁到了 `unverified`
+   (`scripts/golden_v2_fix_t15_answer_key.py`)。
+   代价如实登记:2026-11-16 那份按纸面标签「转述」做的 AI 裁定,对这 10 张**判据已过期**
+   ⇒ harness 的 AI 口径多出一条门禁未满足项,生成器拒绝重新落盘(见下面两条测试)。
 """
 
 import importlib.util
@@ -28,6 +32,12 @@ GOLDEN = ROOT / "10_tests" / "golden"
 CARDS_PATH = GOLDEN / "golden_set_v2.jsonl"
 SIDECAR_PATH = GOLDEN / "golden_set_v2_ai_adjudication.jsonl"
 SHEET_TOKENS_PATH = GOLDEN / "adjudications" / "printed_sheet_tokens_20261116.jsonl"
+
+# T-15 的 10 张伪造归属卡(kind = opinion_attributed)。2026-11-17 批次4 修好路由器之后,
+# 它们的机器结论从 opinion(转述)变成 unverified(对不上),AI sidecar 里记的机器标签
+# 因此整体过期 —— 这是修复的**代价**,不是 bug。
+T15_CARDS = ["v2f06", "v2f12", "v2f17", "v2h04", "v2h09", "v2h15",
+             "v2t05", "v2t11", "v2t17", "v2t23"]
 
 
 def _load(name: str, path: Path):
@@ -103,9 +113,18 @@ def test_ai_adjudicator_is_marked_as_ai(cards, sidecar):
 
 
 def test_sidecar_records_current_machine_labels_or_is_flagged_drift(cards, sidecar, machine_now):
-    """sidecar 抄的机器标签必须跟今天的机器结论一致;不一致就是判据过期,得重裁。"""
-    drift = [r["card_id"] for r in sidecar if r["machine_now"] != machine_now[r["card_id"]]]
-    assert drift == [], f"机器结论已变,以下卡片的 AI 判据过期需重裁:{drift}"
+    """sidecar 抄的机器标签必须跟今天的机器结论一致;不一致就是判据过期,得重裁。
+
+    T-15 修复(批次4,2026-11-17)把 10 张伪造归属卡的机器结论从「转述」改成「对不上」:
+    2026-11-16 抄下的机器标签对**恰好这 10 张**已过期,必须重裁,不得沿用。
+    修复前这条钉的是 `drift == []`(当时的现状);现在钉的是「只漂这 10 张,别的一张都不许漂」。
+    """
+    drift = sorted(r["card_id"] for r in sidecar if r["machine_now"] != machine_now[r["card_id"]])
+    assert drift == T15_CARDS, f"机器标签漂移的卡片不是 T-15 那 10 张:{drift}"
+    for row in sidecar:
+        if row["card_id"] in T15_CARDS:
+            assert row["machine_now"] == "opinion", row["card_id"]      # 当时机器贴的是「转述」
+            assert machine_now[row["card_id"]] == "unverified", row["card_id"]   # 今天机器判「对不上」
 
 
 def test_basis_label_equals_what_was_printed_on_the_sheet(sidecar):
@@ -141,15 +160,21 @@ def test_reasons_exist_for_every_rejected_verdict(sidecar):
     assert all(r["ai_reason"] == "" for r in sidecar if r["ai_verdict"] == "通过")
 
 
-def test_generator_reproduces_the_committed_sidecar(tmp_path, cards):
-    """重跑生成器必须逐字得到同一份裁定(只允许录入时间不同)—— 转录不可漂。"""
+def test_generator_refuses_to_regenerate_the_sidecar_after_t15(tmp_path, cards):
+    """T-15 修复前:重跑生成器逐字复现 sidecar(只允许录入时间不同)。
+    T-15 修复后:10 张伪造归属卡的今日机器结论已变,生成器必须**拒绝**重新落盘,
+    而不是把 2026-11-16 按「转述」做的旧判定悄悄沿用一遍。
+    这条断言变红 = 要么 AI 裁定重做完了(判据重新对齐),要么护栏被削弱。
+    """
     out = tmp_path / "again.jsonl"
-    assert generator.main(["--out", str(out)]) == 0
-    fresh = _read_jsonl(out)
-    assert len(fresh) == 61
-    keys = [k for k in fresh[0] if k not in ("ai_at", "ai_recheck_at")]
-    assert [{k: r[k] for k in keys} for r in fresh] == [{k: r[k] for k in keys}
-                                                        for r in _read_jsonl(SIDECAR_PATH)]
+    assert generator.main(["--out", str(out)]) == 1
+    assert not out.exists(), "判据已过期却仍然写出裁定表 = 沿用旧判定"
+    sheet = generator.load_sheet_tokens(SHEET_TOKENS_PATH)
+    machine = {c["card_id"]: harness.machine_result(c)["credibility"] for c in cards}
+    _rows, errors = generator.build_rows(cards, machine, sheet)
+    assert sorted({e.split(":")[0] for e in errors}) == T15_CARDS, errors
+    assert len(errors) == 20, errors                    # 每张两条:补重述理由 + 重判不得引用旧标签
+    assert all(("重述" in e and "不能沿用旧判定" in e) or "重判所引标签" in e for e in errors), errors
 
 
 def test_recheck_covers_exactly_the_12_disputed_cards(ai):
@@ -182,12 +207,18 @@ def test_recheck_keeps_ten_fabricated_attribution_cards_rejected(ai):
 
 
 def test_recheck_does_not_move_quality_conclusion(cards, ai):
-    """重判后人工口径仍是 0、质量结论仍 NOT_AVAILABLE、退出码仍 2;AI 口径仍卡在 A/B <50%。"""
+    """重判后人工口径仍是 0、质量结论仍 NOT_AVAILABLE、退出码仍 2。
+    T-15 修复后 AI 口径多出一条未满足项:10 张卡的机器标签变了 ⇒ 判据过期必须重裁。
+    """
     metrics = harness.evaluate(cards, ai)
     assert metrics["human_adjudicated_count"] == 0
     assert metrics["quality_claim"] == "NOT_AVAILABLE"
     assert metrics["quality_claim_ai"] == "NOT_AVAILABLE"
-    assert metrics["ai_gate_failures"] == ["AI 确认的 A/B 级独立证据占比 0.279 < 0.5"]
+    assert metrics["ai_gate_failures"][0] == "AI 确认的 A/B 级独立证据占比 0.279 < 0.5"
+    assert len(metrics["ai_gate_failures"]) == 2, metrics["ai_gate_failures"]
+    drift_line = metrics["ai_gate_failures"][1]
+    assert "机器标签与当前机器结论不一致 10 张" in drift_line and "必须重裁" in drift_line
+    assert all(cid in drift_line for cid in T15_CARDS)
 
 
 def test_generator_refuses_stale_verdict_without_restated_reason(cards, monkeypatch):
@@ -210,9 +241,14 @@ def test_dual_caliber_metrics_and_gate_stays_red(cards, sidecar):
     assert metrics["quality_claim"] == "NOT_AVAILABLE"
     assert len(metrics["gate_failures"]) == 3
     assert metrics["machine_vs_human"]["accuracy"] is None
-    # AI 口径:数量够了,但 A/B 独立证据占比仍卡在 17/61 —— T-02 未解
-    assert metrics["ai_gate_failures"] == [
-        f"AI 确认的 A/B 级独立证据占比 0.279 < {harness.MIN_INDEPENDENT_SHARE}"]
+    # AI 口径:数量够了,但 A/B 独立证据占比仍卡在 17/61 —— T-02 未解;
+    # T-15 修好之后又多一条:10 张卡的机器标签变了,AI 判据过期必须重裁(门禁只会变严不会变松)
+    assert metrics["ai_gate_failures"][0] == \
+        f"AI 确认的 A/B 级独立证据占比 0.279 < {harness.MIN_INDEPENDENT_SHARE}"
+    assert len(metrics["ai_gate_failures"]) == 2, metrics["ai_gate_failures"]
+    assert metrics["machine_vs_ai"]["machine_label_drift"] == T15_CARDS
+    assert metrics["machine_vs_ai"]["basis_stale_cards"] == [
+        "v2h01", "v2h02", "v2h03", "v2h16", "v2t13", "v2t14"]   # 纸面标签口径没变,还是 T-03 那 6 张
     assert metrics["quality_claim_ai"] == "NOT_AVAILABLE"
     assert metrics["machine_vs_ai"]["accuracy"] == 0.836  # 51/61(按今日标签重述)
     assert metrics["machine_vs_ai"]["verdict_as_recorded"] == {"通过": 46, "驳回": 15}
@@ -326,23 +362,24 @@ def test_gate_critical_findings_fire_for_the_regression_cards(cards):
 # ---------------------------------------------------------------- 4. T-15 已知缺陷登记
 
 
-def test_ten_opinion_routed_cards_still_escape_the_fact_gate(cards, sidecar):
-    """登记 T-15 现状:10 张伪造「业内人士…」的卡走 opinion 通道,门禁不跑事实核验。
+def test_ten_fabricated_attribution_cards_now_hit_the_fact_gate(cards, sidecar):
+    """T-15 已修(批次4,2026-11-17):10 张伪造「业内人士…」的卡不再走转述通道。
 
-    这是**已知未修**的缺陷,不是这条测试造成的。断言的是当前行为,
-    将来修好路由器(见 T-15)时这条会红,提醒同步更新答案钥匙与 A/B 口径。
+    修复前这条测试登记的是缺陷现状(credibility=opinion、missing_dims=[]、一条 critical 都不产);
+    路由器现在要求第三方归属必须在绑定引句 ±1 句内逐字存在,断言随之钉成反面:
+    进门禁、有 critical、missing_dims 至少含 attribution。细节断言在
+    `10_tests/test_p13_batch4_attribution_routing.py`,这里钉答案钥匙与 AI 证据的一致性。
     """
-    routed = sorted(c["card_id"] for c in cards if c["kind"] == "opinion_attributed")
-    assert len(routed) == 10
     from ttxt.writing import verifier
 
+    routed = sorted(c["card_id"] for c in cards if c["kind"] == "opinion_attributed")
+    assert routed == T15_CARDS
     ai = {r["card_id"]: r for r in sidecar}
     for card_id in routed:
         card = next(c for c in cards if c["card_id"] == card_id)
         m = harness.machine_result(card)
-        assert m["credibility"] == "opinion", (card_id, m["credibility"])
-        assert m["missing_dims"] == [], f"{card_id}:走 opinion 通道本该什么都不核验"
-        # 门禁层面:这类卡连事实核验都不进,一条 critical 都不产生 —— 缺陷的现状
+        assert m["credibility"] == "unverified", (card_id, m["credibility"])
+        assert any(dim.startswith("attribution:") for dim in m["missing_dims"]), (card_id, m["missing_dims"])
         article = {
             "id": card.get("source_article_id"),
             "title": card.get("source_title") or "",
@@ -350,22 +387,28 @@ def test_ten_opinion_routed_cards_still_escape_the_fact_gate(cards, sidecar):
             "text": card.get("source_text") or "",
         }
         evidence = verifier.verify_claim(card["claim"], article)
-        assert evidence["kind"] == "opinion"
+        assert evidence["kind"] == "fact", (card_id, evidence["kind"])
         _issues, critical = verifier.deterministic_findings([evidence], card["claim"], card["claim"])
-        assert critical == [], (
-            f"{card_id}:伪造归属句现在被门禁拦下了 —— 说明 T-15 已修,"
-            "同步更新答案钥匙、A/B 口径和这条断言")
-        # AI 初审 10/10 认为机器贴得不贴切(应判「对不上」),已作为 T-15 的证据
+        assert any("attribution_not_in_source" in item for item in critical), (card_id, critical)
+        assert any(item.startswith("事实未通过来源核验") for item in critical), (card_id, critical)
+        # 答案钥匙跟着现实走:这 10 张的构造真值本来就是「归属无出处、事实未核实」
+        assert card["expected_by_construction"] == "unverified" == m["credibility"], card_id
+        # AI 初审 10/10 认为机器当时贴「转述」不贴切(应判「对不上」)—— 与今天的机器结论一致
         assert ai[card_id]["ai_verdict"] == "驳回"
         assert any(k in ai[card_id]["ai_reason"] for k in ("转述", "归属", "归因")), ai[card_id]["ai_reason"]
 
 
-def test_answer_key_is_untouched_by_the_ai_pass(cards, sidecar):
-    """AI 判机器错,不改答案钥匙:expected_by_construction 仍与机器结论一致(61/61)。
+def test_answer_key_now_matches_the_machine_for_all_61_cards(cards, sidecar):
+    """答案钥匙只被 T-15 那 10 行动过(其余 51 行仍是构造时的原值),61/61 与机器结论一致。
 
-    改答案钥匙会让 A/B 口径失真,所以 AI 的不同意见只进 sidecar,等 T-15 用生产证据处理。
+    AI 的不同意见本身不改答案钥匙:它只进 sidecar;改钥匙的是 T-15 的路由器修复
+    (机器结论与构造真值同时变成 unverified),由 `scripts/golden_v2_fix_t15_answer_key.py` 落盘。
     """
     assert all(c["expected_by_construction"] == harness.machine_result(c)["credibility"] for c in cards)
+    moved = [c["card_id"] for c in cards if c["kind"] == "opinion_attributed"]
+    assert sorted(moved) == T15_CARDS
+    assert all(c["expected_by_construction"] == "unverified" for c in cards if c["card_id"] in T15_CARDS)
+    assert sum(1 for c in cards if c["expected_by_construction"] == "opinion") == 0
     disagree = [r["card_id"] for r in sidecar if r["ai_verdict_current"] == "驳回"]
     assert len(disagree) == 10
-    assert set(disagree) == {c["card_id"] for c in cards if c["kind"] == "opinion_attributed"}
+    assert set(disagree) == set(T15_CARDS)

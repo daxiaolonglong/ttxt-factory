@@ -26,6 +26,16 @@ HEDGE_SRC_TEXT = (
 )
 HEDGE_ARTICLE = {"id": 11, "title": "星海科技发布新模型", "url": "https://example.com/h", "text": HEDGE_SRC_TEXT}
 
+# 真转述夹具(T-15 批次4):来源里**确实**有一句第三方归属,紧贴在 25 亿元那句旁边,
+# 保证它落在绑定引句 ±1 句的窗口内。少了这句,「业内人士预计」就是伪造归属。
+ATTR_SRC_TEXT = (
+    "2026年3月,星海科技公司发布新一代开源模型。"
+    "王芳表示,该模型训练成本为 25 亿元,推理速度提升 3.5%。"
+    "业内人士预计,这一成本数字还会继续发酵。"
+    "世界卫生组织召集的专家小组建议将两款新候选疫苗纳入试点计划。"
+)
+ATTR_ARTICLE = {"id": 13, "title": "星海科技发布新模型", "url": "https://example.com/a", "text": ATTR_SRC_TEXT}
+
 # --------------------------------------------------------------------------- 移花接木夹具
 
 DISPLACE_SRC_TEXT = (
@@ -80,12 +90,31 @@ def test_named_person_prediction_with_number_is_not_exempted():
 
 
 def test_attributed_prediction_still_routes_to_opinion():
-    """明确「归属 + 谓语」的观点句仍走观点通道,并留下标记。"""
+    """明确「归属 + 谓语」的观点句仍走观点通道,并留下标记。
+
+    T-15(批次4)之后夹具必须**真的**在来源里写过那个归属:
+    原来这个测试拿 HEDGE_SRC_TEXT(全文没有「业内人士」)当来源,等于替
+    「凭空造一个出处」的写法背书 —— 路由器现在要求第三方归属在绑定引句 ±1 句内逐字存在,
+    所以这里换一份带真实归属的来源,并另加一条反向夹具钉住收紧后的行为。
+    """
     claim = "业内人士预计,该模型训练成本为 25 亿元将继续发酵"
-    ev = verifier.verify_claim(claim, HEDGE_ARTICLE)
+    ev = verifier.verify_claim(claim, ATTR_ARTICLE)
     assert ev["kind"] == "opinion"
     assert ev["credibility"] == "opinion"
     assert ev["checks"]["opinion_markers"]
+    assert ev["checks"]["attribution"]["found"] == ["业内人士预计"]
+    assert ev["checks"]["attribution"]["missing"] == []
+
+
+def test_attribution_absent_from_the_source_no_longer_routes_to_opinion():
+    """同一句话,来源里找不到那个归属 ⇒ 不得再走转述通道(T-15 回归)。"""
+    claim = "业内人士预计,该模型训练成本为 25 亿元将继续发酵"
+    ev = verifier.verify_claim(claim, HEDGE_ARTICLE)
+    assert ev["kind"] == "fact"
+    assert ev["credibility"] == "unverified"
+    assert ev["checks"]["attribution"]["missing"] == ["业内人士预计"]
+    _issues, critical = verifier.deterministic_findings([ev], "星海科技发布新模型", HEDGE_SRC_TEXT)
+    assert any("attribution_not_in_source" in line for line in critical), critical
 
 
 def test_first_person_opinion_still_routes_to_opinion():

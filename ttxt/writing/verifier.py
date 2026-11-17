@@ -17,6 +17,14 @@
    「专家小组建议纳入 X」「预计3126年11月15日后有货」这类含日期/数字的机构立场与预测,
    必须继续走事实门禁。显然/或将/可能/或许/应该/必须/建议/预计 等裸 hedge 词只作为
    `checks["opinion_markers"]` 留痕,不构成豁免。
+   **命中归属词只是进入观点通道的必要条件(P13 批次4 / 账本 T-15 根因③修复)**:
+   第三/四方归属(业内人士预计、据 X 报道、据悉、外媒报道…)必须在**绑定引句 ±1 句**
+   的窗口内**逐字**存在 —— 来源里没有这个归属,「业内人士预计,<原句>将继续发酵」就是
+   凭空造一个出处给事实句买通行证。找不到即不得路由 opinion,改走事实门禁,
+   记入 `checks["attribution"] = {found, missing, self}` 并产生
+   `attribution_not_in_source` critical。第一人称自述(我认为/笔者/我的判断…)的出处
+   就是作者本人,来源里本不必出现该短语,不做存在性核验。
+   反过来,窗口内找到归属也**只是取得转述资格**,不给任何句子盖「已核实」的章。
 4. 标题-正文一致性(标题兑现):标题中的数字/日期/人物/机构与词面覆盖必须在
    正文出现;
 5. 启发式边界(必须如实记录):人物/机构提取依赖后缀与谓词线索,存在漏检与
@@ -25,13 +33,16 @@
 
 credibility 语义(门禁据此判定):
 - verified     :引句绑定成功,且数字/日期锚点都在「引句 ±1 句」窗口内找到、人物/机构在来源全文找到;
-- unverified   :锚点缺失或引句重叠过低(不通过);
-- no_source    :claim 无有效来源编号(不通过);
-- opinion      :带明确归属观点标记的句子,不参与事实门禁,单独记录。
-   已修的边界:裸 hedge 词(建议/预计/或将/可能…)不再把整句豁免出事实门禁 ——
-   豁免只按「归属 + 谓语」判定,具名人物/机构的「表示/称/建议」不算观点。
-   仍存在的边界:归属表是有限词表,换一种写法(如「圈内普遍认为」未列词)仍可能被漏判为
-   事实句去做核验;漏判的方向是「更严」(多走一次门禁),不是放行。
+- unverified   :锚点缺失、引句重叠过低,或第三/四方归属在「引句 ±1 句」窗口内逐字找不到(不通过);
+- no_source    :claim 无有效来源编号(不通过);带第三方归属但无来源卡片时同样走这一项;
+- opinion      :带明确归属观点标记的句子,且不参与事实门禁,单独记录。
+   已修的边界:①裸 hedge 词(建议/预计/或将/可能…)不再把整句豁免出事实门禁 ——
+   豁免只按「归属 + 谓语」判定,具名人物/机构的「表示/称/建议」不算观点;
+   ②命中归属词但绑定引句 ±1 句里逐字找不到该归属(P13 批次4 / 账本 T-15)不再放行,
+   句子回到事实门禁并记 `attribution_not_in_source` critical。
+   仍存在的边界:归属表是有限词表,换一种未列写法仍可能被漏判为事实句去做核验;
+   漏判的方向是「更严」(多走一次门禁),不是放行。反向边界同样如实记录:
+   窗口内逐字存在归属只等于「这句话确是在转述来源写过的话」,规则不判断该归属本身可信与否。
 """
 
 from __future__ import annotations
@@ -149,8 +160,50 @@ def is_opinion(text: str) -> list[str]:
 
     裸 hedge 词(建议/预计/或将/可能…)不再让整句豁免事实门禁 —— 机构立场陈述
     「专家小组建议纳入 X」与日期造假「预计3126年11月15日后有货」都必须继续核验。
+
+    **命中归属词只是进入观点通道的必要条件,不是充分条件**:第三/四方归属还必须
+    在来源里逐字存在(见 `attribution_check()`),否则「业内人士预计,…」这种
+    无中生有的归属就是把事实句送进免检通道的许可证(P13 批次4 / 账本 T-15)。
     """
     return _dedup(OPINION_ATTRIBUTION_RE.findall(text or ""))
+
+
+# 自述归属(P13 批次4 / 账本 T-15):出处就是作者本人,来源原文里本来就不必出现这个
+# 短语,所以**不做**存在性核验。除这一类以外,`is_opinion()` 命中的归属
+# (业内人士预计 / 据 X 报道 / 据报道 / 据悉 / 外媒报道 / 媒体称 / 博主X点评…)
+# 都在声称「外部来源说过这话」,必须在绑定引句 ±1 句的窗口内逐字找到。
+# 只匹配**整条标记**,避免把「博主张三点评」这类第三方归属误判成作者自述。
+SELF_ATTRIBUTION_RE = re.compile(
+    r"^(?:我认为|我们认为|我觉得|笔者|我个人|个人看来|就个人|依我看|在我看来"
+    r"|点评|看法是|我的判断)$"
+)
+
+
+def attribution_markers(claim: str) -> tuple[list[str], list[str]]:
+    """把观点标记拆成(第三方归属, 自述归属)。"""
+    marks = is_opinion(claim)
+    own = [mark for mark in marks if SELF_ATTRIBUTION_RE.search(mark)]
+    return [mark for mark in marks if mark not in own], own
+
+
+def attribution_check(claim: str, window: str) -> dict:
+    """T-15:第三/四方归属必须**逐字**出现在「绑定引句 ±1 句」窗口内(确定性,不调模型)。
+
+    与数字/日期同一把尺子:只认窗口,不认全文 —— 正文别处出现过一次「据 X 报道」,
+    不等于当前这句的归属有出处(移花接木同样成立)。命中不到就是缺出处,
+    该句必须回到事实门禁逐锚点核验,而不是贴「转述」放行。
+    无第三方归属(事实句、或纯自述观点)时返回空 dict,不参与核验。
+    """
+    third_party, own = attribution_markers(claim)
+    if not third_party:
+        return {}
+    found = [mark for mark in third_party if mark in window]
+    return {
+        "found": found,
+        "missing": [mark for mark in third_party if mark not in window],
+        "self": own,
+        "note": "归属须在绑定引句±1句窗口内逐字出现;缺失即视为伪造归属,句子回到事实门禁",
+    }
 
 
 def hedge_markers(text: str) -> list[str]:
@@ -247,7 +300,16 @@ def bind_quote(claim: str, source_text: str) -> tuple[str, int, float] | None:
 def verify_claim(claim: str, article: dict | None) -> dict:
     """核验单条事实。article 需含 id/title/url/text。"""
     markers = is_opinion(claim)
-    if markers:
+    text = (article or {}).get("text") or ""
+    bound = bind_quote(claim, text) if text else None
+    window, window_offset = anchor_window(text, bound[0], bound[1]) if bound else ("", 0)
+    attribution = attribution_check(claim, window)
+    if markers and not attribution.get("missing"):
+        # 观点通道:自述归属(我认为/笔者…)或来源里逐字存在归属的转述句。
+        # 注意:进入本通道不代表句子为真,只代表它不承担事实核验义务。
+        checks: dict = {"opinion_markers": markers}
+        if attribution:
+            checks["attribution"] = attribution
         return {
             "claim": claim,
             "kind": "opinion",
@@ -256,7 +318,7 @@ def verify_claim(claim: str, article: dict | None) -> dict:
             "quote": None,
             "quote_offset": None,
             "overlap": 0.0,
-            "checks": {"opinion_markers": markers},
+            "checks": checks,
             "credibility": "opinion",
         }
     if not article:
@@ -268,17 +330,17 @@ def verify_claim(claim: str, article: dict | None) -> dict:
             "quote": None,
             "quote_offset": None,
             "overlap": 0.0,
-            "checks": {},
+            "checks": {"attribution": attribution} if attribution else {},
             "credibility": "no_source",
         }
-    text = article.get("text") or ""
-    bound = bind_quote(claim, text)
     anchors = extract_anchors(claim)
     norm_text = norm(text)
-    window, window_offset = anchor_window(text, bound[0], bound[1]) if bound else ("", 0)
     norm_window = norm(window)
     checks: dict = {}
-    all_ok = True
+    if attribution:
+        checks["attribution"] = attribution
+    # 归属缺出处 ⇒ 这一句已经没有「转述」资格,后续锚点全部照常核验,且必须判不通过。
+    all_ok = not attribution.get("missing")
     for dim in ("numbers", "dates", "persons", "orgs"):
         # 根因②修复:数字/日期必须在「绑定引句 ±1 句」窗口内出现;
         # 人物/机构仍按全文锚定(不顺手加严),但引句外的命中会留痕。
@@ -378,14 +440,26 @@ def deterministic_findings(evidence: list[dict], title: str, body: str) -> tuple
     facts = [item for item in evidence if item.get("kind") == "fact"]
     opinions = [item for item in evidence if item.get("kind") == "opinion"]
     for item in facts:
+        checks = item.get("checks") or {}
+        attribution = checks.get("attribution") or {}
+        if attribution.get("missing"):
+            # 账本 T-15:句子带着「业内人士预计/据 X 报道」这类归属,但绑定引句 ±1 句里
+            # 逐字找不到它 ⇒ 归属是编的。机器可读标识 attribution_not_in_source 固定写在
+            # 这一条里,便于门禁、报表与人工复核按标识检索。
+            critical.append(
+                "伪造归属(attribution_not_in_source):"
+                f"{item['claim'][:50]}"
+                f"(绑定引句 ±1 句内逐字找不到归属:{','.join(attribution['missing'])})"
+            )
         if item["credibility"] == "no_source":
             critical.append(f"无来源断言:{item['claim'][:50]}")
             continue
         if item["credibility"] != "verified":
             missing = {
                 dim: payload.get("missing") or []
-                for dim, payload in (item.get("checks") or {}).items()
-                if dim in ("numbers", "dates", "persons", "orgs", "causal") and payload.get("missing")
+                for dim, payload in checks.items()
+                if dim in ("numbers", "dates", "persons", "orgs", "causal", "attribution")
+                and payload.get("missing")
             }
             detail = ";".join(f"{dim}:{','.join(vals)}" for dim, vals in missing.items())
             displaced = {
