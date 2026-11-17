@@ -69,6 +69,12 @@ def machine_now(cards) -> dict[str, str]:
 
 # ---------------------------------------------------------------- 1. AI 口径护栏
 
+@pytest.fixture(scope="module")
+def ai(sidecar):
+    """别名:重判与口径测试里用 `ai` 指代按 card_id 索引的 sidecar 字典。"""
+    return {r["card_id"]: r for r in sidecar}
+
+
 def test_sidecar_covers_every_card_exactly_once(cards, sidecar):
     ids = [r["card_id"] for r in sidecar]
     assert len(ids) == len(set(ids)) == len(cards) == 61
@@ -141,9 +147,47 @@ def test_generator_reproduces_the_committed_sidecar(tmp_path, cards):
     assert generator.main(["--out", str(out)]) == 0
     fresh = _read_jsonl(out)
     assert len(fresh) == 61
-    keys = [k for k in fresh[0] if k != "ai_at"]
+    keys = [k for k in fresh[0] if k not in ("ai_at", "ai_recheck_at")]
     assert [{k: r[k] for k in keys} for r in fresh] == [{k: r[k] for k in keys}
                                                         for r in _read_jsonl(SIDECAR_PATH)]
+
+
+def test_recheck_covers_exactly_the_12_disputed_cards(ai):
+    """两版打架的 12 张必须都带回重判,且**判据是今日标签**,不是 2026-11-16 纸面旧标签。"""
+    disputed = {"v2f06", "v2f12", "v2f17", "v2h01", "v2h03", "v2h04", "v2h09", "v2h15",
+                "v2t05", "v2t11", "v2t17", "v2t23"}
+    rechecked = {cid for cid, r in ai.items() if r["ai_recheck_verdict"] is not None}
+    assert rechecked == disputed, rechecked ^ disputed
+    zh = {"verified": "能核实", "unverified": "对不上", "no_source": "没出处", "opinion": "转述"}
+    for cid in rechecked:
+        row = ai[cid]
+        assert row["ai_recheck_basis_label"] == zh[row["machine_now"]], cid
+        assert row["ai_recheck_rubric"] and "①b" in row["ai_recheck_rubric"], cid
+        assert row["ai_recheck_flag"] is None, (cid, row["ai_recheck_flag"])
+        assert row["ai_recheck_reason"].startswith("AI 重判理由"), cid
+        assert "human_" not in "".join(k for k in row if k.startswith("ai_recheck")), cid
+
+
+def test_recheck_keeps_ten_fabricated_attribution_cards_rejected(ai):
+    """钉死口径 ①b 下:来源里没有那个归属 ⇒ 10 张伪造归属卡仍判「不贴切」,机器贴「转述」= T-15 漏洞。"""
+    ten = ["v2f06", "v2f12", "v2f17", "v2h04", "v2h09", "v2h15", "v2t05", "v2t11", "v2t17", "v2t23"]
+    for cid in ten:
+        assert ai[cid]["ai_recheck_verdict"] == "驳回", cid
+        assert ai[cid]["ai_recheck_basis_label"] == "转述", cid
+        assert ai[cid]["machine_now"] == "opinion", cid
+    assert ai["v2h01"]["ai_recheck_verdict"] == "通过"
+    assert ai["v2h03"]["ai_recheck_verdict"] == "通过"
+    # 重判不改历史 ai_verdict,也不改人工字段
+    assert ai["v2h03"]["ai_verdict"] == "驳回" and ai["v2h01"]["ai_verdict"] == "通过"
+
+
+def test_recheck_does_not_move_quality_conclusion(cards, ai):
+    """重判后人工口径仍是 0、质量结论仍 NOT_AVAILABLE、退出码仍 2;AI 口径仍卡在 A/B <50%。"""
+    metrics = harness.evaluate(cards, ai)
+    assert metrics["human_adjudicated_count"] == 0
+    assert metrics["quality_claim"] == "NOT_AVAILABLE"
+    assert metrics["quality_claim_ai"] == "NOT_AVAILABLE"
+    assert metrics["ai_gate_failures"] == ["AI 确认的 A/B 级独立证据占比 0.279 < 0.5"]
 
 
 def test_generator_refuses_stale_verdict_without_restated_reason(cards, monkeypatch):

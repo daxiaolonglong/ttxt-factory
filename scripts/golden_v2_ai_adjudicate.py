@@ -46,6 +46,7 @@ CARDS_PATH = ROOT / "10_tests" / "golden" / "golden_set_v2.jsonl"
 # 不靠记忆,也不用今天的机器结论反推当时看到了什么(那样等于伪造判据)。
 SHEET_TOKENS_PATH = ROOT / "10_tests" / "golden" / "adjudications" / "printed_sheet_tokens_20261116.jsonl"
 TOKEN_TO_LABEL = {"能核实": "verified", "对不上": "unverified", "没出处": "no_source", "转述": "opinion"}
+ZH_OF_LABEL = {v: k for k, v in TOKEN_TO_LABEL.items()}   # verified → 能核实
 
 REASON_ATTRIBUTION = (
     "AI 理由:来源原句里没有「业内人士预计/或将/显然」这类归属,也没有「将继续发酵」的内容,"
@@ -176,6 +177,55 @@ ADJUDICATOR_NOTE = (
     "本记录**不是人工裁定**,不得计入人工口径。"
 )
 
+# ---------------------------------------------------------------------------
+# 重判(钉死口径):两版 AI 第一轮互相打架(① 只一致 49/61),分歧全落在带归属词的句子。
+# 两轮**各自独立**给出了同一把尺子(①a 句子类型贴不贴 + ①b 归属是否真实存在于来源原句;
+# 来源里没有 ⇒ ① 一律记「不贴切」,应判「对不上」),口径已写进 golden_set_v2.schema.md §6。
+# 下面 12 张 = 两版判定相反的那 12 张,由第一轮裁定者按**今日机器标签**(不是 2026-11-16 纸面标签)
+# 重判,逐字转录项目负责人 2026-11-17 转回的重判表。**重判只加 ai_recheck_* 字段,不加口径、不加行、
+# 不动 ai_verdict 原值(历史记录必须留着),更不写 human_*。**
+RECHECK_RUBRIC = "①a 句子类型贴不贴 + ①b 归属是否真实存在于来源原句;见 golden_set_v2.schema.md §6"
+RECHECK_AT_BASIS = "录入时间;重判结果的原始时间戳未随表回传,不伪造"
+REASON_Rc_ATTRIBUTION = (
+    "AI 重判理由(按今日标签):句子里的「业内人士预计/或将/显然」在来源原句里不存在,"
+    "按钉死口径 ①b ⇒ ① 不贴切,应判「对不上」;今日机器仍贴「转述」⇒ 门禁漏洞(T-15)。"
+)
+# card_id → (AI 所引的今日机器标签, ①重判, 理由)
+RECHECK_ROWS = {
+    "v2f06": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2f12": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2f17": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2h04": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2h09": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2h15": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2t05": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2t11": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2t17": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2t23": ("转述", "驳回", REASON_Rc_ATTRIBUTION),
+    "v2h01": ("能核实", "通过",
+              "AI 重判理由(按今日标签):来源原句与事实句一致,今日机器贴「能核实」贴切;"
+              "旧纸面「转述」已被 T-03 改掉,不再按旧标签算今天的机器错误。"),
+    "v2h03": ("对不上", "通过",
+              "AI 重判理由(按今日标签):今日机器已贴「对不上」,与「来源不支持这个归属」一致 ⇒ ① 贴切;"
+              "但 ② 仍是「不能」(原句撑不住整句话),贴切不等于原句撑得住。"),
+}
+
+# 钉死口径下的**机械可核**自洽规则(判据 = 今日机器标签):
+#   R5「转述」+ ①贴切 + ②不能 ⇒ 归属没有来源支撑却判标签贴切,直接违反 ①b(第二轮的老判法就是这个形态)。
+def self_consistency_recheck(token_zh: str, tick1_ok: bool, support_zh: str) -> str:
+    if not tick1_ok:
+        return ""
+    if token_zh in TOKEN_CLAIM_SUPPORTS and support_zh == "不能":
+        return "R1"
+    if token_zh in TOKEN_CLAIM_BLOCKED and support_zh == "能":
+        return "R2"
+    if token_zh in TOKEN_CLAIM_HEARSAY and support_zh == "能":
+        return "R4"
+    if token_zh in TOKEN_CLAIM_HEARSAY and support_zh == "不能":
+        return "R5"
+    return ""
+
+
 # 自洽检查(用**纸面实印**的短词,不用构造真值、不用今天的机器结论):
 # ①说「机器贴得贴切」却与自己的 ② 打架,说明这张的 ① 不可信,必须标出来交人工复核。
 # 规则名沿用 golden_v2_assist_audit.py 的 R1/R2,并补 R4(转述也是「不当作已核实事实」的标签)。
@@ -260,6 +310,21 @@ def build_rows(
             current, reason = verdict, ""
         if not stale and card_id in CURRENT_BASIS_REREAD:
             errors.append(f"{card_id}: 被登记为「判据已过期」,但纸面标签与今日机器结论一致")
+        rc = RECHECK_ROWS.get(card_id)
+        if rc is None:
+            basis_zh = rc_verdict = rc_reason = None
+            rc_flag = ""
+        else:
+            basis_zh, rc_verdict, rc_reason = rc
+            # 重判必须按**今日**机器标签;引旧纸面标签的,直接报错(第一轮打架有一半就是这么来的)。
+            if basis_zh != ZH_OF_LABEL[now]:
+                errors.append(f"{card_id}: 重判所引标签「{basis_zh}」与今日机器结论"
+                              f"「{ZH_OF_LABEL[now]}」不一致,重判不许按 2026-11-16 的纸面旧标签")
+            # ② 沿用初审值:两版 ② 完全一致(61/61),重判表没有改判 ②。
+            rc_flag = self_consistency_recheck(basis_zh, rc_verdict == "通过", support_zh)
+            if rc_flag:
+                errors.append(f"{card_id}: 重判 {rc_verdict} 与今日标签「{basis_zh}」+ ②{support_zh}"
+                              f" 违反钉死口径({rc_flag}),见 golden_set_v2.schema.md §6")
         rows.append({
             "card_id": card_id,
             "ai_row_no": row_no,
@@ -284,6 +349,17 @@ def build_rows(
             "ai_self_consistency_flag": flag,
             "needs_human_review": bool(flag) or stale,
             "tier_matches_card": tier == card["source_tier"],
+            # ---- 重判(钉死口径 ①a+①b;只覆盖两版打架的 12 张,原 ai_verdict 不动)----
+            "ai_recheck_adjudicator": ADJUDICATOR if rc else None,
+            "ai_recheck_at": None,  # 由 main() 统一写录入时间
+            "ai_recheck_at_basis": RECHECK_AT_BASIS if rc else None,
+            "ai_recheck_basis_label": basis_zh,
+            "ai_recheck_verdict": rc_verdict,
+            "ai_recheck_reason": rc_reason,
+            "ai_recheck_rubric": RECHECK_RUBRIC if rc else None,
+            "ai_recheck_flag": rc_flag or None,
+            "ai_recheck_changes_recorded": bool(rc and rc_verdict != verdict),
+            "ai_recheck_changes_derived": bool(rc and rc_verdict != current),
         })
     if seen_rows != set(range(1, len(cards) + 1)):
         errors.append(f"行号集合不完整:{len(seen_rows)} 行 / 卡片 {len(cards)} 张")
@@ -323,6 +399,8 @@ def main(argv: list[str] | None = None) -> int:
     at = args.at or datetime.now().astimezone().isoformat(timespec="seconds")
     for row in rows:
         row["ai_at"] = at
+        if row["ai_recheck_verdict"] is not None:
+            row["ai_recheck_at"] = at
 
     tier_ai: dict[str, int] = {}
     for row in rows:
