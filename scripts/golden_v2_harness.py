@@ -6,8 +6,17 @@
 - 已人工裁定卡片 < MIN_HUMAN_CASES 时,quality_claim = NOT_AVAILABLE,
   任何「事实核验达标」的结论都不成立。
 
+**两种口径必须同时报,不得互相冒充(2026-11-17 项目负责人口径决定)**:
+- 人工口径:卡片文件里的 `human_*` 字段。目前为 0 条,`quality_claim` 只由它决定,
+  退出码也只看它 —— 这样 CI / 每周巡检不会因 AI 初审而偷偷变绿。
+- AI 口径:独立 sidecar `golden_set_v2_ai_adjudication.jsonl` 的 `ai_*` 字段
+  (AI 辅助初审,项目负责人 2026-11-17 15:06 授权)。单独报 `quality_claim_ai`,
+  并在报告里写明「AI 口径达标 ≠ 人工达标、≠ L4 通过」。
+- sidecar **禁止**携带任何 `human_*` 字段,发现即报模式错误(防止 AI 结果洗成人工)。
+
 用法:
     python scripts/golden_v2_harness.py [--cards 10_tests/golden/golden_set_v2.jsonl]
+                                        [--ai-sidecar 10_tests/golden/golden_set_v2_ai_adjudication.jsonl]
                                         [--out 08_wiki/reports/P13-batch1-golden-v2-status.md]
                                         [--no-report]
 """
@@ -28,6 +37,7 @@ if str(ROOT) not in sys.path:
 from ttxt.writing import verifier  # noqa: E402
 
 CARDS_PATH = ROOT / "10_tests" / "golden" / "golden_set_v2.jsonl"
+AI_SIDECAR_PATH = ROOT / "10_tests" / "golden" / "golden_set_v2_ai_adjudication.jsonl"
 REPORT_PATH = ROOT / "08_wiki" / "reports" / "P13-batch1-golden-v2-status.md"
 
 MIN_HUMAN_CASES = 50          # 少于该数量不得宣称质量达标
@@ -54,6 +64,13 @@ NEGATIVE_KINDS = {
 TIERS = {"A", "B", "C", "D"}
 EXPECTED = {"verified", "unverified", "no_source", "opinion"}
 VERDICTS = {"通过", "驳回"}
+
+# ---- AI 口径(sidecar)校验常量:AI 结果只许待在 ai_* 字段里 ----
+AI_REQUIRED_FIELDS = (
+    "card_id", "ai_adjudicated", "ai_verdict", "ai_fact_support", "ai_confirms_tier",
+    "ai_adjudicator", "ai_at", "machine_now",
+)
+AI_FACT_SUPPORTS = {"supported", "unsupported", "needs_more_evidence"}
 
 
 def load_cards(path: Path) -> tuple[list[dict], list[str]]:
@@ -103,6 +120,62 @@ def load_cards(path: Path) -> tuple[list[dict], list[str]]:
     return cards, errors
 
 
+def ai_sidecar_path_for(cards_path: Path) -> Path:
+    """sidecar 默认与卡片同目录、同名前缀 + `_ai_adjudication.jsonl`。
+
+    这样 `--cards /tmp/x.jsonl` 的临时夹具不会误吃到仓库里的 61 张 AI 裁定。
+    """
+    if cards_path.suffix == ".jsonl":
+        return cards_path.with_name(cards_path.stem + "_ai_adjudication.jsonl")
+    return AI_SIDECAR_PATH
+
+
+def load_ai_adjudications(path: Path, known_ids: set[str]) -> tuple[dict[str, dict], list[str]]:
+    """读取 AI 辅助初审 sidecar(一行一张,按 card_id 对齐)。只读,不写任何文件。
+
+    铁律(规则 54 补充口径):sidecar 里出现任何 `human_*` 字段就是**模式错误** ——
+    AI 裁定不得洗成人工裁定;缺字段、取值越界、card_id 对不上卡片文件同样报错。
+    文件不存在 → 按「AI 口径 0 条」计,不算错误(没做过初审也要能跑度量器)。
+    """
+    if not path.exists():
+        return {}, []
+    out: dict[str, dict] = {}
+    errors: list[str] = []
+    for lineno, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError as exc:
+            errors.append(f"sidecar 第 {lineno} 行 JSON 解析失败:{exc}")
+            continue
+        cid = str(rec.get("card_id") or "")
+        where = cid or f"sidecar 第 {lineno} 行"
+        leaked = sorted(k for k in rec if k.startswith("human_"))
+        if leaked:
+            errors.append(f"{where}: sidecar 禁止携带 human_* 字段 {leaked}(AI 裁定冒充人工裁定)")
+        for field in AI_REQUIRED_FIELDS:
+            if field not in rec:
+                errors.append(f"{where}: sidecar 缺必填字段 {field}")
+        if rec.get("ai_adjudicated") is not True:
+            errors.append(f"{where}: ai_adjudicated 必须为 true(AI 未裁的卡不得进 sidecar)")
+        for field, allowed in (("ai_verdict", VERDICTS), ("ai_fact_support", AI_FACT_SUPPORTS),
+                               ("ai_confirms_tier", TIERS), ("machine_now", EXPECTED)):
+            if rec.get(field) not in allowed:
+                errors.append(f"{where}: {field}={rec.get(field)!r} 不在允许集合内")
+        if not str(rec.get("ai_adjudicator") or "").strip():
+            errors.append(f"{where}: ai_adjudicator 不得为空(必须写明是 AI,不得留空冒充人工)")
+        if not str(rec.get("ai_at") or "").strip():
+            errors.append(f"{where}: ai_at 不得为空")
+        if cid in out:
+            errors.append(f"{where}: sidecar card_id 重复")
+        if cid and cid not in known_ids:
+            errors.append(f"{where}: sidecar 的 card_id 在卡片文件里不存在")
+        out[cid] = rec
+    return out, errors
+
+
 def machine_result(card: dict) -> dict:
     """现算机器结论(① 原文匹配),不写入卡片文件。"""
     article = {
@@ -128,11 +201,13 @@ def machine_result(card: dict) -> dict:
     }
 
 
-def evaluate(cards: list[dict]) -> dict:
+def evaluate(cards: list[dict], ai: dict[str, dict] | None = None) -> dict:
+    ai = ai or {}
     adjudicated = [c for c in cards if c.get("human_adjudicated") is True]
     rows = []
     for card in cards:
         m = machine_result(card)
+        rec = ai.get(card.get("card_id")) or {}
         rows.append({
             "card_id": card.get("card_id"),
             "kind": card.get("kind"),
@@ -144,6 +219,15 @@ def evaluate(cards: list[dict]) -> dict:
             "adjudicated": card.get("human_adjudicated") is True,
             "verdict": card.get("human_verdict"),
             "agree_construction": m["credibility"] == card.get("expected_by_construction"),
+            # ---- AI 口径(只从 sidecar 取,卡片里的 human_* 一律不动) ----
+            "ai_adjudicated": bool(rec.get("ai_adjudicated")),
+            "ai_verdict": rec.get("ai_verdict"),
+            "ai_verdict_current": rec.get("ai_verdict_current") or rec.get("ai_verdict"),
+            "ai_basis_stale": bool(rec.get("ai_basis_stale")),
+            "ai_fact_support": rec.get("ai_fact_support"),
+            "ai_confirms_tier": rec.get("ai_confirms_tier"),
+            "machine_at_ai_adjudication": rec.get("machine_at_adjudication"),
+            "machine_recorded_in_sidecar": rec.get("machine_now"),
         })
 
     def subset(rows_, kinds=None, machines=None, verdict=None):
@@ -195,10 +279,60 @@ def evaluate(cards: list[dict]) -> dict:
     if thin_kinds:
         gate_fail.append(f"kind 覆盖不足: {thin_kinds}(每种需 ≥{MIN_PER_KIND})")
 
+    # ---- AI 口径:与人工口径并列计算,单独一套门禁,绝不合并进上面 ----
+    ai_rows = [r for r in rows if r["ai_adjudicated"]]
+    ai_verdict_counts = Counter(r["ai_verdict"] for r in ai_rows)
+    ai_current_counts = Counter(r["ai_verdict_current"] for r in ai_rows)
+    ai_drift = [
+        r["card_id"] for r in ai_rows
+        if r["machine_recorded_in_sidecar"] and r["machine_recorded_in_sidecar"] != r["machine"]
+    ]
+    ai_neg = [r for r in ai_rows if r["kind"] in NEGATIVE_KINDS]
+    ai_pos = [r for r in ai_rows if r["kind"] == "positive"]
+    ai_false_accept = sum(
+        1 for r in ai_neg if r["machine"] == "verified" and r["ai_verdict_current"] == "通过")
+    ai_false_reject = sum(
+        1 for r in ai_pos
+        if r["machine"] in {"unverified", "no_source"} and r["ai_verdict_current"] == "通过")
+    ai_opinion_cards = [r for r in ai_rows if r["kind"] == "opinion_attributed"]
+    ai_opinion_rejected = sum(
+        1 for r in ai_opinion_cards if r["machine"] == "opinion" and r["ai_verdict_current"] == "驳回")
+    ai_per_category = Counter(r["category"] for r in ai_rows)
+    ai_tier_counts = Counter(r["ai_confirms_tier"] for r in ai_rows)
+    ai_independent = sum(1 for r in ai_rows if r["ai_confirms_tier"] in {"A", "B"})
+    ai_ind_share = share(ai_independent, len(ai_rows))
+
+    ai_gate = []
+    if not ai_rows:
+        ai_gate.append("AI 口径 0 条:未找到 sidecar 或尚未做 AI 初审")
+    if len(ai_rows) < MIN_HUMAN_CASES:
+        ai_gate.append(f"已 AI 初审 {len(ai_rows)} < {MIN_HUMAN_CASES}")
+    ai_short = {k: v for k, v in ai_per_category.items() if v < MIN_PER_CATEGORY}
+    ai_missing = sorted(CATEGORIES - set(ai_per_category))
+    if ai_short or ai_missing:
+        ai_gate.append(
+            f"AI 口径类目覆盖不足: {ai_short or {}} 缺类目 {ai_missing}(每类目需 ≥{MIN_PER_CATEGORY})"
+        )
+    if ai_rows and (ai_ind_share is None or ai_ind_share < MIN_INDEPENDENT_SHARE):
+        ai_gate.append(f"AI 确认的 A/B 级独立证据占比 {ai_ind_share} < {MIN_INDEPENDENT_SHARE}")
+    if ai_drift:
+        ai_gate.append(
+            f"sidecar 记录的机器标签与当前机器结论不一致 {len(ai_drift)} 张:{sorted(ai_drift)[:10]}"
+            "(机器结论变了 ⇒ AI 判据已过期,必须重裁,不得沿用)"
+        )
+
     return {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "card_count": len(cards),
+        # 人工口径(唯一决定 quality_claim 与退出码的口径)
         "adjudicated_count": len(adjudicated),
+        "human_adjudicated_count": len(adjudicated),
+        # AI 口径(辅助初审,不得当人工用)
+        "ai_adjudicated_count": len(ai_rows),
+        "caliber_note": (
+            "human_adjudicated_count = 真人逐张裁定;ai_adjudicated_count = AI 辅助初审。"
+            "两个口径分开报数:AI 数量再多也不构成人工裁定,AI 口径达标 ≠ 人工达标 ≠ L4 通过。"
+        ),
         "machine_vs_construction": {
             "agreement": agree_construction,
             "rate": share(agree_construction, len(rows)),
@@ -215,38 +349,77 @@ def evaluate(cards: list[dict]) -> dict:
             "positive_adjudicated": len(adj_pos),
             "positive_false_reject": pos_false_reject,
             "false_reject_rate": share(pos_false_reject, len(adj_pos)),
+            "meaning": "**唯一可宣称的质量口径**,只统计真人逐张裁定的卡片",
+        },
+        "machine_vs_ai": {
+            "adjudicated": len(ai_rows),
+            "adjudicator": sorted({str((ai.get(r['card_id']) or {}).get('ai_adjudicator') or '') for r in ai_rows}) or None,
+            "verdict_as_recorded": dict(ai_verdict_counts),
+            "verdict_on_current_machine_label": dict(ai_current_counts),
+            "basis_stale_cards": sorted(r["card_id"] for r in ai_rows if r["ai_basis_stale"]),
+            "machine_label_drift": sorted(ai_drift),
+            "agree_通过_current": ai_current_counts.get("通过", 0),
+            "reject_驳回_current": ai_current_counts.get("驳回", 0),
+            "accuracy": share(ai_current_counts.get("通过", 0), len(ai_rows)),
+            "negative_adjudicated": len(ai_neg),
+            "negative_false_accept": ai_false_accept,
+            "false_accept_rate": share(ai_false_accept, len(ai_neg)),
+            "positive_adjudicated": len(ai_pos),
+            "positive_false_reject": ai_false_reject,
+            "false_reject_rate": share(ai_false_reject, len(ai_pos)),
+            "opinion_routed_cards": len(ai_opinion_cards),
+            "opinion_routing_rejected_by_ai": ai_opinion_rejected,
+            "fact_support": dict(Counter(r["ai_fact_support"] for r in ai_rows)),
+            "meaning": (
+                "AI 辅助初审口径:只用于定位机器的可疑误判与回归样本,"
+                "**不是质量分数、不是人工裁定、不得用于 L4 验收**"
+            ),
         },
         "source_independence": {
             "tier_counts": dict(tier_counts),
             "human_confirmed_tiers": dict(adjudicated_tiers),
-            "independent_share_of_adjudicated": ind_share,
+            "ai_confirmed_tiers": dict(ai_tier_counts),
+            "independent_share_of_human_adjudicated": ind_share,
+            "independent_share_of_ai_adjudicated": ai_ind_share,
         },
         "distribution": {
             "per_category_all": dict(Counter(c.get("category") for c in cards)),
-            "per_category_adjudicated": dict(per_category),
+            "per_category_human_adjudicated": dict(per_category),
+            "per_category_ai_adjudicated": dict(ai_per_category),
             "per_kind": dict(per_kind),
             "per_fact_type": dict(Counter(c.get("fact_type") for c in cards)),
         },
         "quality_claim": "NOT_AVAILABLE" if gate_fail else "AVAILABLE",
+        "quality_claim_basis": "只由人工口径(gate_failures)决定;AI 口径不影响退出码,防止 AI 初审让 CI 偷偷变绿",
         "gate_failures": gate_fail,
+        "quality_claim_ai": "NOT_AVAILABLE" if ai_gate else "AVAILABLE",
+        "ai_gate_failures": ai_gate,
         "rows": rows,
     }
 
 
 def render_report(metrics: dict, schema_errors: list[str]) -> str:
     m_h = metrics["machine_vs_human"]
+    m_a = metrics["machine_vs_ai"]
     m_c = metrics["machine_vs_construction"]
     lines = [
         "# P13 批次1 黄金核验集 v2 状态(由 scripts/golden_v2_harness.py 生成)",
         "",
         f"- 生成时间:{metrics['generated_at']}",
-        f"- 卡片总数(候选):{metrics['card_count']};**已人工裁定:{metrics['adjudicated_count']}**",
-        f"- **质量结论:{metrics['quality_claim']}**"
+        f"- 卡片总数(候选):{metrics['card_count']}",
+        f"- **已人工裁定:{metrics['human_adjudicated_count']}**;"
+        f"已 AI 辅助初审:{metrics['ai_adjudicated_count']}",
+        f"- {metrics['caliber_note']}",
+        f"- **质量结论(人工口径,唯一决定退出码):{metrics['quality_claim']}**"
         + ("" if metrics["quality_claim"] == "AVAILABLE" else " —— 门禁未通过,禁止宣称「L4 事实核验达标」"),
+        f"- 质量结论(AI 口径,仅供参考):{metrics['quality_claim_ai']}",
     ]
     if metrics["gate_failures"]:
-        lines.append("- 门禁未满足项:")
+        lines.append("- 人工口径门禁未满足项:")
         lines.extend(f"  - {item}" for item in metrics["gate_failures"])
+    if metrics["ai_gate_failures"]:
+        lines.append("- AI 口径门禁未满足项:")
+        lines.extend(f"  - {item}" for item in metrics["ai_gate_failures"])
     if schema_errors:
         lines.append(f"- ⚠️ 模式校验错误 {len(schema_errors)} 条(这些卡片不计入任何结论):")
         lines.extend(f"  - {item}" for item in schema_errors[:40])
@@ -264,21 +437,40 @@ def render_report(metrics: dict, schema_errors: list[str]) -> str:
         f"- 正样本(已裁定 {m_h['positive_adjudicated']}):误判 unverified/no_source"
         f" {m_h['positive_false_reject']};false_reject_rate = {m_h['false_reject_rate']}",
         "",
+        "## 2b. 机器 vs AI 辅助初审(参考口径,不是质量分数)",
+        f"- 已 AI 初审:{m_a['adjudicated']};裁定者 {m_a['adjudicator']}",
+        f"- 按纸面标签记的 ①:{m_a['verdict_as_recorded']};"
+        f"按今日机器标签重述:{m_a['verdict_on_current_machine_label']}",
+        f"- 判据已过期(纸面标签≠今日标签)的卡片:{m_a['basis_stale_cards'] or '无'}",
+        f"- sidecar 记录的机器标签与当前不一致:{m_a['machine_label_drift'] or '无'}",
+        f"- 负样本(已 AI 初审 {m_a['negative_adjudicated']}):机器 verified 而 AI 认可"
+        f" {m_a['negative_false_accept']};false_accept_rate = {m_a['false_accept_rate']}",
+        f"- 正样本(已 AI 初审 {m_a['positive_adjudicated']}):机器对不上/没出处 而 AI 认可"
+        f" {m_a['positive_false_reject']};false_reject_rate = {m_a['false_reject_rate']}",
+        f"- 走「转述」通道的卡片 {m_a['opinion_routed_cards']} 张,AI 判机器贴得不贴切"
+        f" {m_a['opinion_routing_rejected_by_ai']} 张(T-15 的线索)",
+        f"- ② 原句支撑分布:{m_a['fact_support']}",
+        f"- {m_a['meaning']}",
+        "",
         "## 3. 来源独立性",
         f"- 声明证据级分布:{metrics['source_independence']['tier_counts']}",
-        f"- 人工确认证据级分布:{metrics['source_independence']['human_confirmed_tiers']}",
-        f"- 已裁定卡片中 A/B 级占比:{metrics['source_independence']['independent_share_of_adjudicated']}",
+        f"- 人工确认证据级分布:{metrics['source_independence']['human_confirmed_tiers']};"
+        f"AI 确认(AI 口径):{metrics['source_independence']['ai_confirmed_tiers']}",
+        f"- 已人工裁定卡片中 A/B 级占比:{metrics['source_independence']['independent_share_of_human_adjudicated']};"
+        f"AI 口径:{metrics['source_independence']['independent_share_of_ai_adjudicated']}",
         "",
         "## 4. 覆盖分布",
-        f"- 类目(全部/已裁定):{metrics['distribution']['per_category_all']}"
-        f" / {metrics['distribution']['per_category_adjudicated']}",
+        f"- 类目(全部/已人工裁定/已 AI 初审):{metrics['distribution']['per_category_all']}"
+        f" / {metrics['distribution']['per_category_human_adjudicated']}"
+        f" / {metrics['distribution']['per_category_ai_adjudicated']}",
         f"- kind:{metrics['distribution']['per_kind']}",
         f"- fact_type:{metrics['distribution']['per_fact_type']}",
         "",
         "## 5. 人工裁定方法",
         "- 逐条回复 `v2xNN: 通过` 或 `v2xNN: 驳回`;需要修正证据级时回复 `v2xNN: 证据级=B`。",
         "- 「驳回」= 认为机器结论错误;只有 `human_adjudicated=true` 的卡片进入 §2 的质量口径。",
-        "- 待裁定清单见同目录人工复核表(由 build_golden_set_v2.py 生成)。",
+        "- AI 辅助初审结果只进 sidecar(`*_ai_adjudication.jsonl`)的 `ai_*` 字段,"
+        "**永远不得**写进卡片文件的 `human_*` 字段。",
     ]
     return "\n".join(lines) + "\n"
 
@@ -286,25 +478,36 @@ def render_report(metrics: dict, schema_errors: list[str]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="黄金核验集 v2 度量器")
     parser.add_argument("--cards", default=str(CARDS_PATH))
+    parser.add_argument("--ai-sidecar", default=None,
+                        help="AI 辅助初审 sidecar;默认取卡片同名 *_ai_adjudication.jsonl")
     parser.add_argument("--out", default=str(REPORT_PATH))
     parser.add_argument("--no-report", action="store_true")
     args = parser.parse_args(argv)
 
-    cards, errors = load_cards(Path(args.cards))
-    metrics = evaluate(cards)
+    cards_path = Path(args.cards)
+    cards, errors = load_cards(cards_path)
+    sidecar_path = Path(args.ai_sidecar) if args.ai_sidecar else ai_sidecar_path_for(cards_path)
+    ai, ai_errors = load_ai_adjudications(sidecar_path, {c.get("card_id") for c in cards})
+    metrics = evaluate(cards, ai)
+    metrics["ai_sidecar_path"] = str(sidecar_path)
     print(json.dumps({k: v for k, v in metrics.items() if k != "rows"}, ensure_ascii=False, indent=2))
     if errors:
         print(f"\n模式校验错误 {len(errors)} 条:", file=sys.stderr)
         for item in errors:
             print("  -", item, file=sys.stderr)
+    if ai_errors:
+        print(f"\nAI sidecar 校验错误 {len(ai_errors)} 条({sidecar_path}):", file=sys.stderr)
+        for item in ai_errors:
+            print("  -", item, file=sys.stderr)
     if not args.no_report:
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(render_report(metrics, errors), encoding="utf-8")
+        out.write_text(render_report(metrics, errors + ai_errors), encoding="utf-8")
         print(f"\n报告:{out}")
-    if errors:
+    if errors or ai_errors:
         return 1
-    # 门禁未通过必须让 CI / 每周巡检能机器识别:NOT_AVAILABLE → 退出码 2
+    # 人工口径门禁未通过必须让 CI / 每周巡检能机器识别:NOT_AVAILABLE → 退出码 2。
+    # AI 口径只报数,不参与退出码 —— 否则 AI 初审一做,CI 就自己变绿了。
     return 0 if metrics["quality_claim"] == "AVAILABLE" else 2
 
 

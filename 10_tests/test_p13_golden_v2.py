@@ -161,7 +161,7 @@ def test_quality_claim_available_only_when_every_gate_is_met():
     assert metrics["quality_claim"] == "AVAILABLE", metrics["gate_failures"]
     assert metrics["machine_vs_human"]["accuracy"] is not None
     assert metrics["machine_vs_human"]["false_accept_rate"] is not None
-    assert metrics["source_independence"]["independent_share_of_adjudicated"] == 1.0
+    assert metrics["source_independence"]["independent_share_of_human_adjudicated"] == 1.0
 
 
 def test_dropping_one_category_reopens_gate():

@@ -59,7 +59,17 @@ harness 同时输出两类数字,且**不得混称**:
    - `opinion_routing_errors`:hedge 词路由错误(该走事实门禁的走了观点,或反之);
    - `independent_source_coverage`:tier A/B 且独立性经人工确认的卡片占比。
 
+harness 还必须先数人再数 AI,两套计数并列输出、绝不合并:`human_adjudicated_count`(真人逐张裁定)与 `ai_adjudicated_count`(AI 辅助初审)。质量结论只有一个人工口径 `quality_claim`,**只由 `gate_failures` 决定**;AI 口径另出一套 `quality_claim_ai` / `ai_gate_failures`,仅供参考,**不参与退出码**(门禁未过一律退 2)。`machine_vs_ai` 一节里 `verdict_as_recorded` 与 `verdict_on_current_machine_label` 必须分开报,后者只在判据过期时由 AI 自己写明的应判标签派生。
+
 **门禁**:`已人工裁定卡片数 < 50` 时,harness 必须输出 `quality_claim: NOT_AVAILABLE`,并拒绝给出「L4 事实核验达标」的任何结论。有效卡片还要求:每类目 ≥10、A+B 级 ≥50%、负样本 ≥30%、六种 `kind` 至少各 3 张。
+
+## 4b. AI 辅助初审 sidecar(2026-11-17 起)
+
+- 文件:与卡片文件同名加后缀 —— `golden_set_v2_ai_adjudication.jsonl`(定位规则 `harness.ai_sidecar_path_for()`)。一行一张,按 `card_id` 对齐。
+- 只允许这些字段:`card_id / ai_row_no / category / kind / card_source_tier / ai_adjudicated / ai_verdict(通过|驳回) / ai_fact_support(supported|unsupported) / ai_confirms_tier(A|B|C|D) / ai_adjudicator / ai_adjudicator_note / ai_at / ai_at_basis / ai_reason / sheet_printed_machine_token / machine_at_adjudication / machine_now / ai_basis_stale / ai_verdict_current / ai_verdict_current_reason / ai_self_consistency_flag / needs_human_review / tier_matches_card`。
+- **铁律**:sidecar 里出现任何 `human_*` 键 = 冒充人工裁定,harness 直接判模式错误(退 1);卡片文件的 `human_*` 四个字段一律保持原值(现全空),AI 结果永不得回填。
+- **判据必须可取证**:`machine_at_adjudication` 取 AI 当时看到的机器标签(= 打勾单纸面实印短词,证据 `adjudications/printed_sheet_tokens_20261116.jsonl`),不得用今天的机器结论反推;纸面标签与 `machine_now` 不一致时 `ai_basis_stale=true`,且必须带 `ai_verdict_current_reason`,否则生成器报错。
+- **一轮一份,不许合并**:不同轮 AI 初审对同一张卡片判定相反时,不得平均、不得挑好看的用,必须出分歧清单退回重判(本轮实测两版 ① 只一致 49/61,分歧 12 张,见 `08_wiki/reports/P13-ai-round2-disputes.md`)。sidecar 目前只存第一轮那一份。
 
 ## 5. 构造纪律
 
