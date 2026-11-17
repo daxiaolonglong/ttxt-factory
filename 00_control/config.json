@@ -46,7 +46,8 @@
       "article": 2048
     },
     "rag_max_mb": 500,
-    "browser_max_gb": 3
+    "browser_max_gb": 3,
+    "wal_max_mb": 64
   },
   "categories": [
     "technology",
@@ -90,7 +91,8 @@
     "authorized_sources": {
       "toutiao_admin_export": "self_reported",
       "manual_verified": "verified",
-      "toutiao_public_article": "public_page"
+      "toutiao_public_article": "public_page",
+      "legacy_factory_search_ssr": "public_page"
     },
     "credibility_rank": {
       "verified": 5,

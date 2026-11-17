@@ -79,10 +79,10 @@ def test_enqueue_actor_distinguishes_scheduler_and_manual(tmp_path: Path):
 
 # ------------------------------------------------------------------ 2 FTS 覆盖率要能体检
 #
-# `isolated_data_root` 是把**生产 6 个类目库逐字节复制到 tmp**,再把 cfg.CATEGORIES_DIR 指过去,
-# 所以体检看到的是"生产副本"(374 行、social 22/33 这些数字都来自副本),不是空库。
-# 因此这里**不写死绝对数字**(生产一直在涨),只用 SQL 现读现算,断言"细节里必须出现这个命名空间的
-# 实际 fts/articles 比值" —— 写死数字的测试明天就会假失败。
+# `isolated_data_root` 用的是 **P38 裁剪副本**(生产库逐字节复制到 07_tmp/pytest_trim 后裁到最近
+# TRIM_ARTICLE_ROWS 篇 + 整簇,再把 cfg.CATEGORIES_DIR 指过去),所以体检看到的是"生产库的最近一段",
+# 不是空库,也不是整库。因此这里**不写死绝对数字**(生产一直在涨,裁剪窗口也跟着变),只用 SQL 现读现算,
+# 断言"细节里必须出现这个命名空间的实际 fts/articles 比值" —— 写死数字的测试明天就会假失败。
 
 
 def _counts(db_path: Path) -> tuple[int, int]:

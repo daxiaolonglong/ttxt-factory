@@ -93,26 +93,35 @@ def test_overview(dashboard):
     assert data["disk"]["free_gb"] > 0
 
 
-def test_categories_isolation(dashboard, isolated_data_root: Path):
+def test_categories_isolation(dashboard, isolated_data_root: Path, trim_caches: dict):
     _, body = _get(dashboard + "/api/categories")
     cats = {c["slug"]: c for c in json.loads(body)}
     assert "technology" in cats
     assert "demo" in cats
 
     def count_articles(slug: str) -> int:
-        # C-8:面板 API 读的是 07_tmp 下的副本;本测试也在副本上核对真实计数。
-        # 副本必须与生产库逐字节一致,否则 API 计数不能代表生产真相。
-        production = Path("D:/ttxt/01_categories") / slug / "articles.db"
+        # C-8/P38:面板读的是 07_tmp 下的隔离副本,本测试也在同一副本上核对真实计数。
+        # "副本忠实于生产"这件事不再靠"整库逐字节相同"来证(整库复制 = 28 GB/轮,是这次
+        # 磁盘事故的根因),而由夹具谱系记录证三件事:副本 == 裁剪缓存逐字节、
+        # 裁剪缓存由一次哈希一致的整库字节复制派生、裁剪只删行不造行(rows_kept ≤ rows_source)。
         copy_path = isolated_data_root / "01_categories" / slug / "articles.db"
         assert copy_path.exists(), f"缺少隔离副本:{copy_path}"
+        record = trim_caches[slug]
+        cache = Path(record["cache"])
         assert hashlib.sha256(copy_path.read_bytes()).hexdigest() == hashlib.sha256(
-            production.read_bytes()
-        ).hexdigest(), f"副本与生产库不一致:{slug}"
+            cache.read_bytes()
+        ).hexdigest(), f"隔离副本与裁剪缓存不一致:{slug}"
+        assert cache.stat().st_size <= 40 * 1024 * 1024, (
+            f"{slug} 裁剪副本 {cache.stat().st_size:,} 字节超过 40 MB 上限:副本必须是裁剪库,不是整库"
+        )
         con = sqlite3.connect(copy_path)
         try:
-            return con.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+            rows = con.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
         finally:
             con.close()
+        assert rows == record["rows_kept"], f"副本行数与谱系记录不符:{slug}:{rows} != {record['rows_kept']}"
+        assert rows <= record["rows_source"], f"裁剪副本凭空多出行:{slug}:{rows} > {record['rows_source']}"
+        return rows
 
     # 每个类目的 API 计数必须等于该类目独立数据库的真实计数(物理隔离)
     assert cats["technology"]["articles"] == count_articles("technology")

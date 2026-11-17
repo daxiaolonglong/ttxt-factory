@@ -20,23 +20,38 @@ def _db_path(category: str, db_path: Path | None) -> Path:
 
 
 def rebuild_index(category: str, db_path: Path | None = None) -> dict[str, int]:
+    """整库重建 FTS。
+
+    重建用 ``DROP + CREATE`` 而不是 ``DELETE FROM``:FTS5 的 DELETE 只写墓碑,旧段
+    (2026-11-17 实测 social 整库索引 811 MB)永远留在 b-tree 里,VACUUM 也拿不回来。
+    手动事务(pysqlite 对 DDL 不开隐式事务)保证中途崩溃整体回滚,不会留下半截索引。
+    """
+    from ttxt.crawler.store import ARTICLES_FTS_DDL
+
     target = _db_path(category, db_path)
     con = connect(target)
+    con.isolation_level = None
     try:
         rows = con.execute("SELECT id, title, cleaned_content, content FROM articles ORDER BY id").fetchall()
-        con.execute("DELETE FROM articles_fts")
-        con.executemany(
-            "INSERT INTO articles_fts(article_id, title, body) VALUES (?, ?, ?)",
-            [
-                (
-                    row["id"],
-                    bigrams(row["title"] or ""),
-                    bigrams((row["cleaned_content"] or row["content"] or "")[:INDEX_CHAR_LIMIT]),
-                )
-                for row in rows
-            ],
-        )
-        con.commit()
+        con.execute("BEGIN IMMEDIATE")
+        try:
+            con.execute("DROP TABLE IF EXISTS articles_fts")
+            con.execute(ARTICLES_FTS_DDL)
+            con.executemany(
+                "INSERT INTO articles_fts(article_id, title, body) VALUES (?, ?, ?)",
+                [
+                    (
+                        row["id"],
+                        bigrams(row["title"] or ""),
+                        bigrams((row["cleaned_content"] or row["content"] or "")[:INDEX_CHAR_LIMIT]),
+                    )
+                    for row in rows
+                ],
+            )
+        except Exception:
+            con.execute("ROLLBACK")
+            raise
+        con.execute("COMMIT")
     finally:
         con.close()
     return {"indexed": len(rows)}

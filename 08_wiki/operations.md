@@ -84,6 +84,19 @@
 #   row_errors / outcome_counts / labels / analysis / measured / calibration_hint。
 #   **重标定用的是现有阈值,不自动重算阈值**(爆款的定义不能悄悄漂移):实测样本涨了而阈值快照还是旧的,
 #   回执里会给 calibration_hint,由人决定要不要跑第 3)步 ttxt metrics --category <类目> --calibrate。
+# 旧资产库一次性迁入类目库(T-14 / P37,2026-11-17):
+#   .venv\Scripts\python.exe -X utf8 -m ttxt legacy-migrate                      # 干跑:零字节,回执只报"会写什么"
+#   .venv\Scripts\python.exe -X utf8 -m ttxt legacy-migrate --apply              # 真写:每类目写前先备份到 11_backups
+#   策略在 `00_control/legacy_migration.json`(旧 primary_type → 类目、最小正文长度、0 当缺失的字段),**不在代码里**;
+#   旧库 `资产库/01_语料库/factory.db` 永远只读(回执里记 sha256 前后一致,实测 `a8a1f4c3…`)。
+#   回执 `09_logs/legacy_migrate/<时间戳>-{dry_run,apply}.json`:逐批对账 inserted/duplicates/metrics_written/
+#   metrics_orphaned(挂不上文章就不挂,不重新归因)/indexed/index_errors;幂等:重跑 inserted 0、duplicates 全量。
+#   迁移当场只重建 FTS,**不跑聚类**(O(n²),见 T-17),所以迁完要单独 `ttxt clean --category <类目>`
+#   (实测 social 40,506 行 47m51.9s)。回滚 = 用 `11_backups/<类目>-before-<时间戳>.db` 覆盖回去。
+# 完整性标签整改(T-13,只改标签不删语料,可精确回滚):
+#   .venv\Scripts\python.exe -X utf8 -m ttxt relabel-completeness --category <类目> --out 07_tmp/relabel-<类目>.json      # 出计划
+#   .venv\Scripts\python.exe -X utf8 -m ttxt relabel-completeness --category <类目> --apply --out 07_tmp/relabel-<类目>.json
+#   .venv\Scripts\python.exe -X utf8 -m ttxt relabel-completeness --category <类目> --rollback 07_tmp/relabel-<类目>.json # 按报告逐行改回
 # 浏览器 profile 跨进程互斥(P36,2026-11-17):上面"不能同时开浏览器"从 P36 起是**操作系统级真锁**,不再靠排队自觉。
 #   锁文件 `02_crawler/.browser/profile.lock` 在 profile 目录**之外**(Chromium 清 profile 清不掉它),
 #   Windows 用 `msvcrt.locking` 锁 1MB 偏移处的一个字节(POSIX 走 `fcntl.flock`,本机未实测);

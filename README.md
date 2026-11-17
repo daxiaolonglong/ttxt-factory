@@ -40,6 +40,7 @@ D:\ttxt\scripts\ttxt.cmd housekeep --clean
 D:\ttxt\scripts\ttxt.cmd crawl-queue --limit 20
 D:\ttxt\scripts\ttxt.cmd schedule
 D:\ttxt\scripts\ttxt.cmd metrics --list-sources
+D:\ttxt\scripts\ttxt.cmd legacy-migrate   # 旧资产库 factory.db → 类目库(默认只读干跑;--apply 才写,写前自动备份类目库)
 D:\ttxt\scripts\ttxt.cmd predict report --category technology
 ```
 

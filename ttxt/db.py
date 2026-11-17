@@ -14,6 +14,10 @@ from .config import (
 
 SCHEMA_VERSION = 1
 
+# WAL 检查点后保留的上限:超过部分由 SQLite 截断。没有这一行,一次大事务(整库 FTS
+# 重建)留下的 -wal 会一直挂在生产目录(2026-11-17 实测 social/articles.db-wal 826 MB)。
+WAL_SIZE_LIMIT_BYTES = 64 * 1024 * 1024
+
 SYSTEM_SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
   key TEXT PRIMARY KEY,
@@ -95,6 +99,9 @@ def connect(path: Path | str) -> sqlite3.Connection:
     con = sqlite3.connect(str(path), timeout=30.0)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
+    # WAL 检查点后按上限截断:否则一次大事务(如整库 FTS 重建)留下的 -wal 会长期
+    # 挂在生产目录里(2026-11-17 实测 social/articles.db-wal 826 MB)。
+    con.execute(f"PRAGMA journal_size_limit={WAL_SIZE_LIMIT_BYTES}")
     con.execute("PRAGMA foreign_keys=ON")
     con.execute("PRAGMA busy_timeout=30000")
     # 强制内存临时 B-tree:避免 temp 溢写落到 TMP(项目边界外),

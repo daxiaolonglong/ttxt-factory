@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import os
+import re
 import shutil
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -229,6 +232,94 @@ def db_size_warnings() -> list[dict[str, Any]]:
     return warnings
 
 
+def _db_paths_with_sidecars() -> list[Path]:
+    from ttxt.db import system_db_path
+
+    return [system_db_path(), *sorted(cfg.CATEGORIES_DIR.glob("*/articles.db"))]
+
+
+def _wal_threshold_bytes(min_wal_bytes: int | None = None) -> int:
+    from ttxt.db import WAL_SIZE_LIMIT_BYTES
+
+    if min_wal_bytes is not None:
+        return int(min_wal_bytes)
+    configured = int(cfg.load_config().get("disk", {}).get("wal_max_mb", 64)) * 1024 * 1024
+    return max(configured, WAL_SIZE_LIMIT_BYTES)
+
+
+def db_wal_warnings(min_wal_bytes: int | None = None) -> list[dict[str, Any]]:
+    """``-wal`` 边车超过阈值 ⇒ 检查点没跟上。它既占盘,又让下次打开先重放几百 MB。"""
+    threshold = _wal_threshold_bytes(min_wal_bytes)
+    warnings: list[dict[str, Any]] = []
+    for db_path in _db_paths_with_sidecars():
+        wal = db_path.with_name(db_path.name + "-wal")
+        if not wal.exists():
+            continue
+        size = wal.stat().st_size
+        if size > threshold:
+            warnings.append(
+                {
+                    "path": str(wal),
+                    "wal_bytes": size,
+                    "db_bytes": db_path.stat().st_size if db_path.exists() else 0,
+                }
+            )
+    return warnings
+
+
+def checkpoint_db_wals(dry_run: bool = False, min_wal_bytes: int | None = None) -> dict[str, Any]:
+    """把超阈值的 ``-wal`` 合并回主库并截断(SQLite 标准维护:只合并,不删数据)。
+
+    只处理超阈值的库,空闲小边车不动;库被别的进程占用时 ``skipped_busy`` 记录并跳过。
+    """
+    results: list[dict[str, Any]] = []
+    for item in db_wal_warnings(min_wal_bytes):
+        wal = Path(item["path"])
+        db_path = wal.with_name(wal.name[: -len("-wal")])
+        record = {
+            "db": db_path.as_posix(),
+            "wal_bytes_before": item["wal_bytes"],
+            "db_bytes_before": item["db_bytes"],
+        }
+        if dry_run:
+            record["action"] = "would_checkpoint"
+            results.append(record)
+            continue
+        import sqlite3
+
+        try:
+            con = sqlite3.connect(str(db_path), timeout=30.0)
+        except sqlite3.Error as exc:
+            record.update(action="failed", error=f"{type(exc).__name__}: {exc}")
+            results.append(record)
+            continue
+        try:
+            con.execute("PRAGMA busy_timeout=30000")
+            busy, log_size, framed = con.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+            record.update(
+                action="checkpointed" if not busy else "skipped_busy",
+                wal_frames_in_log=log_size,
+                wal_frames_written=framed,
+                wal_bytes_after=wal.stat().st_size if wal.exists() else 0,
+                db_bytes_after=db_path.stat().st_size,
+            )
+        except sqlite3.Error as exc:
+            record.update(action="failed", error=f"{type(exc).__name__}: {exc}")
+        finally:
+            con.close()
+        results.append(record)
+        LOG.info("housekeep.checkpoint_db_wals", "wal sidecar checkpointed", **record)
+    return {
+        "dry_run": dry_run,
+        "candidates": len(results),
+        "wal_bytes_reclaimed": sum(
+            r.get("wal_bytes_before", 0) - r.get("wal_bytes_after", r["wal_bytes_before"])
+            for r in results
+        ),
+        "results": results,
+    }
+
+
 def report() -> dict[str, Any]:
     config = cfg.load_config()
     disk_cfg = config.get("disk", {})
@@ -313,6 +404,7 @@ def report() -> dict[str, Any]:
             "browser_within": dir_size(cfg.CRAWLER_DIR / ".browser")
             <= float(disk_cfg.get("browser_max_gb", 3)) * GB,
             "db_warnings": db_size_warnings(),
+            "wal_warnings": db_wal_warnings(),
         },
     }
 
@@ -340,8 +432,176 @@ def prune_pytest_dirs(base: Path | None = None, keep: int = 2) -> dict[str, Any]
     return result
 
 
-def run(clean: bool = False, temp_max_age_hours: float = 24.0) -> dict[str, Any]:
+BASETEMP_DIRNAME = "pytest_basetemp"
+_RECLAIM_KEEP_RUNS = 1
+_RECLAIM_LIVE_GRACE_MINUTES = 30.0
+_RUN_DIR = re.compile(r"pytest-(\d+)$")
+_SCRATCH_KEEP_PREFIXES = ("reclaim-", "pytest_trim")
+
+
+def _inside_scratch(path: Path) -> bool:
+    """只允许删除 ``07_tmp`` 之下的路径(符号链接解析后判定)。"""
+    try:
+        Path(path).resolve().relative_to(cfg.SCRATCH_DIR.resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
+def _protected_scratch_name(name: str) -> bool:
+    """取证件与裁剪副本缓存不能被回收:它们是按 mtime 扫到的,只按名字豁免。"""
+    return name.startswith(_SCRATCH_KEEP_PREFIXES)
+
+
+def reclaim_scratch_runs(
+    dry_run: bool = True,
+    keep_runs: int = _RECLAIM_KEEP_RUNS,
+    live_grace_minutes: float = _RECLAIM_LIVE_GRACE_MINUTES,
+) -> dict[str, Any]:
+    """回收 ``07_tmp`` 下的 pytest 运行目录,按**字节**上限而不是按份数,逐条留回执。
+
+    P38 根因:T-14 把 social 库扩到 1.7 GB 后,测试夹具每测复制整库 ⇒ 单轮 basetemp 实测
+    28 GB(不是 conftest 注释里的"约 50 MB/轮"),按份数保留 4 份就是 56 GB。按份数回收
+    管不住体积,必须按字节。取证件(``reclaim-*``/``pytest_trim``)与 07_tmp 根下的历史
+    取证目录不在回收范围内,只有运行目录会被动。
+    """
+    root = cfg.SCRATCH_DIR / BASETEMP_DIRNAME
+    now = time.time()
+    grace = max(0.0, float(live_grace_minutes)) * 60.0
+    records: list[dict[str, Any]] = []
+    kept: list[dict[str, Any]] = []
+    skipped_live: list[dict[str, Any]] = []
+    skipped_locked: list[str] = []
+
+    run_dirs: list[tuple[int, Path, int]] = []
+    orphan_dirs: list[tuple[float, Path, int]] = []
+    if root.exists():
+        for entry in sorted(root.iterdir()):
+            if not entry.is_dir() or _protected_scratch_name(entry.name):
+                continue
+            try:
+                st = entry.stat()
+            except OSError:
+                continue
+            size = dir_size(entry)
+            match = _RUN_DIR.match(entry.name)
+            if match:
+                run_dirs.append((int(match.group(1)), entry, size))
+            else:
+                orphan_dirs.append((st.st_mtime, entry, size))
+
+    run_dirs.sort(key=lambda item: item[0], reverse=True)
+    for rank, (_number, entry, size) in enumerate(run_dirs):
+        try:
+            st = entry.stat()
+        except OSError:
+            continue
+        rel = entry.relative_to(cfg.PROJECT_ROOT).as_posix()
+        if now - st.st_mtime < grace:
+            skipped_live.append({"path": rel, "bytes": size, "live": True})
+            continue
+        if rank < max(0, int(keep_runs)):
+            kept.append({"path": rel, "bytes": size, "run": entry.name, "live": False})
+            continue
+        orphan_dirs.append((st.st_mtime, entry, size))
+
+    for _mtime, entry, size in sorted(orphan_dirs, key=lambda item: item[0]):
+        try:
+            st = entry.stat()
+        except OSError:
+            continue
+        rel = entry.relative_to(cfg.PROJECT_ROOT).as_posix()
+        if now - st.st_mtime < grace:
+            skipped_live.append({"path": rel, "bytes": size, "live": True})
+            continue
+        record = {"path": rel, "bytes": size, "mtime": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(st.st_mtime))}
+        if dry_run:
+            record["action"] = "would_delete"
+            records.append(record)
+            continue
+        record["action"] = "deleted"
+        staging = entry.with_name(entry.name + ".reclaiming")
+        try:
+            entry.rename(staging)
+            shutil.rmtree(staging)
+        except OSError as exc:
+            if staging.exists():
+                try:
+                    staging.rename(entry)
+                except OSError:
+                    pass
+            record["action"] = "skipped_locked"
+            record["error"] = f"{type(exc).__name__}: {exc}"
+            skipped_locked.append(rel)
+        records.append(record)
+        LOG.info("housekeep.reclaim_scratch_runs", "scratch run dir reclaimed", **record)
+
+    freed = sum(item["bytes"] for item in records if item["action"] == "deleted")
+    candidates = sum(item["bytes"] for item in records if item["action"] == "would_delete")
+    receipt_path: str | None = None
+    if not dry_run:
+        stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        receipt_dir = cfg.SCRATCH_DIR / f"reclaim-{stamp}"
+        receipt_dir.mkdir(parents=True, exist_ok=True)
+        receipt_file = receipt_dir / "ledger.json"
+        if not _inside_scratch(receipt_file):  # pragma: no cover - 边界守卫
+            receipt_path = None
+        else:
+            receipt_path = receipt_file.as_posix()
+            receipt_file.write_text(
+                json.dumps(
+                    {
+                        "dry_run": False,
+                        "keep_runs": keep_runs,
+                        "live_grace_minutes": live_grace_minutes,
+                        "freed_bytes": freed,
+                        "deleted": len([r for r in records if r["action"] == "deleted"]),
+                        "skipped_locked": skipped_locked,
+                        "kept": kept,
+                        "records": records,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+    result = {
+        "dry_run": dry_run,
+        "scratch_dir": str(cfg.SCRATCH_DIR),
+        "basetemp": str(root),
+        "candidates_bytes": candidates,
+        "candidates_gb": round(candidates / GB, 3),
+        "freed_bytes": freed,
+        "freed_gb": round(freed / GB, 3),
+        "would_delete_count": len([r for r in records if r["action"] == "would_delete"]),
+        "deleted_count": len([r for r in records if r["action"] == "deleted"]),
+        "kept_runs": kept,
+        "skipped_live": skipped_live,
+        "skipped_locked": skipped_locked,
+        "scratch_bytes_after": dir_size(cfg.SCRATCH_DIR),
+        "scratch_max_gb": float(cfg.load_config().get("disk", {}).get("scratch_max_gb", 2)),
+        "receipt": receipt_path,
+        "records_sample": records[:20],
+    }
+    LOG.info(
+        "housekeep.reclaim_scratch_runs",
+        "scratch run dirs reclaimed" if not dry_run else "scratch run dirs surveyed (dry-run)",
+        dry_run=dry_run, candidates_bytes=candidates, freed_bytes=freed,
+        deleted_count=result["deleted_count"], would_delete_count=result["would_delete_count"],
+        skipped_locked=len(skipped_locked), receipt=receipt_path,
+    )
+    return result
+
+
+def run(clean: bool = False, temp_max_age_hours: float = 24.0, reclaim_scratch: bool = False,
+        reclaim_apply: bool = False, reclaim_keep_runs: int = _RECLAIM_KEEP_RUNS,
+        checkpoint_wals: bool = False, checkpoint_wals_dry_run: bool = False) -> dict[str, Any]:
     result: dict[str, Any] = {"report": report()}
+    if reclaim_scratch:
+        result["reclaim_scratch"] = reclaim_scratch_runs(dry_run=not reclaim_apply, keep_runs=reclaim_keep_runs)
+    if checkpoint_wals:
+        result["checkpoint_db_wals"] = checkpoint_db_wals(dry_run=checkpoint_wals_dry_run)
     if clean:
         result["clean_temp"] = clean_temp(max_age_hours=temp_max_age_hours)
         result["rotate_logs"] = rotate_logs()

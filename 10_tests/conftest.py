@@ -39,10 +39,21 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 BASETEMP_ROOT = ROOT / "07_tmp" / "pytest_basetemp"
-# 每轮 pytest 的 basetemp 会复制生产库做隔离副本(实测约 50MB/轮)。
 # 规则 17/27:临时目录必须有上限并回收,磁盘不得膨胀。留 4 份足够事后取证
 # (最近一轮 + 失败复现用),更早的轮次证据都在 09_logs 与 08_wiki/reports 里。
 KEEP_BASETEMP_RUNS = 4
+# P38(2026-11-17 实测根因):**按份数保留管不住体积**。T-14 把 social 扩到 1.7 GB 之后,
+# 夹具每测复制整库 ⇒ 单轮 basetemp 实测 28 GB(老注释写的"约 50MB/轮"早已失真),
+# 留 4 份就是 56 GB,`07_tmp` 因此把 scratch 限额(2 GB)顶穿 28 倍。
+# 所以现在两条同时生效:份数上限 + **字节上限**,并在磁盘不够时当场拒绝开跑,而不是跑爆盘。
+BASETEMP_MAX_GB = 4.0
+MIN_FREE_GB_AT_START = 8.0
+# 类目库隔离副本改为"会话级裁剪副本":整库逐字节复制是 28 GB 的来源,裁剪副本只保留
+# 最近 N 篇及其同簇文章(聚类/近重复语义仍在),按生产库 size+mtime 做缓存键,跨会话复用。
+TRIM_DIR = ROOT / "07_tmp" / "pytest_trim"
+TRIM_ARTICLE_ROWS = 400
+TEST_COPY_MAX_MB = 40.0
+TEST_COPY_BUDGET_MB = 200.0
 
 CATEGORY_SLUGS = ("technology", "finance", "health", "social", "history", "demo")
 DATA_DIRS = (ROOT / "00_control", ROOT / "01_categories")
@@ -108,11 +119,79 @@ def pytest_configure(config: pytest.Config) -> None:
             f"basetemp.purged: 已回收旧临时运行目录 07_tmp/pytest_basetemp/{name}"
             f"({size:,} 字节),按保留份数只留最近 {KEEP_BASETEMP_RUNS} 份"
         )
-        try:
-            config.issue_config_time_warning(UserWarning(message), stacklevel=2)
-        except Exception:  # pragma: no cover - 兜底,不得静默
-            print(message, file=sys.stderr)
+        _announce(config, message)
+    # P38:份数上限之外再上一道**字节**闸门——体积才是真凶,份数只是表象。
+    by_bytes = _purge_basetemp_to_budget()
+    for name, size in by_bytes:
+        _announce(
+            config,
+            f"basetemp.purged_by_bytes: 已回收 07_tmp/pytest_basetemp/{name}({size:,} 字节),"
+            f"运行目录总量必须压到 {BASETEMP_MAX_GB:g} GB 以内(P38)",
+        )
     config.option.basetemp = str(BASETEMP_ROOT / f"pytest-{highest + 1}")
+    _require_free_disk(config)
+
+
+def _announce(config: pytest.Config, message: str) -> None:
+    """自动删除必须逐条可见(规则 29):能走 pytest 告警就走,否则落 stderr,绝不静默。"""
+    try:
+        config.issue_config_time_warning(UserWarning(message), stacklevel=2)
+    except Exception:  # pragma: no cover - 兜底,不得静默
+        print(message, file=sys.stderr)
+
+
+def _purge_basetemp_to_budget(budget_gb: float = BASETEMP_MAX_GB) -> list[tuple[str, int]]:
+    """按最旧优先回收 basetemp 运行目录,直到总量压进字节预算;被占用的跳过并回报。"""
+    limit = int(budget_gb * 1024**3)
+    if not BASETEMP_ROOT.exists():
+        return []
+    runs: list[tuple[float, int, Path]] = []
+    for item in BASETEMP_ROOT.iterdir():
+        if not item.is_dir():
+            continue
+        try:
+            runs.append((item.stat().st_mtime, _dir_size(item), item))
+        except OSError:
+            continue
+    total = sum(size for _mtime, size, _p in runs)
+    purged: list[tuple[str, int]] = []
+    for _mtime, size, item in sorted(runs, key=lambda entry: entry[0]):
+        if total <= limit:
+            break
+        victim = item.with_name(item.name + ".purging")
+        try:
+            item.rename(victim)
+            _rmtree(victim)
+            purged.append((item.name, size))
+            total -= size
+        except OSError:
+            continue
+    return purged
+
+
+def _require_free_disk(config: pytest.Config) -> None:
+    """空闲盘不足时**拒绝开跑**,并把能跑通的回收命令写清楚。
+
+    实测教训(P38):basetemp 涨到 56 GB 时 D: 只剩 34 GB,再跑一轮全量就会把盘写爆,
+    而失败现场是"互不相干的测试随机红"——排查成本远高于一句提前拒绝。
+    """
+    floor = MIN_FREE_GB_AT_START
+    try:
+        from ttxt import config as cfg
+
+        floor = max(floor, float(cfg.load_config().get("disk", {}).get("min_free_gb", 5)))
+    except Exception:  # pragma: no cover - 配置读不出来时仍要用底线值
+        pass
+    free = shutil.disk_usage(str(ROOT)).free / 1024**3
+    if free >= floor:
+        return
+    pytest.exit(
+        f"磁盘空闲 {free:.1f} GB 低于下限 {floor:g} GB,拒绝开跑测试(P38 防线)。\n"
+        f"先回收临时运行目录,再重跑:\n"
+        f"  python -m ttxt housekeep --reclaim-scratch --reclaim-apply --reclaim-keep-runs 0\n"
+        f"回收清单可先 dry-run:去掉 --reclaim-apply。取证目录(07_tmp 根下的往轮账本)不在回收范围。",
+        returncode=1,
+    )
 
 
 def _rmtree(path: Path) -> None:
@@ -348,11 +427,173 @@ def production_state_untouched(session_db_opens, isolated_log_dir, session_categ
 # --------------------------------------------------------------------------- 复用夹具
 
 
-@pytest.fixture()
-def isolated_data_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """把 ``00_control`` / ``01_categories`` 的库与配置复制成 tmp 副本,并把 ttxt 路径指向副本。
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
-    复制是逐字节 ``copyfile``(含热 WAL,若存在);生产库文件只被读,不被 SQLite 打开。
+
+def _trim_cache_paths(source: Path) -> tuple[Path, Path]:
+    """缓存键 = 生产库的 ``size + mtime_ns``:生产库一变,缓存自动失效,不会读到旧数据。"""
+    st = source.stat()
+    cache = TRIM_DIR / f"{source.parent.name}-{st.st_size}-{st.st_mtime_ns}.db"
+    return cache, cache.with_name(cache.name + ".lineage.json")
+
+
+def _drop_staging(staging: Path) -> None:
+    """半成品必须清干净:残留的 ``.building`` 既占盘,又会被误当成缓存。"""
+    for path in (staging, *[staging.with_name(staging.name + s) for s in ("-wal", "-shm")]):
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            continue
+
+
+def _trim_with_sql(staging: Path, rows: int) -> tuple[int, int]:
+    """在副本上裁剪:最近 N 篇 + 同簇成员全量,级联清掉孤儿派生行,小表整体保留。
+
+    保留 ``articles_meta`` 很关键——`viral_calibration`(爆款阈值)就住在这里,
+    裁剪掉它,面板与 doctor 的读数会变成"未标定"的假象。
+    """
+    from ttxt.analysis import rag
+
+    con = sqlite3.connect(staging)
+    try:
+        con.execute("PRAGMA temp_store=MEMORY")
+        tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        total = con.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+        con.execute("CREATE TEMP TABLE kept_ids(id INTEGER PRIMARY KEY)")
+        con.execute(
+            "INSERT OR IGNORE INTO temp.kept_ids(id) SELECT id FROM articles "
+            "ORDER BY COALESCE(published_at, fetched_at) DESC, id DESC LIMIT ?",
+            (int(rows),),
+        )
+        # 同簇成员必须整簇保留:只留半簇会让聚类/近重复的断言出现假绿假红。
+        con.execute("CREATE TEMP TABLE kept_clusters(cluster_id TEXT PRIMARY KEY)")
+        con.execute(
+            "INSERT OR IGNORE INTO temp.kept_clusters(cluster_id) "
+            "SELECT DISTINCT cluster_id FROM articles "
+            "WHERE id IN (SELECT id FROM temp.kept_ids) AND cluster_id IS NOT NULL AND cluster_id <> ''"
+        )
+        con.execute(
+            "INSERT OR IGNORE INTO temp.kept_ids(id) "
+            "SELECT id FROM articles WHERE cluster_id IN (SELECT cluster_id FROM temp.kept_clusters)"
+        )
+        kept = con.execute("SELECT COUNT(*) FROM temp.kept_ids").fetchone()[0]
+        con.execute("DELETE FROM articles WHERE id NOT IN (SELECT id FROM temp.kept_ids)")
+        for table in ("viral_labels", "article_metrics", "metric_snapshots"):
+            if table in tables:
+                con.execute(f"DELETE FROM {table} WHERE article_id NOT IN (SELECT id FROM temp.kept_ids)")
+        if "evidence_links" in tables:
+            con.execute(
+                "DELETE FROM evidence_links WHERE article_id IS NOT NULL "
+                "AND article_id NOT IN (SELECT id FROM temp.kept_ids)"
+            )
+        if "article_clusters" in tables:
+            con.execute(
+                "DELETE FROM article_clusters WHERE cluster_id NOT IN "
+                "(SELECT DISTINCT cluster_id FROM articles WHERE cluster_id IS NOT NULL)"
+            )
+        con.commit()
+    finally:
+        con.close()
+    rag.rebuild_index(source_slug(staging), db_path=staging)
+    con = sqlite3.connect(staging)
+    try:
+        # VACUUM 必须排在 FTS 重建之后:全量 FTS 索引(实测 social 811 MiB 空闲页)
+        # 只有在它被删掉之后再 VACUUM,文件才会真正缩小。
+        con.execute("PRAGMA temp_store=MEMORY")
+        con.execute("VACUUM")
+        con.commit()
+        con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        con.commit()
+    finally:
+        con.close()
+    return total, kept
+
+
+def source_slug(db_path: Path) -> str:
+    """裁剪缓存文件名 ``<slug>-<size>-<mtime>.db`` 与 ``<slug>/articles.db`` 都反推 slug。"""
+    name = db_path.parent.name
+    return name if name != "pytest_trim" else db_path.name.split("-", 1)[0]
+
+
+def build_trimmed_category_db(source: Path, rows: int = TRIM_ARTICLE_ROWS) -> dict[str, object]:
+    """生产类目库 → ``07_tmp/pytest_trim`` 下的裁剪副本(逐字节复制后才裁剪,可跨会话复用)。
+
+    生产库只被 ``shutil.copyfile`` 读字节,**不经 SQLite 连接** ⇒ 不会在生产目录留下
+    ``-wal/-shm``,也不违反"测试不得连接生产库"的红线;裁剪与 FTS 重建都发生在副本上。
+    """
+    import json
+
+    cache, lineage_file = _trim_cache_paths(source)
+    if cache.exists() and lineage_file.exists():
+        try:
+            record = json.loads(lineage_file.read_text(encoding="utf-8"))
+            if Path(record["cache"]).resolve() == cache.resolve():
+                return record
+        except (OSError, ValueError, KeyError):
+            pass
+    TRIM_DIR.mkdir(parents=True, exist_ok=True)
+    staging = cache.with_name(cache.name + ".building")
+    if staging.exists():
+        staging.unlink()
+    try:
+        shutil.copyfile(source, staging)
+        # 生产库若正处 WAL 且有未 checkpoint 的提交,只拷主文件会少行 ⇒ 边车一起拷,
+        # 让 SQLite 在副本上自行回放(生产目录始终不动)。
+        for suffix in ("-wal", "-shm"):
+            sidecar = source.with_name(source.name + suffix)
+            if sidecar.exists():
+                try:
+                    shutil.copyfile(sidecar, staging.with_name(staging.name + suffix))
+                except OSError:
+                    pass
+        source_sha = _sha256_file(source)
+        copy_sha = _sha256_file(staging)
+        if source_sha != copy_sha:
+            raise RuntimeError(
+                f"裁剪副本的字节复制与生产库不一致,拒绝继续:{source}(源={source_sha[:12]} 副本={copy_sha[:12]})"
+            )
+        total, kept = _trim_with_sql(staging, rows)
+        os.replace(staging, cache)
+    except BaseException:
+        _drop_staging(staging)
+        raise
+    record: dict[str, object] = {
+        "slug": source.parent.name,
+        "source": source.resolve().as_posix(),
+        "source_bytes": source.stat().st_size,
+        "source_mtime_ns": source.stat().st_mtime_ns,
+        "source_sha256": source_sha,
+        "rows_source": total,
+        "rows_kept": kept,
+        "cache": cache.resolve().as_posix(),
+        "cache_bytes": cache.stat().st_size,
+        "trim_rows": int(rows),
+        "built_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    lineage_file.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    return record
+
+
+@pytest.fixture(scope="session")
+def trim_caches() -> dict[str, dict[str, object]]:
+    """会话级:为每个生产类目库准备一份裁剪副本,整个会话只做一次(实测每测一份整库=28 GB/轮)。"""
+    lineage: dict[str, dict[str, object]] = {}
+    for source in sorted((ROOT / "01_categories").glob("*/articles.db")):
+        lineage[source.parent.name] = build_trimmed_category_db(source)
+    return lineage
+
+
+@pytest.fixture()
+def isolated_data_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, trim_caches: dict[str, dict[str, object]]) -> Path:
+    """把 ``00_control`` / 裁剪后的 ``01_categories`` 副本放进 tmp,并把 ttxt 路径指向副本。
+
+    P38:类目库不再是整库逐字节复制,而是 ``trim_caches`` 里那份裁剪副本的逐字节复制。
+    每测都带字节上限断言——一旦有人把副本改回整库,这里当场红,而不是让磁盘悄悄涨到 56 GB。
     """
     from ttxt import config as cfg
     from ttxt import db as ttxt_db
@@ -367,13 +608,23 @@ def isolated_data_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     system_db = ROOT / "00_control" / "system.db"
     if system_db.exists():
         shutil.copyfile(system_db, control / "system.db")
-    for source in sorted((ROOT / "01_categories").glob("*/articles.db")):
-        target = categories / source.parent.name / "articles.db"
+
+    copied_bytes = 0
+    for slug, record in sorted(trim_caches.items()):
+        cache = Path(record["cache"])
+        size = cache.stat().st_size
+        assert size <= TEST_COPY_MAX_MB * 1024 * 1024, (
+            f"{slug} 的隔离副本 {size:,} 字节已超单库上限 {TEST_COPY_MAX_MB:g} MB。"
+            "整库复制正是 28 GB/轮 的根因:副本必须是 07_tmp/pytest_trim 下的裁剪副本,"
+            "要更多样本请调 TRIM_ARTICLE_ROWS,不要退回整库。"
+        )
+        target = categories / slug / "articles.db"
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
-        wal = source.with_name("articles.db-wal")
-        if wal.exists():
-            shutil.copyfile(wal, target.with_name("articles.db-wal"))
+        shutil.copyfile(cache, target)
+        copied_bytes += size
+    assert copied_bytes <= TEST_COPY_BUDGET_MB * 1024 * 1024, (
+        f"单测试的类目副本合计 {copied_bytes:,} 字节已超预算 {TEST_COPY_BUDGET_MB:g} MB(P38 字节预算)"
+    )
 
     monkeypatch.setattr(cfg, "CONTROL_DIR", control)
     monkeypatch.setattr(cfg, "CONFIG_PATH", control / "config.json")

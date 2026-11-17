@@ -779,12 +779,32 @@ def run_doctor() -> int:
     caps_status = report["caps_status"]
     results.append(
         (
-            "PASS" if caps_status["scratch_within"] else "WARN",
+            "PASS" if caps_status["scratch_within"] else "FAIL",
             "disk.scratch",
             f"07_tmp={caps_status['scratch_bytes'] / (1024 ** 3):.3f}GB"
             f" cap={report['caps']['scratch_max_gb']}GB"
             f";99_temp={caps_status['temp_bytes'] / (1024 ** 3):.3f}GB"
-            f" cap={report['caps']['temp_max_gb']}GB(超限额只告警,07_tmp 里是往轮账本与取证件,删不删由人决定)",
+            f" cap={report['caps']['temp_max_gb']}GB"
+            "(P38:超限额判 FAIL —— 实测 07_tmp 曾被 pytest 副本顶到 56 GB(28 倍),只告警等于没人处理;"
+            "回收:`python -m ttxt housekeep --reclaim-scratch --reclaim-apply --reclaim-keep-runs 0`)",
+        )
+    )
+    # P38:-wal 边车是"检查点没跟上"的现场。它既算进磁盘预算,又会在下次打开时先重放,
+    # 现场实测 social/articles.db-wal 826 MB。合并回主库是标准维护,只合并不删数据。
+    wal_warnings = caps_status.get("wal_warnings", [])
+    results.append(
+        (
+            "PASS" if not wal_warnings else "FAIL",
+            "db.wal_sidecars",
+            "oversized="
+            + (
+                ", ".join(
+                    f"{item['path']}={item['wal_bytes'] / (1024 ** 2):.0f}MB" for item in wal_warnings
+                )
+                if wal_warnings
+                else "none"
+            )
+            + "(合并:`python -m ttxt housekeep --checkpoint-wals`)",
         )
     )
     unaccounted = report["unaccounted_dirs"]
