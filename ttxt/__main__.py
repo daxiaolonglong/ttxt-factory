@@ -546,7 +546,8 @@ def cmd_metrics(args: argparse.Namespace) -> int:
         sleep_s = args.sleep if args.sleep is not None else float(conf.get("sleep_s", 2.0))
         try:
             report = crawler_metrics_pages.collect_with_browser(
-                args.category, limit=limit, apply=bool(args.apply), sleep_s=sleep_s
+                args.category, limit=limit, apply=bool(args.apply), sleep_s=sleep_s,
+                retry_gone=bool(args.retry_gone),
             )
         except PermissionError as exc:
             print(json.dumps({"error": str(exc)}, ensure_ascii=False))
@@ -770,6 +771,9 @@ def build_parser() -> argparse.ArgumentParser:
     metrics.add_argument("--apply", action="store_true", help="真正写库(不加则只报告,不落库)")
     metrics.add_argument("--evidence", default=None,
                          help="把本轮完整逐篇证据(结果台账 + 逐字段前后值变更清单)写成 JSON 文件,便于事后对账与回滚")
+    metrics.add_argument("--retry-gone", action="store_true",
+                         help="忽略「已确认下架(404/410)」跳过台账,强制重新取证(事后核查用;"
+                              "默认跳过这些文章,避免反复请求已删除的内容)")
     metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
     metrics.set_defaults(func=cmd_metrics)
 

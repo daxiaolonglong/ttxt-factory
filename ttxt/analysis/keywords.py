@@ -172,6 +172,16 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
             # 有真实爆款信号才混合(最多占 VIRAL_WEIGHT);没有就原样保留:不虚构加分,也不因缺数据扣分
             score = (round((1.0 - VIRAL_WEIGHT) * base + VIRAL_WEIGHT * signal, 4)
                      if signal is not None else round(base, 4))
+            # 真人验收裁定(2026-11-17)第 1 条:库里存的 score(如 0.8093)与 analyze 打印的
+            # signal(如 0.3642)是**两个口径**,报告里只留一个孤立数字就会被当成同一个指标。
+            # 这里把拆项一起交出来,任何一处引用都能按公式复算,不改公式、不改权重。
+            detail = signal_details.get(_keyword)
+            if detail is not None:
+                detail["base"] = round(base, 4)
+                detail["collected_norm"] = round(collected_norm, 4)
+                detail["quality_ratio"] = round(quality_ratio, 4)
+                detail["viral_component"] = round(VIRAL_WEIGHT * signal, 4) if signal is not None else None
+                detail["score"] = score
             con.execute(
                 """
                 INSERT INTO keyword_performance(
@@ -213,6 +223,15 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
             "min_keyword_hits": MIN_KEYWORD_MEASURED_HITS,
             "keywords_with_signal": applied,
             "keywords_without_signal": len(signal_details) - applied,
+            # 口径说明(必须随结果一起输出):score 是综合得分,signal 只是其中权重 0.3 的加数,
+            # 两者不是同一个指标,不能互相替换,也不能拿一个时间点的 score 去比另一个时间点的 signal。
+            "formula": (f"score = {1.0 - VIRAL_WEIGHT:.1f} * base + {VIRAL_WEIGHT:.1f} * signal;"
+                        " base = 0.6 * collected_norm + 0.4 * quality_ratio;"
+                        " collected_norm = collected / max_collected;"
+                        " quality_ratio = quality / collected(正文 >= 120 字);"
+                        " signal = 命中文章里 tier=measured 样本的标签均值"
+                        "(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base"),
+            "score_and_signal_are_different_metrics": True,
             "details": signal_details,
         },
     }

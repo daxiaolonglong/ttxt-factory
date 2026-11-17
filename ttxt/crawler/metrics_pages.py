@@ -33,6 +33,7 @@ import json
 import re
 import time
 import urllib.parse
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urlsplit
@@ -58,11 +59,17 @@ UNPROVEN_FIELDS = ("favorites",)
 # P33 逐篇结果台账:每条候选必须落到唯一一个可解释状态。
 OUTCOME_OK = "metrics_ok"                      # 拿到本文章自己的真实计数
 OUTCOME_NO_COUNTS = "no_public_counts"         # 页面能打开,但本文章没有任何可归属计数
-OUTCOME_GONE = "article_gone"                  # 404/410/451:内容已不存在(平台删除/下架)
+OUTCOME_GONE = "article_gone"                  # 404/410:内容不存在(平台删除/下架)
+OUTCOME_LEGAL_BLOCKED = "blocked_by_legal"     # 451:因法律/政策要求不可用(P34 起单独一列)
 OUTCOME_BLOCKED = "access_blocked"             # 401/403/429:访问受限(不放宽任何保护)
 OUTCOME_FETCH_FAILED = "fetch_failed"          # 网络/浏览器等其他失败
 OUTCOME_ROBOTS_REFUSED = "robots_refused"      # robots 不放行 ⇒ 一次请求都不发
-_GONE_STATUSES = frozenset({404, 410, 451})
+# P34(真人验收裁定第 2 条)口径修正:451 是「因法律要求不可用」,可能是临时屏蔽,
+# 它**不是**「内容不存在」的证据,也不能当作「以后不用再请求」的依据。
+# ⇒ 状态码集合分开维护:只有 404/410 构成可追踪的「已下架」(见 LINK_STATUS_KEY),
+#   451 单列 blocked_by_legal,既不写指标也不进跳过清单,下一轮照常复查。
+_GONE_STATUSES = frozenset({404, 410})
+_LEGAL_STATUSES = frozenset({451})
 _BLOCKED_STATUSES = frozenset({401, 403, 429})
 
 
@@ -72,6 +79,8 @@ def _classify_fetch_failure(exc: BaseException) -> tuple[str, int | None]:
     status = int(raw) if isinstance(raw, int) and not isinstance(raw, bool) else None
     if status in _GONE_STATUSES:
         return OUTCOME_GONE, status
+    if status in _LEGAL_STATUSES:
+        return OUTCOME_LEGAL_BLOCKED, status
     if status in _BLOCKED_STATUSES:
         return OUTCOME_BLOCKED, status
     return OUTCOME_FETCH_FAILED, status
@@ -82,6 +91,100 @@ def _record_outcome(report: dict, outcome: dict) -> None:
     report["outcomes"].append(outcome)
     key = str(outcome["outcome"])
     report["outcome_counts"][key] = report["outcome_counts"].get(key, 0) + 1
+
+
+# ---------------------------------------------------------------------------
+# P34 ③(真人验收裁定第 3 条):已确认下架文章的可追踪跳过台账
+#
+# 落点选择:**只用现成的 ``articles_meta`` kv 表**(key = ``metrics_link_status``),
+# 不新建表、不给 ``articles`` 加字段 —— P33 红线是"不得增加新表/新字段除非先证明现有
+# 结构无法完成",而这里要的只是 article_id -> 状态 的映射,kv 完全够用
+# (与 ``viral_calibration``、``dispatch_state`` 同一套约定;红线由测试锁住)。
+#
+# 三条硬规矩(都有测试):
+# 1. 只有 404/410(``article_gone``,内容确实不存在)才进台账;451/403/网络失败不进 ——
+#    它们是临时故障或法律屏蔽,进了就等于把一次误判永久化;
+# 2. 记录必须带取证时间并且**会过期**(GONE_RETRY_DAYS):平台可能恢复内容、URL 也可能是我们自己拼错;
+#    过期后重新取证,结果好就把旧记录撤销;
+# 3. dry-run 什么都不写;只有 ``apply=True`` 才落库(与"默认不改生产数据"口径一致)。
+LINK_STATUS_KEY = "metrics_link_status"
+GONE_RETRY_DAYS = 90
+
+
+def _read_link_status(con) -> dict[str, dict]:
+    row = con.execute("SELECT value FROM articles_meta WHERE key=?", (LINK_STATUS_KEY,)).fetchone()
+    if not row:
+        return {}
+    try:
+        payload = json.loads(row["value"])
+    except (TypeError, ValueError):
+        # 台账坏了不能连累采集:当作空台账重来,但必须留日志(不静默吞掉)
+        LOG.warn("metrics.link_status.corrupt", key=LINK_STATUS_KEY)
+        return {}
+    if not isinstance(payload, dict):
+        LOG.warn("metrics.link_status.corrupt", key=LINK_STATUS_KEY)
+        return {}
+    return {str(key): value for key, value in payload.items() if isinstance(value, dict)}
+
+
+def load_link_status(category: str, db_path: Path | None = None) -> dict[str, dict]:
+    """只读:本类目的链接状态台账(article_id -> {status, outcome, url, checked_at, reason})。"""
+    target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
+    con = connect(target)
+    try:
+        return _read_link_status(con)
+    finally:
+        con.close()
+
+
+def _status_fresh(entry: dict, now: datetime) -> bool:
+    """台账记录是否仍在有效期内。时间读不出来 ⇒ 当过期处理(宁可多查一次,不做永久拉黑)。"""
+    if int(entry.get("status") or 0) not in _GONE_STATUSES:
+        return False
+    raw = str(entry.get("checked_at") or "")
+    try:
+        checked = datetime.fromisoformat(raw)
+    except ValueError:
+        return False
+    if checked.tzinfo is None:
+        checked = checked.astimezone()  # naive 时间按本机时区解释,和 now 同一口径才能相减
+    return (now - checked).days < GONE_RETRY_DAYS
+
+
+def _update_link_status(category: str, db_path: Path | None, report: dict, apply: bool, stamp: str) -> None:
+    """把本轮确认的「内容不存在」写进台账;重新取证成功的撤销旧记录。"""
+    if not apply:
+        return
+    target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
+    con = connect(target)
+    try:
+        current = _read_link_status(con)
+        payload = dict(current)
+        recorded = cleared = 0
+        for outcome in report["outcomes"]:
+            key = str(outcome["article_id"])
+            if outcome["outcome"] == OUTCOME_GONE:
+                payload[key] = {
+                    "status": outcome["status"],
+                    "outcome": OUTCOME_GONE,
+                    "url": outcome["url"],
+                    "checked_at": stamp,
+                    "reason": str(outcome.get("reason") or "")[:200],
+                }
+                recorded += 1
+            elif outcome["outcome"] == OUTCOME_OK and key in payload:
+                payload.pop(key)  # 这次取到了 ⇒ 旧的"已下架"结论作废,不能既成功又留着 404 记录
+                cleared += 1
+        if payload != current:
+            con.execute(
+                "INSERT OR REPLACE INTO articles_meta(key, value) VALUES(?, ?)",
+                (LINK_STATUS_KEY, json.dumps(payload, ensure_ascii=False, sort_keys=True)),
+            )
+            con.commit()
+        report["link_status_recorded"] = recorded
+        report["link_status_cleared"] = cleared
+    finally:
+        con.close()
 
 
 _COUNT_RE = re.compile(r"^([+]?\d[\d,]*(?:\.\d+)?)([万wkW]?)$")
@@ -338,11 +441,21 @@ def extract_public_metrics(page: Any, url: str | None = None, detail: dict | Non
     return metrics
 
 
-def _candidates(category: str, db_path: Path | None, limit: int | None) -> tuple[list[dict], int]:
+def _candidates(
+    category: str, db_path: Path | None, limit: int | None, retry_gone: bool = False
+) -> tuple[list[dict], int, list[int]]:
     """挑本轮要采的文章:没测过的先采,都要采时最久没刷的先刷。
 
     只按 id 倒序取前 N 篇会反复采同一批新文章,标定样本永远攒不到
     ``viral.MIN_CALIBRATION_SAMPLE`` ⇒ 必须让每一轮都往前推进(P22 根因修复)。
+
+    P34 ③:台账里仍在有效期内、且状态是 404/410(内容确认不存在)的文章**不再发请求**,
+    只计 ``known_gone``;``retry_gone=True`` 用于事后核查,强制重新取证。
+    返回 ``(待采清单, 域名不在白名单而不可采的文章数, 已确认下架而跳过的文章 id)``。
+
+    注意口径:``limit`` 只限制 ``picked`` 的长度,**不限制扫描范围**。
+    两个跳过计数必须是对整个类目库的统计,否则 ``--limit`` 一小就会报 0,
+    "本轮到底少发了多少请求"就没法核对(实测过这个坑:limit=2 时旧写法报 0)。
     """
     target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
     con = connect(target)
@@ -352,19 +465,26 @@ def _candidates(category: str, db_path: Path | None, limit: int | None) -> tuple
             " FROM articles a LEFT JOIN article_metrics m ON m.article_id = a.id"
             " ORDER BY (m.captured_at IS NULL) DESC, m.captured_at ASC, a.id DESC"
         ).fetchall()
+        link_status = {} if retry_gone else _read_link_status(con)
     finally:
         con.close()
+    now = datetime.now().astimezone()
     picked: list[dict] = []
     host_skipped = 0
+    known_gone: list[int] = []
+    capped = limit is not None and int(limit) <= 0
     for row in rows:
         url = str(row["url_normalized"] or row["url"] or "")
         if not url or not host_allowed(url):
             host_skipped += 1
             continue
+        if _status_fresh(link_status.get(str(int(row["id"]))) or {}, now):
+            known_gone.append(int(row["id"]))
+            continue
+        if capped or (limit is not None and len(picked) >= int(limit)):
+            continue  # 已经挑够了:这一行不再入队,但扫描继续,计数保持全库口径
         picked.append({"article_id": int(row["id"]), "url": url})
-        if limit is not None and len(picked) >= int(limit):
-            break
-    return picked, host_skipped
+    return picked, host_skipped, known_gone
 
 
 def collect_public_metrics(
@@ -379,20 +499,30 @@ def collect_public_metrics(
     sleeper: Callable[[float], None] | None = None,
     captured_at: str | None = None,
     source_id: str = SOURCE_ID,
+    retry_gone: bool = False,
 ) -> dict:
-    """采集头条公开文章页互动数。默认 dry-run;``apply=True`` 才写库。"""
+    """采集头条公开文章页互动数。默认 dry-run;``apply=True`` 才写库。
+
+    ``retry_gone=True``:忽略"已确认下架"台账,强制重新取证(事后核查用,默认 False)。
+    """
     allow = authorized if authorized is not None else metrics_import.load_authorized_sources()
     if source_id not in allow:
         raise PermissionError(
             f"未授权数据来源 {source_id!r}:必须先在 config.metrics.authorized_sources 登记,"
             "否则拒绝采集入库(防止未经登记的来源污染指标)。"
         )
-    candidates, host_skipped = _candidates(category, db_path, limit)
+    candidates, host_skipped, known_gone = _candidates(category, db_path, limit, retry_gone=retry_gone)
     report: dict[str, Any] = {
         "category": category,
         "source": source_id,
         "candidates": len(candidates),
         "host_skipped": host_skipped,
+        # P34 ③:已确认下架(404/410)且在有效期内的文章 ⇒ 本轮不再发请求,单独计数不混进失败
+        "known_gone_skipped": len(known_gone),
+        "known_gone_ids": known_gone,
+        "retry_gone": bool(retry_gone),
+        "link_status_recorded": 0,
+        "link_status_cleared": 0,
         "robots_refused": 0,
         "fetched": 0,
         "fetch_errors": 0,
@@ -471,6 +601,9 @@ def collect_public_metrics(
             if classified == OUTCOME_GONE:
                 # 文章已失效:不写指标、不写 0,只留可解释状态(P25 那 4 条 404 的根因归到这里)
                 LOG.warn("metrics.public.article_gone", url=url, status=status, error=str(exc)[:200])
+            elif classified == OUTCOME_LEGAL_BLOCKED:
+                # 451:因法律/政策要求不可用 ⇒ 不当下架证据,也不进跳过台账,下一轮照常复查
+                LOG.warn("metrics.public.blocked_by_legal", url=url, status=status, error=str(exc)[:200])
             else:
                 LOG.warn("metrics.public.fetch_error", url=url, error=str(exc)[:200])
             _record_outcome(report, outcome)
@@ -530,6 +663,9 @@ def collect_public_metrics(
     elif rows:
         report["would_write"] = len(rows)
 
+    # P34 ③:下架台账只在 apply=True 时更新(dry-run 不落任何状态)
+    _update_link_status(category, db_path, report, apply, captured)
+
     LOG.info(
         "metrics.public.summary",
         category=category,
@@ -538,6 +674,8 @@ def collect_public_metrics(
         robots_refused=report["robots_refused"],
         fetch_errors=report["fetch_errors"],
         no_metrics=report["no_metrics_skipped"],
+        known_gone_skipped=report["known_gone_skipped"],
+        link_status_recorded=report["link_status_recorded"],
         outcome_counts=report["outcome_counts"],
         applied=apply,
     )
