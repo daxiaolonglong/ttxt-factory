@@ -1,0 +1,331 @@
+{
+  "window_days": 3,
+  "grace_hours": 24,
+  "categories": {
+    "finance": {
+      "category": "finance",
+      "window_days": 3,
+      "grace_hours": 24,
+      "counts": {
+        "drafts_total": 2,
+        "drafts_bound": 0,
+        "publications": 0,
+        "publication_observations": 0,
+        "articles_total": 12994,
+        "articles_with_published_at": 12824,
+        "metric_snapshots": 8119,
+        "performance_windows": 12824,
+        "readings_total": 7999
+      },
+      "status_counts": {
+        "on_time": 0,
+        "late": 7999,
+        "early": 73,
+        "pending": 458,
+        "overdue": 4,
+        "unavailable": 4290
+      },
+      "missing_counts": {
+        "reads": 440,
+        "likes": 3923,
+        "favorites": 7999,
+        "comments": 5886,
+        "impressions": 7994
+      },
+      "breakpoints": [
+        {
+          "step": "draft → publication",
+          "total": 2,
+          "bound": 0,
+          "status": "broken",
+          "missing_fields": [
+            "draft url",
+            "published_at",
+            "platform article id"
+          ],
+          "detail": "writing_history 只有草稿正文/模型/时间,没有发布链接、发布时间或平台文章 id;在不猜测的前提下无法自动绑定。绑定必须由发布动作调用 publish bind 写入。"
+        },
+        {
+          "step": "publication → observations",
+          "total": 0,
+          "bound": 0,
+          "status": "empty",
+          "missing_fields": [],
+          "detail": "观测来自 publish record(或后续采集写入);未记录前 T+N 一律 unavailable。"
+        },
+        {
+          "step": "article → T+N snapshot",
+          "total": 12824,
+          "bound": 12824,
+          "status": "partial",
+          "missing_fields": [
+            "comments",
+            "favorites",
+            "impressions",
+            "likes",
+            "reads"
+          ],
+          "detail": "历史文章按 published_at 回填;metric_snapshots 是唯一时序来源,快照时点与发布时间无绑定关系,只能按时间窗判定 on_time/late/early/overdue。"
+        }
+      ]
+    },
+    "health": {
+      "category": "health",
+      "window_days": 3,
+      "grace_hours": 24,
+      "counts": {
+        "drafts_total": 2,
+        "drafts_bound": 0,
+        "publications": 0,
+        "publication_observations": 0,
+        "articles_total": 67,
+        "articles_with_published_at": 67,
+        "metric_snapshots": 68,
+        "performance_windows": 67,
+        "readings_total": 14
+      },
+      "status_counts": {
+        "on_time": 0,
+        "late": 14,
+        "early": 26,
+        "pending": 0,
+        "overdue": 0,
+        "unavailable": 27
+      },
+      "missing_counts": {
+        "reads": 0,
+        "likes": 0,
+        "favorites": 14,
+        "comments": 0,
+        "impressions": 0
+      },
+      "breakpoints": [
+        {
+          "step": "draft → publication",
+          "total": 2,
+          "bound": 0,
+          "status": "broken",
+          "missing_fields": [
+            "draft url",
+            "published_at",
+            "platform article id"
+          ],
+          "detail": "writing_history 只有草稿正文/模型/时间,没有发布链接、发布时间或平台文章 id;在不猜测的前提下无法自动绑定。绑定必须由发布动作调用 publish bind 写入。"
+        },
+        {
+          "step": "publication → observations",
+          "total": 0,
+          "bound": 0,
+          "status": "empty",
+          "missing_fields": [],
+          "detail": "观测来自 publish record(或后续采集写入);未记录前 T+N 一律 unavailable。"
+        },
+        {
+          "step": "article → T+N snapshot",
+          "total": 67,
+          "bound": 67,
+          "status": "partial",
+          "missing_fields": [
+            "favorites"
+          ],
+          "detail": "历史文章按 published_at 回填;metric_snapshots 是唯一时序来源,快照时点与发布时间无绑定关系,只能按时间窗判定 on_time/late/early/overdue。"
+        }
+      ]
+    },
+    "history": {
+      "category": "history",
+      "window_days": 3,
+      "grace_hours": 24,
+      "counts": {
+        "drafts_total": 0,
+        "drafts_bound": 0,
+        "publications": 0,
+        "publication_observations": 0,
+        "articles_total": 216,
+        "articles_with_published_at": 216,
+        "metric_snapshots": 81,
+        "performance_windows": 216,
+        "readings_total": 28
+      },
+      "status_counts": {
+        "on_time": 5,
+        "late": 23,
+        "early": 35,
+        "pending": 92,
+        "overdue": 18,
+        "unavailable": 43
+      },
+      "missing_counts": {
+        "reads": 0,
+        "likes": 0,
+        "favorites": 28,
+        "comments": 0,
+        "impressions": 0
+      },
+      "breakpoints": [
+        {
+          "step": "draft → publication",
+          "total": 0,
+          "bound": 0,
+          "status": "empty",
+          "missing_fields": [
+            "draft url",
+            "published_at",
+            "platform article id"
+          ],
+          "detail": "writing_history 只有草稿正文/模型/时间,没有发布链接、发布时间或平台文章 id;在不猜测的前提下无法自动绑定。绑定必须由发布动作调用 publish bind 写入。"
+        },
+        {
+          "step": "publication → observations",
+          "total": 0,
+          "bound": 0,
+          "status": "empty",
+          "missing_fields": [],
+          "detail": "观测来自 publish record(或后续采集写入);未记录前 T+N 一律 unavailable。"
+        },
+        {
+          "step": "article → T+N snapshot",
+          "total": 216,
+          "bound": 216,
+          "status": "ok",
+          "missing_fields": [
+            "favorites"
+          ],
+          "detail": "历史文章按 published_at 回填;metric_snapshots 是唯一时序来源,快照时点与发布时间无绑定关系,只能按时间窗判定 on_time/late/early/overdue。"
+        }
+      ]
+    },
+    "social": {
+      "category": "social",
+      "window_days": 3,
+      "grace_hours": 24,
+      "counts": {
+        "drafts_total": 3,
+        "drafts_bound": 0,
+        "publications": 0,
+        "publication_observations": 0,
+        "articles_total": 40574,
+        "articles_with_published_at": 40146,
+        "metric_snapshots": 26627,
+        "performance_windows": 40146,
+        "readings_total": 26328
+      },
+      "status_counts": {
+        "on_time": 0,
+        "late": 26328,
+        "early": 0,
+        "pending": 146,
+        "overdue": 0,
+        "unavailable": 13672
+      },
+      "missing_counts": {
+        "reads": 1101,
+        "likes": 12422,
+        "favorites": 26328,
+        "comments": 20015,
+        "impressions": 26328
+      },
+      "breakpoints": [
+        {
+          "step": "draft → publication",
+          "total": 3,
+          "bound": 0,
+          "status": "broken",
+          "missing_fields": [
+            "draft url",
+            "published_at",
+            "platform article id"
+          ],
+          "detail": "writing_history 只有草稿正文/模型/时间,没有发布链接、发布时间或平台文章 id;在不猜测的前提下无法自动绑定。绑定必须由发布动作调用 publish bind 写入。"
+        },
+        {
+          "step": "publication → observations",
+          "total": 0,
+          "bound": 0,
+          "status": "empty",
+          "missing_fields": [],
+          "detail": "观测来自 publish record(或后续采集写入);未记录前 T+N 一律 unavailable。"
+        },
+        {
+          "step": "article → T+N snapshot",
+          "total": 40146,
+          "bound": 40146,
+          "status": "partial",
+          "missing_fields": [
+            "comments",
+            "favorites",
+            "impressions",
+            "likes",
+            "reads"
+          ],
+          "detail": "历史文章按 published_at 回填;metric_snapshots 是唯一时序来源,快照时点与发布时间无绑定关系,只能按时间窗判定 on_time/late/early/overdue。"
+        }
+      ]
+    },
+    "technology": {
+      "category": "technology",
+      "window_days": 3,
+      "grace_hours": 24,
+      "counts": {
+        "drafts_total": 7,
+        "drafts_bound": 0,
+        "publications": 0,
+        "publication_observations": 0,
+        "articles_total": 468,
+        "articles_with_published_at": 468,
+        "metric_snapshots": 252,
+        "performance_windows": 468,
+        "readings_total": 117
+      },
+      "status_counts": {
+        "on_time": 35,
+        "late": 82,
+        "early": 88,
+        "pending": 175,
+        "overdue": 31,
+        "unavailable": 57
+      },
+      "missing_counts": {
+        "reads": 7,
+        "likes": 0,
+        "favorites": 117,
+        "comments": 0,
+        "impressions": 7
+      },
+      "breakpoints": [
+        {
+          "step": "draft → publication",
+          "total": 7,
+          "bound": 0,
+          "status": "broken",
+          "missing_fields": [
+            "draft url",
+            "published_at",
+            "platform article id"
+          ],
+          "detail": "writing_history 只有草稿正文/模型/时间,没有发布链接、发布时间或平台文章 id;在不猜测的前提下无法自动绑定。绑定必须由发布动作调用 publish bind 写入。"
+        },
+        {
+          "step": "publication → observations",
+          "total": 0,
+          "bound": 0,
+          "status": "empty",
+          "missing_fields": [],
+          "detail": "观测来自 publish record(或后续采集写入);未记录前 T+N 一律 unavailable。"
+        },
+        {
+          "step": "article → T+N snapshot",
+          "total": 468,
+          "bound": 468,
+          "status": "ok",
+          "missing_fields": [
+            "favorites",
+            "impressions",
+            "reads"
+          ],
+          "detail": "历史文章按 published_at 回填;metric_snapshots 是唯一时序来源,快照时点与发布时间无绑定关系,只能按时间窗判定 on_time/late/early/overdue。"
+        }
+      ]
+    }
+  }
+}

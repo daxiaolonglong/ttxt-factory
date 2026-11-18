@@ -1,0 +1,141 @@
+{
+  "apply": true,
+  "window_days": 3,
+  "categories": {
+    "finance": {
+      "category": "finance",
+      "window_days": 3,
+      "grace_hours": 24,
+      "apply": true,
+      "articles_total": 12994,
+      "articles_with_published_at": 12824,
+      "articles_without_published_at": 170,
+      "bad_published_at": 0,
+      "with_snapshots": 8076,
+      "status_counts": {
+        "on_time": 0,
+        "late": 7999,
+        "early": 73,
+        "pending": 458,
+        "overdue": 4,
+        "unavailable": 4290
+      },
+      "missing_counts": {
+        "reads": 5265,
+        "likes": 8748,
+        "favorites": 12824,
+        "comments": 10711,
+        "impressions": 12819
+      },
+      "windows_written": 12824
+    },
+    "health": {
+      "category": "health",
+      "window_days": 3,
+      "grace_hours": 24,
+      "apply": true,
+      "articles_total": 67,
+      "articles_with_published_at": 67,
+      "articles_without_published_at": 0,
+      "bad_published_at": 0,
+      "with_snapshots": 40,
+      "status_counts": {
+        "on_time": 0,
+        "late": 14,
+        "early": 26,
+        "pending": 0,
+        "overdue": 0,
+        "unavailable": 27
+      },
+      "missing_counts": {
+        "reads": 53,
+        "likes": 53,
+        "favorites": 67,
+        "comments": 53,
+        "impressions": 53
+      },
+      "windows_written": 67
+    },
+    "history": {
+      "category": "history",
+      "window_days": 3,
+      "grace_hours": 24,
+      "apply": true,
+      "articles_total": 216,
+      "articles_with_published_at": 216,
+      "articles_without_published_at": 0,
+      "bad_published_at": 0,
+      "with_snapshots": 81,
+      "status_counts": {
+        "on_time": 5,
+        "late": 23,
+        "early": 35,
+        "pending": 92,
+        "overdue": 18,
+        "unavailable": 43
+      },
+      "missing_counts": {
+        "reads": 188,
+        "likes": 188,
+        "favorites": 216,
+        "comments": 188,
+        "impressions": 188
+      },
+      "windows_written": 216
+    },
+    "social": {
+      "category": "social",
+      "window_days": 3,
+      "grace_hours": 24,
+      "apply": true,
+      "articles_total": 40574,
+      "articles_with_published_at": 40146,
+      "articles_without_published_at": 428,
+      "bad_published_at": 0,
+      "with_snapshots": 26328,
+      "status_counts": {
+        "on_time": 0,
+        "late": 26328,
+        "early": 0,
+        "pending": 146,
+        "overdue": 0,
+        "unavailable": 13672
+      },
+      "missing_counts": {
+        "reads": 14919,
+        "likes": 26240,
+        "favorites": 40146,
+        "comments": 33833,
+        "impressions": 40146
+      },
+      "windows_written": 40146
+    },
+    "technology": {
+      "category": "technology",
+      "window_days": 3,
+      "grace_hours": 24,
+      "apply": true,
+      "articles_total": 468,
+      "articles_with_published_at": 468,
+      "articles_without_published_at": 0,
+      "bad_published_at": 0,
+      "with_snapshots": 236,
+      "status_counts": {
+        "on_time": 35,
+        "late": 82,
+        "early": 88,
+        "pending": 175,
+        "overdue": 31,
+        "unavailable": 57
+      },
+      "missing_counts": {
+        "reads": 358,
+        "likes": 351,
+        "favorites": 468,
+        "comments": 351,
+        "impressions": 358
+      },
+      "windows_written": 468
+    }
+  }
+}

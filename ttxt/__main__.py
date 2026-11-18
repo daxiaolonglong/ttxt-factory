@@ -27,6 +27,7 @@ from .legacy import migrate as legacy_migrate
 from .model_gate import client as model_client
 from .model_gate import gate as model_gate
 from .model_gate import queue as model_queue
+from .writing import publication as writing_publication
 from .writing import workflow as writing_workflow
 from . import agents as agents_module
 from .logging import get_logger
@@ -601,6 +602,97 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0 if not report["row_errors"] else 0
 
 
+def _publish_out(path_value: str | None, payload: dict) -> Path | None:
+    if not path_value:
+        return None
+    target = cfg.resolve_path(path_value)
+    if not target.is_relative_to(cfg.PROJECT_ROOT):
+        raise ValueError(f"回执必须写在项目内:{target}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return target
+
+
+def cmd_publish(args: argparse.Namespace) -> int:
+    """R41:草稿 → 发布链接 → T+N 表现数据(T 不可解析就拒绝,缺失一律 NULL)。"""
+    try:
+        if args.action == "bind":
+            if not (args.category and args.draft_id and args.url and args.published_at):
+                print("publish bind 需要 --category --draft-id --url --published-at")
+                return 1
+            result = writing_publication.bind(
+                args.category,
+                args.draft_id,
+                args.url,
+                args.published_at,
+                version=args.version,
+                platform=args.platform,
+                source=args.source if args.source != "manual" else "declared",
+                note=args.note,
+            )
+        elif args.action == "record":
+            if not (args.category and args.publication_id):
+                print("publish record 需要 --category --publication-id(指标用 --reads/--likes/...)")
+                return 1
+            metrics = {
+                "reads": args.reads,
+                "likes": args.likes,
+                "favorites": args.favorites,
+                "comments": args.comments,
+                "impressions": args.impressions,
+            }
+            result = writing_publication.record_metrics(
+                args.category,
+                args.publication_id,
+                metrics,
+                captured_at=args.captured_at,
+                data_source=args.source,
+                note=args.note,
+            )
+        elif args.action == "report":
+            if not args.category:
+                print("publish report 需要 --category")
+                return 1
+            if args.subject == "article" or args.article_id is not None:
+                result = writing_publication.article_report(
+                    args.category, article_id=args.article_id, limit=args.limit, days=args.days
+                )
+            else:
+                result = writing_publication.report(
+                    args.category, draft_id=args.draft_id, limit=args.limit
+                )
+        elif args.action == "backfill":
+            if args.category in (None, "all"):
+                categories = sorted(crawler_store.registered_namespaces())
+            else:
+                categories = [args.category]
+            result = writing_publication.backfill_all(
+                categories, days=args.days, apply=bool(args.apply)
+            )
+        else:  # usability
+            if args.category in (None, "all"):
+                categories = sorted(crawler_store.registered_namespaces())
+            else:
+                categories = [args.category]
+            result = {
+                "window_days": int(args.days) if args.days is not None else writing_publication.window_days(),
+                "grace_hours": writing_publication.WINDOW_GRACE_HOURS,
+                "categories": {
+                    category: writing_publication.chain_usability(category, days=args.days)
+                    for category in categories
+                },
+            }
+        out = _publish_out(args.out, result)
+        if out is not None:
+            print(json.dumps({**result, "out": str(out)}, ensure_ascii=False, indent=2))
+        else:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    except (ValueError, LookupError, PermissionError, FileNotFoundError) as exc:
+        print(json.dumps({"error": f"{type(exc).__name__}: {exc}"}, ensure_ascii=False))
+        return 2
+
+
 def cmd_legacy_migrate(args: argparse.Namespace) -> int:
     """旧资产迁移(账本 T-14):默认只读预演,加 ``--apply`` 才写类目库。"""
     try:
@@ -910,6 +1002,35 @@ def build_parser() -> argparse.ArgumentParser:
     write.add_argument("--max-tokens", type=int, default=900)
     write.add_argument("--think", action="store_true", help="启用模型推理过程")
     write.set_defaults(func=cmd_write)
+
+    publish = sub.add_parser(
+        "publish",
+        help="R41 发布链路:草稿→链接→T+N 表现(缺失如实记 NULL;回填默认干跑)",
+    )
+    publish.add_argument("action", choices=["bind", "record", "report", "backfill", "usability"])
+    publish.add_argument("--category", default=None, help="类目 slug(backfill/usability 可用 all)")
+    publish.add_argument("--draft-id", default=None, help="bind/report 的草稿 id")
+    publish.add_argument("--version", type=int, default=None, help="草稿版本")
+    publish.add_argument("--url", default=None, help="发布链接")
+    publish.add_argument("--published-at", default=None, help="发布时间(必填且必须可解析)")
+    publish.add_argument("--platform", default=None, help="发布平台")
+    publish.add_argument("--source", default="manual", help="指标来源(须在白名单)")
+    publish.add_argument("--publication-id", type=int, default=None, help="record 的发布 id")
+    publish.add_argument("--article-id", type=int, default=None, help="report 指定文章(查历史回填读数)")
+    publish.add_argument("--subject", choices=["publication", "article"], default="publication",
+                         help="report 查发布绑定(默认)还是历史文章 T+N")
+    publish.add_argument("--captured-at", default=None, help="观测时间(默认当前)")
+    publish.add_argument("--reads", default=None)
+    publish.add_argument("--likes", default=None)
+    publish.add_argument("--favorites", default=None)
+    publish.add_argument("--comments", default=None)
+    publish.add_argument("--impressions", default=None)
+    publish.add_argument("--days", type=int, default=None, help="T+N 的 N(默认 config/环境或 3)")
+    publish.add_argument("--limit", type=int, default=None)
+    publish.add_argument("--note", default=None)
+    publish.add_argument("--apply", action="store_true", help="backfill 真正写库(不加=只报告)")
+    publish.add_argument("--out", default=None, help="把完整回执写成 JSON(项目内路径)")
+    publish.set_defaults(func=cmd_publish)
 
     sub.add_parser("selftest", help="运行 pytest 测试").set_defaults(func=cmd_selftest)
 

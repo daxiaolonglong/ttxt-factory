@@ -1,0 +1,112 @@
+{
+  "category": "technology",
+  "window_days": 3,
+  "count": 5,
+  "articles": [
+    {
+      "article_id": 492,
+      "title": "手机中安装了这 5 类软件的，赶紧卸载，否则手机会越用越卡！",
+      "url": "https://www.toutiao.com/article/7708403871546999323/",
+      "published_at": "2026-11-15T23:56:00+08:00",
+      "window_days": 3,
+      "due_at": "2026-11-18T23:56:00+08:00",
+      "window_end": "2026-11-19T23:56:00+08:00",
+      "captured_at": "2026-11-19T02:11:04+08:00",
+      "status": "on_time",
+      "reason": null,
+      "source": "toutiao_public_article",
+      "reads": 1047,
+      "likes": 12,
+      "favorites": null,
+      "comments": 1,
+      "impressions": 52424,
+      "missing_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 339,
+      "title": "央媒发声后，网信部门整治AI仿冒乱象，未提郭晶晶",
+      "url": "https://www.toutiao.com/article/7707660578285781554/",
+      "published_at": "2026-11-13T22:20:00+08:00",
+      "window_days": 3,
+      "due_at": "2026-11-16T22:20:00+08:00",
+      "window_end": "2026-11-17T22:20:00+08:00",
+      "captured_at": "2026-11-16T22:22:07+08:00",
+      "status": "on_time",
+      "reason": null,
+      "source": "toutiao_public_article",
+      "reads": 200,
+      "likes": 3,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 8151,
+      "missing_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 334,
+      "title": "4000元制作、6000万热度 四川40岁设计师“早九晚六”做短剧，被全网催着上班",
+      "url": "https://www.toutiao.com/article/7707568050836357668/",
+      "published_at": "2026-11-13T16:21:00+08:00",
+      "window_days": 3,
+      "due_at": "2026-11-16T16:21:00+08:00",
+      "window_end": "2026-11-17T16:21:00+08:00",
+      "captured_at": "2026-11-16T22:22:07+08:00",
+      "status": "on_time",
+      "reason": null,
+      "source": "toutiao_public_article",
+      "reads": 1709,
+      "likes": 22,
+      "favorites": null,
+      "comments": 1,
+      "impressions": 57075,
+      "missing_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 330,
+      "title": "刚刚，各大电商的双11成绩单出来了",
+      "url": "https://www.toutiao.com/article/7707551622393594410/",
+      "published_at": "2026-11-13T15:24:00+08:00",
+      "window_days": 3,
+      "due_at": "2026-11-16T15:24:00+08:00",
+      "window_end": "2026-11-17T15:24:00+08:00",
+      "captured_at": "2026-11-16T22:22:07+08:00",
+      "status": "on_time",
+      "reason": null,
+      "source": "toutiao_public_article",
+      "reads": 156076,
+      "likes": 873,
+      "favorites": null,
+      "comments": 357,
+      "impressions": 3447726,
+      "missing_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 291,
+      "title": "所有人都低估刘强东了！国内外卖还在厮杀，又砸百亿拿下欧洲龙头",
+      "url": "https://www.toutiao.com/article/7707526791782613519/",
+      "published_at": "2026-11-13T13:54:00+08:00",
+      "window_days": 3,
+      "due_at": "2026-11-16T13:54:00+08:00",
+      "window_end": "2026-11-17T13:54:00+08:00",
+      "captured_at": "2026-11-16T22:22:07+08:00",
+      "status": "on_time",
+      "reason": null,
+      "source": "toutiao_public_article",
+      "reads": 3257,
+      "likes": 23,
+      "favorites": null,
+      "comments": 6,
+      "impressions": 190711,
+      "missing_fields": [
+        "favorites"
+      ]
+    }
+  ]
+}
