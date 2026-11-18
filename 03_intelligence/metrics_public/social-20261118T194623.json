@@ -1,0 +1,938 @@
+{
+  "category": "social",
+  "job": "metrics_fetch_6h",
+  "run_at": "2026-11-18T19:51:19+08:00",
+  "plan": {
+    "category": "social",
+    "candidates": 12,
+    "picked_ids": [
+      40794,
+      40793,
+      40788,
+      40787,
+      40786,
+      40785,
+      40784,
+      40782,
+      40781,
+      40780,
+      40778,
+      40776
+    ],
+    "host_skipped": 139,
+    "known_gone_skipped": 8,
+    "known_gone_ids": [
+      40913,
+      40873,
+      40871,
+      40849,
+      40838,
+      40825,
+      40824,
+      40818
+    ],
+    "retry_gone": false
+  },
+  "source": "toutiao_public_article",
+  "candidates": 12,
+  "host_skipped": 139,
+  "known_gone_skipped": 8,
+  "known_gone_ids": [
+    40913,
+    40873,
+    40871,
+    40849,
+    40838,
+    40825,
+    40824,
+    40818
+  ],
+  "retry_gone": false,
+  "link_status_recorded": 1,
+  "link_status_cleared": 0,
+  "robots_refused": 0,
+  "fetched": 11,
+  "fetch_errors": 1,
+  "no_metrics_skipped": 0,
+  "render_ok": 11,
+  "render_mismatch": 0,
+  "render_unattributed": 0,
+  "render_errors": 0,
+  "sanity_rejected": 0,
+  "written": 11,
+  "updated": 0,
+  "snapshots": 11,
+  "filled_from_null": 44,
+  "protected_by_credibility": 0,
+  "null_kept": 0,
+  "dry_run": false,
+  "pages": [
+    {
+      "article_id": 40794,
+      "url": "https://www.toutiao.com/article/7673111398129402377/",
+      "reads": 587,
+      "likes": 5,
+      "favorites": null,
+      "comments": 2,
+      "impressions": 20027,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 2,
+        "diggCount": 5,
+        "readCount": 587,
+        "shareCount": 61,
+        "showCount": 20027,
+        "repinCount": 26,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40793,
+      "url": "https://www.toutiao.com/article/7673093860226122259/",
+      "reads": 72,
+      "likes": 5,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 5769,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 5,
+        "readCount": 72,
+        "shareCount": 21,
+        "showCount": 5769,
+        "repinCount": 19,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40788,
+      "url": "https://www.toutiao.com/article/7673077675589648946/",
+      "reads": 12,
+      "likes": 0,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 897,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 0,
+        "readCount": 12,
+        "shareCount": 5,
+        "showCount": 897,
+        "repinCount": 0,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40787,
+      "url": "https://www.toutiao.com/article/7673076301002981911/",
+      "reads": 46,
+      "likes": 0,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 7905,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 0,
+        "readCount": 46,
+        "shareCount": 0,
+        "showCount": 7905,
+        "repinCount": 1,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40786,
+      "url": "https://www.toutiao.com/article/7673074633902195210/",
+      "reads": 6,
+      "likes": 0,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 1685,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 0,
+        "readCount": 6,
+        "shareCount": 0,
+        "showCount": 1685,
+        "repinCount": 1,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40785,
+      "url": "https://www.toutiao.com/article/7673071233634451987/",
+      "reads": 1,
+      "likes": 0,
+      "favorites": null,
+      "comments": 1,
+      "impressions": 1134,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 1,
+        "diggCount": 0,
+        "readCount": 1,
+        "shareCount": 0,
+        "showCount": 1134,
+        "repinCount": 0,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40784,
+      "url": "https://www.toutiao.com/article/7673057227682497066/",
+      "reads": 17,
+      "likes": 1,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 7908,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 1,
+        "readCount": 17,
+        "shareCount": 0,
+        "showCount": 7908,
+        "repinCount": 0,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40782,
+      "url": "https://www.toutiao.com/article/7673051353349915179/",
+      "reads": 2,
+      "likes": 0,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 584,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 0,
+        "readCount": 2,
+        "shareCount": 0,
+        "showCount": 584,
+        "repinCount": 0,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40781,
+      "url": "https://www.toutiao.com/article/7673051259858846242/",
+      "reads": 4,
+      "likes": 0,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 4678,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 0,
+        "readCount": 4,
+        "shareCount": 0,
+        "showCount": 4678,
+        "repinCount": 0,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40780,
+      "url": "https://www.toutiao.com/article/7673050259324682775/",
+      "reads": 0,
+      "likes": 0,
+      "favorites": null,
+      "comments": 0,
+      "impressions": 2121,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 0,
+        "diggCount": 0,
+        "readCount": 0,
+        "shareCount": 0,
+        "showCount": 2121,
+        "repinCount": 0,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    },
+    {
+      "article_id": 40778,
+      "url": "https://www.toutiao.com/article/7673047920958128642/",
+      "reads": 16,
+      "likes": 0,
+      "favorites": null,
+      "comments": 2,
+      "impressions": 1102,
+      "render_counters": {
+        "buryCount": 0,
+        "commentCount": 2,
+        "diggCount": 0,
+        "readCount": 16,
+        "shareCount": 0,
+        "showCount": 1102,
+        "repinCount": 1,
+        "forwardCount": 0,
+        "danmuCount": 0
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "article_id": 40794,
+      "url": "https://www.toutiao.com/article/7673111398129402377/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 587,
+        "likes": 5,
+        "comments": 2,
+        "impressions": 20027
+      },
+      "checked_at": "2026-11-18T19:50:03+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40793,
+      "url": "https://www.toutiao.com/article/7673093860226122259/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 72,
+        "likes": 5,
+        "comments": 0,
+        "impressions": 5769
+      },
+      "checked_at": "2026-11-18T19:50:09+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40788,
+      "url": "https://www.toutiao.com/article/7673077675589648946/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 12,
+        "likes": 0,
+        "comments": 0,
+        "impressions": 897
+      },
+      "checked_at": "2026-11-18T19:50:17+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40787,
+      "url": "https://www.toutiao.com/article/7673076301002981911/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 46,
+        "likes": 0,
+        "comments": 0,
+        "impressions": 7905
+      },
+      "checked_at": "2026-11-18T19:50:22+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40786,
+      "url": "https://www.toutiao.com/article/7673074633902195210/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 6,
+        "likes": 0,
+        "comments": 0,
+        "impressions": 1685
+      },
+      "checked_at": "2026-11-18T19:50:29+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40785,
+      "url": "https://www.toutiao.com/article/7673071233634451987/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 1,
+        "likes": 0,
+        "comments": 1,
+        "impressions": 1134
+      },
+      "checked_at": "2026-11-18T19:50:37+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40784,
+      "url": "https://www.toutiao.com/article/7673057227682497066/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 17,
+        "likes": 1,
+        "comments": 0,
+        "impressions": 7908
+      },
+      "checked_at": "2026-11-18T19:50:44+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40782,
+      "url": "https://www.toutiao.com/article/7673051353349915179/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 2,
+        "likes": 0,
+        "comments": 0,
+        "impressions": 584
+      },
+      "checked_at": "2026-11-18T19:50:50+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40781,
+      "url": "https://www.toutiao.com/article/7673051259858846242/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 4,
+        "likes": 0,
+        "comments": 0,
+        "impressions": 4678
+      },
+      "checked_at": "2026-11-18T19:50:58+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40780,
+      "url": "https://www.toutiao.com/article/7673050259324682775/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 0,
+        "likes": 0,
+        "comments": 0,
+        "impressions": 2121
+      },
+      "checked_at": "2026-11-18T19:51:04+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40778,
+      "url": "https://www.toutiao.com/article/7673047920958128642/",
+      "outcome": "metrics_ok",
+      "status": null,
+      "reason": null,
+      "fetched": true,
+      "metrics_written": true,
+      "observed": {
+        "reads": 16,
+        "likes": 0,
+        "comments": 2,
+        "impressions": 1102
+      },
+      "checked_at": "2026-11-18T19:51:12+08:00",
+      "unproven_fields": [
+        "favorites"
+      ]
+    },
+    {
+      "article_id": 40776,
+      "url": "https://www.toutiao.com/article/7673042594716238382/",
+      "outcome": "article_gone",
+      "status": 404,
+      "reason": "HTTP 404(终态,不重试)",
+      "fetched": false,
+      "metrics_written": false,
+      "observed": {},
+      "checked_at": "2026-11-18T19:51:18+08:00"
+    }
+  ],
+  "outcome_counts": {
+    "metrics_ok": 11,
+    "article_gone": 1
+  },
+  "changes": [
+    {
+      "article_id": 40794,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 587,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 5,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 2,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 20027,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40793,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 72,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 5,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 5769,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40788,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 12,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 897,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40787,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 46,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 7905,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40786,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 6,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 1685,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40785,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 1,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 1,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 1134,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40784,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 17,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 1,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 7908,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40782,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 2,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 584,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40781,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 4,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 4678,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40780,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 2121,
+          "action": "inserted"
+        }
+      ]
+    },
+    {
+      "article_id": 40778,
+      "captured_at": "2026-11-18T19:50:03+08:00",
+      "data_source": "toutiao_public_article",
+      "credibility": "public_page",
+      "fields": [
+        {
+          "field": "reads",
+          "old": null,
+          "new": 16,
+          "action": "inserted"
+        },
+        {
+          "field": "likes",
+          "old": null,
+          "new": 0,
+          "action": "inserted"
+        },
+        {
+          "field": "favorites",
+          "old": null,
+          "new": null,
+          "action": "stayed_null"
+        },
+        {
+          "field": "comments",
+          "old": null,
+          "new": 2,
+          "action": "inserted"
+        },
+        {
+          "field": "impressions",
+          "old": null,
+          "new": 1102,
+          "action": "inserted"
+        }
+      ]
+    }
+  ],
+  "row_errors": []
+}
