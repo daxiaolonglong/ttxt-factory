@@ -126,6 +126,13 @@
   "prediction": {
     "min_samples": 5
   },
+  "pipeline": {
+    "_comment": "T-17 管线增量化(账本实测:social clean 全量 47m51s / analyze index 236s)。delta_enabled=false 或 CLI --full 一律走全量路径(强制回退)。fts_delta_full_rebuild_at_changed_rows:单轮 FTS 增量变更行数达到该值就整库重建;fts_delta_ops_budget:自上次整库重建以来累计 FTS 增删操作数达到该值也整库重建(FTS5 的 DELETE 只写墓碑、VACUUM 收不回,规则 61);cluster_bucket_report_over:分桶聚类里桶大小超过该值就写进 oversized_buckets 回执,不得隐藏。",
+    "delta_enabled": true,
+    "fts_delta_full_rebuild_at_changed_rows": 2000,
+    "fts_delta_ops_budget": 20000,
+    "cluster_bucket_report_over": 500
+  },
   "scheduler": {
     "enabled": true,
     "_comment": "P35:metrics_fetch 把公开互动指标自动回流接进闭环(采集→重标定爆款标签→关键词评分→反哺关键词)。它直接用浏览器,而 Worker 是另一个进程、共用同一份 02_crawler/.browser/profile,所以 wait_for_queue_s 先让开队列;排在 crawl_enqueue 之前是有意安排的:同一个 tick 里两个任务都到期时先采指标(此时队列必然空闲),再入队采集。apply=false 是干跑开关,核实过数字才改成 true。P36 之后还有第二道保险:浏览器 profile 跨进程锁,lock_wait_s=300 比 Worker 的 600 短,抢不到就整轮记 skipped_browser_busy 明确跳过(不烧浏览器、不发请求),绝不把 Worker 正在用的浏览器抢过来。",

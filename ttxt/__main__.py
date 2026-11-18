@@ -146,7 +146,7 @@ def cmd_clean(args: argparse.Namespace) -> int:
     ok = True
     for category in categories:
         try:
-            results[category] = crawler_pipeline.run_pipeline(category)
+            results[category] = crawler_pipeline.run_pipeline(category, full=getattr(args, "full", False))
         except Exception as exc:  # noqa: BLE001 - 类目级错误隔离
             results[category] = {"error": f"{type(exc).__name__}: {exc}"}
             ok = False
@@ -372,7 +372,7 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     ok = True
     for category in categories:
         try:
-            results[category] = analyzer.run_analysis(category)
+            results[category] = analyzer.run_analysis(category, full=getattr(args, "full", False))
         except Exception as exc:  # noqa: BLE001 - 类目级错误隔离
             results[category] = {"error": f"{type(exc).__name__}: {exc}"}
             ok = False
@@ -749,6 +749,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     clean = sub.add_parser("clean", help="清洗、时间归一化与相似聚类")
     clean.add_argument("--category", default="all", help="类目 slug 或 all")
+    clean.add_argument(
+        "--full",
+        action="store_true",
+        help="强制全量重跑(关闭指纹台账增量与 FTS 增量;增量对账不过时的规定回退通道)",
+    )
     clean.set_defaults(func=cmd_clean)
 
     relabel = sub.add_parser(
@@ -774,6 +779,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     analyze = sub.add_parser("analyze", help="关键词评分/爆款标签/知识资产/FTS5 索引")
     analyze.add_argument("--category", default="all", help="类目 slug 或 all")
+    analyze.add_argument(
+        "--full",
+        action="store_true",
+        help="检索索引强制整库重建(关闭 sync_index 增量;规定回退通道)",
+    )
     analyze.set_defaults(func=cmd_analyze)
 
     search = sub.add_parser("search", help="类目内 RAG 检索")

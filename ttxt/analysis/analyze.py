@@ -27,6 +27,7 @@ def run_analysis(
     system_db: Path | None = None,
     sources_path: Path | None = None,
     evidence_dir: Path | None = None,
+    full: bool = False,
 ) -> dict:
     path = store.migrate_articles_db(category, db_path=db_path)
     stages: dict[str, float] = {}
@@ -45,7 +46,12 @@ def run_analysis(
     )
     viral_stats = _timed(stages, "viral", viral.label_category, category, path)
     knowledge_stats = _timed(stages, "knowledge", knowledge.build_assets, category, path)
-    index_stats = _timed(stages, "index", lambda: rag.rebuild_index(category, db_path=path))
+    # T-17:index 段实测 236s(整库重建)。默认走 sync_index 增量(台账 vs articles 推导
+    # 变更集,外部写方塞的行照样被覆盖);``--full`` 或前提不成立自动回退整库重建。
+    if full:
+        index_stats = _timed(stages, "index", lambda: rag.rebuild_index(category, db_path=path))
+    else:
+        index_stats = _timed(stages, "index", lambda: rag.sync_index(category, db_path=path))
     LOG.info("analysis.stage.done", category=category, **stages)
     return {
         "category": category,

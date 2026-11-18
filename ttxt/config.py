@@ -78,6 +78,34 @@ def load_config() -> dict[str, Any]:
     return load_json(CONFIG_PATH)
 
 
+# T-17(管线增量化):`pipeline` 配置段的代码级默认值。
+# 配置里缺这个段(老 config)绝不能让管线崩:缺键一律回落到这里的默认值。
+PIPELINE_DEFAULTS: dict[str, Any] = {
+    "delta_enabled": True,
+    "fts_delta_full_rebuild_at_changed_rows": 2000,
+    "fts_delta_ops_budget": 20000,
+    "cluster_bucket_report_over": 500,
+}
+
+
+def pipeline_settings() -> dict[str, Any]:
+    """读 ``00_control/config.json`` 的 ``pipeline`` 段并合并默认值。
+
+    只认词表内的键(未知键忽略),配置读失败按默认值走 —— 增量化是优化,
+    不是可用性依赖:配置层出问题必须退到默认参数继续跑,而不是把 clean/analyze 卡死。
+    """
+    settings = dict(PIPELINE_DEFAULTS)
+    try:
+        section = load_config().get("pipeline") or {}
+    except Exception:  # noqa: BLE001 - 缺段/坏文件都按默认值走
+        section = {}
+    if isinstance(section, dict):
+        for key, value in section.items():
+            if key in PIPELINE_DEFAULTS:
+                settings[key] = value
+    return settings
+
+
 def load_registry() -> dict[str, Any]:
     return load_json(REGISTRY_PATH)
 

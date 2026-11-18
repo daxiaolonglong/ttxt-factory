@@ -1,0 +1,17 @@
+{
+  "category": "demo",
+  "generated_at": "2026-11-18T14:30:36+08:00",
+  "gap_keywords": [
+    "人工智能",
+    "开源",
+    "效率工具",
+    "数据"
+  ],
+  "recovered_keywords": 0,
+  "queued_job_id": null,
+  "note": "该类目无正式启用来源(或演示类目),仅记录反哺证据",
+  "cooldown_hours": 24.0,
+  "cooldown_remaining_hours": null,
+  "last_enqueued_at": null,
+  "feedback_attempts": null
+}

@@ -79,6 +79,25 @@ CREATE TABLE IF NOT EXISTS article_clusters (
 );
 """
 
+# T-17(管线增量化)派生结果台账:纯新增表,不动 articles(生产 articles 1.7 GB)。
+# content_fp 是**管线自己**对源文本算的指纹(sha256(CLEAN_VERSION+title+content)),
+# 故意不用 articles.content_hash —— 正确性不能依赖每个写入方都同步维护那一列。
+# 外部写方(migrate/dedupe/conftest 裁剪副本)会直接删文章行,所以台账必须容忍孤儿行,
+# 由管线在每轮开始时裁剪(DELETE ... NOT IN articles)并把裁剪计数写进回执。
+PIPELINE_STATE_SCHEMA = """
+CREATE TABLE IF NOT EXISTS pipeline_state (
+  article_id INTEGER PRIMARY KEY,
+  content_fp TEXT NOT NULL,
+  simhash TEXT NOT NULL,
+  text_len INTEGER NOT NULL,
+  fp_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS pipeline_state_meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+"""
+
 # P3 schema v2 新增列(ALTER TABLE 幂等添加)
 P3_COLUMNS: list[tuple[str, str]] = [
     ("cleaned_content", "TEXT"),
@@ -220,6 +239,7 @@ def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
         con.executescript(CLUSTERS_SCHEMA)
         con.executescript(V3_SCHEMA)
         con.executescript(V4_SCHEMA)
+        con.executescript(PIPELINE_STATE_SCHEMA)
         writing_columns = {row[1] for row in con.execute("PRAGMA table_info(writing_history)")}
         if "status" not in writing_columns:
             con.execute("ALTER TABLE writing_history ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'")

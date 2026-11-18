@@ -25,6 +25,24 @@ def tokenize(text: str) -> list[str]:
     return tokens
 
 
+# T-17:token → 64 位摘要的记忆表。纯记忆化:同一个 token 的 md5 摘要恒定,
+# 命中与否不改变 simhash64 的任何输出(测试 test_p3_clean 钉了新旧一致)。
+# 有界:超过上限整体清空重来,防止长跑进程内存无上限增长。
+_TOKEN_DIGEST_CACHE: dict[str, int] = {}
+_TOKEN_DIGEST_CACHE_LIMIT = 250_000
+
+
+def token_digest(token: str) -> int:
+    value = _TOKEN_DIGEST_CACHE.get(token)
+    if value is None:
+        digest = hashlib.md5(token.encode("utf-8")).digest()[:8]
+        value = int.from_bytes(digest, "big")
+        if len(_TOKEN_DIGEST_CACHE) >= _TOKEN_DIGEST_CACHE_LIMIT:
+            _TOKEN_DIGEST_CACHE.clear()
+        _TOKEN_DIGEST_CACHE[token] = value
+    return value
+
+
 def simhash64(text: str) -> int:
     tokens = tokenize(text)
     if not tokens:
@@ -32,8 +50,7 @@ def simhash64(text: str) -> int:
     weights = Counter(tokens)
     vector = [0] * 64
     for token, weight in weights.items():
-        digest = hashlib.md5(token.encode("utf-8")).digest()[:8]
-        value = int.from_bytes(digest, "big")
+        value = token_digest(token)
         for bit in range(64):
             vector[bit] += weight if (value >> bit) & 1 else -weight
     result = 0
