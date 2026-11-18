@@ -689,7 +689,9 @@ def write_article(
     materials_text = build_materials(materials)
     outline = model_call(
         prompts.outline_prompt(topic, materials_text),
-        max_tokens=400,
+        # 400 每次都被截断(生产日志 2026-11-18 三个版本各触发一次 400→600 重试),
+        # 等于每版固定浪费一次模型调用;直接给到实测够用的 600。
+        max_tokens=600,
         temperature=0.3,
         enable_thinking=enable_thinking,
     )

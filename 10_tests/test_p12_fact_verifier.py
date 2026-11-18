@@ -70,6 +70,40 @@ def test_unrelated_source_not_bound():
     assert ev["quote"] is None
 
 
+# --------------------------------------------------- 生产实测:锚点抽取误伤(R30)
+
+
+def test_relative_date_not_extracted_as_bare_number():
+    # 「明年2月」里的 2 不是独立事实数字;整段按日期核验,不得因窗口里没有孤立 2 判缺失
+    text = "该基地的首座厂房规划高度约150米，计划于明年2月开始运营。"
+    article = {"id": 3, "title": "t", "url": "https://e.com/3", "text": text}
+    claim = "该基地的首座厂房规划高度约150米，并计划于明年2月开始运营"
+    anchors = verifier.extract_anchors(claim)
+    assert "2" not in anchors["numbers"]
+    assert any(item.endswith("月") for item in anchors["dates"])
+    ev = verifier.verify_claim(claim, article)
+    assert ev["checks"]["numbers"]["missing"] == []
+
+
+def test_generic_attribution_accepts_named_source():
+    # 模型写「据报道」,来源写「据韩联社报道」:属于同一归属,不得判伪造
+    text = "据韩联社报道，该基地计划于明年2月开始运营。"
+    article = {"id": 4, "title": "t", "url": "https://e.com/4", "text": text}
+    ev = verifier.verify_claim("据报道，该基地计划于明年2月开始运营", article)
+    assert ev["checks"]["attribution"]["missing"] == []
+    assert ev["kind"] == "opinion"
+
+
+def test_fragment_org_core_is_not_a_hard_anchor():
+    # 懒匹配会把句子片段当机构(在韩国龙仁建设其公司),只留痕不判 critical
+    assert verifier.is_anaphoric_org("在韩国龙仁建设其公司") is True
+    assert verifier.is_anaphoric_org("中国建设银行") is False
+    text = "该公司在韩国龙仁建设其公司。"
+    article = {"id": 5, "title": "t", "url": "https://e.com/5", "text": text}
+    ev = verifier.verify_claim("该公司在韩国龙仁建设其公司", article)
+    assert ev["checks"]["orgs"]["missing"] == []
+
+
 # --------------------------------------------------------------------------- 分维度扰动
 
 

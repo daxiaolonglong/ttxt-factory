@@ -73,6 +73,12 @@ CN_NUMBER_RE = re.compile(r"[一二三四五六七八九十百千万亿两]{1,8}
 DATE_RE = re.compile(
     r"\d{4}年\d{1,2}月(?:\d{1,2}日)?|\d{4}-\d{1,2}-\d{1,2}|\d{1,2}月\d{1,2}日|\d{4}年"
 )
+# 「明年2月」「本月7日」这类**相对日期**DATE_RE 不认,数字会漏进 numbers 变成裸锚点:
+# 生产实测(2026-11-18 technology 稿)「计划于明年2月开始运营」因为窗口里找不到孤立的 2
+# 被判 critical。整段当日期核验,同时从数字抽取里剔掉,避免同一位数字双计。
+REL_DATE_RE = re.compile(
+    r"(?:明年|今年|去年|本年|次年|同年|来年|本月|下月|上月|当月)?\d{1,2}月(?:\d{1,2}日)?"
+)
 PERSON_RE = re.compile(
     r"([\u4e00-\u9fff]{2,4})(?=表示|称|说|指出|强调|透露|介绍|回应|告诉|预计|认为|称)"
 )
@@ -99,14 +105,24 @@ _ORG_SUFFIXES = (
     "公司", "集团", "研究院", "研究所", "科学院", "大学", "学院", "银行", "委员会", "协会",
     "学会", "机构", "部门", "医院", "学校", "总局", "总部", "组织", "部委", "基金会",
 )
+# 以这些字开头的「机构核心」是句子片段而不是专名(在/于/与/和/对/从/据…)。
+_ORG_FRAGMENT_LEADING = (
+    "在", "于", "从", "对", "向", "把", "被", "据", "与", "和", "随", "因", "由",
+    "将", "已", "正", "并", "而", "为", "是", "其",
+)
 
 
 def is_anaphoric_org(anchor: str) -> bool:
-    """机构锚点去掉后缀后的核心是否只是指示代词/泛指词。"""
+    """机构锚点去掉后缀后的核心是否只是指示代词/泛指词/句子片段。"""
     for suffix in _ORG_SUFFIXES:
         if anchor.endswith(suffix):
             core = anchor[: len(anchor) - len(suffix)]
-            return core in ANAPHORIC_ORG_CORES or core.startswith(("这", "该", "此", "上述", "前述"))
+            if core in ANAPHORIC_ORG_CORES or core.startswith(("这", "该", "此", "上述", "前述")):
+                return True
+            # 懒匹配会把句子片段拼成机构:生产实测「在韩国龙仁建设其公司」核心是
+            # 「在韩国龙仁建设其」。核心以介词/连词开头或夹代词,就不是可核验的专名。
+            if core.startswith(_ORG_FRAGMENT_LEADING) or any(ch in core for ch in "其该此这那"):
+                return True
     return False
 CAUSAL_RE = re.compile(r"因为|由于|导致|因此|所以|使得|致使|引发|造成|促使|带动|使得")
 # 裸 hedge 词:只留痕,不豁免事实门禁(遗留常量,v1 构造脚本 scripts/build_golden_set.py 仍引用)
@@ -174,16 +190,38 @@ def _dedup(items: list[str]) -> list[str]:
     return out
 
 
+def _split_date_tokens(normed: str) -> tuple[str, list[str]]:
+    """把**相对日期**从数字抽取里剔掉并收进 dates;完整日期原样保留。
+
+    返回 (可用于数字抽取的文本, 日期锚点列表)。
+    """
+    spans = [(m.start(), m.end()) for m in DATE_RE.finditer(normed)]
+    dates = [m.group(0) for m in DATE_RE.finditer(normed)]
+    chars = list(normed)
+    for match in REL_DATE_RE.finditer(normed):
+        if any(start <= match.start() and match.end() <= end for start, end in spans):
+            continue  # 已由完整日期覆盖,不重复计
+        dates.append(match.group(0))
+        for idx in range(match.start(), match.end()):
+            chars[idx] = " "
+    return "".join(chars), dates
+
+
 def extract_anchors(text: str) -> dict[str, list[str]]:
     """从文本提取五类事实锚点(去重,保序)。引用编号 [n] 先剥掉,不当事实数字。"""
     clean = strip_citations(text)
-    numbers = _dedup(NUMBER_RE.findall(norm(clean)))
+    normed = norm(clean)
+    # 相对日期(「明年2月」)整段按日期核验,并从数字抽取里剔掉,否则窗口里缺一个孤立的 2
+    # 就误判 critical;完整日期(「2026年11月15日」)保持原样 —— T-03 黄金集要求伪造年份
+    # 同时以 dates 和 numbers 两个维度报缺失,这条冗余不能拆。
+    number_text, dates = _split_date_tokens(normed)
+    numbers = _dedup(NUMBER_RE.findall(number_text))
     # 纯中文数量词只在与阿拉伯数字不重叠时补充,避免「三大」与「3」双计
     arabic = "".join(numbers)
     cn = [item for item in _dedup(CN_NUMBER_RE.findall(clean)) if item not in arabic]
     return {
         "numbers": numbers + cn,
-        "dates": _dedup(DATE_RE.findall(norm(clean))),
+        "dates": _dedup(dates),
         "persons": _dedup(_extract_persons(clean)),
         "orgs": _dedup(ORG_RE.findall(clean)),
         "causal": _dedup(CAUSAL_RE.findall(clean)),
@@ -221,6 +259,22 @@ def attribution_markers(claim: str) -> tuple[list[str], list[str]]:
     return [mark for mark in marks if mark not in own], own
 
 
+# 「据报道 / 据悉」是泛称,来源里的写法几乎总带主体(「据韩联社报道」「据新华社消息」),
+# 逐字匹配会把真实转述判成伪造归属(生产实测 2026-11-18 technology 稿)。
+# 只对这两个泛称放宽成「窗口内存在 据…报道」:仍然要求归属与绑定引句同窗,不放行移花接木。
+_GENERIC_ATTRIBUTION = {
+    "据报道": re.compile(r"据[^。！？；\n]{0,20}?报道"),
+    "据悉": re.compile(r"据[^。！？；\n]{0,20}?(?:悉|获悉|了解|消息)"),
+}
+
+
+def _attribution_in(mark: str, window: str) -> bool:
+    if mark in (window or ""):
+        return True
+    pattern = _GENERIC_ATTRIBUTION.get(mark)
+    return bool(pattern and pattern.search(window or ""))
+
+
 def attribution_check(claim: str, window: str) -> dict:
     """T-15:第三/四方归属必须**逐字**出现在「绑定引句 ±1 句」窗口内(确定性,不调模型)。
 
@@ -232,10 +286,10 @@ def attribution_check(claim: str, window: str) -> dict:
     third_party, own = attribution_markers(claim)
     if not third_party:
         return {}
-    found = [mark for mark in third_party if mark in window]
+    found = [mark for mark in third_party if _attribution_in(mark, window)]
     return {
         "found": found,
-        "missing": [mark for mark in third_party if mark not in window],
+        "missing": [mark for mark in third_party if mark not in found],
         "self": own,
         "note": "归属须在绑定引句±1句窗口内逐字出现;缺失即视为伪造归属,句子回到事实门禁",
     }
