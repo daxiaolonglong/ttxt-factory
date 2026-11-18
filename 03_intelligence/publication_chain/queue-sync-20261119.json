@@ -1,0 +1,75 @@
+{
+  "action": "due_enqueue",
+  "categories": {
+    "technology": {
+      "category": "technology",
+      "window_days": 3,
+      "now": "2026-11-19T03:34:55+08:00",
+      "total": 468,
+      "states": {
+        "scheduled": 263,
+        "ready": 21,
+        "backlog": 67,
+        "done": 117,
+        "exhausted": 0
+      },
+      "removed": 0
+    },
+    "finance": {
+      "category": "finance",
+      "window_days": 3,
+      "now": "2026-11-19T03:34:55+08:00",
+      "total": 12824,
+      "states": {
+        "scheduled": 531,
+        "ready": 19,
+        "backlog": 4275,
+        "done": 7999,
+        "exhausted": 0
+      },
+      "removed": 0
+    },
+    "social": {
+      "category": "social",
+      "window_days": 3,
+      "now": "2026-11-19T03:34:56+08:00",
+      "total": 40146,
+      "states": {
+        "scheduled": 146,
+        "ready": 21,
+        "backlog": 13651,
+        "done": 26328,
+        "exhausted": 0
+      },
+      "removed": 0
+    },
+    "history": {
+      "category": "history",
+      "window_days": 3,
+      "now": "2026-11-19T03:34:57+08:00",
+      "total": 216,
+      "states": {
+        "scheduled": 127,
+        "ready": 19,
+        "backlog": 42,
+        "done": 28,
+        "exhausted": 0
+      },
+      "removed": 0
+    },
+    "health": {
+      "category": "health",
+      "window_days": 3,
+      "now": "2026-11-19T03:34:57+08:00",
+      "total": 67,
+      "states": {
+        "scheduled": 26,
+        "ready": 0,
+        "backlog": 27,
+        "done": 14,
+        "exhausted": 0
+      },
+      "removed": 0
+    }
+  }
+}

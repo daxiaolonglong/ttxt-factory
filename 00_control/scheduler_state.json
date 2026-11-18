@@ -81,7 +81,7 @@
     "last_error": null
   },
   "metrics_fetch_6h": {
-    "last_run_at": "2026-11-18T19:54:01+08:00",
+    "last_run_at": "2026-11-19T02:18:16+08:00",
     "last_status": "ok",
     "last_result": {
       "scheduler_status": "ok",
@@ -112,63 +112,67 @@
             "metrics_ok": 12
           },
           "labels": {
-            "articles": 345,
+            "articles": 468,
             "tiers": {
-              "measured": 212,
-              "missing_data": 133
+              "measured": 236,
+              "missing_data": 232
             },
             "calibration": {
               "status": "calibrated",
-              "sample": 200,
+              "sample": 212,
               "thresholds": [
-                0.0548,
-                0.0261,
-                0.0125
+                0.0562,
+                0.0266,
+                0.0126
               ]
+            },
+            "calibration_reads": {
+              "status": "default_thresholds",
+              "sample": 0
             }
           },
           "analysis": {
             "category": "technology",
-            "seeded_keywords": 4,
+            "seeded_keywords": 13,
             "keywords": {
-              "keywords": 4,
+              "keywords": 14,
               "zero_coverage": 1,
               "feedback_candidates": [
                 "效率工具"
               ],
               "viral": {
                 "status": "applied",
-                "measured_samples": 212,
+                "measured_samples": 236,
                 "required": 30,
                 "weight": 0.3,
                 "calibration": "calibrated",
                 "min_keyword_hits": 3,
-                "keywords_with_signal": 3,
+                "keywords_with_signal": 13,
                 "keywords_without_signal": 1,
-                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier=measured 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
+                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
                 "score_and_signal_are_different_metrics": true,
                 "details": {
                   "人工智能": {
-                    "signal": 0.3733,
-                    "measured_hits": 30,
-                    "matched_articles": 44,
+                    "signal": 0.3657,
+                    "measured_hits": 35,
+                    "matched_articles": 54,
                     "reason": "",
-                    "base": 0.5808,
-                    "collected_norm": 0.3014,
+                    "base": 0.5662,
+                    "collected_norm": 0.2769,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.112,
-                    "score": 0.5186
+                    "viral_component": 0.1097,
+                    "score": 0.506
                   },
                   "开源": {
-                    "signal": 0.4308,
-                    "measured_hits": 13,
-                    "matched_articles": 19,
+                    "signal": 0.4,
+                    "measured_hits": 14,
+                    "matched_articles": 29,
                     "reason": "",
-                    "base": 0.457,
-                    "collected_norm": 0.1301,
-                    "quality_ratio": 0.9474,
-                    "viral_component": 0.1292,
-                    "score": 0.4492
+                    "base": 0.4754,
+                    "collected_norm": 0.1487,
+                    "quality_ratio": 0.9655,
+                    "viral_component": 0.12,
+                    "score": 0.4528
                   },
                   "效率工具": {
                     "signal": null,
@@ -182,74 +186,307 @@
                     "score": 0.0
                   },
                   "数据": {
-                    "signal": 0.3731,
-                    "measured_hits": 119,
-                    "matched_articles": 146,
+                    "signal": 0.3729,
+                    "measured_hits": 133,
+                    "matched_articles": 195,
                     "reason": "",
                     "base": 1.0,
                     "collected_norm": 1.0,
                     "quality_ratio": 1.0,
                     "viral_component": 0.1119,
                     "score": 0.8119
+                  },
+                  "降价": {
+                    "signal": 0.5,
+                    "measured_hits": 8,
+                    "matched_articles": 10,
+                    "reason": "",
+                    "base": 0.4308,
+                    "collected_norm": 0.0513,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.15,
+                    "score": 0.4515
+                  },
+                  "航天": {
+                    "signal": 0.4611,
+                    "measured_hits": 36,
+                    "matched_articles": 41,
+                    "reason": "",
+                    "base": 0.5262,
+                    "collected_norm": 0.2103,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1383,
+                    "score": 0.5066
+                  },
+                  "京东": {
+                    "signal": 0.328,
+                    "measured_hits": 25,
+                    "matched_articles": 30,
+                    "reason": "",
+                    "base": 0.4923,
+                    "collected_norm": 0.1538,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.0984,
+                    "score": 0.443
+                  },
+                  "航天员": {
+                    "signal": 0.5294,
+                    "measured_hits": 17,
+                    "matched_articles": 17,
+                    "reason": "",
+                    "base": 0.4523,
+                    "collected_norm": 0.0872,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1588,
+                    "score": 0.4754
+                  },
+                  "神舟二十": {
+                    "signal": 0.4571,
+                    "measured_hits": 14,
+                    "matched_articles": 14,
+                    "reason": "",
+                    "base": 0.4431,
+                    "collected_norm": 0.0718,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1371,
+                    "score": 0.4473
+                  },
+                  "中国": {
+                    "signal": 0.4339,
+                    "measured_hits": 112,
+                    "matched_articles": 163,
+                    "reason": "",
+                    "base": 0.8966,
+                    "collected_norm": 0.8359,
+                    "quality_ratio": 0.9877,
+                    "viral_component": 0.1302,
+                    "score": 0.7578
+                  },
+                  "科学家": {
+                    "signal": 0.4875,
+                    "measured_hits": 16,
+                    "matched_articles": 26,
+                    "reason": "",
+                    "base": 0.48,
+                    "collected_norm": 0.1333,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1462,
+                    "score": 0.4823
+                  },
+                  "小米": {
+                    "signal": 0.3733,
+                    "measured_hits": 15,
+                    "matched_articles": 20,
+                    "reason": "",
+                    "base": 0.4615,
+                    "collected_norm": 0.1026,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.112,
+                    "score": 0.4351
+                  },
+                  "国家": {
+                    "signal": 0.4167,
+                    "measured_hits": 84,
+                    "matched_articles": 111,
+                    "reason": "",
+                    "base": 0.7415,
+                    "collected_norm": 0.5692,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.125,
+                    "score": 0.6441
+                  },
+                  "工程": {
+                    "signal": 0.4575,
+                    "measured_hits": 73,
+                    "matched_articles": 111,
+                    "reason": "",
+                    "base": 0.7415,
+                    "collected_norm": 0.5692,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1373,
+                    "score": 0.6563
                   }
                 }
               }
             },
+            "mined_keywords": {
+              "status": "ok",
+              "viral_docs": 96,
+              "corpus_titles": 465,
+              "duplicate_titles_dropped": 3,
+              "candidates": 10,
+              "inserted": 2,
+              "pruned": 1,
+              "min_docs": 3,
+              "min_lift": 2.0,
+              "specificity_min": 2.0,
+              "max_prevalence": 0.02,
+              "background_categories": 4,
+              "entropy_min": 0.5,
+              "top": [
+                {
+                  "keyword": "中国",
+                  "viral_docs": 30,
+                  "lift": 2.106,
+                  "score": 11.535,
+                  "pos": "ns",
+                  "specificity": 8.939,
+                  "left_entropy": 1.742,
+                  "right_entropy": 3.85
+                },
+                {
+                  "keyword": "京东",
+                  "viral_docs": 4,
+                  "lift": 3.875,
+                  "score": 7.75,
+                  "pos": "ns",
+                  "specificity": 5.0,
+                  "left_entropy": 0.5,
+                  "right_entropy": 1.332
+                },
+                {
+                  "keyword": "航天员",
+                  "viral_docs": 5,
+                  "lift": 3.027,
+                  "score": 6.769,
+                  "pos": "n",
+                  "specificity": 8.0,
+                  "left_entropy": 1.494,
+                  "right_entropy": 1.733
+                },
+                {
+                  "keyword": "航天",
+                  "viral_docs": 6,
+                  "lift": 2.642,
+                  "score": 6.472,
+                  "pos": "n",
+                  "specificity": 11.0,
+                  "left_entropy": 2.098,
+                  "right_entropy": 1.072
+                },
+                {
+                  "keyword": "科学家",
+                  "viral_docs": 3,
+                  "lift": 3.633,
+                  "score": 6.292,
+                  "pos": "n",
+                  "specificity": 4.0,
+                  "left_entropy": 1.386,
+                  "right_entropy": 1.386
+                },
+                {
+                  "keyword": "降价",
+                  "viral_docs": 3,
+                  "lift": 3.633,
+                  "score": 6.292,
+                  "pos": "n",
+                  "specificity": 4.0,
+                  "left_entropy": 1.386,
+                  "right_entropy": 1.04
+                },
+                {
+                  "keyword": "国家",
+                  "viral_docs": 3,
+                  "lift": 2.906,
+                  "score": 5.034,
+                  "pos": "n",
+                  "specificity": 3.84,
+                  "left_entropy": 1.055,
+                  "right_entropy": 1.332
+                },
+                {
+                  "keyword": "工程",
+                  "viral_docs": 3,
+                  "lift": 2.906,
+                  "score": 5.034,
+                  "pos": "n",
+                  "specificity": 2.323,
+                  "left_entropy": 1.609,
+                  "right_entropy": 1.332
+                },
+                {
+                  "keyword": "神舟二十",
+                  "viral_docs": 3,
+                  "lift": 2.906,
+                  "score": 5.034,
+                  "pos": "nz/m",
+                  "specificity": 5.0,
+                  "left_entropy": 0.5,
+                  "right_entropy": 0.5
+                },
+                {
+                  "keyword": "小米",
+                  "viral_docs": 4,
+                  "lift": 2.422,
+                  "score": 4.844,
+                  "pos": "n",
+                  "specificity": 8.0,
+                  "left_entropy": 0.736,
+                  "right_entropy": 1.386
+                }
+              ]
+            },
             "feedback": {
               "category": "technology",
-              "generated_at": "2026-11-18T19:52:22+08:00",
+              "generated_at": "2026-11-19T02:17:53+08:00",
               "gap_keywords": [
                 "效率工具"
               ],
               "recovered_keywords": 0,
-              "queued_job_id": 182,
-              "note": "已入队补充采集任务(不自动执行)",
+              "queued_job_id": null,
+              "note": "冷却中:距上次反哺入队还需 45.79 小时(窗口 48 小时,已真实入队 1 次),本次不入队;该来源累计第 19 次反哺尝试",
               "cooldown_hours": 24.0,
-              "cooldown_remaining_hours": null,
-              "last_enqueued_at": "2026-11-18T19:52:22+08:00",
-              "feedback_attempts": 8,
-              "evidence_file": "D:\\ttxt\\03_intelligence\\keyword_feedback\\technology-feedback-20261118T195222+0800.json"
+              "cooldown_hours_effective": 48.0,
+              "cooldown_remaining_hours": 45.79,
+              "last_enqueued_at": "2026-11-19T00:05:17+08:00",
+              "feedback_attempts": 19,
+              "evidence_file": "D:\\ttxt\\03_intelligence\\keyword_feedback\\technology-feedback-20261119T021753+0800.json"
             },
             "viral": {
-              "articles": 345,
+              "articles": 468,
               "tiers": {
-                "measured": 212,
-                "missing_data": 133
+                "measured": 236,
+                "missing_data": 232
               },
               "calibration": {
                 "status": "calibrated",
-                "sample": 200,
+                "sample": 212,
                 "thresholds": [
-                  0.0548,
-                  0.0261,
-                  0.0125
+                  0.0562,
+                  0.0266,
+                  0.0126
                 ]
+              },
+              "calibration_reads": {
+                "status": "default_thresholds",
+                "sample": 0
               }
             },
             "knowledge": {
               "assets": 3,
-              "articles": 345,
+              "articles": 468,
               "zero_coverage": 1
             },
             "index": {
-              "mode": "full",
-              "indexed": 345,
-              "deleted": 345,
+              "mode": "delta",
+              "indexed": 0,
+              "deleted": 0,
               "candidate_count": 0,
-              "delta_ops_since_full": 0,
-              "elapsed_s": 0.812
+              "delta_ops_since_full": 114,
+              "elapsed_s": 0.01
             },
             "stage_seconds": {
-              "seed": 0.02,
-              "score_keywords": 0.05,
-              "auto_feedback": 0.02,
+              "seed": 0.01,
               "viral": 0.03,
-              "knowledge": 0.02,
-              "index": 0.81
+              "mine_keywords": 1.56,
+              "score_keywords": 0.03,
+              "auto_feedback": 0.02,
+              "knowledge": 0.01,
+              "index": 0.02
             }
           },
-          "measured": 212,
-          "calibration_hint": "实测样本已有 212 条,阈值快照还是 200 条时的;要更新爆款口径就执行 ttxt metrics --category technology --calibrate"
+          "measured": 236,
+          "calibration_hint": "实测样本已有 236 条,阈值快照还是 212 条时的;要更新爆款口径就执行 ttxt metrics --category technology --calibrate"
         },
         "finance": {
           "status": "ok",
@@ -265,142 +502,391 @@
             "metrics_ok": 12
           },
           "labels": {
-            "articles": 12803,
+            "articles": 12994,
             "tiers": {
-              "missing_data": 4708,
-              "measured": 58,
-              "no_impressions": 8037
+              "missing_data": 4875,
+              "measured": 82,
+              "measured_reads": 7596,
+              "no_impressions": 441
             },
             "calibration": {
               "status": "calibrated",
-              "sample": 46,
+              "sample": 58,
               "thresholds": [
                 0.0553,
                 0.0288,
-                0.0147
+                0.0146
+              ]
+            },
+            "calibration_reads": {
+              "status": "calibrated",
+              "sample": 7596,
+              "thresholds": [
+                0.2395,
+                0.0196,
+                0.003
               ]
             }
           },
           "analysis": {
             "category": "finance",
-            "seeded_keywords": 4,
+            "seeded_keywords": 14,
             "keywords": {
-              "keywords": 4,
+              "keywords": 14,
               "zero_coverage": 0,
               "feedback_candidates": [],
               "viral": {
                 "status": "applied",
-                "measured_samples": 58,
+                "measured_samples": 7678,
                 "required": 30,
                 "weight": 0.3,
                 "calibration": "calibrated",
                 "min_keyword_hits": 3,
-                "keywords_with_signal": 4,
+                "keywords_with_signal": 14,
                 "keywords_without_signal": 0,
-                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier=measured 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
+                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
                 "score_and_signal_are_different_metrics": true,
                 "details": {
                   "市场": {
-                    "signal": 0.3429,
-                    "measured_hits": 42,
-                    "matched_articles": 6036,
+                    "signal": 0.3475,
+                    "measured_hits": 3727,
+                    "matched_articles": 6157,
                     "reason": "",
                     "base": 0.9995,
                     "collected_norm": 1.0,
-                    "quality_ratio": 0.9988,
-                    "viral_component": 0.1029,
-                    "score": 0.8025
+                    "quality_ratio": 0.9987,
+                    "viral_component": 0.1042,
+                    "score": 0.8039
                   },
                   "投资": {
-                    "signal": 0.2692,
-                    "measured_hits": 26,
-                    "matched_articles": 2297,
+                    "signal": 0.3623,
+                    "measured_hits": 1431,
+                    "matched_articles": 2388,
                     "reason": "",
-                    "base": 0.6271,
-                    "collected_norm": 0.3806,
-                    "quality_ratio": 0.997,
-                    "viral_component": 0.0808,
-                    "score": 0.5197
+                    "base": 0.6315,
+                    "collected_norm": 0.3879,
+                    "quality_ratio": 0.9971,
+                    "viral_component": 0.1087,
+                    "score": 0.5508
                   },
                   "财报": {
-                    "signal": 0.48,
-                    "measured_hits": 5,
-                    "matched_articles": 198,
+                    "signal": 0.4337,
+                    "measured_hits": 101,
+                    "matched_articles": 223,
                     "reason": "",
-                    "base": 0.4156,
-                    "collected_norm": 0.0328,
-                    "quality_ratio": 0.9899,
-                    "viral_component": 0.144,
-                    "score": 0.4349
+                    "base": 0.4146,
+                    "collected_norm": 0.0362,
+                    "quality_ratio": 0.9821,
+                    "viral_component": 0.1301,
+                    "score": 0.4203
                   },
                   "利率": {
-                    "signal": 0.26,
-                    "measured_hits": 10,
-                    "matched_articles": 247,
+                    "signal": 0.388,
+                    "measured_hits": 150,
+                    "matched_articles": 271,
                     "reason": "",
-                    "base": 0.4246,
-                    "collected_norm": 0.0409,
+                    "base": 0.4264,
+                    "collected_norm": 0.044,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.078,
-                    "score": 0.3752
+                    "viral_component": 0.1164,
+                    "score": 0.4149
+                  },
+                  "司机": {
+                    "signal": 0.3681,
+                    "measured_hits": 144,
+                    "matched_articles": 216,
+                    "reason": "",
+                    "base": 0.4192,
+                    "collected_norm": 0.0351,
+                    "quality_ratio": 0.9954,
+                    "viral_component": 0.1104,
+                    "score": 0.4039
+                  },
+                  "谷歌": {
+                    "signal": 0.5139,
+                    "measured_hits": 216,
+                    "matched_articles": 314,
+                    "reason": "",
+                    "base": 0.4306,
+                    "collected_norm": 0.051,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1542,
+                    "score": 0.4556
+                  },
+                  "女子": {
+                    "signal": 0.5292,
+                    "measured_hits": 48,
+                    "matched_articles": 59,
+                    "reason": "",
+                    "base": 0.4057,
+                    "collected_norm": 0.0096,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1588,
+                    "score": 0.4428
+                  },
+                  "滴滴": {
+                    "signal": 0.4216,
+                    "measured_hits": 74,
+                    "matched_articles": 89,
+                    "reason": "",
+                    "base": 0.4087,
+                    "collected_norm": 0.0145,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1265,
+                    "score": 0.4126
+                  },
+                  "骑手": {
+                    "signal": 0.4587,
+                    "measured_hits": 109,
+                    "matched_articles": 156,
+                    "reason": "",
+                    "base": 0.4152,
+                    "collected_norm": 0.0253,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1376,
+                    "score": 0.4283
+                  },
+                  "火箭": {
+                    "signal": 0.5509,
+                    "measured_hits": 53,
+                    "matched_articles": 76,
+                    "reason": "",
+                    "base": 0.4074,
+                    "collected_norm": 0.0123,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1653,
+                    "score": 0.4505
+                  },
+                  "典型案例": {
+                    "signal": 0.4315,
+                    "measured_hits": 127,
+                    "matched_articles": 185,
+                    "reason": "",
+                    "base": 0.418,
+                    "collected_norm": 0.03,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1294,
+                    "score": 0.4221
+                  },
+                  "戚薇": {
+                    "signal": 0.6222,
+                    "measured_hits": 9,
+                    "matched_articles": 10,
+                    "reason": "",
+                    "base": 0.401,
+                    "collected_norm": 0.0016,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1867,
+                    "score": 0.4673
+                  },
+                  "数据分析": {
+                    "signal": 0.3298,
+                    "measured_hits": 510,
+                    "matched_articles": 842,
+                    "reason": "",
+                    "base": 0.4821,
+                    "collected_norm": 0.1368,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.0989,
+                    "score": 0.4364
+                  },
+                  "苹果": {
+                    "signal": 0.4625,
+                    "measured_hits": 160,
+                    "matched_articles": 234,
+                    "reason": "",
+                    "base": 0.4228,
+                    "collected_norm": 0.038,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1388,
+                    "score": 0.4347
                   }
                 }
               }
             },
+            "mined_keywords": {
+              "status": "ok",
+              "viral_docs": 2927,
+              "corpus_titles": 12381,
+              "duplicate_titles_dropped": 613,
+              "candidates": 246,
+              "inserted": 0,
+              "pruned": 0,
+              "min_docs": 3,
+              "min_lift": 2.0,
+              "specificity_min": 2.0,
+              "max_prevalence": 0.02,
+              "background_categories": 4,
+              "entropy_min": 0.5,
+              "top": [
+                {
+                  "keyword": "司机",
+                  "viral_docs": 15,
+                  "lift": 3.021,
+                  "score": 11.702,
+                  "pos": "n",
+                  "specificity": 21.0,
+                  "left_entropy": 1.909,
+                  "right_entropy": 2.595
+                },
+                {
+                  "keyword": "谷歌",
+                  "viral_docs": 17,
+                  "lift": 2.766,
+                  "score": 11.403,
+                  "pos": "nr",
+                  "specificity": 26.0,
+                  "left_entropy": 0.799,
+                  "right_entropy": 1.784
+                },
+                {
+                  "keyword": "女子",
+                  "viral_docs": 18,
+                  "lift": 2.625,
+                  "score": 11.139,
+                  "pos": "n",
+                  "specificity": 29.0,
+                  "left_entropy": 1.512,
+                  "right_entropy": 2.467
+                },
+                {
+                  "keyword": "滴滴",
+                  "viral_docs": 8,
+                  "lift": 3.76,
+                  "score": 10.635,
+                  "pos": "n",
+                  "specificity": 9.0,
+                  "left_entropy": 1.215,
+                  "right_entropy": 1.003
+                },
+                {
+                  "keyword": "骑手",
+                  "viral_docs": 16,
+                  "lift": 2.603,
+                  "score": 10.412,
+                  "pos": "n",
+                  "specificity": 26.0,
+                  "left_entropy": 2.318,
+                  "right_entropy": 2.735
+                },
+                {
+                  "keyword": "火箭",
+                  "viral_docs": 9,
+                  "lift": 3.172,
+                  "score": 9.517,
+                  "pos": "n",
+                  "specificity": 12.0,
+                  "left_entropy": 2.095,
+                  "right_entropy": 2.095
+                },
+                {
+                  "keyword": "典型案例",
+                  "viral_docs": 11,
+                  "lift": 2.737,
+                  "score": 9.078,
+                  "pos": "n/n",
+                  "specificity": 17.0,
+                  "left_entropy": 2.232,
+                  "right_entropy": 0.872
+                },
+                {
+                  "keyword": "戚薇",
+                  "viral_docs": 6,
+                  "lift": 3.626,
+                  "score": 8.881,
+                  "pos": "nr",
+                  "specificity": 7.0,
+                  "left_entropy": 0.683,
+                  "right_entropy": 1.277
+                },
+                {
+                  "keyword": "数据分析",
+                  "viral_docs": 6,
+                  "lift": 3.626,
+                  "score": 8.881,
+                  "pos": "l",
+                  "specificity": 7.0,
+                  "left_entropy": 1.154,
+                  "right_entropy": 1.946
+                },
+                {
+                  "keyword": "苹果",
+                  "viral_docs": 14,
+                  "lift": 2.369,
+                  "score": 8.863,
+                  "pos": "n",
+                  "specificity": 5.048,
+                  "left_entropy": 1.292,
+                  "right_entropy": 1.753
+                }
+              ]
+            },
             "feedback": {
               "category": "finance",
-              "generated_at": "2026-11-18T19:52:25+08:00",
+              "generated_at": "2026-11-19T02:17:59+08:00",
               "gap_keywords": [],
               "recovered_keywords": 0,
               "queued_job_id": null,
               "note": null,
               "cooldown_hours": 24.0,
+              "cooldown_hours_effective": null,
               "cooldown_remaining_hours": null,
               "last_enqueued_at": null,
               "feedback_attempts": null,
               "evidence_file": null
             },
             "viral": {
-              "articles": 12803,
+              "articles": 12994,
               "tiers": {
-                "missing_data": 4708,
-                "measured": 58,
-                "no_impressions": 8037
+                "missing_data": 4875,
+                "measured": 82,
+                "measured_reads": 7596,
+                "no_impressions": 441
               },
               "calibration": {
                 "status": "calibrated",
-                "sample": 46,
+                "sample": 58,
                 "thresholds": [
                   0.0553,
                   0.0288,
-                  0.0147
+                  0.0146
+                ]
+              },
+              "calibration_reads": {
+                "status": "calibrated",
+                "sample": 7596,
+                "thresholds": [
+                  0.2395,
+                  0.0196,
+                  0.003
                 ]
               }
             },
             "knowledge": {
               "assets": 1,
-              "articles": 12803,
+              "articles": 12994,
               "zero_coverage": 0
             },
             "index": {
-              "mode": "full",
-              "indexed": 12803,
-              "deleted": 12803,
+              "mode": "delta",
+              "indexed": 0,
+              "deleted": 0,
               "candidate_count": 0,
-              "delta_ops_since_full": 0,
-              "elapsed_s": 68.075
+              "delta_ops_since_full": 201,
+              "elapsed_s": 0.105
             },
             "stage_seconds": {
-              "seed": 0.0,
-              "score_keywords": 0.78,
+              "seed": 0.02,
+              "viral": 1.0,
+              "mine_keywords": 2.41,
+              "score_keywords": 0.99,
               "auto_feedback": 0.0,
-              "viral": 0.86,
-              "knowledge": 0.3,
-              "index": 68.08
+              "knowledge": 0.25,
+              "index": 0.09
             }
           },
-          "measured": 58,
-          "calibration_hint": "实测样本已有 58 条,阈值快照还是 46 条时的;要更新爆款口径就执行 ttxt metrics --category finance --calibrate"
+          "measured": 82,
+          "calibration_hint": "实测样本已有 82 条,阈值快照还是 58 条时的;要更新爆款口径就执行 ttxt metrics --category finance --calibrate"
         },
         "social": {
           "status": "ok",
@@ -408,7 +894,7 @@
           "written": 11,
           "updated": 0,
           "snapshots": 11,
-          "known_gone_skipped": 8,
+          "known_gone_skipped": 10,
           "link_status_recorded": 1,
           "link_status_cleared": 0,
           "row_errors": 0,
@@ -417,19 +903,29 @@
             "article_gone": 1
           },
           "labels": {
-            "articles": 40534,
+            "articles": 40574,
             "tiers": {
-              "missing_data": 13929,
-              "no_impressions": 26514,
-              "measured": 91
+              "missing_data": 13947,
+              "measured_reads": 25411,
+              "no_impressions": 1103,
+              "measured": 113
             },
             "calibration": {
               "status": "calibrated",
-              "sample": 80,
+              "sample": 91,
               "thresholds": [
                 0.0347,
-                0.0083,
-                0.0003
+                0.0084,
+                0.0004
+              ]
+            },
+            "calibration_reads": {
+              "status": "calibrated",
+              "sample": 25411,
+              "thresholds": [
+                0.2811,
+                0.0234,
+                0.003
               ]
             }
           },
@@ -437,90 +933,328 @@
             "category": "social",
             "seeded_keywords": 3,
             "keywords": {
-              "keywords": 3,
+              "keywords": 13,
               "zero_coverage": 0,
               "feedback_candidates": [],
               "viral": {
                 "status": "applied",
-                "measured_samples": 91,
+                "measured_samples": 25524,
                 "required": 30,
                 "weight": 0.3,
                 "calibration": "calibrated",
                 "min_keyword_hits": 3,
-                "keywords_with_signal": 3,
+                "keywords_with_signal": 13,
                 "keywords_without_signal": 0,
-                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier=measured 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
+                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
                 "score_and_signal_are_different_metrics": true,
                 "details": {
                   "城市": {
-                    "signal": 0.3364,
-                    "measured_hits": 22,
-                    "matched_articles": 8121,
+                    "signal": 0.3565,
+                    "measured_hits": 5269,
+                    "matched_articles": 8131,
                     "reason": "",
                     "base": 1.0,
                     "collected_norm": 1.0,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.1009,
-                    "score": 0.8009
+                    "viral_component": 0.1069,
+                    "score": 0.8069
                   },
                   "教育": {
-                    "signal": 0.38,
-                    "measured_hits": 10,
-                    "matched_articles": 5638,
+                    "signal": 0.3342,
+                    "measured_hits": 3326,
+                    "matched_articles": 5651,
                     "reason": "",
-                    "base": 0.8165,
-                    "collected_norm": 0.6942,
+                    "base": 0.817,
+                    "collected_norm": 0.695,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.114,
-                    "score": 0.6856
+                    "viral_component": 0.1003,
+                    "score": 0.6722
                   },
                   "就业": {
-                    "signal": 0.325,
-                    "measured_hits": 8,
-                    "matched_articles": 5767,
+                    "signal": 0.3239,
+                    "measured_hits": 3489,
+                    "matched_articles": 5773,
                     "reason": "",
-                    "base": 0.8261,
-                    "collected_norm": 0.7101,
+                    "base": 0.826,
+                    "collected_norm": 0.71,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.0975,
-                    "score": 0.6758
+                    "viral_component": 0.0972,
+                    "score": 0.6754
+                  },
+                  "男子": {
+                    "signal": 0.5303,
+                    "measured_hits": 238,
+                    "matched_articles": 313,
+                    "reason": "",
+                    "base": 0.4231,
+                    "collected_norm": 0.0385,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1591,
+                    "score": 0.4553
+                  },
+                  "数学": {
+                    "signal": 0.4098,
+                    "measured_hits": 774,
+                    "matched_articles": 1166,
+                    "reason": "",
+                    "base": 0.486,
+                    "collected_norm": 0.1434,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1229,
+                    "score": 0.4632
+                  },
+                  "美女": {
+                    "signal": 0.6075,
+                    "measured_hits": 159,
+                    "matched_articles": 183,
+                    "reason": "",
+                    "base": 0.4135,
+                    "collected_norm": 0.0225,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1822,
+                    "score": 0.4717
+                  },
+                  "网恋": {
+                    "signal": 0.5071,
+                    "measured_hits": 99,
+                    "matched_articles": 133,
+                    "reason": "",
+                    "base": 0.4098,
+                    "collected_norm": 0.0164,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1521,
+                    "score": 0.439
+                  },
+                  "产品经理": {
+                    "signal": 0.4677,
+                    "measured_hits": 942,
+                    "matched_articles": 1272,
+                    "reason": "",
+                    "base": 0.4939,
+                    "collected_norm": 0.1564,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1403,
+                    "score": 0.486
+                  },
+                  "女医生": {
+                    "signal": 0.6727,
+                    "measured_hits": 33,
+                    "matched_articles": 38,
+                    "reason": "",
+                    "base": 0.4028,
+                    "collected_norm": 0.0047,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.2018,
+                    "score": 0.4838
+                  },
+                  "三次创业": {
+                    "signal": 0.417,
+                    "measured_hits": 47,
+                    "matched_articles": 56,
+                    "reason": "",
+                    "base": 0.4041,
+                    "collected_norm": 0.0069,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1251,
+                    "score": 0.408
+                  },
+                  "同居": {
+                    "signal": 0.5423,
+                    "measured_hits": 111,
+                    "matched_articles": 154,
+                    "reason": "",
+                    "base": 0.4114,
+                    "collected_norm": 0.0189,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1627,
+                    "score": 0.4506
+                  },
+                  "指令": {
+                    "signal": 0.3761,
+                    "measured_hits": 2002,
+                    "matched_articles": 3086,
+                    "reason": "",
+                    "base": 0.6277,
+                    "collected_norm": 0.3795,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1128,
+                    "score": 0.5522
+                  },
+                  "警方": {
+                    "signal": 0.4714,
+                    "measured_hits": 454,
+                    "matched_articles": 664,
+                    "reason": "",
+                    "base": 0.449,
+                    "collected_norm": 0.0817,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1414,
+                    "score": 0.4557
                   }
                 }
               }
             },
+            "mined_keywords": {
+              "status": "ok",
+              "viral_docs": 6172,
+              "corpus_titles": 18229,
+              "duplicate_titles_dropped": 1771,
+              "candidates": 289,
+              "inserted": 10,
+              "pruned": 0,
+              "min_docs": 3,
+              "min_lift": 2.0,
+              "specificity_min": 2.0,
+              "max_prevalence": 0.02,
+              "background_categories": 4,
+              "entropy_min": 0.5,
+              "top": [
+                {
+                  "keyword": "男子",
+                  "viral_docs": 44,
+                  "lift": 2.13,
+                  "score": 14.131,
+                  "pos": "n",
+                  "specificity": 61.0,
+                  "left_entropy": 2.293,
+                  "right_entropy": 3.243
+                },
+                {
+                  "keyword": "数学",
+                  "viral_docs": 19,
+                  "lift": 2.672,
+                  "score": 11.648,
+                  "pos": "n",
+                  "specificity": 21.0,
+                  "left_entropy": 2.476,
+                  "right_entropy": 1.895
+                },
+                {
+                  "keyword": "美女",
+                  "viral_docs": 22,
+                  "lift": 2.321,
+                  "score": 10.885,
+                  "pos": "n",
+                  "specificity": 3.84,
+                  "left_entropy": 1.364,
+                  "right_entropy": 1.55
+                },
+                {
+                  "keyword": "网恋",
+                  "viral_docs": 18,
+                  "lift": 2.532,
+                  "score": 10.741,
+                  "pos": "n",
+                  "specificity": 21.0,
+                  "left_entropy": 1.699,
+                  "right_entropy": 1.336
+                },
+                {
+                  "keyword": "产品经理",
+                  "viral_docs": 25,
+                  "lift": 2.11,
+                  "score": 10.548,
+                  "pos": "n/n",
+                  "specificity": 35.0,
+                  "left_entropy": 1.495,
+                  "right_entropy": 2.343
+                },
+                {
+                  "keyword": "女医生",
+                  "viral_docs": 19,
+                  "lift": 2.338,
+                  "score": 10.192,
+                  "pos": "n",
+                  "specificity": 24.0,
+                  "left_entropy": 0.762,
+                  "right_entropy": 0.736
+                },
+                {
+                  "keyword": "三次创业",
+                  "viral_docs": 13,
+                  "lift": 2.4,
+                  "score": 8.652,
+                  "pos": "m/n",
+                  "specificity": 16.0,
+                  "left_entropy": 1.124,
+                  "right_entropy": 1.715
+                },
+                {
+                  "keyword": "同居",
+                  "viral_docs": 14,
+                  "lift": 2.297,
+                  "score": 8.595,
+                  "pos": "j",
+                  "specificity": 18.0,
+                  "left_entropy": 1.351,
+                  "right_entropy": 1.725
+                },
+                {
+                  "keyword": "指令",
+                  "viral_docs": 14,
+                  "lift": 2.297,
+                  "score": 8.595,
+                  "pos": "n",
+                  "specificity": 18.0,
+                  "left_entropy": 2.366,
+                  "right_entropy": 0.634
+                },
+                {
+                  "keyword": "警方",
+                  "viral_docs": 11,
+                  "lift": 2.499,
+                  "score": 8.289,
+                  "pos": "n",
+                  "specificity": 13.0,
+                  "left_entropy": 1.378,
+                  "right_entropy": 1.992
+                }
+              ]
+            },
             "feedback": {
               "category": "social",
-              "generated_at": "2026-11-18T19:53:54+08:00",
+              "generated_at": "2026-11-19T02:18:15+08:00",
               "gap_keywords": [],
               "recovered_keywords": 0,
               "queued_job_id": null,
               "note": null,
               "cooldown_hours": 24.0,
+              "cooldown_hours_effective": null,
               "cooldown_remaining_hours": null,
               "last_enqueued_at": null,
               "feedback_attempts": null,
               "evidence_file": null
             },
             "viral": {
-              "articles": 40534,
+              "articles": 40574,
               "tiers": {
-                "missing_data": 13929,
-                "no_impressions": 26514,
-                "measured": 91
+                "missing_data": 13947,
+                "measured_reads": 25411,
+                "no_impressions": 1103,
+                "measured": 113
               },
               "calibration": {
                 "status": "calibrated",
-                "sample": 80,
+                "sample": 91,
                 "thresholds": [
                   0.0347,
-                  0.0083,
-                  0.0003
+                  0.0084,
+                  0.0004
+                ]
+              },
+              "calibration_reads": {
+                "status": "calibrated",
+                "sample": 25411,
+                "thresholds": [
+                  0.2811,
+                  0.0234,
+                  0.003
                 ]
               }
             },
             "knowledge": {
               "assets": 1,
-              "articles": 40534,
+              "articles": 40574,
               "zero_coverage": 0
             },
             "index": {
@@ -528,26 +1262,234 @@
               "indexed": 0,
               "deleted": 0,
               "candidate_count": 0,
-              "delta_ops_since_full": 0,
-              "elapsed_s": 0.475
+              "delta_ops_since_full": 40,
+              "elapsed_s": 0.33
             },
             "stage_seconds": {
-              "seed": 0.02,
-              "score_keywords": 2.73,
-              "auto_feedback": 0.0,
-              "viral": 3.28,
-              "knowledge": 2.58,
-              "index": 0.47
+              "seed": 0.0,
+              "viral": 3.48,
+              "mine_keywords": 4.25,
+              "score_keywords": 4.0,
+              "auto_feedback": 0.02,
+              "knowledge": 0.91,
+              "index": 0.33
             }
           },
-          "measured": 91,
-          "calibration_hint": "实测样本已有 91 条,阈值快照还是 80 条时的;要更新爆款口径就执行 ttxt metrics --category social --calibrate"
+          "measured": 113,
+          "calibration_hint": "实测样本已有 113 条,阈值快照还是 91 条时的;要更新爆款口径就执行 ttxt metrics --category social --calibrate"
         },
         "history": {
           "status": "ok",
           "fetched": 12,
           "written": 12,
           "updated": 0,
+          "snapshots": 12,
+          "known_gone_skipped": 1,
+          "link_status_recorded": 0,
+          "link_status_cleared": 0,
+          "row_errors": 0,
+          "outcome_counts": {
+            "metrics_ok": 12
+          },
+          "labels": {
+            "articles": 216,
+            "tiers": {
+              "missing_data": 135,
+              "measured": 81
+            },
+            "calibration": {
+              "status": "calibrated",
+              "sample": 58,
+              "thresholds": [
+                0.0528,
+                0.0307,
+                0.0193
+              ]
+            },
+            "calibration_reads": {
+              "status": "default_thresholds",
+              "sample": 0
+            }
+          },
+          "analysis": {
+            "category": "history",
+            "seeded_keywords": 5,
+            "keywords": {
+              "keywords": 5,
+              "zero_coverage": 0,
+              "feedback_candidates": [],
+              "viral": {
+                "status": "applied",
+                "measured_samples": 81,
+                "required": 30,
+                "weight": 0.3,
+                "calibration": "calibrated",
+                "min_keyword_hits": 3,
+                "keywords_with_signal": 5,
+                "keywords_without_signal": 0,
+                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
+                "score_and_signal_are_different_metrics": true,
+                "details": {
+                  "历史": {
+                    "signal": 0.3848,
+                    "measured_hits": 66,
+                    "matched_articles": 139,
+                    "reason": "",
+                    "base": 1.0,
+                    "collected_norm": 1.0,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1154,
+                    "score": 0.8154
+                  },
+                  "考古": {
+                    "signal": 0.4,
+                    "measured_hits": 10,
+                    "matched_articles": 23,
+                    "reason": "",
+                    "base": 0.4993,
+                    "collected_norm": 0.1655,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.12,
+                    "score": 0.4695
+                  },
+                  "文明": {
+                    "signal": 0.3077,
+                    "measured_hits": 13,
+                    "matched_articles": 29,
+                    "reason": "",
+                    "base": 0.5252,
+                    "collected_norm": 0.2086,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.0923,
+                    "score": 0.4599
+                  },
+                  "毛主席": {
+                    "signal": 0.4933,
+                    "measured_hits": 15,
+                    "matched_articles": 20,
+                    "reason": "",
+                    "base": 0.4863,
+                    "collected_norm": 0.1439,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.148,
+                    "score": 0.4884
+                  },
+                  "蒋介石": {
+                    "signal": 0.4571,
+                    "measured_hits": 14,
+                    "matched_articles": 23,
+                    "reason": "",
+                    "base": 0.4993,
+                    "collected_norm": 0.1655,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.1371,
+                    "score": 0.4866
+                  }
+                }
+              }
+            },
+            "mined_keywords": {
+              "status": "ok",
+              "viral_docs": 34,
+              "corpus_titles": 215,
+              "duplicate_titles_dropped": 1,
+              "candidates": 2,
+              "inserted": 0,
+              "pruned": 0,
+              "min_docs": 3,
+              "min_lift": 2.0,
+              "specificity_min": 2.0,
+              "max_prevalence": 0.02,
+              "background_categories": 4,
+              "entropy_min": 0.5,
+              "top": [
+                {
+                  "keyword": "毛主席",
+                  "viral_docs": 9,
+                  "lift": 3.348,
+                  "score": 10.043,
+                  "pos": "n",
+                  "specificity": 17.0,
+                  "left_entropy": 1.67,
+                  "right_entropy": 2.032
+                },
+                {
+                  "keyword": "蒋介石",
+                  "viral_docs": 4,
+                  "lift": 2.81,
+                  "score": 5.621,
+                  "pos": "nr",
+                  "specificity": 9.0,
+                  "left_entropy": 1.003,
+                  "right_entropy": 1.889
+                }
+              ]
+            },
+            "feedback": {
+              "category": "history",
+              "generated_at": "2026-11-19T02:18:16+08:00",
+              "gap_keywords": [],
+              "recovered_keywords": 0,
+              "queued_job_id": null,
+              "note": null,
+              "cooldown_hours": 24.0,
+              "cooldown_hours_effective": null,
+              "cooldown_remaining_hours": null,
+              "last_enqueued_at": null,
+              "feedback_attempts": null,
+              "evidence_file": null
+            },
+            "viral": {
+              "articles": 216,
+              "tiers": {
+                "missing_data": 135,
+                "measured": 81
+              },
+              "calibration": {
+                "status": "calibrated",
+                "sample": 58,
+                "thresholds": [
+                  0.0528,
+                  0.0307,
+                  0.0193
+                ]
+              },
+              "calibration_reads": {
+                "status": "default_thresholds",
+                "sample": 0
+              }
+            },
+            "knowledge": {
+              "assets": 1,
+              "articles": 216,
+              "zero_coverage": 0
+            },
+            "index": {
+              "mode": "delta",
+              "indexed": 0,
+              "deleted": 0,
+              "candidate_count": 0,
+              "delta_ops_since_full": 28,
+              "elapsed_s": 0.008
+            },
+            "stage_seconds": {
+              "seed": 0.02,
+              "viral": 0.02,
+              "mine_keywords": 0.11,
+              "score_keywords": 0.02,
+              "auto_feedback": 0.0,
+              "knowledge": 0.01,
+              "index": 0.0
+            }
+          },
+          "measured": 81,
+          "calibration_hint": "实测样本已有 81 条,阈值快照还是 58 条时的;要更新爆款口径就执行 ttxt metrics --category history --calibrate"
+        },
+        "health": {
+          "status": "ok",
+          "fetched": 12,
+          "written": 0,
+          "updated": 12,
           "snapshots": 12,
           "known_gone_skipped": 0,
           "link_status_recorded": 0,
@@ -557,138 +1499,208 @@
             "metrics_ok": 12
           },
           "labels": {
-            "articles": 179,
+            "articles": 67,
             "tiers": {
-              "missing_data": 121,
-              "measured": 58
+              "missing_data": 27,
+              "measured": 40
             },
             "calibration": {
               "status": "calibrated",
-              "sample": 46,
+              "sample": 30,
               "thresholds": [
-                0.0528,
-                0.0299,
-                0.0193
+                0.049,
+                0.0192,
+                0.011
               ]
+            },
+            "calibration_reads": {
+              "status": "default_thresholds",
+              "sample": 0
             }
           },
           "analysis": {
-            "category": "history",
-            "seeded_keywords": 3,
+            "category": "health",
+            "seeded_keywords": 5,
             "keywords": {
-              "keywords": 3,
+              "keywords": 5,
               "zero_coverage": 0,
               "feedback_candidates": [],
               "viral": {
                 "status": "applied",
-                "measured_samples": 58,
+                "measured_samples": 40,
                 "required": 30,
                 "weight": 0.3,
                 "calibration": "calibrated",
                 "min_keyword_hits": 3,
-                "keywords_with_signal": 3,
+                "keywords_with_signal": 5,
                 "keywords_without_signal": 0,
-                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier=measured 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
+                "formula": "score = 0.7 * base + 0.3 * signal; base = 0.6 * collected_norm + 0.4 * quality_ratio; collected_norm = collected / max_collected; quality_ratio = quality / collected(正文 >= 120 字); signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base",
                 "score_and_signal_are_different_metrics": true,
                 "details": {
-                  "历史": {
-                    "signal": 0.3745,
-                    "measured_hits": 47,
-                    "matched_articles": 112,
+                  "健康": {
+                    "signal": 0.3611,
+                    "measured_hits": 36,
+                    "matched_articles": 41,
                     "reason": "",
-                    "base": 1.0,
+                    "base": 0.9805,
                     "collected_norm": 1.0,
-                    "quality_ratio": 1.0,
-                    "viral_component": 0.1123,
-                    "score": 0.8123
+                    "quality_ratio": 0.9512,
+                    "viral_component": 0.1083,
+                    "score": 0.7947
                   },
-                  "考古": {
-                    "signal": 0.475,
-                    "measured_hits": 8,
+                  "运动": {
+                    "signal": 0.3692,
+                    "measured_hits": 13,
+                    "matched_articles": 14,
+                    "reason": "",
+                    "base": 0.5763,
+                    "collected_norm": 0.3415,
+                    "quality_ratio": 0.9286,
+                    "viral_component": 0.1108,
+                    "score": 0.5142
+                  },
+                  "睡眠": {
+                    "signal": 0.3778,
+                    "measured_hits": 18,
                     "matched_articles": 18,
                     "reason": "",
-                    "base": 0.4964,
-                    "collected_norm": 0.1607,
+                    "base": 0.6634,
+                    "collected_norm": 0.439,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.1425,
-                    "score": 0.49
+                    "viral_component": 0.1133,
+                    "score": 0.5777
                   },
-                  "文明": {
-                    "signal": 0.2727,
-                    "measured_hits": 11,
-                    "matched_articles": 26,
+                  "老人": {
+                    "signal": 0.34,
+                    "measured_hits": 20,
+                    "matched_articles": 20,
                     "reason": "",
-                    "base": 0.5393,
-                    "collected_norm": 0.2321,
+                    "base": 0.6927,
+                    "collected_norm": 0.4878,
                     "quality_ratio": 1.0,
-                    "viral_component": 0.0818,
-                    "score": 0.4593
+                    "viral_component": 0.102,
+                    "score": 0.5869
+                  },
+                  "医生": {
+                    "signal": 0.3533,
+                    "measured_hits": 30,
+                    "matched_articles": 30,
+                    "reason": "",
+                    "base": 0.839,
+                    "collected_norm": 0.7317,
+                    "quality_ratio": 1.0,
+                    "viral_component": 0.106,
+                    "score": 0.6933
                   }
                 }
               }
             },
+            "mined_keywords": {
+              "status": "ok",
+              "viral_docs": 19,
+              "corpus_titles": 67,
+              "duplicate_titles_dropped": 0,
+              "candidates": 2,
+              "inserted": 0,
+              "pruned": 0,
+              "min_docs": 3,
+              "min_lift": 2.0,
+              "specificity_min": 2.0,
+              "max_prevalence": 0.02,
+              "background_categories": 4,
+              "entropy_min": 0.5,
+              "top": [
+                {
+                  "keyword": "医生",
+                  "viral_docs": 5,
+                  "lift": 2.204,
+                  "score": 4.928,
+                  "pos": "n",
+                  "specificity": 8.0,
+                  "left_entropy": 0.736,
+                  "right_entropy": 1.667
+                },
+                {
+                  "keyword": "老人",
+                  "viral_docs": 3,
+                  "lift": 2.645,
+                  "score": 4.581,
+                  "pos": "n",
+                  "specificity": 4.0,
+                  "left_entropy": 0.693,
+                  "right_entropy": 1.04
+                }
+              ]
+            },
             "feedback": {
-              "category": "history",
-              "generated_at": "2026-11-18T19:54:01+08:00",
+              "category": "health",
+              "generated_at": "2026-11-19T02:18:16+08:00",
               "gap_keywords": [],
               "recovered_keywords": 0,
               "queued_job_id": null,
               "note": null,
               "cooldown_hours": 24.0,
+              "cooldown_hours_effective": null,
               "cooldown_remaining_hours": null,
               "last_enqueued_at": null,
               "feedback_attempts": null,
               "evidence_file": null
             },
             "viral": {
-              "articles": 179,
+              "articles": 67,
               "tiers": {
-                "missing_data": 121,
-                "measured": 58
+                "missing_data": 27,
+                "measured": 40
               },
               "calibration": {
                 "status": "calibrated",
-                "sample": 46,
+                "sample": 30,
                 "thresholds": [
-                  0.0528,
-                  0.0299,
-                  0.0193
+                  0.049,
+                  0.0192,
+                  0.011
                 ]
+              },
+              "calibration_reads": {
+                "status": "default_thresholds",
+                "sample": 0
               }
             },
             "knowledge": {
               "assets": 1,
-              "articles": 179,
+              "articles": 67,
               "zero_coverage": 0
             },
             "index": {
-              "mode": "full",
-              "indexed": 179,
-              "deleted": 179,
+              "mode": "delta",
+              "indexed": 0,
+              "deleted": 0,
               "candidate_count": 0,
-              "delta_ops_since_full": 0,
-              "elapsed_s": 0.709
+              "delta_ops_since_full": 40,
+              "elapsed_s": 0.006
             },
             "stage_seconds": {
               "seed": 0.0,
-              "score_keywords": 0.03,
-              "auto_feedback": 0.0,
               "viral": 0.02,
-              "knowledge": 0.02,
-              "index": 0.7
+              "mine_keywords": 0.08,
+              "score_keywords": 0.02,
+              "auto_feedback": 0.0,
+              "knowledge": 0.0,
+              "index": 0.01
             }
           },
-          "measured": 58,
-          "calibration_hint": "实测样本已有 58 条,阈值快照还是 46 条时的;要更新爆款口径就执行 ttxt metrics --category history --calibrate"
-        },
-        "health": {
-          "status": "no_candidates",
-          "host_skipped": 26,
-          "known_gone_skipped": 0
+          "measured": 40,
+          "calibration_hint": "实测样本已有 40 条,阈值快照还是 30 条时的;要更新爆款口径就执行 ttxt metrics --category health --calibrate"
         }
       },
       "errors": []
     },
     "last_error": null
+  },
+  "metrics_due_60m": {
+    "last_run_at": "2026-11-19T03:35:07+08:00",
+    "last_status": "error",
+    "last_result": null,
+    "last_error": "ValueError: 未知调度任务 kind: 'metrics_due'(可用: ['analyze', 'crawl_enqueue', 'housekeep', 'metrics_fetch', 'recover'])"
   }
 }

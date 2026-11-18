@@ -1,0 +1,260 @@
+{
+  "action": "due_report",
+  "categories": {
+    "technology": {
+      "category": "technology",
+      "window_days": 3,
+      "now": "2026-11-19T03:35:47+08:00",
+      "articles_with_published_at": 468,
+      "windows": 468,
+      "readings": 117,
+      "status_counts": {
+        "on_time": 35,
+        "late": 82,
+        "early": 88,
+        "pending": 175,
+        "overdue": 31,
+        "unavailable": 57
+      },
+      "late_ratio": 0.700855,
+      "on_time_coverage": 0.074786,
+      "on_time_share_of_readings": 0.299145,
+      "missing_counts": {
+        "reads": 7,
+        "likes": 0,
+        "favorites": 117,
+        "comments": 0,
+        "impressions": 7
+      },
+      "missing_ratio": {
+        "reads": 0.059829,
+        "likes": 0.0,
+        "favorites": 1.0,
+        "comments": 0.0,
+        "impressions": 0.059829
+      },
+      "recoverable_on_time_in_window": 21,
+      "queue": {
+        "scheduled": 263,
+        "ready": 21,
+        "backlog": 67,
+        "done": 117,
+        "exhausted": 0
+      },
+      "queue_total": 468,
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff_hours": [
+          1.0,
+          6.0,
+          24.0
+        ],
+        "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+      }
+    },
+    "finance": {
+      "category": "finance",
+      "window_days": 3,
+      "now": "2026-11-19T03:35:47+08:00",
+      "articles_with_published_at": 12824,
+      "windows": 12824,
+      "readings": 7999,
+      "status_counts": {
+        "on_time": 0,
+        "late": 7999,
+        "early": 73,
+        "pending": 458,
+        "overdue": 4,
+        "unavailable": 4290
+      },
+      "late_ratio": 1.0,
+      "on_time_coverage": 0.0,
+      "on_time_share_of_readings": 0.0,
+      "missing_counts": {
+        "reads": 440,
+        "likes": 3923,
+        "favorites": 7999,
+        "comments": 5886,
+        "impressions": 7994
+      },
+      "missing_ratio": {
+        "reads": 0.055007,
+        "likes": 0.490436,
+        "favorites": 1.0,
+        "comments": 0.735842,
+        "impressions": 0.999375
+      },
+      "recoverable_on_time_in_window": 19,
+      "queue": {
+        "scheduled": 531,
+        "ready": 19,
+        "backlog": 4275,
+        "done": 7999,
+        "exhausted": 0
+      },
+      "queue_total": 12824,
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff_hours": [
+          1.0,
+          6.0,
+          24.0
+        ],
+        "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+      }
+    },
+    "social": {
+      "category": "social",
+      "window_days": 3,
+      "now": "2026-11-19T03:35:47+08:00",
+      "articles_with_published_at": 40146,
+      "windows": 40146,
+      "readings": 26328,
+      "status_counts": {
+        "on_time": 0,
+        "late": 26328,
+        "early": 0,
+        "pending": 146,
+        "overdue": 0,
+        "unavailable": 13672
+      },
+      "late_ratio": 1.0,
+      "on_time_coverage": 0.0,
+      "on_time_share_of_readings": 0.0,
+      "missing_counts": {
+        "reads": 1101,
+        "likes": 12422,
+        "favorites": 26328,
+        "comments": 20015,
+        "impressions": 26328
+      },
+      "missing_ratio": {
+        "reads": 0.041819,
+        "likes": 0.471817,
+        "favorites": 1.0,
+        "comments": 0.760217,
+        "impressions": 1.0
+      },
+      "recoverable_on_time_in_window": 21,
+      "queue": {
+        "scheduled": 146,
+        "ready": 21,
+        "backlog": 13651,
+        "done": 26328,
+        "exhausted": 0
+      },
+      "queue_total": 40146,
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff_hours": [
+          1.0,
+          6.0,
+          24.0
+        ],
+        "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+      }
+    },
+    "history": {
+      "category": "history",
+      "window_days": 3,
+      "now": "2026-11-19T03:35:47+08:00",
+      "articles_with_published_at": 216,
+      "windows": 216,
+      "readings": 28,
+      "status_counts": {
+        "on_time": 5,
+        "late": 23,
+        "early": 35,
+        "pending": 92,
+        "overdue": 18,
+        "unavailable": 43
+      },
+      "late_ratio": 0.821429,
+      "on_time_coverage": 0.023148,
+      "on_time_share_of_readings": 0.178571,
+      "missing_counts": {
+        "reads": 0,
+        "likes": 0,
+        "favorites": 28,
+        "comments": 0,
+        "impressions": 0
+      },
+      "missing_ratio": {
+        "reads": 0.0,
+        "likes": 0.0,
+        "favorites": 1.0,
+        "comments": 0.0,
+        "impressions": 0.0
+      },
+      "recoverable_on_time_in_window": 19,
+      "queue": {
+        "scheduled": 127,
+        "ready": 19,
+        "backlog": 42,
+        "done": 28,
+        "exhausted": 0
+      },
+      "queue_total": 216,
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff_hours": [
+          1.0,
+          6.0,
+          24.0
+        ],
+        "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+      }
+    },
+    "health": {
+      "category": "health",
+      "window_days": 3,
+      "now": "2026-11-19T03:35:47+08:00",
+      "articles_with_published_at": 67,
+      "windows": 67,
+      "readings": 14,
+      "status_counts": {
+        "on_time": 0,
+        "late": 14,
+        "early": 26,
+        "pending": 0,
+        "overdue": 0,
+        "unavailable": 27
+      },
+      "late_ratio": 1.0,
+      "on_time_coverage": 0.0,
+      "on_time_share_of_readings": 0.0,
+      "missing_counts": {
+        "reads": 0,
+        "likes": 0,
+        "favorites": 14,
+        "comments": 0,
+        "impressions": 0
+      },
+      "missing_ratio": {
+        "reads": 0.0,
+        "likes": 0.0,
+        "favorites": 1.0,
+        "comments": 0.0,
+        "impressions": 0.0
+      },
+      "recoverable_on_time_in_window": 0,
+      "queue": {
+        "scheduled": 26,
+        "ready": 0,
+        "backlog": 27,
+        "done": 14,
+        "exhausted": 0
+      },
+      "queue_total": 67,
+      "retry_policy": {
+        "max_attempts": 3,
+        "backoff_hours": [
+          1.0,
+          6.0,
+          24.0
+        ],
+        "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+      }
+    }
+  }
+}

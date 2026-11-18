@@ -142,6 +142,19 @@ def load_link_status(category: str, db_path: Path | None = None) -> dict[str, di
         con.close()
 
 
+def fresh_gone_ids(
+    category: str, db_path: Path | None = None, now: datetime | None = None
+) -> list[int]:
+    """台账里仍在有效期内(404/410)的文章 id —— R42 的 due 队列不再向它们发请求。"""
+    moment = now or datetime.now().astimezone()
+    status = load_link_status(category, db_path=db_path)
+    return [
+        int(key)
+        for key, entry in status.items()
+        if isinstance(entry, dict) and _status_fresh(entry, moment)
+    ]
+
+
 def _status_fresh(entry: dict, now: datetime) -> bool:
     """台账记录是否仍在有效期内。时间读不出来/在未来 ⇒ 当过期处理(宁可多查一次,不做永久拉黑)。"""
     if int(entry.get("status") or 0) not in _GONE_STATUSES:
@@ -455,12 +468,19 @@ def extract_public_metrics(page: Any, url: str | None = None, detail: dict | Non
 
 
 def _candidates(
-    category: str, db_path: Path | None, limit: int | None, retry_gone: bool = False
+    category: str,
+    db_path: Path | None,
+    limit: int | None,
+    retry_gone: bool = False,
+    article_ids: list[int] | None = None,
 ) -> tuple[list[dict], int, list[int]]:
     """挑本轮要采的文章:没测过的先采,都要采时最久没刷的先刷。
 
     只按 id 倒序取前 N 篇会反复采同一批新文章,标定样本永远攒不到
     ``viral.MIN_CALIBRATION_SAMPLE`` ⇒ 必须让每一轮都往前推进(P22 根因修复)。
+
+    R42:``article_ids`` 给定时**只采这批**(按给定顺序),用于按 ``due_at`` 排队的到期批次;
+    其余保护(域名白名单 / 下架台账)照旧,``limit`` 与全库跳过计数只在未给 id 时生效。
 
     P34 ③:台账里仍在有效期内、且状态是 404/410(内容确认不存在)的文章**不再发请求**,
     只计 ``known_gone``;``retry_gone=True`` 用于事后核查,强制重新取证。
@@ -481,6 +501,10 @@ def _candidates(
         link_status = {} if retry_gone else _read_link_status(con)
     finally:
         con.close()
+    if article_ids is not None:
+        by_id = {int(row["id"]): row for row in rows}
+        wanted = [int(item) for item in article_ids]
+        rows = [by_id[item] for item in wanted if item in by_id]
     now = datetime.now().astimezone()
     picked: list[dict] = []
     host_skipped = 0
@@ -501,14 +525,17 @@ def _candidates(
 
 
 def round_plan(category: str, db_path: Path | None = None, limit: int | None = 20,
-               retry_gone: bool = False) -> dict:
+               retry_gone: bool = False, article_ids: list[int] | None = None) -> dict:
     """只读:这一轮打算采谁、会跳过谁。**不发任何请求、不写任何状态**。
 
     存在理由(不是新功能,是给调度器用的判断件):调度器要先知道"这轮有没有活可干",
     没有文章可采就不该开浏览器(启动一次浏览器要十几秒,还白白动 profile)。
     口径与 ``_candidates`` 完全一致 ⇒ 计划里的数字和真正跑起来对得上。
+    ``article_ids`` 给定时只算这批(R42 的 due 队列批次)。
     """
-    picked, host_skipped, known_gone = _candidates(category, db_path, limit, retry_gone=retry_gone)
+    picked, host_skipped, known_gone = _candidates(
+        category, db_path, limit, retry_gone=retry_gone, article_ids=article_ids
+    )
     return {
         "category": category,
         "candidates": len(picked),
@@ -534,12 +561,14 @@ def collect_public_metrics(
     source_id: str = SOURCE_ID,
     retry_gone: bool = False,
     clock: Callable[[], str] | None = None,
+    article_ids: list[int] | None = None,
 ) -> dict:
     """采集头条公开文章页互动数。默认 dry-run;``apply=True`` 才写库。
 
     ``retry_gone=True``:忽略"已确认下架"台账,强制重新取证(事后核查用,默认 False)。
     ``clock``:取证时刻的来源(默认 ``cfg.now_iso``)。每篇文章**各自**记一次取证时刻,
     不整批共用批次开始时间 —— 台账的 90 天窗口必须是这篇文章自己的时间(P35 真人复核第 2 条)。
+    ``article_ids``:R42 按 ``due_at`` 排队后给定的批次,只采这批(顺序即队列优先级)。
     """
     allow = authorized if authorized is not None else metrics_import.load_authorized_sources()
     if source_id not in allow:
@@ -547,11 +576,14 @@ def collect_public_metrics(
             f"未授权数据来源 {source_id!r}:必须先在 config.metrics.authorized_sources 登记,"
             "否则拒绝采集入库(防止未经登记的来源污染指标)。"
         )
-    candidates, host_skipped, known_gone = _candidates(category, db_path, limit, retry_gone=retry_gone)
+    candidates, host_skipped, known_gone = _candidates(
+        category, db_path, limit, retry_gone=retry_gone, article_ids=article_ids
+    )
     report: dict[str, Any] = {
         "category": category,
         "source": source_id,
         "candidates": len(candidates),
+        "article_ids_requested": len(article_ids) if article_ids is not None else None,
         "host_skipped": host_skipped,
         # P34 ③:已确认下架(404/410)且在有效期内的文章 ⇒ 本轮不再发请求,单独计数不混进失败
         "known_gone_skipped": len(known_gone),

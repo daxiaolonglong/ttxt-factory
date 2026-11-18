@@ -60,6 +60,9 @@ MIN_FREE_GB_AT_START = 8.0
 # 最近 N 篇及其同簇文章(聚类/近重复语义仍在),按生产库 size+mtime 做缓存键,跨会话复用。
 TRIM_DIR = ROOT / "07_tmp" / "pytest_trim"
 TRIM_ARTICLE_ROWS = 400
+# 裁剪逻辑版本:改裁剪规则(比如新增要清的非内容表)必须 +1,否则旧缓存会按
+# "生产库 size+mtime 没变"直接复用,新规则等于没生效。R42 起 = 2(清 ``metrics_due_queue``)。
+TRIM_LOGIC_VERSION = 2
 TEST_COPY_MAX_MB = 40.0
 TEST_COPY_BUDGET_MB = 200.0
 
@@ -617,7 +620,9 @@ def _trim_with_sql(staging: Path, rows: int) -> tuple[int, int]:
         )
         kept = con.execute("SELECT COUNT(*) FROM temp.kept_ids").fetchone()[0]
         con.execute("DELETE FROM articles WHERE id NOT IN (SELECT id FROM temp.kept_ids)")
-        for table in ("viral_labels", "article_metrics", "metric_snapshots"):
+        # R42:``metrics_due_queue`` 是取数排队表(每篇文章一行),不是内容表;
+        # 不跟着裁剪会让类目库副本因排队行超 40 MB 上限,而排队状态对测试语义为零。
+        for table in ("viral_labels", "article_metrics", "metric_snapshots", "metrics_due_queue"):
             if table in tables:
                 con.execute(f"DELETE FROM {table} WHERE article_id NOT IN (SELECT id FROM temp.kept_ids)")
         if "evidence_links" in tables:
@@ -666,7 +671,10 @@ def build_trimmed_category_db(source: Path, rows: int = TRIM_ARTICLE_ROWS) -> di
     if cache.exists() and lineage_file.exists():
         try:
             record = json.loads(lineage_file.read_text(encoding="utf-8"))
-            if Path(record["cache"]).resolve() == cache.resolve():
+            if (
+                Path(record["cache"]).resolve() == cache.resolve()
+                and int(record.get("trim_version") or 0) == TRIM_LOGIC_VERSION
+            ):
                 return record
         except (OSError, ValueError, KeyError):
             pass
@@ -707,6 +715,7 @@ def build_trimmed_category_db(source: Path, rows: int = TRIM_ARTICLE_ROWS) -> di
         "cache": cache.resolve().as_posix(),
         "cache_bytes": cache.stat().st_size,
         "trim_rows": int(rows),
+        "trim_version": TRIM_LOGIC_VERSION,
         "built_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
     lineage_file.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")

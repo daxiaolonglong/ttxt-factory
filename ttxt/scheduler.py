@@ -387,12 +387,128 @@ def _job_metrics_fetch(job: dict) -> dict:
     }
 
 
+def _job_metrics_due(job: dict) -> dict:
+    """R42:按 ``due_at`` 队列到点必采,不再按「谁最久没刷」碰运气。
+
+    与 ``metrics_fetch`` 的区别只在取数时点:批次由 ``metrics_due_queue`` 按
+    「窗口内 ready(最早到期先采)→ 窗口已过 backlog(最近积压先补)」给出;
+    robots / 域名白名单 / 下架台账 / 写库白名单 / favorites 恒 NULL 全部走原通道。
+    """
+    from ttxt.analysis import metrics_queue
+    from ttxt.crawler import fetcher
+
+    conf = cfg.load_config()
+    page_cfg = dict((conf.get("metrics", {}) or {}).get("public_pages", {}) or {})
+    limit = int(job.get("limit", page_cfg.get("limit_per_run", 20)))
+    sleep_s = float(job.get("sleep_s", page_cfg.get("sleep_s", 2.0)))
+    apply = bool(job.get("apply", False))
+    lock_wait_s = job.get("lock_wait_s")
+    system_db = Path(job["system_db"]) if job.get("system_db") else None
+    evidence_dir = Path(job["evidence_dir"]) if job.get("evidence_dir") else cfg.INTELLIGENCE_DIR / "metrics_public"
+    categories = [str(job["category"])] if job.get("category") else [str(c) for c in conf.get("categories", [])]
+
+    gate = _wait_for_idle_queue(
+        system_db, float(job.get("wait_for_queue_s", 120.0)), float(job.get("queue_poll_s", 10.0))
+    )
+    if gate["busy"]:
+        LOG.warn("scheduler.metrics_due.skipped_queue_busy", queued=gate["queued"],
+                 running=gate["running"], waited_s=gate["waited_s"])
+        return {
+            "scheduler_status": "skipped_queue_busy",
+            "reason": f"采集队列仍忙(queued={gate['queued']}, running={gate['running']});这一轮一个请求都不发",
+            "queue": gate,
+            "categories": {},
+            "errors": [],
+        }
+
+    stamp = datetime.now().astimezone().strftime("%Y%m%dT%H%M%S")
+    per: dict[str, dict] = {}
+    errors: list[str] = []
+    for category in categories:
+        try:
+            sync = metrics_queue.sync_queue(category)
+            batch = metrics_queue.claim_batch(category, limit=limit)
+            if not batch["article_ids"]:
+                per[category] = {
+                    "status": "no_due",
+                    "queue_states": sync["states"],
+                    "eligible": batch["eligible"],
+                    "gone_skipped": batch["gone_skipped"],
+                }
+                continue
+            report = metrics_queue.run_due(
+                category,
+                limit=limit,
+                apply=apply,
+                collect_kwargs={"sleep_s": sleep_s, "lock_wait_s": lock_wait_s},
+            )
+            _write_metrics_evidence(
+                evidence_dir, category, stamp,
+                {"category": category, "job": job.get("id"), "run_at": cfg.now_iso(),
+                 "plan": batch, **report},
+            )
+            collection = report.get("collection") or {}
+            after = report.get("after") or {}
+            per[category] = {
+                "status": "ok" if apply else "dry_run",
+                "claimed": int(report.get("claimed") or 0),
+                "eligible": int(report.get("eligible") or 0),
+                "fetched": int(collection.get("fetched") or 0),
+                "written": int(collection.get("written") or 0),
+                "snapshots": int(collection.get("snapshots") or 0),
+                "would_write": int(collection.get("would_write") or 0),
+                "unsupported_host_skipped": int(report.get("unsupported_host_skipped") or 0),
+                "windows_refreshed": int(report.get("windows_refreshed") or 0),
+                "queue_states": (report.get("queue_sync") or {}).get("states"),
+                "outcome_counts": collection.get("outcome_counts"),
+                "after": {
+                    key: after.get(key)
+                    for key in ("late_ratio", "on_time_coverage", "missing_ratio",
+                                "recoverable_on_time_in_window")
+                },
+            }
+        except fetcher.BrowserBusyError as exc:
+            holder = exc.holder or {}
+            waited = round(float(exc.waited_s), 1)
+            LOG.warn("scheduler.metrics_due.skipped_browser_busy", category=category,
+                     waited_s=waited, holder_tag=holder.get("tag") or "未知")
+            per[category] = {
+                "status": "skipped_browser_busy",
+                "reason": f"等浏览器 profile 锁 {waited}s 没等到,本轮跳过(不硬抢 Worker 的浏览器)",
+                "browser_wait_s": waited,
+            }
+        except Exception as exc:  # noqa: BLE001 - 类目级隔离
+            message = f"{type(exc).__name__}: {exc}"
+            errors.append(f"{category}: {message}")
+            per[category] = {"status": "error", "error": message}
+            LOG.error("scheduler.metrics_due.category_failed", category=category, error=message)
+
+    worked = [c for c, r in per.items() if r.get("status") in {"ok", "dry_run"}]
+    if errors and len(errors) == len(categories):
+        status = "error"
+    elif errors:
+        status = "partial"
+    else:
+        status = "ok"
+    LOG.info("scheduler.metrics_due.round", status=status, apply=apply, limit=limit,
+             categories=len(categories), worked=len(worked), failed=len(errors))
+    return {
+        "scheduler_status": status,
+        "apply": apply,
+        "limit": limit,
+        "queue": gate,
+        "categories": per,
+        "errors": errors,
+    }
+
+
 _JOB_RUNNERS = {
     "crawl_enqueue": _job_crawl_enqueue,
     "analyze": _job_analyze,
     "recover": _job_recover,
     "housekeep": _job_housekeep,
     "metrics_fetch": _job_metrics_fetch,
+    "metrics_due": _job_metrics_due,
 }
 
 

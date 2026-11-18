@@ -1,0 +1,187 @@
+{
+  "action": "due_run",
+  "categories": {
+    "technology": {
+      "category": "technology",
+      "window_days": 3,
+      "apply": true,
+      "queue_sync": {
+        "category": "technology",
+        "window_days": 3,
+        "now": "2026-11-19T03:35:52+08:00",
+        "total": 468,
+        "states": {
+          "scheduled": 263,
+          "ready": 21,
+          "backlog": 67,
+          "done": 117,
+          "exhausted": 0
+        },
+        "removed": 0
+      },
+      "eligible": 84,
+      "claimed": 12,
+      "claimed_ids": [
+        348,
+        284,
+        363,
+        335,
+        296,
+        298,
+        353,
+        333,
+        362,
+        423,
+        303,
+        313
+      ],
+      "gone_skipped": 4,
+      "collection": {
+        "candidates": 9,
+        "fetched": 9,
+        "written": 0,
+        "updated": 9,
+        "snapshots": 9,
+        "would_write": null,
+        "robots_refused": 0,
+        "fetch_errors": 0,
+        "no_metrics_skipped": 0,
+        "known_gone_skipped": 0,
+        "outcome_counts": {
+          "metrics_ok": 9
+        }
+      },
+      "attempts": {
+        "category": "technology",
+        "apply": true,
+        "planned": [
+          {
+            "article_id": 348,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 284,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 335,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 296,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 298,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 333,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 423,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 303,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          },
+          {
+            "article_id": 313,
+            "outcome": "metrics_ok",
+            "previous_state": "ready",
+            "attempts": 1,
+            "state": "done",
+            "next_attempt_at": null
+          }
+        ],
+        "updated": 9
+      },
+      "windows_refreshed": 9,
+      "after": {
+        "category": "technology",
+        "window_days": 3,
+        "now": "2026-11-19T03:36:39+08:00",
+        "articles_with_published_at": 468,
+        "windows": 468,
+        "readings": 126,
+        "status_counts": {
+          "on_time": 44,
+          "late": 82,
+          "early": 88,
+          "pending": 175,
+          "overdue": 22,
+          "unavailable": 57
+        },
+        "late_ratio": 0.650794,
+        "on_time_coverage": 0.094017,
+        "on_time_share_of_readings": 0.349206,
+        "missing_counts": {
+          "reads": 7,
+          "likes": 0,
+          "favorites": 126,
+          "comments": 0,
+          "impressions": 7
+        },
+        "missing_ratio": {
+          "reads": 0.055556,
+          "likes": 0.0,
+          "favorites": 1.0,
+          "comments": 0.0,
+          "impressions": 0.055556
+        },
+        "recoverable_on_time_in_window": 12,
+        "queue": {
+          "scheduled": 263,
+          "ready": 12,
+          "backlog": 67,
+          "done": 126,
+          "exhausted": 0
+        },
+        "queue_total": 468,
+        "retry_policy": {
+          "max_attempts": 3,
+          "backoff_hours": [
+            1.0,
+            6.0,
+            24.0
+          ],
+          "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+        }
+      }
+    }
+  }
+}

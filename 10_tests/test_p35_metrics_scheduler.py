@@ -307,19 +307,27 @@ def test_shipped_config_has_a_bounded_metrics_job(tmp_path):
 
     排在前面是有意的:同一个 tick 里两个任务都到期时,先采集指标(此时队列必然空闲),
     再入队采集,避免两边撞同一个浏览器 profile。
+
+    R42:取数时点改为按 ``due_at`` 排队,启用任务是 ``metrics_due``;
+    旧的 ``metrics_fetch`` 只保留一条停用记录用于人工对照/回滚,不得同时启用两条。
     """
     conf = json.loads(Path(cfg.CONFIG_PATH).read_text(encoding="utf-8"))
     jobs = conf["scheduler"]["jobs"]
-    metrics_jobs = [job for job in jobs if job.get("kind") == "metrics_fetch"]
-    assert len(metrics_jobs) == 1, "调度器里应当有且只有一个公开指标采集任务"
-    job = metrics_jobs[0]
+    due_jobs = [job for job in jobs if job.get("kind") == "metrics_due"]
+    assert len(due_jobs) == 1, "调度器里应当有且只有一个按 due_at 排队的指标采集任务"
+    job = due_jobs[0]
     assert job.get("enabled") is True and job.get("apply") is True
     page_cfg = conf["metrics"]["public_pages"]
     assert 0 < int(job["limit"]) <= int(page_cfg["limit_per_run"]), "每轮数量必须有上限"
     assert 60 <= int(job["interval_min"]) <= 1440, "间隔不得小于 1 小时,也不得超过 1 天"
     assert float(job["sleep_s"]) >= float(page_cfg["sleep_s"]), "请求间隔不得低于配置里的下限"
     assert float(job.get("wait_for_queue_s", 0)) > 0, "必须先让开采集队列"
-    ids = [job["id"] for job in jobs]
+    enabled_metrics = [
+        other["id"] for other in jobs
+        if other.get("kind") in {"metrics_due", "metrics_fetch"} and other.get("enabled") is True
+    ]
+    assert enabled_metrics == [job["id"]], "enabled 的指标采集任务只能有一条,避免两套时点口径并行"
+    ids = [item["id"] for item in jobs]
     assert ids.index(job["id"]) < ids.index("crawl_enqueue_4h"), "指标采集要排在入队之前"
 
 

@@ -465,6 +465,58 @@ def refresh_publication_window(con, pub, *, now: str | None = None, days: int | 
     }
 
 
+def refresh_article_window(
+    con, article_id: int, category: str, *, now: str | None = None, days: int | None = None
+) -> dict | None:
+    """重算**单篇文章**的 T+N 行(数据来自 ``metric_snapshots``),写回 ``performance_windows``。
+
+    R42:每次采集写库后调用,保证队列排到的那一篇当场变成 on_time / late,
+    不必等下一次全量回填。发布时间不可解析/文章不存在 ⇒ 返回 None(不编造窗口)。
+    """
+    span = int(days) if days is not None else window_days()
+    row = con.execute(
+        "SELECT id, url, published_at FROM articles WHERE id=?", (int(article_id),)
+    ).fetchone()
+    if row is None or not str(row["published_at"] or "").strip():
+        return None
+    try:
+        bounds = window_bounds(row["published_at"], span)
+    except ValueError:
+        return None
+    observations = [
+        dict(item)
+        for item in con.execute(
+            "SELECT captured_at, reads, likes, favorites, comments, impressions, data_source"
+            " FROM metric_snapshots WHERE article_id=? ORDER BY captured_at",
+            (int(article_id),),
+        ).fetchall()
+    ]
+    picked = classify(observations, bounds["due_at"], bounds["window_end"], now=now)
+    _upsert_window(
+        con,
+        {
+            "subject_type": "article",
+            "subject_key": str(int(article_id)),
+            "category": category,
+            "publication_id": None,
+            "draft_id": None,
+            **bounds,
+            **picked,
+            "source": observations[-1]["data_source"] if observations else None,
+            "updated_at": now or cfg.now_iso(),
+        },
+    )
+    return {
+        "article_id": int(article_id),
+        "url": row["url"],
+        "published_at": row["published_at"],
+        **{key: bounds[key] for key in ("window_days", "due_at", "window_end")},
+        **{key: picked[key] for key in ("status", "captured_at", "reason")},
+        **{field: picked[field] for field in METRIC_FIELDS},
+        "missing_fields": [field for field in METRIC_FIELDS if picked[field] is None],
+    }
+
+
 # --------------------------------------------------------------------- 历史回填
 
 

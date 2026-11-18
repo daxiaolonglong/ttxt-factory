@@ -137,7 +137,11 @@
     "enabled": true,
     "_comment": "P35:metrics_fetch 把公开互动指标自动回流接进闭环(采集→重标定爆款标签→关键词评分→反哺关键词)。它直接用浏览器,而 Worker 是另一个进程、共用同一份 02_crawler/.browser/profile,所以 wait_for_queue_s 先让开队列;排在 crawl_enqueue 之前是有意安排的:同一个 tick 里两个任务都到期时先采指标(此时队列必然空闲),再入队采集。apply=false 是干跑开关,核实过数字才改成 true。P36 之后还有第二道保险:浏览器 profile 跨进程锁,lock_wait_s=300 比 Worker 的 600 短,抢不到就整轮记 skipped_browser_busy 明确跳过(不烧浏览器、不发请求),绝不把 Worker 正在用的浏览器抢过来。",
     "jobs": [
-      {"id": "metrics_fetch_6h", "kind": "metrics_fetch", "interval_min": 360, "enabled": true,
+      {"id": "metrics_due_60m", "kind": "metrics_due", "interval_min": 60, "enabled": true,
+       "limit": 12, "sleep_s": 2.5, "apply": true,
+       "wait_for_queue_s": 180, "queue_poll_s": 20, "lock_wait_s": 180},
+      {"id": "metrics_fetch_6h", "kind": "metrics_fetch", "interval_min": 360, "enabled": false,
+       "_comment": "R42:取数时点已改为按 due_at 排队,本任务停用(保留代码只用于人工对照/回滚)",
        "limit": 12, "sleep_s": 2.5, "apply": true, "retry_gone": false,
        "wait_for_queue_s": 300, "queue_poll_s": 20, "lock_wait_s": 300},
       {"id": "crawl_enqueue_4h", "kind": "crawl_enqueue", "interval_min": 240, "enabled": true},

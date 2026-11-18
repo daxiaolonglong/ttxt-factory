@@ -540,6 +540,38 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     if not args.category:
         print("metrics 需要 --category(或用 --list-sources 查看授权来源)")
         return 1
+    due_enqueue = bool(getattr(args, "due_enqueue", False))
+    due_run = bool(getattr(args, "due_run", False))
+    due_report = bool(getattr(args, "due_report", False))
+    if due_enqueue or due_run or due_report:
+        from ttxt.analysis import metrics_queue
+
+        if args.category == "all":
+            categories = [str(c) for c in cfg.load_config().get("categories", [])]
+        else:
+            categories = [args.category]
+        payload: dict[str, dict] = {}
+        action = "due_run" if due_run else ("due_enqueue" if due_enqueue else "due_report")
+        for category in categories:
+            if due_run:
+                payload[category] = metrics_queue.run_due(
+                    category,
+                    limit=args.limit if args.limit is not None else 20,
+                    apply=bool(args.apply),
+                    collect_kwargs={"sleep_s": args.sleep} if args.sleep is not None else None,
+                )
+            elif due_enqueue:
+                payload[category] = metrics_queue.sync_queue(category)
+            else:
+                payload[category] = metrics_queue.timing_report(category)
+        report = {"action": action, "categories": payload}
+        if args.evidence:
+            path = cfg.resolve_path(args.evidence)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+            report["evidence"] = str(path)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
     if args.snapshot:
         report = metrics_import.snapshot_current_metrics(args.category)
         report["relabel"] = metrics_import.relabel_after_import(args.category)
@@ -931,6 +963,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     metrics.add_argument("--fetch-public", action="store_true",
                          help="采集公开文章页指标(头条:阅读/点赞/评论/展现量,内嵌计数逐页核对文章 id;默认 dry-run)")
+    metrics.add_argument("--due-enqueue", action="store_true",
+                         help="R42:按 published_at+due_at 同步取数队列(只写队列台账,不采页面)")
+    metrics.add_argument("--due-run", action="store_true",
+                         help="R42:按 due_at 队列采集到期/积压文章(窗口内优先、积压按窗口由近到远;默认 dry-run)")
+    metrics.add_argument("--due-report", action="store_true",
+                         help="R42:给出取数时点口径(晚采比例/on_time 覆盖率/字段缺失率/队列状态)")
     metrics.add_argument("--limit", type=int, default=None, help="本轮最多采集多少篇(默认取 config)")
     metrics.add_argument("--sleep", type=float, default=None, help="两次抓取之间的间隔秒(默认取 config)")
     metrics.add_argument("--apply", action="store_true", help="真正写库(不加则只报告,不落库)")
