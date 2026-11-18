@@ -64,6 +64,35 @@
       "notes": "R28 取证(2026-11-18 20:53-20:55,07_tmp/r28_health_channel/probe_news_regimen.json + regimen_collect_probe.json):静态抓是 4883 字节 JS 外壳,必须浏览器渲染;渲染后 302 落到 ``?channel=regimen&source=ch``、标题「养生 - 今日头条」、23 条逐篇链接 ⇒ slug 真实存在(不是猜的)。robots:unknown=false、/ch/news_regimen/ 与 /article/ 均放行、crawl_delay 无。生产适配器 fetcher.browser_session()+toutiao.collect(limit=3) 实测 pages 4 / links 10 / items 3 / robots_skipped 0 / errors 0,正文 2018/2177/1993 字,带作者(老巫追剧/健康语言/快嘴老付)⇒ 独立来源计数可用作者而不必退域名。注册动机:health 类目此前 27 行 100% 来自 who.int,既无头条互动指标也无法达到 30 样本标定门槛(T-07/T-16);本来源是 health 第一个能产生公开互动指标的头条源。已知边界:频道列表不是严格按时间排序,实测最新一篇为 2026-10-13(一个月前),因此它补的是**可测量的头条样本**,不承担「最新鲜」职责;max_articles=10 与其它头条频道一致,逐篇正文由适配器在浏览器会话内自取"
     },
     {
+      "id": "ithome_rss",
+      "name": "IT之家(公开 RSS)",
+      "category": "technology",
+      "kind": "rss",
+      "url": "https://www.ithome.com/rss/",
+      "enabled": true,
+      "rate_limit_s": 1.0,
+      "max_pages": 1,
+      "max_articles": 60,
+      "demo": false,
+      "notes": "T-02 扩源取证(2026-11-19 00:4x,07_tmp/t02_expand_probe.json + t02_feed_shape.py):robots unknown=false、目标路径放行、无 crawl-delay;feed HTTP 200 / 60 条、条目标题+链接齐全,description 自带全文(首条 1704 原始字符,strip 后约 1014 字),文章页 /1/029/121.htm HTTP 200 且 robots 放行、<p> 文本 1014 字/11 段 ⇒ 不需要 fetch_item_pages。注册动机:technology 语料此前只有头条聚合稿 + 三家 RSS 摘要,缺少能整篇入正文的独立科技媒体域名;IT之家与现有池(toutiao/eastmoney/sspai/ruanyifeng/ifanr)域名不同。已知边界:feed 无 author/dc:creator,署名只能在文章页取证;部分条目是对外媒的编译稿,配对时必须按正文电头/来源署名判血统,不得默认算独立第二来源。max_articles=60 取满整份 feed,扩大与 ifanr/sspai/头条同日稿的重叠面"
+    },
+    {
+      "id": "chinanews_finance",
+      "name": "中国新闻网 · 财经频道(公开 RSS)",
+      "category": "finance",
+      "kind": "rss",
+      "url": "https://www.chinanews.com.cn/rss/finance.xml",
+      "enabled": true,
+      "rate_limit_s": 1.5,
+      "max_pages": 1,
+      "max_articles": 30,
+      "fetch_item_pages": true,
+      "max_item_pages": 30,
+      "item_content_selectors": ["div.left_zw", "div.content_maincontent_content"],
+      "demo": false,
+      "notes": "T-02 扩源取证(同上):robots unknown=false、目标路径放行(39 条规则,金融频道未被禁);feed HTTP 200 / 30 条全部当日发布,RSS 摘要仅 23–116 字 ⇒ 必须补正文;首条 /cj/2026/11-18/10734424.shtml HTTP 200 且 robots 放行,<p> 文本 1989 字/11 段,正文容器与社会/文化频道同一套中新网模板(P19 probe7 已证 div.left_zw 与 div.content_maincontent_content 稳定、无哈希类名)。注册动机:finance 语料此前只有 eastmoney/tmtpost 两家财经媒体,缺一个不同域名的通讯社稿件来源;中新网是独立域名 + 独立编辑部,且与 eastmoney 常报同一批宏观财经事件,是产生跨域名同题配对的现实候选"
+    },
+    {
       "id": "quotes_toscrape",
       "name": "Quotes to Scrape(Scrapling 官方演示站)",
       "category": "technology",

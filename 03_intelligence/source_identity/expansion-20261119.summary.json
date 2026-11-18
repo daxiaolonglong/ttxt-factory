@@ -1,0 +1,27 @@
+{
+  "probed": 90,
+  "kinds": {
+    "reprint_external": 5,
+    "own_report": 85
+  },
+  "agencies": {
+    "mofcom": 1,
+    "chinanews": 25,
+    "三里河": 1,
+    "people_daily": 1,
+    "cctv_news": 1,
+    "网信铁岭": 1,
+    "ithome": 60
+  },
+  "reprint_agencies": {
+    "mofcom": 1,
+    "三里河": 1,
+    "people_daily": 1,
+    "cctv_news": 1,
+    "网信铁岭": 1
+  },
+  "independent_eligible": 90,
+  "first_hand_of_event": 85,
+  "probed_at": "2026-11-19T00:33:39+08:00",
+  "out": "03_intelligence\\source_identity\\expansion-20261119.jsonl"
+}

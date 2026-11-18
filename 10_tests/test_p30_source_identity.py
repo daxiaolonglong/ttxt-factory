@@ -163,6 +163,39 @@ def test_inventory_asset_exists_and_is_honest() -> None:
     assert all(r["probed_at"] for r in rows)
 
 
+def test_every_registered_source_declares_its_publisher() -> None:
+    """T-02 扩源:每个注册来源必须显式声明发布机构。
+
+    漏声明会走 ``canon_agency(source_id)`` 回退,把 source_id 当成机构名 ⇒ 聚合平台
+    (如 toutiao_regimen)会被误判成 "own_report",进而和真媒体配成假独立对。
+    这条把"漏声明即红"钉死,新增来源时必须同步 SOURCE_PUBLISHER。
+    """
+    raw = json.loads((ROOT / "02_crawler" / "sources.json").read_text(encoding="utf-8"))
+    missing = [s["id"] for s in raw["sources"] if s["id"] not in si.SOURCE_PUBLISHER]
+    assert missing == [], f"这些来源没有在 SOURCE_PUBLISHER 里声明发布机构: {missing}"
+
+
+def test_toutiao_regimen_is_aggregator_not_independent() -> None:
+    """health 频道的头条源与其它 toutiao_* 一样是聚合平台,不得当独立第二来源。"""
+    regimen = si.identity_for_source("toutiao_regimen")
+    assert regimen.kind == si.KIND_AGGREGATOR
+    assert regimen.agency == "toutiao"
+    who = si.identity_for_source("who_cn_news")
+    assert si.independent(regimen, who) is False
+
+
+def test_ithome_dateline_marks_own_report_and_reprint_of_ithome() -> None:
+    """「IT之家 11 月 18 日消息」既能证 IT之家自有稿,也会把转载方正确指回 ithome。"""
+    body = "IT之家 11 月 18 日消息，据美国 CNBC 援引知情人士消息称，Anthropic 考虑扩大 IPO 规模。"
+    assert si.extract_dateline(body) == "IT之家"
+    own = si.classify(None, si.extract_dateline(body), own_agency="ithome")
+    assert own.kind == si.KIND_OWN and own.agency == "ithome"
+    # 东方财富转载同一句电头时,agency 也是 ithome ⇒ 与 IT之家不构成两家独立媒体
+    reprint = si.classify(None, si.extract_dateline(body), own_agency="eastmoney")
+    assert reprint.kind == si.KIND_REPRINT and reprint.agency == "ithome"
+    assert si.independent(own, reprint) is False
+
+
 def test_pair_candidate_pages_show_reprints_are_being_caught() -> None:
     """财经跨机构候选对的逐页复核:必须抓到转载稿/无署名,不许默认当自有报道。
 

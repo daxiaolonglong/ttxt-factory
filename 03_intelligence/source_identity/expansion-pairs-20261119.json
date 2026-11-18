@@ -1,0 +1,926 @@
+{
+  "inventory": "03_intelligence\\source_identity\\expansion-20261119.jsonl",
+  "extra_identity_files": [
+    "07_tmp\\t02_pair_probe.jsonl"
+  ],
+  "categories": {
+    "technology": {
+      "articles": 438,
+      "focus_articles": 60,
+      "focus_unprobed": 0,
+      "focus_domains": [
+        "ithome.com"
+      ],
+      "focus_dates": {
+        "2026-11-18": 60
+      },
+      "scanned_pairs": 26220,
+      "pairs": [],
+      "rejected": [
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/121.htm",
+            "title": "消息称 Anthropic 考虑扩大 IPO 规模，散户认购意向接近千亿美元",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707957616546185763/",
+            "title": "癌症将成历史 ！Anthropic掌门人IPO路演放豪言，医学界集体泼冷水",
+            "domain": "toutiao.com"
+          },
+          "score": 0.179,
+          "reason": "来源不独立:ithome/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/120.htm",
+            "title": "小米 18 标准版手机预计 12 月发布，消息称起售价 5699 元",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709022394085556755/",
+            "title": "消息称小米Watch6大概率与小米18标准版一同登场，eSIM全智能手表",
+            "domain": "toutiao.com"
+          },
+          "score": 0.157,
+          "reason": "来源不独立:ithome/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/120.htm",
+            "title": "小米 18 标准版手机预计 12 月发布，消息称起售价 5699 元",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709304041511059968/",
+            "title": "小米18 Pro系列手机国际版正式发布，售价1399欧元（约10278元人民币）起",
+            "domain": "toutiao.com"
+          },
+          "score": 0.127,
+          "reason": "来源不独立:ithome/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/118.htm",
+            "title": "数毛社实测《GTA 6》Xbox 版：Series X 稳定 30 帧，Series S 掉帧明显",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.ithome.com/1/029/055.htm",
+            "title": "数毛社实测《GTA 6》：PS5 爆炸场景跌至 23 帧，PS5 Pro 近乎稳定 30 帧",
+            "domain": "ithome.com"
+          },
+          "score": 0.231,
+          "reason": "同一域名 ithome.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/111.htm",
+            "title": "微星 RTX Spark 迷你主机 EdgeMesa N AI+ 上市：64GB + 1TB 售 33999 元",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.ithome.com/1/029/093.htm",
+            "title": "铭凡 5L 台式机 T5 Max-388 上市：48GB + 1TB，到手价 9699 元",
+            "domain": "ithome.com"
+          },
+          "score": 0.136,
+          "reason": "同一域名 ithome.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/111.htm",
+            "title": "微星 RTX Spark 迷你主机 EdgeMesa N AI+ 上市：64GB + 1TB 售 33999 元",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.ithome.com/1/029/073.htm",
+            "title": "34999 元起，华硕 RTX Spark 迷你主机 ProArt GR1X 发售",
+            "domain": "ithome.com"
+          },
+          "score": 0.224,
+          "reason": "同一域名 ithome.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/110.htm",
+            "title": "腾讯：WorkBuddy 最近七天收入按年化折算超 5 亿美元，三季度收入是第二季度的 5 倍以上",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7708678818893988386/",
+            "title": "无极AI工作手机正式上架WorkBuddy",
+            "domain": "toutiao.com"
+          },
+          "score": 0.154,
+          "reason": "来源不独立:ithome/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/061.htm",
+            "title": "Face ID 存疑：消息称苹果 iPhone Duo 2 工程机沿用侧边指纹设计",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7706203367751582248/",
+            "title": "iPhone 20 Pro新消息，意想不到的改动！",
+            "domain": "toutiao.com"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:ithome/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/061.htm",
+            "title": "Face ID 存疑：消息称苹果 iPhone Duo 2 工程机沿用侧边指纹设计",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://sspai.com/post/119184",
+            "title": "社区速递 166｜柯尼卡胶片机、iPhone Duo 体验与假期省钱实操大赏",
+            "domain": "sspai.com"
+          },
+          "score": 0.136,
+          "reason": "标题相似度 0.136 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/061.htm",
+            "title": "Face ID 存疑：消息称苹果 iPhone Duo 2 工程机沿用侧边指纹设计",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1690009?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "除了人脸解锁，iPhone Duo 2 还值得哪些升级？",
+            "domain": "ifanr.com"
+          },
+          "score": 0.191,
+          "reason": "标题相似度 0.191 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/061.htm",
+            "title": "Face ID 存疑：消息称苹果 iPhone Duo 2 工程机沿用侧边指纹设计",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709494826437263913/",
+            "title": "苹果iPhone 18与Air 2有望在明年3月发布 屏幕量产已就绪",
+            "domain": "toutiao.com"
+          },
+          "score": 0.123,
+          "reason": "来源不独立:ithome/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/058.htm",
+            "title": "DeepSeek API 定价调整：调用模型时触发服务端搜索、网页抓取不再计费，仅按模型 Token 用量计费",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689176?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "刚刚，豆包工作官宣接入 Kimi、DeepSeek，AI 模型自由来了",
+            "domain": "ifanr.com"
+          },
+          "score": 0.123,
+          "reason": "标题相似度 0.123 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.ithome.com/1/029/055.htm",
+            "title": "数毛社实测《GTA 6》：PS5 爆炸场景跌至 23 帧，PS5 Pro 近乎稳定 30 帧",
+            "domain": "ithome.com"
+          },
+          "right": {
+            "url": "https://www.ithome.com/1/029/043.htm",
+            "title": "R 星确认《GTA 6》在 PS5 Pro 上不会推出 60 帧模式，原因是硬件性能不足",
+            "domain": "ithome.com"
+          },
+          "score": 0.161,
+          "reason": "同一域名 ithome.com,不构成两家独立媒体"
+        }
+      ],
+      "rejected_reasons": {
+        "来源不独立:ithome/own_report 与 toutiao/aggregator": 6,
+        "同一域名 ithome.com,不构成两家独立媒体": 4,
+        "标题相似度 0.136 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.191 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.123 < 0.3,不足以判定同一事件": 1
+      }
+    },
+    "finance": {
+      "articles": 12921,
+      "focus_articles": 30,
+      "focus_unprobed": 0,
+      "focus_domains": [
+        "chinanews.com.cn"
+      ],
+      "focus_dates": {
+        "2026-11-18": 30
+      },
+      "scanned_pairs": 387600,
+      "pairs": [],
+      "rejected": [
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734424.shtml",
+            "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1345,202611173933028682.html",
+            "title": "商务部新闻发言人就中加经贸磋商成果答记者问",
+            "domain": "finance.eastmoney.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734424.shtml",
+            "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1351,202611183934332462.html",
+            "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+            "domain": "finance.eastmoney.com"
+          },
+          "score": 1.0,
+          "reason": "来源不独立:mofcom/reprint_external 与 mofcom/reprint_external"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8207947.html",
+            "title": "2026中国整合肿瘤学大会在长沙开幕",
+            "domain": "tmtpost.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7692684814725497371/",
+            "title": "2026年人工智能应用发展趋势报告",
+            "domain": "toutiao.com"
+          },
+          "score": 0.129,
+          "reason": "标题相似度 0.129 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7691240436182024740/",
+            "title": "2026年中国AI医疗行业产业链、竞争格局及重点企业分析",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7686374886943638079/",
+            "title": "2026年中国人形机器人行业产业链、市场规模及发展趋势分析",
+            "domain": "toutiao.com"
+          },
+          "score": 0.15,
+          "reason": "标题相似度 0.150 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7665222566625165875/",
+            "title": "2026年中国AI应用行业市场深度分析报告-华经产业研究院",
+            "domain": "toutiao.com"
+          },
+          "score": 0.122,
+          "reason": "标题相似度 0.122 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7649979923746193939/",
+            "title": "2026年中国AI医疗行业市场调查研究报告-华经产业研究院",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7624368584211218996/",
+            "title": "2026年中国AI服务器行业市场调查研究报告-华经产业研究院",
+            "domain": "toutiao.com"
+          },
+          "score": 0.122,
+          "reason": "标题相似度 0.122 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734397.shtml",
+            "title": "“中国发展论坛·2026”聚焦现代化产业体系",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "score": 0.147,
+          "reason": "同一域名 chinanews.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7700550355695698447/",
+            "title": "从算力到场景：AI如何真正走进产业——第三届“科技产业金融协同发展论坛”人工智能多方谈",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7700425794157281827/",
+            "title": "从算力到场景：AI如何真正走进产业——第三届“科技产业金融协同发展论坛”人工智能多方谈",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7700200376854659611/",
+            "title": "人工智能来了，饭碗怎么办？",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7698297002920919593/",
+            "title": "专访北航教授王田苗：人工智能发展红利会分多轮释放，家庭场景将带来新一轮增长",
+            "domain": "toutiao.com"
+          },
+          "score": 0.13,
+          "reason": "标题相似度 0.130 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7694885287872184832/",
+            "title": "人工智能产业日报(10.09) : AI全球动态",
+            "domain": "toutiao.com"
+          },
+          "score": 0.133,
+          "reason": "标题相似度 0.133 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7692684814725497371/",
+            "title": "2026年人工智能应用发展趋势报告",
+            "domain": "toutiao.com"
+          },
+          "score": 0.138,
+          "reason": "标题相似度 0.138 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688678721133363712/",
+            "title": "中国信通院王志勤：推动“人工智能+软件”深度融合，赋能软件产业高质量发展",
+            "domain": "toutiao.com"
+          },
+          "score": 0.2,
+          "reason": "标题相似度 0.200 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7686096233181577772/",
+            "title": "人工智能产业持续爆发，产业链机会梳理",
+            "domain": "toutiao.com"
+          },
+          "score": 0.143,
+          "reason": "标题相似度 0.143 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7683798301951214134/",
+            "title": "江小涓：人工智能正在改写中国企业出海路径",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7679144243868434988/",
+            "title": "人工智能对就业市场的影响",
+            "domain": "toutiao.com"
+          },
+          "score": 0.12,
+          "reason": "标题相似度 0.120 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7672611696998629903/",
+            "title": "重庆：十二条举措护航人工智能OPC创业发展",
+            "domain": "toutiao.com"
+          },
+          "score": 0.121,
+          "reason": "标题相似度 0.121 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7662301795619701299/",
+            "title": "人工智能有哪些实际应用",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7533514583584080399/",
+            "title": "人工智能赋能农业发展的路径与趋势研究",
+            "domain": "toutiao.com"
+          },
+          "score": 0.172,
+          "reason": "标题相似度 0.172 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7509740164105634355/",
+            "title": "如何加快人工智能赋能新型工业化商业模式创新？",
+            "domain": "toutiao.com"
+          },
+          "score": 0.121,
+          "reason": "标题相似度 0.121 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/6636496719435530766/",
+            "title": "运用人工智能重构营销体系",
+            "domain": "toutiao.com"
+          },
+          "score": 0.12,
+          "reason": "标题相似度 0.120 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734384.shtml",
+            "title": "中国算力产业高速增长 赋能人工智能发展",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7668562277934711298/",
+            "title": "全球人工智能发展趋势、各国国家战略、职场变革与全民生活渗透",
+            "domain": "toutiao.com"
+          },
+          "score": 0.132,
+          "reason": "标题相似度 0.132 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734311.shtml",
+            "title": "AI赋能+外商直采 浙江拱墅激活专业市场外贸新动能",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7702023149591740971/",
+            "title": "广交会看外贸新变量：AI赋能背后的“杭州解法”",
+            "domain": "toutiao.com"
+          },
+          "score": 0.132,
+          "reason": "标题相似度 0.132 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734311.shtml",
+            "title": "AI赋能+外商直采 浙江拱墅激活专业市场外贸新动能",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7679378292017513012/",
+            "title": "AI 赋能国际贸易专业学习 ：从市场调研、单证制作到外贸谈判全场景",
+            "domain": "toutiao.com"
+          },
+          "score": 0.13,
+          "reason": "标题相似度 0.130 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734279.shtml",
+            "title": "中国将围绕降本增效进一步为企业“减负”",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7676411024282583595/",
+            "title": "小企业借助AI工具降本增效实操思路",
+            "domain": "toutiao.com"
+          },
+          "score": 0.143,
+          "reason": "标题相似度 0.143 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734279.shtml",
+            "title": "中国将围绕降本增效进一步为企业“减负”",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7667875553462190644/",
+            "title": "青虹AI数字员工是什么？企业降本增效新解法",
+            "domain": "toutiao.com"
+          },
+          "score": 0.129,
+          "reason": "标题相似度 0.129 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734279.shtml",
+            "title": "中国将围绕降本增效进一步为企业“减负”",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7636986221524288052/",
+            "title": "告别低效加班！青石 AI 办公系统，中小企业首选，降本增效一步到位",
+            "domain": "toutiao.com"
+          },
+          "score": 0.128,
+          "reason": "标题相似度 0.128 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734267.shtml",
+            "title": "小马智行三季度营收2.99亿：Robotaxi领涨，双引擎战略推高国内规模，拉快出海节奏",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7700064803991470630/",
+            "title": "AI就业友好导向下，理性把握Robotaxi商业化节奏！",
+            "domain": "toutiao.com"
+          },
+          "score": 0.138,
+          "reason": "标题相似度 0.138 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734226.shtml",
+            "title": "2026第二届鲁苏豫皖冀毗邻区域蛋鸡产业大会在山东巨野召开",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8207947.html",
+            "title": "2026中国整合肿瘤学大会在长沙开幕",
+            "domain": "tmtpost.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734226.shtml",
+            "title": "2026第二届鲁苏豫皖冀毗邻区域蛋鸡产业大会在山东巨野召开",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688364685866893833/",
+            "title": "2026世界制造业大会观察：制造如何争“先”？",
+            "domain": "toutiao.com"
+          },
+          "score": 0.122,
+          "reason": "标题相似度 0.122 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8207947.html",
+            "title": "2026中国整合肿瘤学大会在长沙开幕",
+            "domain": "tmtpost.com"
+          },
+          "score": 0.156,
+          "reason": "标题相似度 0.156 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7702435395866214955/",
+            "title": "毕节七星关:大抓产业推动高质量发展",
+            "domain": "toutiao.com"
+          },
+          "score": 0.129,
+          "reason": "标题相似度 0.129 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7696843195509965353/",
+            "title": "山西 | 山西省工业互联网高质量发展行动方案",
+            "domain": "toutiao.com"
+          },
+          "score": 0.121,
+          "reason": "标题相似度 0.121 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7696612163430990377/",
+            "title": "2026年评价高的机汇管家AI智能体厂家服务质量评选",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7692684814725497371/",
+            "title": "2026年人工智能应用发展趋势报告",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690903639560487464/",
+            "title": "现代综合交通运输体系铺就高质量发展“快车道”",
+            "domain": "toutiao.com"
+          },
+          "score": 0.147,
+          "reason": "标题相似度 0.147 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690414637518438954/",
+            "title": "现代综合交通运输体系铺就高质量发展“快车道”",
+            "domain": "toutiao.com"
+          },
+          "score": 0.147,
+          "reason": "标题相似度 0.147 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7689283586335261247/",
+            "title": "走好化工高质量发展转型路",
+            "domain": "toutiao.com"
+          },
+          "score": 0.148,
+          "reason": "标题相似度 0.148 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7689269390029668879/",
+            "title": "走好化工高质量发展转型路",
+            "domain": "toutiao.com"
+          },
+          "score": 0.148,
+          "reason": "标题相似度 0.148 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688411001096372772/",
+            "title": "2026云栖大会在杭州举行 阿里全力投入AI基础设施建设",
+            "domain": "toutiao.com"
+          },
+          "score": 0.15,
+          "reason": "标题相似度 0.150 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688273304976622116/",
+            "title": "七秩弦歌，筑梦山海！重庆建筑工程职业学院举行建校70周年高质量发展大会",
+            "domain": "toutiao.com"
+          },
+          "score": 0.178,
+          "reason": "标题相似度 0.178 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688101695875858971/",
+            "title": "供需协同推动服务业高质量发展",
+            "domain": "toutiao.com"
+          },
+          "score": 0.269,
+          "reason": "标题相似度 0.269 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7687682443691786815/",
+            "title": "五年，法治护航常州高质量发展",
+            "domain": "toutiao.com"
+          },
+          "score": 0.143,
+          "reason": "标题相似度 0.143 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+            "title": "2026现代服务业高质量发展大会在重庆举行",
+            "domain": "chinanews.com.cn"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7662365861612749350/",
+            "title": "2026国际机器学习大会亮点：AI 下一阶段的发展方向",
+            "domain": "toutiao.com"
+          },
+          "score": 0.125,
+          "reason": "标题相似度 0.125 < 0.3,不足以判定同一事件"
+        }
+      ],
+      "rejected_reasons": {
+        "标题相似度 0.125 < 0.3,不足以判定同一事件": 13,
+        "来源不独立:mofcom/reprint_external 与 mofcom/reprint_external": 1,
+        "标题相似度 0.129 < 0.3,不足以判定同一事件": 3,
+        "标题相似度 0.150 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.122 < 0.3,不足以判定同一事件": 3,
+        "同一域名 chinanews.com.cn,不构成两家独立媒体": 1,
+        "标题相似度 0.130 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.133 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.138 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.200 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.143 < 0.3,不足以判定同一事件": 3,
+        "标题相似度 0.120 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.121 < 0.3,不足以判定同一事件": 3,
+        "标题相似度 0.172 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.132 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.128 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.156 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.147 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.148 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.178 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.269 < 0.3,不足以判定同一事件": 1
+      }
+    }
+  },
+  "totals": {
+    "pairs": 0,
+    "rejected": 61
+  }
+}

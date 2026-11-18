@@ -27,7 +27,8 @@ def load_identities(inventory: Path) -> dict[str, si.Identity]:
         if not line.strip():
             continue
         row = json.loads(line)
-        ids[row["url"]] = si.Identity(row["kind"], row["agency"], row.get("page_marker"),
+        ids[row["url"]] = si.Identity(row["kind"], si.canon_agency(row.get("agency")),
+                                      row.get("page_marker"),
                                       row.get("dateline_agency"), row.get("evidence") or "")
     return ids
 

@@ -38,6 +38,10 @@ AGENCY_CANON: dict[str, str] = {
     "澎湃新闻": "thepaper", "界面新闻": "jiemian",
     "东方财富网": "eastmoney", "东方财富": "eastmoney",
     "钛媒体": "tmtpost", "爱范儿": "ifanr", "少数派": "sspai", "阮一峰博客": "ruanyifeng",
+    "IT之家": "ithome",
+    # T-02 扩源取证:中新网与东方财富各挂一篇同题稿,页头「来源」分别写「商务部网站」与「商务部」,
+    # 实为同一份官方答问。写法不归一就会被判成两家独立机构 ⇒ 必须映射到同一 id。
+    "商务部网站": "mofcom", "商务部": "mofcom",
     "世界卫生组织": "who", "WHO": "who",
 }
 #: 注册来源 → 规范机构 id(采集侧用;toutiao_* 是聚合平台,单列)
@@ -45,7 +49,10 @@ SOURCE_PUBLISHER: dict[str, str] = {
     "eastmoney_rss": "eastmoney", "tmtpost_rss": "tmtpost", "ifanr_feed": "ifanr",
     "sspai_rss": "sspai", "ruanyifeng_atom": "ruanyifeng", "who_cn_news": "who",
     "chinanews_society": "chinanews", "chinanews_culture": "chinanews",
+    "chinanews_finance": "chinanews",
+    "ithome_rss": "ithome",
     "toutiao_tech": "toutiao", "toutiao_finance": "toutiao", "toutiao_history": "toutiao",
+    "toutiao_regimen": "toutiao",
     "quotes_toscrape": "quotes_toscrape",
 }
 AGGREGATOR_AGENCIES = {"toutiao"}
@@ -57,6 +64,9 @@ _DATELINE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("人民日报", re.compile(r"人民日报\s*[\u4e00-\u9fa5]{0,8}\d{1,2}月\d{1,2}日电")),
     ("央视新闻", re.compile(r"央视新闻客户端?")),
     ("中国天气网", re.compile(r"中国天气网")),
+    # T-02 扩源:IT之家自有稿的电头固定写「IT之家 11 月 18 日消息」;别家转载引用时同样带这句,
+    # 因此它既能证自有报道,也能把转载方正确判成 reprint(ithome),不会被域名洗白。
+    ("IT之家", re.compile(r"IT\s*之家\s*\d{1,2}\s*月\s*\d{1,2}\s*日\s*消息")),
 ]
 #: 「来源:xxx」署名。前面紧跟 数/材/料/章/载/文/链 的「来源」是正文里的用语,不是页头署名。
 _MARKER_RE = re.compile(r"(.)?来源\s*[:：]\s*([^\s　,，。;；:：|]{2,40})")
