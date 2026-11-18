@@ -196,6 +196,20 @@ def test_state_file_is_robust_against_garbage(tmp_path: Path) -> None:
     assert sup.supervisor_running(paths["lock_path"], paths["state_path"])[0] is False
 
 
+def test_watchdog_installer_repetition_has_duration() -> None:
+    """重复触发器必须带 Duration,否则统一调度引擎会判无效、只走网格不启动。
+
+    2026-11-18 实测:缺 Duration 时 schtasks 报 "Repeat: Until: Duration: Disabled",
+    NextRunTime 每 5 分钟推进而 LastRunTime 冻结,NumberOfMissedRuns 连续增长。
+    """
+    script = (Path(__file__).resolve().parents[1] / "scripts" / "install-supervisor-tasks.ps1").read_text(
+        encoding="utf-8"
+    )
+    repetition = script.split("<Repetition>", 1)[1].split("</Repetition>", 1)[0]
+    assert "<Interval>PT5M</Interval>" in repetition, repetition
+    assert "<Duration>P1D</Duration>" in repetition, "缺 Duration 的重复触发器不会真正启动"
+
+
 def test_production_paths_are_under_control_dir() -> None:
     # 默认路径必须落在 00_control,方便 doctor 与面板读取。
     assert "00_control" in str(sup.default_state_path())

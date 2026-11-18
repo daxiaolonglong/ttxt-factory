@@ -2,8 +2,13 @@
 # Root cause: the old `schtasks /sc daily /st 00:01 /ri 5 /du 23:59` repetition
 # window only applied within the start boundary DAY; with the unified
 # scheduling engine the task degraded to once-daily after day one (observed:
-# supervisor offline 5.7h with nobody to bring it back). Now the task XML uses
-# Repetition Interval=PT5M with no duration end, repeating forever.
+# supervisor offline 5.7h with nobody to bring it back).
+# 2026-11-18 second root cause (measured): Repetition without <Duration> is
+# rejected by the unified scheduling engine -- schtasks /v reported
+# "Repeat: Until: Duration: Disabled", NextRunTime kept advancing on the 5-min
+# grid while LastRunTime stayed frozen and NumberOfMissedRuns grew (9 slots
+# 19:51-20:31 all skipped; a manual /run worked in seconds). Fix: each daily
+# trigger repeats inside a P1D window, i.e. every 5 min around the clock.
 # Limitation (measured, not hidden): without admin rights only an
 # InteractiveToken task can be registered, so auto-recovery works only while
 # the user is logged on. --WithLogon (logon trigger) needs an elevated shell.
@@ -46,7 +51,7 @@ $xml = @"
     <CalendarTrigger>
       <StartBoundary>$boundary</StartBoundary>
       <ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay>
-      <Repetition><Interval>PT5M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition>
+      <Repetition><Interval>PT5M</Interval><Duration>P1D</Duration><StopAtDurationEnd>false</StopAtDurationEnd></Repetition>
     </CalendarTrigger>
   </Triggers>
   <Actions Context="Author">
