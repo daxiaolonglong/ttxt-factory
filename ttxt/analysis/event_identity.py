@@ -91,9 +91,9 @@ class Signals:
 
     @property
     def core_entities(self) -> frozenset[str]:
-        """核心实体:具名机构/人物/书名号(新闻里最能指认"这一件事"的词)。"""
+        """核心实体:具名机构/人物/书名号/中文裸品牌(新闻里最能指认"这一件事"的词)。"""
         return frozenset(e for e in self.entities
-                         if e.startswith(("org:", "person:", "quote:")))
+                         if e.startswith(("org:", "person:", "quote:", "brand:")))
 
     @property
     def strong_entities(self) -> frozenset[str]:
@@ -167,9 +167,18 @@ def _entities(text: str) -> set[str]:
     for person in anchors["persons"]:
         if len(person) < 2 or len(person) > 4:
             continue
+        if not verifier.is_plausible_person(person):
+            # R39:泛称(专家/网友/业内人士)不是具名身份,留着只会制造巧合重合。
+            continue
         if any(noise in person for noise in _PERSON_NOISE_WORDS):
             continue
         out.add("person:" + person)
+    # R39:中文裸品牌(无「公司/集团」后缀,如「英伟达」)。与 org 分开标记,
+    # 但同属核心实体 —— 品牌名指认事件的能力与具名机构等价。
+    for brand in anchors.get("brands", []):
+        if len(brand) < 2 or verifier.is_anaphoric_org(brand):
+            continue
+        out.add("brand:" + brand)
     for match in _LATIN_ENTITY_RE.finditer(text):
         raw = match.group(0).strip(".-")
         token = raw.lower()

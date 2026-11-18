@@ -46,6 +46,11 @@ MIN_PER_CATEGORY = 10         # 每类目有效卡片下限
 MIN_INDEPENDENT_SHARE = 0.50  # A+B 级占比下限(按已裁定卡片计)
 MIN_NEGATIVE_SHARE = 0.30     # 负样本占比下限
 MIN_PER_KIND = 3              # 每种 kind 的卡片下限
+# R39:「事实可核率」独立放行条件(不替代 A+B 门禁)。
+# 定义:关键事实中「有一手出处(A 级)或至少一个可核锚点在来源原文逐字出现」的比例。
+# 目标线 0.80 是编辑口径(先定线、后读数),不参与 A+B 的分子/分母,也不改任何 A/B/C 计数。
+FACT_CHECKABILITY_MIN = 0.80
+FACT_ANCHOR_DIMS = ("numbers", "dates", "persons", "orgs", "brands")
 
 REQUIRED_FIELDS = (
     "card_id", "category", "fact_type", "kind", "claim", "source_url", "source_publisher",
@@ -202,6 +207,74 @@ def machine_result(card: dict) -> dict:
     }
 
 
+def fact_checkability_card(card: dict) -> dict:
+    """单张卡片(一条关键事实)是否「有一手出处或客观可核锚点」。
+
+    - 一手出处:``source_tier == "A"``(官方/一手发布),直接算可核;
+    - 客观可核锚点:claim 抽出的数字/日期/人物/机构/品牌里,**至少一个**在
+      ``source_text`` 原文逐字出现。锚点必须落回来源原文才算「可核」,
+      只在 claim 里出现、来源里查不到的锚点不算。
+    该判据与 A/B/C 证据级判定相互独立:不读 ``expected_by_construction``,
+    不改写卡片,也不参与 A+B>=50% 门禁。
+    """
+    if card.get("source_tier") == "A":
+        return {"checkable": True, "basis": "first_hand_A", "hits": []}
+    claim = card.get("claim") or ""
+    text = card.get("source_text") or ""
+    try:
+        anchors = verifier.extract_anchors(claim)
+    except Exception:  # noqa: BLE001 - 抽取失败如实记不可核,不伪装通过
+        anchors = {}
+    hits = []
+    for dim in FACT_ANCHOR_DIMS:
+        for anchor in anchors.get(dim) or []:
+            if anchor and anchor in text:
+                hits.append(f"{dim}:{anchor}")
+    return {"checkable": bool(hits), "basis": "anchor_in_source" if hits else "none", "hits": hits}
+
+
+def fact_checkability_metrics(cards: list[dict]) -> dict:
+    """R39:「事实可核率」独立指标 —— 与 A+B 门禁分别记账、互不替代。
+
+    分母固定为**全部卡片**(关键事实总数),不随 A+B 门禁的分母变化;
+    该指标达标不代表 A+B 达标,反之亦然。
+    """
+    rows = [{"card_id": c.get("card_id"), "tier": c.get("source_tier"),
+             "category": c.get("category"), **fact_checkability_card(c)} for c in cards]
+    checkable = [r for r in rows if r["checkable"]]
+    rate = round(len(checkable) / len(rows), 3) if rows else None
+    by_basis: dict[str, int] = {}
+    for row in rows:
+        by_basis[row["basis"]] = by_basis.get(row["basis"], 0) + 1
+    by_tier: dict[str, dict] = {}
+    for row in rows:
+        bucket = by_tier.setdefault(row["tier"], {"cards": 0, "checkable": 0})
+        bucket["cards"] += 1
+        bucket["checkable"] += 1 if row["checkable"] else 0
+    for bucket in by_tier.values():
+        bucket["rate"] = round(bucket["checkable"] / bucket["cards"], 3) if bucket["cards"] else None
+    return {
+        "definition": (
+            "每篇稿件的关键事实中,有一手出处(A 级)或至少一个客观可核锚点"
+            "(数字/日期/人物/机构/品牌在来源原文逐字出现)的比例"
+        ),
+        "denominator": "全部卡片(关键事实总数);与 A+B 门禁分母相互独立",
+        "cards": len(rows),
+        "checkable": len(checkable),
+        "rate": rate,
+        "release_threshold": FACT_CHECKABILITY_MIN,
+        "release_condition_met": bool(rate is not None and rate >= FACT_CHECKABILITY_MIN),
+        "by_basis": by_basis,
+        "by_tier": by_tier,
+        "not_a_substitute_for": "A+B>=50% 门禁;两套指标分别记账,互不替代",
+        "known_limitation": (
+            "A 级直接计为可核,不额外校验正文;B/C 级只要求至少一个锚点落回原文,"
+            "不证明整条事实为真。该指标是放行门槛,不是事实质量分数。"
+        ),
+        "rows": rows,
+    }
+
+
 def evaluate(cards: list[dict], ai: dict[str, dict] | None = None,
              pair_metrics: dict | None = None) -> dict:
     ai = ai or {}
@@ -333,6 +406,7 @@ def evaluate(cards: list[dict], ai: dict[str, dict] | None = None,
             "(机器结论变了 ⇒ AI 判据已过期,必须重裁,不得沿用)"
         )
 
+    fc = fact_checkability_metrics(cards)
     return {
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "card_count": len(cards),
@@ -432,6 +506,19 @@ def evaluate(cards: list[dict], ai: dict[str, dict] | None = None,
             "per_kind": dict(per_kind),
             "per_fact_type": dict(Counter(c.get("fact_type") for c in cards)),
         },
+        # R39:独立指标,与 A+B 门禁分别记账;不进入 gate_fail / quality_claim / 退出码。
+        "fact_checkability": fc,
+        "release_decision": {
+            "a_b_gate": "NOT_AVAILABLE" if gate_fail else "AVAILABLE",
+            "a_b_gate_basis": gate_fail,
+            "fact_checkability": "MET" if fc["release_condition_met"] else "NOT_MET",
+            "fact_checkability_rate": fc["rate"],
+            "release": "BLOCKED" if gate_fail or not fc["release_condition_met"] else "READY",
+            "note": (
+                "A+B 门禁与事实可核率是两套独立放行条件:任一未满足即 BLOCKED,"
+                "不得用一套的读数替代另一套,也不得把 A+B 未达标粉饰为通过"
+            ),
+        },
         "quality_claim": "NOT_AVAILABLE" if gate_fail else "AVAILABLE",
         "quality_claim_basis": "只由人工口径(gate_failures)决定;AI 口径不影响退出码,防止 AI 初审让 CI 偷偷变绿",
         "gate_failures": gate_fail,
@@ -506,6 +593,21 @@ def render_report(metrics: dict, schema_errors: list[str]) -> str:
         f"({metrics['source_independence']['pair_independence_share'].get('independent_pairs')}"
         f"/{metrics['source_independence']['pair_independence_share'].get('candidate_pairs')}) —— "
         f"{metrics['source_independence']['pair_independence_share'].get('meaning')}",
+        "",
+        "## 3b. 事实可核率(独立放行条件,不替代 A+B 门禁)",
+        f"- 定义:{metrics['fact_checkability']['definition']}",
+        f"- 分母:{metrics['fact_checkability']['denominator']}",
+        f"- 读数:{metrics['fact_checkability']['checkable']}/{metrics['fact_checkability']['cards']}"
+        f" = {metrics['fact_checkability']['rate']}"
+        f"(门槛 {metrics['fact_checkability']['release_threshold']},"
+        f"结论 {'MET' if metrics['fact_checkability']['release_condition_met'] else 'NOT_MET'})",
+        f"- 按依据:{metrics['fact_checkability']['by_basis']}",
+        f"- 按证据级:{metrics['fact_checkability']['by_tier']}",
+        f"- 放行决定:{metrics['release_decision']['release']}"
+        f"(A+B 门禁 {metrics['release_decision']['a_b_gate']} / 事实可核率 "
+        f"{metrics['release_decision']['fact_checkability']})",
+        f"- 已知限制:{metrics['fact_checkability']['known_limitation']}",
+        f"- 记账口径:{metrics['fact_checkability']['not_a_substitute_for']}",
         "",
         "## 4. 覆盖分布",
         f"- 类目(全部/已人工裁定/已 AI 初审):{metrics['distribution']['per_category_all']}"

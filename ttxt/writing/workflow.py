@@ -361,6 +361,55 @@ def _passed(complete: bool, review: dict, min_score: float) -> bool:
     )
 
 
+#: R39:「事实可核率」—— 写作阶段的独立放行条件(不替代、也不改写原有事实门禁)。
+#: 目标线先定后读,避免用读数倒推阈值。
+FACT_CHECKABILITY_MIN = 0.80
+FACT_ANCHOR_DIMS = ("numbers", "dates", "persons", "orgs")
+
+
+def fact_checkability(evidence: list[dict], threshold: float = FACT_CHECKABILITY_MIN) -> dict:
+    """统计关键事实中「有一手出处或客观可核锚点」的比例。
+
+    - 一手出处:claim 已绑定到具体来源文章的**原文连续引句**(``quote`` 非空);
+    - 客观可核锚点:数字/日期/人物/机构中至少一个在来源里被 verifier 找到
+      (``checks[dim]["found"]`` 非空)。
+    观点句(``credibility == "opinion"``)不是关键事实,不进分母。
+    该指标与 A+B 证据级门禁分别记账:达标不能替代 A+B,未达标也不能被 A+B 覆盖。
+    """
+    facts = [item for item in (evidence or []) if item.get("credibility") != "opinion"]
+    rows = []
+    for item in facts:
+        hits = []
+        for dim in FACT_ANCHOR_DIMS:
+            payload = (item.get("checks") or {}).get(dim) or {}
+            for anchor in payload.get("found") or []:
+                hits.append(f"{dim}:{anchor}")
+        first_hand = bool(item.get("quote"))
+        rows.append({
+            "claim": item.get("claim"),
+            "credibility": item.get("credibility"),
+            "first_hand": first_hand,
+            "hits": hits,
+            "checkable": bool(first_hand or hits),
+        })
+    checkable = [row for row in rows if row["checkable"]]
+    rate = round(len(checkable) / len(rows), 3) if rows else None
+    return {
+        "definition": (
+            "关键事实中有一手出处(绑定来源原文引句)或至少一个客观可核锚点"
+            "(数字/日期/人物/机构在来源中找到)的比例"
+        ),
+        "denominator": "非观点类关键事实(opinion 不计入分母)",
+        "facts": len(rows),
+        "checkable": len(checkable),
+        "rate": rate,
+        "release_threshold": threshold,
+        "release_condition_met": bool(rate is not None and rate >= threshold),
+        "not_a_substitute_for": "原有事实门禁与 A+B 证据级门禁;两套指标分别记账",
+        "rows": rows,
+    }
+
+
 def _draft_title(draft: str, topic: str) -> tuple[str, str]:
     lines = (draft or "").strip().splitlines()
     title = (lines or [topic])[0][:80]
@@ -755,6 +804,10 @@ def write_article(
     _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
 
     passed = _passed(complete, review, gate_min_score)
+    fact_check = fact_checkability(evidence)
+    # R39:事实可核率是写作阶段的独立放行条件 —— 与原有门禁取「与」,
+    # 只收紧不放宽;不达标时如实拦下,不许用其他读数覆盖。
+    passed = passed and fact_check["release_condition_met"]
     revisions = 0
     while not passed and revisions < max_revisions:
         draft = model_call(
@@ -779,6 +832,8 @@ def write_article(
         review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
         _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
         passed = _passed(complete, review, gate_min_score)
+        fact_check = fact_checkability(evidence)
+        passed = passed and fact_check["release_condition_met"]
 
     # 独立评审只在门禁已通过时跑(账本 T-04):被事实门禁拦下的稿子不值得再花一次评审配额。
     # 通道不可用/模型同名 ⇒ 独立性按不成立处理,绝不为了好看把 same_model_review 改成 false。
@@ -829,6 +884,11 @@ def write_article(
         notes = f"评审得分 {review['score']} 低于门禁 {gate_min_score}"
     if notes is None and review["critical"]:
         notes = "门禁致命问题: " + ";".join(review["critical"][:3])
+    if notes is None and not fact_check["release_condition_met"]:
+        notes = (
+            f"事实可核率 {fact_check['rate']} 低于放行线 {fact_check['release_threshold']}"
+            f"({fact_check['checkable']}/{fact_check['facts']})"
+        )
 
     title, _body = _draft_title(draft, topic)
     path = export.write_export(
@@ -856,6 +916,12 @@ def write_article(
         "issues": review.get("issues") or [],
         "critical": review.get("critical") or [],
         "evidence": evidence,
+        "fact_checkability": fact_check,
+        "release_conditions": {
+            "existing_gate": _passed(complete, review, gate_min_score),
+            "fact_checkability": fact_check["release_condition_met"],
+            "note": "两套条件分别记账、取「与」放行;事实可核率不替代原有门禁",
+        },
         "path": str(path),
         "materials": len(materials),
         "material_stats": material_stats,

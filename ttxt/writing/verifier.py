@@ -48,6 +48,7 @@ credibility 语义(门禁据此判定):
 from __future__ import annotations
 
 import re
+from collections import Counter
 
 from ttxt.crawler.simhash import tokenize
 
@@ -90,6 +91,70 @@ _PERSON_ADVERB_TAIL = re.compile(
 )
 # 4 字窗口会从句子中间起截(「随着华盛顿不断强调」→「着华盛顿」),剥掉开头虚词。
 _PERSON_LEADING = set("着了的地得和与在对于从被把向给为是并而及等这那其该随因由据也都还又将正已曾就才")
+# R39:裸人名召回。原 PERSON_RE 只认「名字 + 谓语」邻接(表示/称/说…),
+# 「黄仁勋首次公开发声」「希望黄仁勋重新担任 CEO」这类写法召回为 0。
+# 第二遍抽取按「常见姓氏 + 后续动作词」判定,只补召回,不改任何判定阈值。
+_SURNAMES = frozenset(
+    "王李张刘陈杨黄赵吴周徐孙马朱胡郭何高林罗郑梁谢宋唐许韩冯邓曹彭曾肖田董袁潘于蒋蔡余杜叶程苏魏"
+    "吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦付方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱"
+    "严覃武戴莫孔向汤华欧柳"
+)
+# 名字里出现这些字基本是句子片段(「周洲因工」「果董事会」),不是人名。
+_NAME_STOP_CHARS = set("的了着和与在对于从被把向给为是并而及等这那其该随因由据也都还又将正已曾就才"
+                       "因将称表说指强透介告认预呼回辞离重首公已果董")
+# 「董」是姓氏,但「董事会/董事长/董监高」是组织词,必须排除。
+_PERSON_WORD_BLOCKLIST = frozenset({"董事会", "董事长", "董监高", "董秘", "董事"})
+_BARE_PERSON_FOLLOW = (
+    "首次", "公开", "重新", "再次", "随后", "当天", "日前", "此前", "已经", "正式",
+    "亲自", "立即", "马上", "转而", "回应", "呼吁", "警告", "坦言", "直言", "发文",
+    "发帖", "撰文", "官宣", "宣布", "表示", "强调", "指出", "透露", "介绍", "告诉",
+    "认为", "预计", "辞职", "回归", "重返", "上任", "离任", "不再",
+)
+_BARE_PERSON_RE = re.compile(
+    r"([\u4e00-\u9fff]{2,4})(?=" + "|".join(_BARE_PERSON_FOLLOW) + r")"
+)
+# 「黄仁勋在发布会上表示」这类人名与谓语之间夹了场合短语,上面的邻接规则会漏掉。
+# 只放行「名字 + 在<场合> + 明确谓语」,仍由姓氏/虚词校验兜底。
+_PERSON_LOCATIVE_RE = re.compile(
+    r"([\u4e00-\u9fff]{2,4})(?=在[^。！？；\n]{0,12}?"
+    r"(?:表示|称|说|指出|强调|透露|介绍|回应|坦言|直言|认为|预计|宣布))"
+)
+# 职务前缀后的名字:「英伟达 CEO 黄仁勋」「董事长周洲」「创始人李彦宏」
+_ROLE_PREFIX_RE = re.compile(
+    r"(?:CEO|CTO|CFO|COO|董事长|总裁|联合创始人|创始人|首席执行官|首席技术官|首席财务官"
+    r"|首席运营官|总经理|发言人|分析师|记者|主编|教授|院士|博士)[\s·:：]*"
+    r"([\u4e00-\u9fff]{2,4})"
+)
+# 裸品牌召回:中文品牌没有「公司/集团」后缀时,靠其后的组织词定位。
+# 只认**组织类**上下文(董事会/CEO/员工/股价/发言人/公司/集团),不认「公布/宣布」这类
+# 泛动词 —— 「公开回应」会被误当成品牌「公开」。候选再经频次聚合,单次出现的句子片段淘汰。
+_BRAND_CONTEXTS = (
+    "董事会", "CEO", "CFO", "CTO", "COO", "首席", "员工", "股价", "发言人",
+    "公司", "集团", "官网",
+)
+# 品牌候选里出现这些字就是句子片段,不是专名
+_BRAND_STOP_CHARS = set(
+    "的了着和与在对于从被把向给为是并而及等这那其该此随因由据也都还又将正已曾就才"
+    "如只要或许很非更最可会能很太没不无我你他她它们这那哪"
+)
+# 泛称/指代/句子片段,不是可核验品牌
+_BRAND_BLOCKLIST = frozenset({
+    "多家", "一家", "两家", "三家", "这家", "那家", "该公司", "公司", "集团", "董事会",
+    "员工", "股价", "首席", "科技", "网络", "信息", "企业", "行业", "上市", "股份",
+    "有限", "控股", "相关", "上述", "前述", "旗下", "子公司", "母公司", "分公司",
+    "财报", "业绩", "市场", "方面", "业务", "产品", "技术", "服务", "用户", "客户",
+    "消息", "报道", "声明", "公告", "问题", "情况", "计划", "数据", "内容",
+    "猎头", "股东", "投资者", "供应商", "伙伴", "对手", "竞品", "高管", "创始人", "分析师",
+})
+# 候选里含这些动词/动作,说明是句子片段而不是专名(「重新担任CEO」「聘请猎头公司」)
+_BRAND_VERB_WORDS = (
+    "担任", "出任", "回归", "重返", "离职", "辞职", "宣布", "发布", "公布", "回应", "表示",
+    "认为", "成为", "超过", "突破", "增长", "下降", "收购", "投资", "合作", "签署", "推出",
+    "上线", "开售", "融资", "上市", "退市", "裁员", "招聘", "寻找", "聘请", "支持", "反对",
+    "要求", "希望", "计划", "预计", "考虑", "决定", "同意", "拒绝", "获批", "通过", "完成",
+    "启动", "关闭", "停运", "起诉", "调查", "处罚", "赔偿", "亏损", "盈利", "营收", "利润",
+    "销量", "大跌", "大涨", "下跌", "上涨", "反弹", "暴跌", "暴涨",
+)
 ORG_RE = re.compile(
     r"[\u4e00-\u9fff]{2,8}?(?:公司|集团|研究院|研究所|科学院|大学|学院|银行|委员会|协会|学会|机构|部门|医院|学校|总局|总部|组织|部委|基金会)"
 )
@@ -207,8 +272,113 @@ def _split_date_tokens(normed: str) -> tuple[str, list[str]]:
     return "".join(chars), dates
 
 
+def _trim_name(raw: str) -> str:
+    """把正则窗口裁成「像人名的部分」:首字须为常见姓氏,长度 2–3,不含虚词。"""
+    candidate = (raw or "").strip()
+    while len(candidate) > 3:
+        candidate = candidate[:-1]
+    while len(candidate) >= 2 and candidate[-1] in _NAME_STOP_CHARS:
+        candidate = candidate[:-1]
+    if len(candidate) < 2 or len(candidate) > 3:
+        return ""
+    if candidate in _PERSON_WORD_BLOCKLIST:
+        return ""
+    if candidate[0] not in _SURNAMES:
+        return ""
+    if any(ch in _NAME_STOP_CHARS for ch in candidate):
+        return ""
+    return candidate
+
+
+def _extract_bare_persons(text: str) -> list[str]:
+    """R39:补召回没有「表示/称」谓语的裸人名(如「黄仁勋首次公开发声」)。
+
+    只按「姓氏 + 动作词/职务前缀」两条强线索抽取,不引入统计模型;
+    召回增加不等于判定放宽:是否构成同一事件仍由 ``event_identity.decide`` 的阈值决定。
+    """
+    out: list[str] = []
+    for match in _ROLE_PREFIX_RE.finditer(text):
+        name = _trim_name(match.group(1))
+        if name:
+            out.append(name)
+    for match in _BARE_PERSON_RE.finditer(text):
+        name = _trim_name(match.group(1))
+        if name:
+            out.append(name)
+    for match in _PERSON_LOCATIVE_RE.finditer(text):
+        name = _trim_name(match.group(1))
+        if name:
+            out.append(name)
+    return out
+
+
+def is_plausible_person(name: str) -> bool:
+    """名字是否像可核验的具名人物(首字常见姓氏、2–3 字、不含虚词)。
+
+    用于结构化事件判定的实体清洗:``专家/网友/业内人士`` 这类泛称不是具名身份,
+    拿它们做「同一事件」的核心实体只会制造巧合重合。
+    """
+    return bool(_trim_name(name))
+
+
+def _brand_clean(candidate: str) -> str:
+    """过滤明显不是专名的候选(含标点/虚词片段/泛称/动词短语/过长过短)。"""
+    if len(candidate) < 2 or len(candidate) > 4:
+        return ""
+    if not all("\u4e00" <= ch <= "\u9fff" for ch in candidate):
+        return ""
+    if candidate in _BRAND_BLOCKLIST:
+        return ""
+    if any(ch in _BRAND_STOP_CHARS for ch in candidate):
+        return ""
+    if any(word in candidate for word in _BRAND_VERB_WORDS):
+        return ""
+    return candidate
+
+
+def _extract_brands(text: str) -> list[str]:
+    """R39:补召回没有「公司/集团」后缀的中文裸品牌(如「英伟达董事会」中的英伟达)。
+
+    做法:只在组织类上下文词(董事会/CEO/员工/股价/公司…)**前面**取 2–4 字候选,
+    同一候选在正文中出现 ≥2 次才保留 —— 单次出现的多是句子片段
+    (「如果董事会」「公开回应」)。短正文(≤200 字,常见于 RSS 摘要)放宽到 1 次,
+    因为此时上下文本身就只是一条标题级信息。
+    抽到的是候选锚点,是否用于事件判定由 ``event_identity`` 决定,这里不改判定阈值。
+    """
+    counts: Counter[str] = Counter()
+    for context in _BRAND_CONTEXTS:
+        start = 0
+        while True:
+            idx = text.find(context, start)
+            if idx < 0:
+                break
+            start = idx + len(context)
+            for length in (4, 3, 2):
+                if idx - length < 0:
+                    continue
+                brand = _brand_clean(text[idx - length: idx])
+                if brand:
+                    counts[brand] += 1
+    if not counts:
+        return []
+    threshold = 1 if len(text) <= 200 else 2
+    kept = [brand for brand, count in counts.items() if count >= threshold]
+    # 去掉被更长候选包含的短后缀(「伟达」被「英伟达」吸收),避免同一品牌重复计数
+    kept.sort(key=len, reverse=True)
+    result: list[str] = []
+    for brand in kept:
+        if any(brand != other and brand in other for other in result):
+            continue
+        result.append(brand)
+    return result
+
+
 def extract_anchors(text: str) -> dict[str, list[str]]:
-    """从文本提取五类事实锚点(去重,保序)。引用编号 [n] 先剥掉,不当事实数字。"""
+    """从文本提取事实锚点(去重,保序)。引用编号 [n] 先剥掉,不当事实数字。
+
+    R39 新增 ``brands``(中文裸品牌)并扩充 ``persons``(裸人名);
+    原有 numbers/dates/orgs/causal 口径不变,既有门禁维度也不增不减。
+    """
     clean = strip_citations(text)
     normed = norm(clean)
     # 相对日期(「明年2月」)整段按日期核验,并从数字抽取里剔掉,否则窗口里缺一个孤立的 2
@@ -222,8 +392,9 @@ def extract_anchors(text: str) -> dict[str, list[str]]:
     return {
         "numbers": numbers + cn,
         "dates": _dedup(dates),
-        "persons": _dedup(_extract_persons(clean)),
+        "persons": _dedup(_extract_persons(clean) + _extract_bare_persons(clean)),
         "orgs": _dedup(ORG_RE.findall(clean)),
+        "brands": _dedup(_extract_brands(clean)),
         "causal": _dedup(CAUSAL_RE.findall(clean)),
     }
 

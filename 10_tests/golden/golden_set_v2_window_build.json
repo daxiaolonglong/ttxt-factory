@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-19T02:38:47+08:00",
+  "generated_at": "2026-11-19T02:58:37+08:00",
   "as_of": "2026-11-19",
   "window_days": 7,
   "window_start": "2026-11-13",
@@ -270,7 +270,7 @@
     "independent_pairs": 2,
     "pair_independence_share": 0.0
   },
-  "pair_report": "03_intelligence\\source_identity\\window-pairs-20261119-r38.json",
+  "pair_report": "03_intelligence\\source_identity\\window-pairs-20261119.json",
   "overlap_with_old": {
     "card_level": {
       "overlap": 0,
