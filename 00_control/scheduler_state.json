@@ -1698,9 +1698,183 @@
     "last_error": null
   },
   "metrics_due_60m": {
-    "last_run_at": "2026-11-19T03:35:07+08:00",
-    "last_status": "error",
-    "last_result": null,
-    "last_error": "ValueError: 未知调度任务 kind: 'metrics_due'(可用: ['analyze', 'crawl_enqueue', 'housekeep', 'metrics_fetch', 'recover'])"
+    "last_run_at": "2026-11-19T03:59:48+08:00",
+    "last_status": "ok",
+    "last_result": {
+      "scheduler_status": "ok",
+      "apply": true,
+      "limit": 12,
+      "queue": {
+        "queued": 0,
+        "running": 0,
+        "busy": false,
+        "waited_s": 0.0,
+        "wait_budget_s": 180.0
+      },
+      "categories": {
+        "technology": {
+          "status": "ok",
+          "claimed": 12,
+          "eligible": 72,
+          "fetched": 11,
+          "written": 1,
+          "snapshots": 11,
+          "would_write": 0,
+          "unsupported_host_skipped": 0,
+          "windows_refreshed": 11,
+          "queue_states": {
+            "scheduled": 262,
+            "ready": 9,
+            "backlog": 63,
+            "done": 134,
+            "exhausted": 0
+          },
+          "outcome_counts": {
+            "metrics_ok": 11,
+            "article_gone": 1
+          },
+          "after": {
+            "late_ratio": 0.620438,
+            "on_time_coverage": 0.111111,
+            "missing_ratio": {
+              "reads": 0.051095,
+              "likes": 0.0,
+              "favorites": 1.0,
+              "comments": 0.0,
+              "impressions": 0.051095
+            },
+            "recoverable_on_time_in_window": 4
+          }
+        },
+        "finance": {
+          "status": "ok",
+          "claimed": 12,
+          "eligible": 4294,
+          "fetched": 0,
+          "written": 0,
+          "snapshots": 0,
+          "would_write": 0,
+          "unsupported_host_skipped": 12,
+          "windows_refreshed": 0,
+          "queue_states": {
+            "scheduled": 531,
+            "ready": 19,
+            "backlog": 4275,
+            "done": 7999,
+            "exhausted": 0
+          },
+          "outcome_counts": {},
+          "after": {
+            "late_ratio": 1.0,
+            "on_time_coverage": 0.0,
+            "missing_ratio": {
+              "reads": 0.055007,
+              "likes": 0.490436,
+              "favorites": 1.0,
+              "comments": 0.735842,
+              "impressions": 0.999375
+            },
+            "recoverable_on_time_in_window": 19
+          }
+        },
+        "social": {
+          "status": "ok",
+          "claimed": 12,
+          "eligible": 13672,
+          "fetched": 0,
+          "written": 0,
+          "snapshots": 0,
+          "would_write": 0,
+          "unsupported_host_skipped": 12,
+          "windows_refreshed": 0,
+          "queue_states": {
+            "scheduled": 146,
+            "ready": 21,
+            "backlog": 13651,
+            "done": 26328,
+            "exhausted": 0
+          },
+          "outcome_counts": {},
+          "after": {
+            "late_ratio": 1.0,
+            "on_time_coverage": 0.0,
+            "missing_ratio": {
+              "reads": 0.041819,
+              "likes": 0.471817,
+              "favorites": 1.0,
+              "comments": 0.760217,
+              "impressions": 1.0
+            },
+            "recoverable_on_time_in_window": 21
+          }
+        },
+        "history": {
+          "status": "ok",
+          "claimed": 12,
+          "eligible": 61,
+          "fetched": 7,
+          "written": 3,
+          "snapshots": 7,
+          "would_write": 0,
+          "unsupported_host_skipped": 5,
+          "windows_refreshed": 7,
+          "queue_states": {
+            "scheduled": 126,
+            "ready": 19,
+            "backlog": 42,
+            "done": 29,
+            "exhausted": 0
+          },
+          "outcome_counts": {
+            "metrics_ok": 7
+          },
+          "after": {
+            "late_ratio": 0.657143,
+            "on_time_coverage": 0.055556,
+            "missing_ratio": {
+              "reads": 0.0,
+              "likes": 0.0,
+              "favorites": 1.0,
+              "comments": 0.0,
+              "impressions": 0.0
+            },
+            "recoverable_on_time_in_window": 12
+          }
+        },
+        "health": {
+          "status": "ok",
+          "claimed": 12,
+          "eligible": 27,
+          "fetched": 0,
+          "written": 0,
+          "snapshots": 0,
+          "would_write": 0,
+          "unsupported_host_skipped": 12,
+          "windows_refreshed": 0,
+          "queue_states": {
+            "scheduled": 26,
+            "ready": 0,
+            "backlog": 27,
+            "done": 14,
+            "exhausted": 0
+          },
+          "outcome_counts": {},
+          "after": {
+            "late_ratio": 1.0,
+            "on_time_coverage": 0.0,
+            "missing_ratio": {
+              "reads": 0.0,
+              "likes": 0.0,
+              "favorites": 1.0,
+              "comments": 0.0,
+              "impressions": 0.0
+            },
+            "recoverable_on_time_in_window": 0
+          }
+        }
+      },
+      "errors": []
+    },
+    "last_error": null
   }
 }
