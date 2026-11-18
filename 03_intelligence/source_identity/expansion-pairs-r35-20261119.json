@@ -1,0 +1,3013 @@
+{
+  "inventories": [
+    "03_intelligence\\source_identity\\expansion-20261119.jsonl",
+    "03_intelligence\\source_identity\\expansion-r35-20261119.jsonl"
+  ],
+  "new_sources": [
+    "nbd_news",
+    "qbitai_feed",
+    "yicai_news"
+  ],
+  "categories": {
+    "technology": {
+      "articles": 448,
+      "focus_articles": 10,
+      "focus_unprobed": 0,
+      "focus_domains": [
+        "qbitai.com"
+      ],
+      "focus_dates": {
+        "2026-11-17": 2,
+        "2026-11-18": 8
+      },
+      "scanned_pairs": 4470,
+      "pairs": [
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510914.html",
+            "title": "GPT-6.2难产！OpenAI怕了",
+            "agency": "qbitai",
+            "kind": "own_report",
+            "domain": "qbitai.com"
+          },
+          "right": {
+            "url": "https://sspai.com/post/119210",
+            "title": "派早报：国区 App Store 将 AIGC 合规设为上架必填、OpenAI 发布 GPT-6.2 Astra 等",
+            "agency": "sspai",
+            "kind": "own_report",
+            "domain": "sspai.com"
+          },
+          "score": 0.54,
+          "cross_agency": true,
+          "same_day": true
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510726.html",
+            "title": "黄仁勋不再沉默：我愿重掌英伟达！董事会：不考虑",
+            "agency": "qbitai",
+            "kind": "own_report",
+            "domain": "qbitai.com"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "黄仁勋官宣愿意回归，英伟达董事会：不考虑！",
+            "agency": "ifanr",
+            "kind": "own_report",
+            "domain": "ifanr.com"
+          },
+          "score": 0.323,
+          "cross_agency": true,
+          "same_day": true
+        }
+      ],
+      "rejected": [
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510922.html",
+            "title": "Gemini新模型Neon箭在弦上，网友：遍历元素周期表？",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1688883?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "今天起，Gemini 4 Carbon 正式上线，但不是所有人都用得上",
+            "domain": "ifanr.com",
+            "agency": "ifanr",
+            "kind": "own_report"
+          },
+          "score": 0.122,
+          "reason": "标题相似度 0.122 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510922.html",
+            "title": "Gemini新模型Neon箭在弦上，网友：遍历元素周期表？",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689267?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "刚刚，Gemini 4 新模型叒来了，终于人人可用",
+            "domain": "ifanr.com",
+            "agency": "ifanr",
+            "kind": "own_report"
+          },
+          "score": 0.179,
+          "reason": "标题相似度 0.179 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510914.html",
+            "title": "GPT-6.2难产！OpenAI怕了",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7708962991718416905/",
+            "title": "击败OpenAI，战胜英伟达，登顶全球第一！\"中国大忽悠\"要翻身了？",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:qbitai/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510914.html",
+            "title": "GPT-6.2难产！OpenAI怕了",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1690130?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "深度实测 GPT-6.2：强是真强，难用也是真难用",
+            "domain": "ifanr.com",
+            "agency": "ifanr",
+            "kind": "own_report"
+          },
+          "score": 0.138,
+          "reason": "标题相似度 0.138 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510726.html",
+            "title": "黄仁勋不再沉默：我愿重掌英伟达！董事会：不考虑",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689051?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "早报｜苹果支持社区将关停/曝英伟达董事会考虑罢免黄仁勋/余承东官宣华为子品牌OSTA星芒",
+            "domain": "ifanr.com",
+            "agency": "ifanr",
+            "kind": "own_report"
+          },
+          "score": 0.121,
+          "reason": "标题相似度 0.121 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510726.html",
+            "title": "黄仁勋不再沉默：我愿重掌英伟达！董事会：不考虑",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7708978249187082792/",
+            "title": "DeepSeek因算力不足限额使用；英伟达董事会：不考虑让黄仁勋重任CEO；曝苹果2027年或推六款iPhone | 极客头条",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:qbitai/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510707.html",
+            "title": "GPT-6.2 Astra和Sol王炸双发！3D又危了",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://sspai.com/post/119210",
+            "title": "派早报：国区 App Store 将 AIGC 合规设为上架必填、OpenAI 发布 GPT-6.2 Astra 等",
+            "domain": "sspai.com",
+            "agency": "sspai",
+            "kind": "own_report"
+          },
+          "score": 0.158,
+          "reason": "标题相似度 0.158 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510707.html",
+            "title": "GPT-6.2 Astra和Sol王炸双发！3D又危了",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1690103?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "GPT-6.2 Astra 刚发布即遭大量差评，实测后我觉得它有点冤",
+            "domain": "ifanr.com",
+            "agency": "ifanr",
+            "kind": "own_report"
+          },
+          "score": 0.214,
+          "reason": "标题相似度 0.214 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510695.html",
+            "title": "并购完成，李飞飞正式率队加入AMD！苏妈亲自欢迎",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709065524226818596/",
+            "title": "超500亿元收购完成！“AI教母”李飞飞正式加入AMD，CEO苏姿丰亲自欢迎！AMD股价连续大跌，市值2天蒸发超8800亿元",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.217,
+          "reason": "来源不独立:qbitai/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510688.html",
+            "title": "李沐加盟的Aimotion，是一家什么AI公司？",
+            "domain": "qbitai.com",
+            "agency": "qbitai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709156731632239113/",
+            "title": "刚刚，诺奖得主的AI公司融了333亿",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.129,
+          "reason": "来源不独立:qbitai/own_report 与 toutiao/aggregator"
+        }
+      ],
+      "rejected_reasons": {
+        "标题相似度 0.122 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.179 < 0.3,不足以判定同一事件": 1,
+        "来源不独立:qbitai/own_report 与 toutiao/aggregator": 4,
+        "标题相似度 0.138 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.121 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.158 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.214 < 0.3,不足以判定同一事件": 1
+      },
+      "near_miss_same_day_cross_agency": [
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510707.html",
+            "title": "GPT-6.2 Astra和Sol王炸双发！3D又危了",
+            "agency": "qbitai",
+            "kind": "own_report",
+            "date": "2026-11-18"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1690103?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "GPT-6.2 Astra 刚发布即遭大量差评，实测后我觉得它有点冤",
+            "agency": "ifanr",
+            "kind": "own_report",
+            "date": "2026-11-18"
+          },
+          "score": 0.21428571428571427
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510707.html",
+            "title": "GPT-6.2 Astra和Sol王炸双发！3D又危了",
+            "agency": "qbitai",
+            "kind": "own_report",
+            "date": "2026-11-18"
+          },
+          "right": {
+            "url": "https://sspai.com/post/119210",
+            "title": "派早报：国区 App Store 将 AIGC 合规设为上架必填、OpenAI 发布 GPT-6.2 Astra 等",
+            "agency": "sspai",
+            "kind": "own_report",
+            "date": "2026-11-18"
+          },
+          "score": 0.15789473684210525
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510914.html",
+            "title": "GPT-6.2难产！OpenAI怕了",
+            "agency": "qbitai",
+            "kind": "own_report",
+            "date": "2026-11-18"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1690130?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "深度实测 GPT-6.2：强是真强，难用也是真难用",
+            "agency": "ifanr",
+            "kind": "own_report",
+            "date": "2026-11-18"
+          },
+          "score": 0.13793103448275862
+        },
+        {
+          "left": {
+            "url": "https://www.qbitai.com/2026/11/510688.html",
+            "title": "李沐加盟的Aimotion，是一家什么AI公司？",
+            "agency": "qbitai",
+            "kind": "own_report",
+            "date": "2026-11-17"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709156731632239113/",
+            "title": "刚刚，诺奖得主的AI公司融了333亿",
+            "agency": "toutiao",
+            "kind": "aggregator",
+            "date": "2026-11-17"
+          },
+          "score": 0.12903225806451613
+        }
+      ],
+      "near_miss_count": 4,
+      "daily_coverage": {
+        "2026-11-17": {
+          "qbitai/own_report": 2
+        },
+        "2026-11-18": {
+          "qbitai/own_report": 8
+        }
+      }
+    },
+    "finance": {
+      "articles": 12994,
+      "focus_articles": 73,
+      "focus_unprobed": 0,
+      "focus_domains": [
+        "nbd.com.cn",
+        "yicai.com"
+      ],
+      "focus_dates": {
+        "": 73
+      },
+      "scanned_pairs": 948489,
+      "pairs": [
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "agency": "yicai",
+            "kind": "own_report",
+            "domain": "yicai.com"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1360,202611183933433098.html",
+            "title": "OpenAI发布GPT-6.2 Astra和Sol 强化专业工作与日常任务能力",
+            "agency": "eastmoney",
+            "kind": "own_report",
+            "domain": "finance.eastmoney.com"
+          },
+          "score": 0.695,
+          "cross_agency": true,
+          "same_day": false
+        }
+      ],
+      "rejected": [
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7704146510815953408/",
+            "title": "2026年AI爆发：赚钱不是先有钱，而是先有胆",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7693887843889857079/",
+            "title": "2026年，普通人翻身的最后3个风口。",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.121,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7692684814725497371/",
+            "title": "2026年人工智能应用发展趋势报告",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.121,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690813893924405762/",
+            "title": "2026年后，真的会迎来大规模失业吗？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.121,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690483908144398902/",
+            "title": "2026年AI写网文实操教程：谁才是最适合你的工具？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688546985007415849/",
+            "title": "2026年AI搜索优化领域相关市场情况客观梳理",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688188017526047259/",
+            "title": "2026年AI证书怎么选？5类认证方向适合哪些人",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688172797259973156/",
+            "title": "2026年选豆APP实测 靠谱的咖啡一站式供应哪家好",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7687301203759333894/",
+            "title": "2026年AI拐点：从模型竞赛转向系统落地",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.139,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7686339391941329423/",
+            "title": "一句话生成短剧，2026年AI网站谁家强？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.147,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7685961619340050980/",
+            "title": "2026年AI小说创作工具对比：灵蟹创作、讯飞智书、豆包",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7685183539133907492/",
+            "title": "2026年AI办公智能体Work Agent品类全解读",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7683811222851994131/",
+            "title": "2026年AI超级员工与元宇宙融合的五大趋势信号",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.128,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7677503964769960487/",
+            "title": "2026年创业风口探讨",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.148,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7677142986299310635/",
+            "title": "2026 年 AI 玩具行业白皮书：数据、趋势与主要玩家",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.128,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7676333684572439083/",
+            "title": "2026年AI做短剧赚钱完整流程分享",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.152,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7676161519649980972/",
+            "title": "其实2026年，风口已经很明显了",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.129,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7675319664095789602/",
+            "title": "程序员接单平台推荐（2026年更新）",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7675214804033782281/",
+            "title": "程序员接单平台推荐（2026年更新）",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7672240832048595471/",
+            "title": "2026 年 8 月，我的最新 AI 装机单",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7667778354048844290/",
+            "title": "Ai漫剧2026年暴利及爆火行业",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7661465021058122286/",
+            "title": "拥抱2026年AI新时代",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.185,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7660087612090106420/",
+            "title": "2026年Ai将彻底改变这十个行业",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.156,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7636598745253036580/",
+            "title": "新岗位、高薪酬、分层门槛——2026年AI衍生职业全景解读",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7626406591117525544/",
+            "title": "2026年，AI最赚钱的3个赛道，普通人也能入局",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.135,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7623800769925448219/",
+            "title": "2026 年 AI 大模型五大关键变化",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.161,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7612475545514754570/",
+            "title": "算力需求攀升、智能体价值兑现 2026年AI产业全面提速",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7612060785719755316/",
+            "title": "算力需求攀升、智能体价值兑现 2026年AI产业全面提速",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7591874906153812506/",
+            "title": "2026年AI行业趋势：普通人如何找到创业机会？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7673368999832486444/",
+            "title": "拥抱2026年AI新时代",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.185,
+          "reason": "来源不独立:xinhua/reprint_external 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "score": 0.643,
+          "reason": "同一域名 yicai.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445768.html",
+            "title": "2026年APEC工商领导人峰会发布深圳倡议",
+            "domain": "yicai.com",
+            "agency": "xinhua",
+            "kind": "reprint_external"
+          },
+          "right": {
+            "url": "https://www.yicai.com/news/103445493.html",
+            "title": "绿联成为2026年APEC会议官方赞助商，中国科技品牌亮相国际舞台",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "score": 0.182,
+          "reason": "同一域名 yicai.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445743.html",
+            "title": "腾讯称资本开支2027年仍将处于峰值，已通过国内供应链增加算力",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7685286035932086825/",
+            "title": "AI投资狂潮会在2027年迎来拐点？万亿资本开支背后的泡沫风险",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.137,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445713.html",
+            "title": "股价下挫拉响多家房企退市警报，“护盘”行动已经开启",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709125003177902602/",
+            "title": "股价跌破“1元”，5家A股公司拉响退市警报",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.152,
+          "reason": "来源不独立:yicai/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445713.html",
+            "title": "股价下挫拉响多家房企退市警报，“护盘”行动已经开启",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651944.html",
+            "title": "筹划重大事项，山鹰国际停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.122,
+          "reason": "标题相似度 0.122 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445713.html",
+            "title": "股价下挫拉响多家房企退市警报，“护盘”行动已经开启",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+            "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.176,
+          "reason": "标题相似度 0.176 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7704146510815953408/",
+            "title": "2026年AI爆发：赚钱不是先有钱，而是先有胆",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7698064668253897279/",
+            "title": "2026年口碑好的企业AI办公软件实力公司推荐",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688546985007415849/",
+            "title": "2026年AI搜索优化领域相关市场情况客观梳理",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688188017526047259/",
+            "title": "2026年AI证书怎么选？5类认证方向适合哪些人",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7687301203759333894/",
+            "title": "2026年AI拐点：从模型竞赛转向系统落地",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.128,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7686339391941329423/",
+            "title": "一句话生成短剧，2026年AI网站谁家强？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.135,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7682852820780843560/",
+            "title": "2026年单人公司，凭啥叫AI超级个体？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.139,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7677503964769960487/",
+            "title": "2026年创业风口探讨",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.133,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7676333684572439083/",
+            "title": "2026年AI做短剧赚钱完整流程分享",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.139,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7661465021058122286/",
+            "title": "拥抱2026年AI新时代",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.167,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7660087612090106420/",
+            "title": "2026年Ai将彻底改变这十个行业",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7626406591117525544/",
+            "title": "2026年，AI最赚钱的3个赛道，普通人也能入局",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7623800769925448219/",
+            "title": "2026 年 AI 大模型五大关键变化",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.147,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7591874906153812506/",
+            "title": "2026年AI行业趋势：普通人如何找到创业机会？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7673303993476465171/",
+            "title": "2026年佛山知名GEO优化销售公司选择指南",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7673368999832486444/",
+            "title": "拥抱2026年AI新时代",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.167,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445691.html",
+            "title": "九号公司高禄峰出席2026年APEC工商领导人峰会",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.yicai.com/news/103445493.html",
+            "title": "绿联成为2026年APEC会议官方赞助商，中国科技品牌亮相国际舞台",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "score": 0.17,
+          "reason": "同一域名 yicai.com,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445669.html",
+            "title": "一财社论：用对话弥合分歧，开放孕育繁荣",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7693409457581064759/",
+            "title": "对话",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.9,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7704247694302151209/",
+            "title": "领英替换部分OpenAI模型，维持服务器成本持平",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.128,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7703363827215254059/",
+            "title": "OpenAI最新长文：AI进入组织的三种方式，以及四个管理新问题",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.133,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7700490245044716058/",
+            "title": "DeepSeek一张卡月入18万，OpenAI倒贴",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.128,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7699171874970665535/",
+            "title": "外媒:中国AI月活千万,OpenAI冲刺百亿美元",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.135,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7698377736976417306/",
+            "title": "又一起“失控”！OpenAI披露AI自主“偷钱”",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7698177609415066127/",
+            "title": "ChatGPT有了AI小队，GPT-6 Astra Pro升级，分头干活还能查进度",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.17,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7697980879235088950/",
+            "title": "ChatGPT有了AI小队！GPT-6 Astra Pro升级，分头干活还能查进度",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.167,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7694443562351542830/",
+            "title": "ChatGPT教我打麻将，OpenAI智能界面实测：重新定义AI交互",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.152,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7692422623514444343/",
+            "title": "OpenAI安全负责人离职！接连出事，AI安全团队持续动荡",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7691742371398894080/",
+            "title": "让 GPT-6 Astra 给你打工：7 步搭一支 AI 员工队",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.211,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690958130053759523/",
+            "title": "OpenAI 今日发布常驻 AI 助手 o：设计师的一人公司，正在变成现实",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.13,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7691392553572139535/",
+            "title": "OpenAI联手美国小企业发展中心推广AI",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.139,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7691263838058791464/",
+            "title": "一分钟看懂OpenAI发布会：AI开始替你干活",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.194,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7691250528663241277/",
+            "title": "OpenAI史上最大发布会翻车：“24小时替你干活”的AI，先卡了12秒",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.128,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690787757542654483/",
+            "title": "OpenAI 智能体越界美政府网站，三个月两次叫停训练",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7691108836861788682/",
+            "title": "AI前沿观察｜OpenAI的AI员工：能干活但被上了锁",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690734852445880882/",
+            "title": "OpenAI突然取消新模型发布：你的AI订阅费白花了吗",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.146,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7690135742852416040/",
+            "title": "OpenAI智能体失控后，被发现曾找中国大模型“帮忙”",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688716784781918735/",
+            "title": "有人用 GPT-6 Astra 和 Kimi K3 赚钱，有人用同一套模型给客户倒贴",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.152,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7688666009254756874/",
+            "title": "【E闻日报】Anthropic和OpenAI同日发布低价AI模型，价格战加剧",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7687831500011602468/",
+            "title": "测完GPT-6 Astra调用Blender，我觉得它被高估了｜实测",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.182,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7686500706898936347/",
+            "title": "AI已经越界了？OpenAI亲自公布6起异常案例",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7686470001586422326/",
+            "title": "OpenAI把ChatGPT变成&#34;会聊天的广告平台",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.163,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7685667956583399977/",
+            "title": "OpenAI披露案例：让AI写代码，也让它做测试",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7685623923827868212/",
+            "title": "GPT-6 Astra刚出，AI办公直接进化成打工人了",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.25,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7684649666256667172/",
+            "title": "200美元一个月的AI会员，OpenAI为啥停卖",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.132,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7684424177620697619/",
+            "title": "OpenAI 封杀竞品：ChatGPT 广告年入10亿美元",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.171,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7684047982362149411/",
+            "title": "OpenAI推出面向金融服务领域ChatGPT",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.189,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7683879488706347556/",
+            "title": "AI Agent时代来了，OpenStack要如何演进？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7683799158385279488/",
+            "title": "GPT-6 Astra来了，AI产品经理该做这三件事",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.222,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7683192156864905728/",
+            "title": "OpenTelemetry：AI基础设施",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.139,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7683138715115422247/",
+            "title": "GPT‑6 Astra横空出世！AI不只是聊天，而是可以直接操控电脑干活",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.146,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7681580863686967850/",
+            "title": "让AI替你填表单做PPT：GPT-6 Astra少花47%时间，榜上却不是第一",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.167,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7681532573348102702/",
+            "title": "GPT-6 Astra 深度评测：当 AI 开始自己干活",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.222,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7681498582519857687/",
+            "title": "GPT‑6 Astra炸场！AI真能替人操作电脑干活了",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.175,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7681455638886482438/",
+            "title": "服务中断期预热新模型，OpenAI踩了哪些公关雷区？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7681450138611335680/",
+            "title": "GPT-6 Astra推理技术争议，为何不会重演o1的恐慌？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.175,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7676334864978821672/",
+            "title": "超级重磅！Open AI正式开源了？",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.156,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7675086967666655770/",
+            "title": "ChatGPT将变“购物车”？零售商专属信用卡发行商携手OpenAI推进AI内购",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.14,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7673038304172261922/",
+            "title": "OpenAI测试ChatGPT Plus付费重置额度功能",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.171,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7613612552848687631/",
+            "title": "OpenAI收缩ChatGPT购物野心，AI电商变现路径再遭考验",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.159,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7558218932595737131/",
+            "title": "OpenAI开发者大会：ChatGPT要做操作系统，开放第三方SDK，8分钟构建智能体",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.127,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7528143507261751846/",
+            "title": "OpenAI发布ChatGPT智能体 能帮金融分析师做PPT和EXCEL",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.196,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7505998197152776739/",
+            "title": "编程革命彻底爆发，OpenAI最强智能体上线ChatGPT",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.167,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7505190911219941907/",
+            "title": "编程革命彻底爆发！刚刚，OpenAI最强智能体上线ChatGPT",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.156,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7272588618735174156/",
+            "title": "OpenAI推ChatGPT企业版：速度快两倍，无使用限制，数据加密",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.152,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7210581900769886753/",
+            "title": "OpenAI发布多模态大模型GPT-4：直接开放API，ChatGPT升级",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.2,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7662597724209955369/",
+            "title": "OpenAI 官方 Prompt 指南",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.194,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445615.html",
+            "title": "AI进化速递 | OpenAI发布GPT-6.2 Astra",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.tmtpost.com/8209040.html",
+            "title": "GPT-6.2 Astra终于上线，从PPT做到发动机",
+            "domain": "tmtpost.com",
+            "agency": "tmtpost",
+            "kind": "own_report"
+          },
+          "score": 0.265,
+          "reason": "标题相似度 0.265 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7697508385519927844/",
+            "title": "AI技术“焕活”非遗技艺",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7659791248626156095/",
+            "title": "AI技术的发展对就业市场有何影响",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.138,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7636327556580508187/",
+            "title": "如何利用AI技术赚钱",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.174,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7634763963938488882/",
+            "title": "AI技术如何提升家电的使用体验",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7616886852062036531/",
+            "title": "如何推动AI技术的普及和应用",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.192,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7611159722070262322/",
+            "title": "AI技术会带来哪些就业机会",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.154,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7605464979466125850/",
+            "title": "AI应用如何改变传媒行业的商业模式",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.133,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7604357587978551835/",
+            "title": "AI合成技术在娱乐圈的应用现状如何",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.133,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7603995661234635290/",
+            "title": "AI技术在外卖行业的应用有哪些",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.143,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445513.html",
+            "title": "AI技术过度应用如何冲击就业︱法经兵言",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7597811021260030473/",
+            "title": "创业者应如何利用AI技术",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.16,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445493.html",
+            "title": "绿联成为2026年APEC会议官方赞助商，中国科技品牌亮相国际舞台",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7661465021058122286/",
+            "title": "拥抱2026年AI新时代",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.135,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445493.html",
+            "title": "绿联成为2026年APEC会议官方赞助商，中国科技品牌亮相国际舞台",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7623800769925448219/",
+            "title": "2026 年 AI 大模型五大关键变化",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.122,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.yicai.com/news/103445493.html",
+            "title": "绿联成为2026年APEC会议官方赞助商，中国科技品牌亮相国际舞台",
+            "domain": "yicai.com",
+            "agency": "yicai",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7673368999832486444/",
+            "title": "拥抱2026年AI新时代",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.135,
+          "reason": "来源不独立:yicai/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652035.html",
+            "title": "002872、002122，宣布正式申请摘掉ST",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7708968095955681835/",
+            "title": "逆市拉升！000521、002843双双涨停",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.121,
+          "reason": "来源不独立:nbd/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652034.html",
+            "title": "突发！600567，筹划重大事项，紧急停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929781122.html",
+            "title": "股价跌破1元！600180紧急提示：面临退市风险",
+            "domain": "finance.eastmoney.com",
+            "agency": "eastmoney",
+            "kind": "own_report"
+          },
+          "score": 0.196,
+          "reason": "标题相似度 0.196 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652034.html",
+            "title": "突发！600567，筹划重大事项，紧急停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709125003177902602/",
+            "title": "股价跌破“1元”，5家A股公司拉响退市警报",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.225,
+          "reason": "来源不独立:nbd/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652034.html",
+            "title": "突发！600567，筹划重大事项，紧急停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651944.html",
+            "title": "筹划重大事项，山鹰国际停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.72,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652034.html",
+            "title": "突发！600567，筹划重大事项，紧急停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+            "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.244,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652032.html",
+            "title": "利好！算力租赁牛股，公告“大订单”",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7708993785329484314/",
+            "title": "利好来了！A股公司密集公告",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.136,
+          "reason": "来源不独立:nbd/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652032.html",
+            "title": "利好！算力租赁牛股，公告“大订单”",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/11137,202611183934115732.html",
+            "title": "GPU租赁价走高！算力租赁概念密集涨停",
+            "domain": "finance.eastmoney.com",
+            "agency": "eastmoney",
+            "kind": "own_report"
+          },
+          "score": 0.154,
+          "reason": "标题相似度 0.154 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-19/4652030.html",
+            "title": "做IP后东西越卖越贵？叶国富回应",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651912.html",
+            "title": "做IP后东西越卖越贵？名创优品创始人叶国富：50元以上产品第三季度销售额贡献近两成，",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.707,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4652002.html",
+            "title": "二连跌停！双重退市风险叠加，*ST华幸再发公告，前三季度净亏损75亿元",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651972.html",
+            "title": "三连跌停！多项风险叠加，*ST瑞茂面值退市倒计时，前三季度营收下滑超九成",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.25,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4652003.html",
+            "title": "英伟达拉升，AI产业链走高；哈啰回应单车“骑行30分钟收费15元”；最高40亿元，中际旭",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651909.html",
+            "title": "美股纳指高开0.65% ，AI产业链走高；哈啰回应单车“骑行30分钟收费15元”；最高40亿元",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.715,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4652003.html",
+            "title": "英伟达拉升，AI产业链走高；哈啰回应单车“骑行30分钟收费15元”；最高40亿元，中际旭",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651935.html",
+            "title": "“骑行30分钟收费15元”，哈啰最新回应：新车定位特色休闲骑行，价格会在开锁前向用户",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.19,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651909.html",
+            "title": "美股纳指高开0.65% ，AI产业链走高；哈啰回应单车“骑行30分钟收费15元”；最高40亿元",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651935.html",
+            "title": "“骑行30分钟收费15元”，哈啰最新回应：新车定位特色休闲骑行，价格会在开锁前向用户",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.185,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651992.html",
+            "title": "APEC开幕前，她终于凑齐21个经济体签名：华强北6平方米档口的手账，写满“愿意来”",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651914.html",
+            "title": "一本手账串联87个国家和地区：深圳华强北6平方米档口里的亚太通路",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.153,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651974.html",
+            "title": "20天顶格买完5亿！澜起科技回购收官，股价却较年内高点回撤近60%",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651797.html",
+            "title": "从150元买到103.17元，CPO龙头天孚通信，累计耗资1亿元回购88万股，股价较年内高点回撤",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.121,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651944.html",
+            "title": "筹划重大事项，山鹰国际停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709125003177902602/",
+            "title": "股价跌破“1元”，5家A股公司拉响退市警报",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.273,
+          "reason": "来源不独立:nbd/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651944.html",
+            "title": "筹划重大事项，山鹰国际停牌！股价已跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+            "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.294,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651954.html",
+            "title": "603038，董事长突然辞职",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651934.html",
+            "title": "突发公告，中金黄金董事长周洲辞职",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.136,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651925.html",
+            "title": "0.97元跌破面值后，金科股份两日推出最高3亿元回购，上限1.5元/股",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651928.html",
+            "title": "PCB龙头胜宏科技，再传利好！此前推出最高3亿元回购方案",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.167,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651925.html",
+            "title": "0.97元跌破面值后，金科股份两日推出最高3亿元回购，上限1.5元/股",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651850.html",
+            "title": "两连板后抛出回购方案，泰嘉股份拟最高2亿元回购，上限21元/股",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.188,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651949.html",
+            "title": "“4连板”大牛股605255，明日复牌！",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709341674560602666/",
+            "title": "“一”字涨停！000521，三连板",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.12,
+          "reason": "来源不独立:nbd/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651928.html",
+            "title": "PCB龙头胜宏科技，再传利好！此前推出最高3亿元回购方案",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1354,202611163932132680.html",
+            "title": "胜宏科技：拟最高3亿元回购、向多家银行申请合计707亿元授信额度",
+            "domain": "finance.eastmoney.com",
+            "agency": "eastmoney",
+            "kind": "own_report"
+          },
+          "score": 0.196,
+          "reason": "标题相似度 0.196 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651928.html",
+            "title": "PCB龙头胜宏科技，再传利好！此前推出最高3亿元回购方案",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651850.html",
+            "title": "两连板后抛出回购方案，泰嘉股份拟最高2亿元回购，上限21元/股",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.128,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651906.html",
+            "title": "东郊记忆主题展区亮相香港DesignInspire，城市创意分享会明日启幕",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7675929388700959267/",
+            "title": "MiniMax Design 来了，视频模型也有了自己的 Codex",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.125,
+          "reason": "来源不独立:nbd/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651934.html",
+            "title": "突发公告，中金黄金董事长周洲辞职",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651736.html",
+            "title": "中金黄金人事变动！掌舵一年半后，周洲因工作调整辞任董事长，贺小庆再度代行董事长职",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "score": 0.14,
+          "reason": "同一域名 nbd.com.cn,不构成两家独立媒体"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651857.html",
+            "title": "最高20亿元！行云科技，再签AI词元跨境“大订单”！股价年内涨超300%",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7684603930331955751/",
+            "title": "AI词元需求大爆发！电信研究院预测，2030年消耗量超3500亿亿",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.145,
+          "reason": "来源不独立:nbd/own_report 与 None/unknown"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651857.html",
+            "title": "最高20亿元！行云科技，再签AI词元跨境“大订单”！股价年内涨超300%",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1354,202611183934169142.html",
+            "title": "行云科技签订不超20亿元AI词元跨境销售服务合同",
+            "domain": "finance.eastmoney.com",
+            "agency": "eastmoney",
+            "kind": "own_report"
+          },
+          "score": 0.25,
+          "reason": "标题相似度 0.250 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+            "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "http://finance.eastmoney.com/news/1345,202611123929781122.html",
+            "title": "股价跌破1元！600180紧急提示：面临退市风险",
+            "domain": "finance.eastmoney.com",
+            "agency": "eastmoney",
+            "kind": "own_report"
+          },
+          "score": 0.167,
+          "reason": "标题相似度 0.167 < 0.3,不足以判定同一事件"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+            "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7709125003177902602/",
+            "title": "股价跌破“1元”，5家A股公司拉响退市警报",
+            "domain": "toutiao.com",
+            "agency": "toutiao",
+            "kind": "aggregator"
+          },
+          "score": 0.385,
+          "reason": "来源不独立:nbd/own_report 与 toutiao/aggregator"
+        },
+        {
+          "left": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651704.html",
+            "title": "对话东方日升副总裁杨伯川：商业航天催生GW级光伏需求，异质结凭“提效减铟”迎战能效",
+            "domain": "nbd.com.cn",
+            "agency": "nbd",
+            "kind": "own_report"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7693409457581064759/",
+            "title": "对话",
+            "domain": "toutiao.com",
+            "agency": null,
+            "kind": "unknown"
+          },
+          "score": 0.9,
+          "reason": "来源不独立:nbd/own_report 与 None/unknown"
+        }
+      ],
+      "rejected_reasons": {
+        "来源不独立:xinhua/reprint_external 与 None/unknown": 30,
+        "同一域名 yicai.com,不构成两家独立媒体": 3,
+        "来源不独立:yicai/own_report 与 None/unknown": 79,
+        "来源不独立:yicai/own_report 与 toutiao/aggregator": 1,
+        "标题相似度 0.122 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.176 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.265 < 0.3,不足以判定同一事件": 1,
+        "来源不独立:nbd/own_report 与 toutiao/aggregator": 6,
+        "标题相似度 0.196 < 0.3,不足以判定同一事件": 2,
+        "同一域名 nbd.com.cn,不构成两家独立媒体": 15,
+        "标题相似度 0.154 < 0.3,不足以判定同一事件": 1,
+        "来源不独立:nbd/own_report 与 None/unknown": 3,
+        "标题相似度 0.250 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.167 < 0.3,不足以判定同一事件": 1
+      },
+      "near_miss_same_day_cross_agency": [],
+      "near_miss_count": 0,
+      "daily_coverage": {
+        "": {
+          "?/unknown": 1,
+          "nbd/own_report": 50,
+          "xinhua/reprint_external": 1,
+          "yicai/own_report": 21
+        }
+      }
+    }
+  },
+  "totals": {
+    "pairs": 3,
+    "rejected": 155,
+    "scanned": 952959
+  }
+}

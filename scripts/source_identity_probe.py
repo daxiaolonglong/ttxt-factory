@@ -94,6 +94,7 @@ def main() -> int:
         parsed = urlparse(url)
         marker: str | None = None
         probe_note = ""
+        page_head = ""
         if index:
             time.sleep(args.rate_s)
         try:
@@ -106,16 +107,28 @@ def main() -> int:
             else:
                 result = fetcher.fetch_page(url, session=None, render=args.render)
                 text = page_text(result.page)
+                page_head = text[:2000]
                 marker = si.extract_page_marker(text)
                 if marker is None:
-                    found = list(result.page.css(".source"))
-                    alt = str(getattr(found[0], "text", "") or "").strip() if found else ""
-                    marker = alt or None
+                    # 有些站点(如第一财经)不写「来源:xxx」,发布机构放在标题下方的署名行
+                    # `<div class="title"><p><span class="f-fl">新华社</span>...`。
+                    # 只在**能归一到已知机构**时才采用,取到人名/图注一律丢弃(判 unknown 更保守)。
+                    known = set(si.AGENCY_CANON.values())
+                    for selector in ("span.source", ".source", "div.title p span.f-fl"):
+                        found = list(result.page.css(selector))
+                        alt = str(getattr(found[0], "text", "") or "").strip() if found else ""
+                        if alt and si.canon_agency(alt) in known:
+                            marker = alt
+                            break
                 probe_note = f"HTTP {result.status};页头署名={marker or '无'}"
         except Exception as exc:  # noqa: BLE001 - 单篇失败不许中断整轮取证
             probe_note = f"抓取失败 {type(exc).__name__}: {str(exc)[:120]}"
 
         dateline = si.extract_dateline(art.get("cleaned_content") or art.get("content"))
+        # 库里正文可能没补全(列表页摘要不含署名),这时用文章页前 2000 字的电头兜底;
+        # 只在库里查不到时才用,避免页面导航/页脚字样覆盖正文证据。
+        if dateline is None and page_head:
+            dateline = si.extract_dateline(page_head)
         own_agency = si.SOURCE_PUBLISHER.get(art["source"]) or "chinanews"
         identity = si.classify(marker, dateline, own_agency=own_agency)
         if identity.kind == si.KIND_UNKNOWN and probe_note:

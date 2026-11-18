@@ -196,6 +196,31 @@ def test_ithome_dateline_marks_own_report_and_reprint_of_ithome() -> None:
     assert si.independent(own, reprint) is False
 
 
+def test_image_credit_is_not_a_source_marker() -> None:
+    """「图片来源：xxx / 供图来源：xxx」是图片版权方(常是摄影记者或图库),不是发布机构。
+
+    R35 实测每日经济新闻 11 篇因此被误判 conflicting_byline,机构名里混进「祝裕」
+    「摄图网_501609341」这类图注 ⇒ 这些前缀开头的「来源」必须跳过。
+    """
+    assert si.extract_page_marker("图片来源：祝裕 编辑：黄博文") is None
+    assert si.extract_page_marker("供图来源：视觉中国") is None
+    assert si.extract_page_marker("摄影来源：新华社") is None
+    # 正常页头署名仍然要拿到
+    assert si.extract_page_marker("来源：每日经济新闻") == "每日经济新闻"
+
+
+def test_new_r35_sources_are_declared_and_canonicalised() -> None:
+    """R35 新增三源必须声明发布机构,且机构名能归一到同一 id(避免假独立)。"""
+    assert si.SOURCE_PUBLISHER["yicai_news"] == "yicai"
+    assert si.SOURCE_PUBLISHER["nbd_news"] == "nbd"
+    assert si.SOURCE_PUBLISHER["qbitai_feed"] == "qbitai"
+    assert si.canon_agency("第一财经日报") == "yicai"
+    assert si.canon_agency("每经媒资库") == "nbd"
+    # 第一财经页面署名行写「新华社」时,该篇是转载,不得算第一财经原创
+    reprint = si.classify("新华社", None, own_agency="yicai")
+    assert reprint.kind == si.KIND_REPRINT and reprint.agency == "xinhua"
+
+
 def test_pair_candidate_pages_show_reprints_are_being_caught() -> None:
     """财经跨机构候选对的逐页复核:必须抓到转载稿/无署名,不许默认当自有报道。
 

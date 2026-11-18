@@ -42,6 +42,10 @@ AGENCY_CANON: dict[str, str] = {
     # T-02 扩源取证:中新网与东方财富各挂一篇同题稿,页头「来源」分别写「商务部网站」与「商务部」,
     # 实为同一份官方答问。写法不归一就会被判成两家独立机构 ⇒ 必须映射到同一 id。
     "商务部网站": "mofcom", "商务部": "mofcom",
+    # R35 扩源:三家原创新闻/科技编辑部,页面署名与电头都按这套写法归一到同一 id。
+    "第一财经": "yicai", "第一财经日报": "yicai",
+    "每日经济新闻": "nbd", "每经": "nbd",
+    "量子位": "qbitai",
     "世界卫生组织": "who", "WHO": "who",
 }
 #: 注册来源 → 规范机构 id(采集侧用;toutiao_* 是聚合平台,单列)
@@ -51,6 +55,9 @@ SOURCE_PUBLISHER: dict[str, str] = {
     "chinanews_society": "chinanews", "chinanews_culture": "chinanews",
     "chinanews_finance": "chinanews",
     "ithome_rss": "ithome",
+    # R35 扩源:三个新增来源必须在这里显式声明发布机构,否则会被当 own_report
+    # 与别家真稿件配成假独立对(回归测试 test_every_registered_source_declares_its_publisher 钉住)。
+    "yicai_news": "yicai", "nbd_news": "nbd", "qbitai_feed": "qbitai",
     "toutiao_tech": "toutiao", "toutiao_finance": "toutiao", "toutiao_history": "toutiao",
     "toutiao_regimen": "toutiao",
     "quotes_toscrape": "quotes_toscrape",
@@ -67,10 +74,18 @@ _DATELINE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     # T-02 扩源:IT之家自有稿的电头固定写「IT之家 11 月 18 日消息」;别家转载引用时同样带这句,
     # 因此它既能证自有报道,也能把转载方正确判成 reprint(ithome),不会被域名洗白。
     ("IT之家", re.compile(r"IT\s*之家\s*\d{1,2}\s*月\s*\d{1,2}\s*日\s*消息")),
+    # R35 扩源:三家新增来源的自有稿标识。只用"署名/报道"这类带动作的写法,
+    # 不匹配"据第一财经报道"式引用(那是别家在引述,不等于本文由第一财经发布)。
+    ("第一财经", re.compile(r"第一财经(?:日报)?(?:记者|编辑|报道)")),
+    ("每日经济新闻", re.compile(r"每经(?:记者|编辑|讯)")),
+    ("量子位", re.compile(r"量子位\s*[|｜]")),
 ]
-#: 「来源:xxx」署名。前面紧跟 数/材/料/章/载/文/链 的「来源」是正文里的用语,不是页头署名。
-_MARKER_RE = re.compile(r"(.)?来源\s*[:：]\s*([^\s　,，。;；:：|]{2,40})")
-_BAD_PREFIX = set("数材料章载文链")
+#: 「来源:xxx」署名。前面紧跟 数/材/料/章/载/文/链 的「来源」是正文里的用语,不是页头署名;
+#: 「图片来源:xxx / 供图来源:xxx / 摄影来源:xxx」写的是图片版权方(常是摄影记者或图库),
+#: 不能当文章发布机构 —— R35 实测每日经济新闻有 11 篇因此被误判 conflicting_byline,
+#: 机构名里还混进「祝裕」「摄图网_501609341」这类图注。
+_MARKER_RE = re.compile(r"(.{0,2})?来源\s*[:：]\s*([^\s　,，。;；:：|]{2,40})")
+_BAD_PREFIX = set("数材料章载文链图片供摄影")
 _TITLE_STOP = re.compile(r"[\s\-—_|:!,，.。?？!、\u3000\u201c\u201d\u2018\u2019()（）\[\]【】《》\"']+")
 
 MIN_EVENT_SCORE = 0.30      # 判定"同一件事"的阈值(实测标定见 P30 账本)
@@ -108,7 +123,7 @@ def extract_page_marker(text: str | None) -> str | None:
         return None
     for match in _MARKER_RE.finditer(text):
         prefix = match.group(1) or ""
-        if prefix and prefix in _BAD_PREFIX:
+        if any(ch in _BAD_PREFIX for ch in prefix):
             continue
         value = match.group(2).strip()
         if value:
@@ -144,8 +159,15 @@ def classify(marker: str | None, dateline: str | None, *, own_agency: str = "chi
 
 
 def identity_for_source(source_id: str) -> Identity:
-    """注册来源侧的身份:RSS 新闻机构按自有报道;聚合平台单列,血统不明不算独立。"""
-    agency = SOURCE_PUBLISHER.get(source_id) or canon_agency(source_id)
+    """注册来源侧的身份:只有显式声明过发布机构的来源才算自有报道。
+
+    未注册来源(例如迁移进来的 ``legacy_factory_search_ssr``)不假定是媒体,
+    按「身份不明一律不算独立」返回 unknown —— R35 实测它曾与真媒体配成伪独立对,
+    而且 2 字标题「对话」把相似度拉到 0.9。
+    """
+    agency = SOURCE_PUBLISHER.get(source_id)
+    if agency is None:
+        return Identity(KIND_UNKNOWN, None, None, None, f"未注册来源 {source_id},不假定为媒体")
     if agency in AGGREGATOR_AGENCIES:
         return Identity(KIND_AGGREGATOR, agency, None, None, "聚合平台自媒体,血统未查明")
     return Identity(KIND_OWN, agency, None, None, f"注册来源 {source_id}")

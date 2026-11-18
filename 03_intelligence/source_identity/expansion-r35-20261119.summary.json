@@ -1,0 +1,22 @@
+{
+  "probed": 83,
+  "kinds": {
+    "unknown": 1,
+    "reprint_external": 1,
+    "own_report": 81
+  },
+  "agencies": {
+    "(unknown)": 1,
+    "xinhua": 1,
+    "yicai": 21,
+    "nbd": 50,
+    "qbitai": 10
+  },
+  "reprint_agencies": {
+    "xinhua": 1
+  },
+  "independent_eligible": 82,
+  "first_hand_of_event": 81,
+  "probed_at": "2026-11-19T01:03:46+08:00",
+  "out": "03_intelligence\\source_identity\\expansion-r35-20261119.jsonl"
+}
