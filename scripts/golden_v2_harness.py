@@ -253,6 +253,16 @@ def evaluate(cards: list[dict], ai: dict[str, dict] | None = None) -> dict:
         return round(part / whole, 3) if whole else None
 
     tier_counts = Counter(c.get("source_tier") for c in cards)
+    # T-02:把「独立性」拆成可解释的读数。A 级按 schema 允许 corroborating_urls 为空(一手出处即可),
+    # 把「61/61 为空」当成独立性不达标是误读;真正缺的是 B 级的独立第二来源。
+    corroborating_present = sum(1 for c in cards if c.get("corroborating_urls"))
+    b_missing_corroborating = sum(
+        1 for c in cards if c.get("source_tier") == "B" and not c.get("corroborating_urls"))
+    # 替代佐证口径:只在"客观可核锚点"的卡片里算一手出处(A)占比。它不参与 A+B>=50% 门禁,
+    # 也不改写卡片数据 —— 只回答"在现有来源结构下,可核事实里有多少拿得到一手出处"。
+    anchor_types = ("number", "date", "person", "org")
+    anchor_cards = [c for c in cards if c.get("fact_type") in anchor_types]
+    anchor_first_hand = sum(1 for c in anchor_cards if c.get("source_tier") == "A")
     adjudicated_tiers = Counter(c.get("human_confirms_tier") or c.get("source_tier") for c in adjudicated)
     independent_human = sum(
         1 for c in adjudicated if (c.get("human_confirms_tier") or c.get("source_tier")) in {"A", "B"}
@@ -381,6 +391,29 @@ def evaluate(cards: list[dict], ai: dict[str, dict] | None = None) -> dict:
             "ai_confirmed_tiers": dict(ai_tier_counts),
             "independent_share_of_human_adjudicated": ind_share,
             "independent_share_of_ai_adjudicated": ai_ind_share,
+            # T-02 拆分读数:一手(A)/跨来源(B)/单一(C)/不可核(D)分开报,避免把 A 的空
+            # corroborating_urls 误读成"独立性不达标"。
+            "first_hand_A": tier_counts.get("A", 0),
+            "cross_source_B": tier_counts.get("B", 0),
+            "single_source_C": tier_counts.get("C", 0),
+            "unverifiable_D": tier_counts.get("D", 0),
+            "cards_with_corroborating_urls": corroborating_present,
+            "b_tier_missing_corroborating": b_missing_corroborating,
+            "a_tier_does_not_require_corroborating": True,
+            "primary_anchor_share": {
+                "fact_types": list(anchor_types),
+                "cards": len(anchor_cards),
+                "first_hand_A": anchor_first_hand,
+                "share": share(anchor_first_hand, len(anchor_cards)),
+                "meaning": (
+                    "替代佐证口径:只在客观可核锚点(number/date/person/org)的卡片里算一手出处占比。"
+                    "不参与 A+B>=50% 门禁,B 级仍必须由独立第二来源构成;不改写卡片、不硬凑数据"
+                ),
+            },
+            "gate_note": (
+                "A 级按 schema 允许 corroborating_urls 为空(一手出处即可),B 级必须非空;"
+                "要过 A+B>=50% 只能补真正的独立第二来源,不得把 A 的空白当缺陷、不得改门禁分母"
+            ),
         },
         "distribution": {
             "per_category_all": dict(Counter(c.get("category") for c in cards)),

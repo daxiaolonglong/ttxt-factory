@@ -216,6 +216,51 @@ def test_shipped_v2_file_is_schema_clean_and_gated():
         assert metrics["quality_claim"] == "NOT_AVAILABLE"
 
 
+def test_a_tier_without_corroborating_urls_is_first_hand_not_a_defect():
+    """T-02:A 级按 schema 允许 corroborating_urls 为空。把「61/61 为空」当独立性不达标,
+    会误杀 17 张一手卡;真正缺的是 B 级的独立第二来源。"""
+    cards = [
+        _card(card_id="v2a01", source_tier="A"),
+        _card(card_id="v2b01", source_tier="B", corroborating_urls=["https://other.example.com/x"]),
+        _card(card_id="v2c01", source_tier="C", fact_type="causal",
+              claim="由于采用了稀疏注意力架构,长文本处理成本大幅下降"),
+    ]
+    m = harness.evaluate(cards)["source_independence"]
+    assert (m["first_hand_A"], m["cross_source_B"], m["single_source_C"]) == (1, 1, 1)
+    assert m["cards_with_corroborating_urls"] == 1, "只统计真的带佐证链接的卡,不把 A 的空列表算进去"
+    assert m["b_tier_missing_corroborating"] == 0
+    assert m["a_tier_does_not_require_corroborating"] is True
+    assert "不得把 A 的空白当缺陷" in m["gate_note"]
+
+
+def test_primary_anchor_share_only_counts_objective_fact_types():
+    """替代佐证口径的分母只含 number/date/person/org;causal/quote 不参与,避免拿主观句凑比例。"""
+    cards = [
+        _card(card_id="v2a01", source_tier="A", fact_type="number"),
+        _card(card_id="v2c01", source_tier="C", fact_type="date"),
+        _card(card_id="v2c02", source_tier="C", fact_type="causal",
+              claim="由于采用了稀疏注意力架构,长文本处理成本大幅下降"),
+    ]
+    p = harness.evaluate(cards)["source_independence"]["primary_anchor_share"]
+    assert p["fact_types"] == ["number", "date", "person", "org"]
+    assert (p["cards"], p["first_hand_A"], p["share"]) == (2, 1, 0.5)
+    assert "不参与 A+B>=50% 门禁" in p["meaning"]
+
+
+def test_shipped_set_reports_real_independence_split():
+    """现场读数钉住:A 17 / B 0 / C 44,corroborating_urls 为空是 A 级正常态而非缺陷。"""
+    path = ROOT / "10_tests" / "golden" / "golden_set_v2.jsonl"
+    if not path.exists():
+        pytest.skip("golden_set_v2.jsonl 尚未生成")
+    cards, errors = harness.load_cards(path)
+    assert errors == []
+    m = harness.evaluate(cards)["source_independence"]
+    assert (m["first_hand_A"], m["cross_source_B"], m["single_source_C"]) == (17, 0, 44)
+    assert m["cards_with_corroborating_urls"] == 0
+    assert m["b_tier_missing_corroborating"] == 0, "B=0 时不应出现『B 缺佐证』,缺的是整个 B 级来源"
+    assert m["primary_anchor_share"]["cards"] > 0
+
+
 def test_gate_is_machine_detectable_via_exit_code(tmp_path):
     """NOT_AVAILABLE 必须以退出码 2 暴露,否则 CI / 每周巡检无法判定。"""
     script = str(ROOT / "scripts" / "golden_v2_harness.py")
