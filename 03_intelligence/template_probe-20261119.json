@@ -1,0 +1,892 @@
+{
+ "generated_at": "2026-11-19T03:08:23+08:00",
+ "categories": {
+  "technology": {
+   "category": "technology",
+   "drafts": 19,
+   "sentences": 386,
+   "marker_hits": 20,
+   "marker_hits_per_100_sentences": 5.18,
+   "top_markers": {
+    "与此同时": 15,
+    "值得注意的是": 5
+   },
+   "drafts_with_any_marker": 16,
+   "drafts_with_repeated_opening": 2,
+   "duplicate_sentence_share_mean": 0.0,
+   "parallel_pattern_hits": 14,
+   "sentence_length_cv_mean": 0.389,
+   "cross_draft_shared_openings": {
+    "神舟二十四号": 4
+   },
+   "cross_draft_shared_opening_kinds": 1,
+   "first_sentence_openings": {
+    "全球AI格局重塑": 3,
+    "数据要素重构全球": 2,
+    "神舟二十四号发射": 2,
+    "算力自主与产业重": 2,
+    "芯片制裁反噬与全": 2,
+    "数据要素赋能全球": 1,
+    "刚刚，各大电商的": 1,
+    "空间站要热闹了：": 1,
+    "全球AI产业链重": 1,
+    "全球AI变局：制": 1
+   },
+   "first_sentence_opening_repeat_kinds": 5,
+   "rows": [
+    {
+     "draft_id": "technology-20261113000422-5a990d",
+     "version": 1,
+     "chars": 1090,
+     "model_id": null,
+     "sentences": 23,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3742,
+     "first_opening": "数据要素重构全球"
+    },
+    {
+     "draft_id": "technology-20261113000422-5a990d",
+     "version": 2,
+     "chars": 1344,
+     "model_id": null,
+     "sentences": 27,
+     "marker_hits": 2,
+     "markers": {
+      "值得注意的是": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3804,
+     "first_opening": "数据要素重构全球"
+    },
+    {
+     "draft_id": "technology-20261113000422-5a990d",
+     "version": 3,
+     "chars": 1293,
+     "model_id": null,
+     "sentences": 25,
+     "marker_hits": 2,
+     "markers": {
+      "值得注意的是": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3615,
+     "first_opening": "数据要素赋能全球"
+    },
+    {
+     "draft_id": "technology-20261117142646-a09a39",
+     "version": 1,
+     "chars": 772,
+     "model_id": null,
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "值得注意的是": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.4,
+     "first_opening": "刚刚，各大电商的"
+    },
+    {
+     "draft_id": "technology-20261117143629-743cbd",
+     "version": 1,
+     "chars": 795,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 16,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.2303,
+     "first_opening": "空间站要热闹了："
+    },
+    {
+     "draft_id": "technology-20261117143629-743cbd",
+     "version": 2,
+     "chars": 761,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 13,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 1,
+     "repeated_opening_hits": 2,
+     "repeated_openings": {
+      "神舟二十四号": 2
+     },
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.4137,
+     "first_opening": "神舟二十四号发射"
+    },
+    {
+     "draft_id": "technology-20261117143629-743cbd",
+     "version": 3,
+     "chars": 726,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 13,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 1,
+     "repeated_opening_hits": 2,
+     "repeated_openings": {
+      "神舟二十四号": 2
+     },
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3293,
+     "first_opening": "神舟二十四号发射"
+    },
+    {
+     "draft_id": "technology-20261118220321-0f860d",
+     "version": 1,
+     "chars": 1004,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3294,
+     "first_opening": "全球AI产业链重"
+    },
+    {
+     "draft_id": "technology-20261118220321-0f860d",
+     "version": 2,
+     "chars": 1083,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.5782,
+     "first_opening": "全球AI变局：制"
+    },
+    {
+     "draft_id": "technology-20261118220321-0f860d",
+     "version": 3,
+     "chars": 1134,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.5842,
+     "first_opening": "2026年AI变"
+    },
+    {
+     "draft_id": "technology-20261118221035-061c05",
+     "version": 1,
+     "chars": 1008,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 23,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3968,
+     "first_opening": "芯片制裁反噬与算"
+    },
+    {
+     "draft_id": "technology-20261118221035-061c05",
+     "version": 2,
+     "chars": 970,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 23,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3985,
+     "first_opening": "算力自主与产业重"
+    },
+    {
+     "draft_id": "technology-20261118221035-061c05",
+     "version": 3,
+     "chars": 1081,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 22,
+     "marker_hits": 2,
+     "markers": {
+      "值得注意的是": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.5194,
+     "first_opening": "算力自主与产业重"
+    },
+    {
+     "draft_id": "technology-20261118231849-7570b5",
+     "version": 1,
+     "chars": 953,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.4023,
+     "first_opening": "全球AI格局重塑"
+    },
+    {
+     "draft_id": "technology-20261118231849-7570b5",
+     "version": 2,
+     "chars": 1030,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3059,
+     "first_opening": "全球AI格局重塑"
+    },
+    {
+     "draft_id": "technology-20261118231849-7570b5",
+     "version": 3,
+     "chars": 1033,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 19,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3047,
+     "first_opening": "全球AI格局重塑"
+    },
+    {
+     "draft_id": "technology-20261118233329-bafce4",
+     "version": 1,
+     "chars": 975,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 21,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3687,
+     "first_opening": "芯片制裁反噬与全"
+    },
+    {
+     "draft_id": "technology-20261118233329-bafce4",
+     "version": 2,
+     "chars": 978,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 21,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3654,
+     "first_opening": "芯片制裁反噬与全"
+    },
+    {
+     "draft_id": "technology-20261118233329-bafce4",
+     "version": 3,
+     "chars": 1419,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 26,
+     "marker_hits": 2,
+     "markers": {
+      "值得注意的是": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 2,
+     "sentence_length_cv": 0.3488,
+     "first_opening": "全球AI算力竞赛"
+    }
+   ]
+  },
+  "finance": {
+   "category": "finance",
+   "drafts": 4,
+   "sentences": 99,
+   "marker_hits": 7,
+   "marker_hits_per_100_sentences": 7.07,
+   "top_markers": {
+    "与此同时": 4,
+    "再次": 1,
+    "值得注意的是": 1,
+    "综上所述": 1
+   },
+   "drafts_with_any_marker": 4,
+   "drafts_with_repeated_opening": 0,
+   "duplicate_sentence_share_mean": 0.0,
+   "parallel_pattern_hits": 1,
+   "sentence_length_cv_mean": 0.3926,
+   "cross_draft_shared_openings": {},
+   "cross_draft_shared_opening_kinds": 0,
+   "first_sentence_openings": {
+    "财报季与市场波动": 1,
+    "财报季波动机制：": 1,
+    "财报季波动：宏观": 1,
+    "财报季引爆市场情": 1
+   },
+   "first_sentence_opening_repeat_kinds": 0,
+   "rows": [
+    {
+     "draft_id": "finance-20261113001849-dc9a4d",
+     "version": 1,
+     "chars": 1137,
+     "model_id": null,
+     "sentences": 26,
+     "marker_hits": 3,
+     "markers": {
+      "再次": 1,
+      "值得注意的是": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.347,
+     "first_opening": "财报季与市场波动"
+    },
+    {
+     "draft_id": "finance-20261113001849-dc9a4d",
+     "version": 2,
+     "chars": 1284,
+     "model_id": null,
+     "sentences": 27,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3694,
+     "first_opening": "财报季波动机制："
+    },
+    {
+     "draft_id": "finance-20261113001849-dc9a4d",
+     "version": 3,
+     "chars": 1335,
+     "model_id": null,
+     "sentences": 28,
+     "marker_hits": 1,
+     "markers": {
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.4693,
+     "first_opening": "财报季波动：宏观"
+    },
+    {
+     "draft_id": "finance-20261113005130-cf7373",
+     "version": 1,
+     "chars": 851,
+     "model_id": null,
+     "sentences": 18,
+     "marker_hits": 2,
+     "markers": {
+      "综上所述": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3847,
+     "first_opening": "财报季引爆市场情"
+    }
+   ]
+  },
+  "health": {
+   "category": "health",
+   "drafts": 6,
+   "sentences": 167,
+   "marker_hits": 13,
+   "marker_hits_per_100_sentences": 7.78,
+   "top_markers": {
+    "一方面": 4,
+    "综上所述": 3,
+    "首先": 2,
+    "其次": 2,
+    "另一方面": 2
+   },
+   "drafts_with_any_marker": 5,
+   "drafts_with_repeated_opening": 1,
+   "duplicate_sentence_share_mean": 0.0077,
+   "parallel_pattern_hits": 3,
+   "sentence_length_cv_mean": 0.4214,
+   "cross_draft_shared_openings": {
+    "**": 2,
+    "*   **": 2
+   },
+   "cross_draft_shared_opening_kinds": 2,
+   "first_sentence_openings": {
+    "睡眠与运动：守护": 3,
+    "睡眠与运动：构建": 1,
+    "睡眠与运动：基于": 1,
+    "睡眠与运动：如何": 1
+   },
+   "first_sentence_opening_repeat_kinds": 1,
+   "rows": [
+    {
+     "draft_id": "health-20261113003349-32aa55",
+     "version": 1,
+     "chars": 966,
+     "model_id": null,
+     "sentences": 28,
+     "marker_hits": 5,
+     "markers": {
+      "首先": 1,
+      "其次": 1,
+      "一方面": 2,
+      "另一方面": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.3532,
+     "first_opening": "睡眠与运动：构建"
+    },
+    {
+     "draft_id": "health-20261113003349-32aa55",
+     "version": 2,
+     "chars": 1127,
+     "model_id": null,
+     "sentences": 28,
+     "marker_hits": 5,
+     "markers": {
+      "首先": 1,
+      "其次": 1,
+      "一方面": 2,
+      "另一方面": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.5301,
+     "first_opening": "睡眠与运动：基于"
+    },
+    {
+     "draft_id": "health-20261113003349-32aa55",
+     "version": 3,
+     "chars": 1415,
+     "model_id": null,
+     "sentences": 43,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 2,
+     "repeated_opening_hits": 4,
+     "repeated_openings": {
+      "**": 2,
+      "*   **": 2
+     },
+     "repeated_sentence_kinds": 1,
+     "duplicate_sentence_share": 0.0465,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.5452,
+     "first_opening": "睡眠与运动：如何"
+    },
+    {
+     "draft_id": "health-20261113005555-e143da",
+     "version": 1,
+     "chars": 993,
+     "model_id": null,
+     "sentences": 22,
+     "marker_hits": 1,
+     "markers": {
+      "综上所述": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3528,
+     "first_opening": "睡眠与运动：守护"
+    },
+    {
+     "draft_id": "health-20261113005555-e143da",
+     "version": 2,
+     "chars": 995,
+     "model_id": null,
+     "sentences": 23,
+     "marker_hits": 1,
+     "markers": {
+      "综上所述": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3736,
+     "first_opening": "睡眠与运动：守护"
+    },
+    {
+     "draft_id": "health-20261113005555-e143da",
+     "version": 3,
+     "chars": 995,
+     "model_id": null,
+     "sentences": 23,
+     "marker_hits": 1,
+     "markers": {
+      "综上所述": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3736,
+     "first_opening": "睡眠与运动：守护"
+    }
+   ]
+  },
+  "history": {
+   "category": "history",
+   "drafts": 0,
+   "sentences": 0,
+   "marker_hits": 0,
+   "marker_hits_per_100_sentences": 0.0,
+   "top_markers": {},
+   "drafts_with_any_marker": 0,
+   "drafts_with_repeated_opening": 0,
+   "duplicate_sentence_share_mean": 0.0,
+   "parallel_pattern_hits": 0,
+   "sentence_length_cv_mean": null,
+   "cross_draft_shared_openings": {},
+   "cross_draft_shared_opening_kinds": 0,
+   "first_sentence_openings": {},
+   "first_sentence_opening_repeat_kinds": 0,
+   "rows": []
+  },
+  "social": {
+   "category": "social",
+   "drafts": 9,
+   "sentences": 189,
+   "marker_hits": 24,
+   "marker_hits_per_100_sentences": 12.7,
+   "top_markers": {
+    "一方面": 10,
+    "另一方面": 5,
+    "首先": 3,
+    "综上所述": 3,
+    "与此同时": 3
+   },
+   "drafts_with_any_marker": 6,
+   "drafts_with_repeated_opening": 1,
+   "duplicate_sentence_share_mean": 0.0,
+   "parallel_pattern_hits": 4,
+   "sentence_length_cv_mean": 0.4152,
+   "cross_draft_shared_openings": {
+    "根据《全国人": 2
+   },
+   "cross_draft_shared_opening_kinds": 1,
+   "first_sentence_openings": {
+    "工龄36年养老金": 3,
+    "延迟退休新规落地": 2,
+    "延迟退休与养老体": 2,
+    "延迟退休大势已定": 1,
+    "延迟退休重塑家庭": 1
+   },
+   "first_sentence_opening_repeat_kinds": 3,
+   "rows": [
+    {
+     "draft_id": "social-20261118101123-549323",
+     "version": 1,
+     "chars": 942,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 22,
+     "marker_hits": 3,
+     "markers": {
+      "首先": 1,
+      "综上所述": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 2,
+     "sentence_length_cv": 0.4752,
+     "first_opening": "工龄36年养老金"
+    },
+    {
+     "draft_id": "social-20261118101123-549323",
+     "version": 2,
+     "chars": 977,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 23,
+     "marker_hits": 3,
+     "markers": {
+      "首先": 1,
+      "综上所述": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.4701,
+     "first_opening": "工龄36年养老金"
+    },
+    {
+     "draft_id": "social-20261118101123-549323",
+     "version": 3,
+     "chars": 979,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 23,
+     "marker_hits": 3,
+     "markers": {
+      "首先": 1,
+      "综上所述": 1,
+      "与此同时": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.4666,
+     "first_opening": "工龄36年养老金"
+    },
+    {
+     "draft_id": "social-20261118113651-07f453",
+     "version": 1,
+     "chars": 1070,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 26,
+     "marker_hits": 3,
+     "markers": {
+      "一方面": 2,
+      "另一方面": 1
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3033,
+     "first_opening": "延迟退休大势已定"
+    },
+    {
+     "draft_id": "social-20261118113651-07f453",
+     "version": 2,
+     "chars": 991,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 26,
+     "marker_hits": 6,
+     "markers": {
+      "一方面": 4,
+      "另一方面": 2
+     },
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3204,
+     "first_opening": "延迟退休新规落地"
+    },
+    {
+     "draft_id": "social-20261118113651-07f453",
+     "version": 3,
+     "chars": 1059,
+     "model_id": "qwen3.8-flash-next-iq3_s",
+     "sentences": 26,
+     "marker_hits": 6,
+     "markers": {
+      "一方面": 4,
+      "另一方面": 2
+     },
+     "repeated_opening_kinds": 1,
+     "repeated_opening_hits": 2,
+     "repeated_openings": {
+      "根据《全国人": 2
+     },
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.4622,
+     "first_opening": "延迟退休新规落地"
+    },
+    {
+     "draft_id": "social-20261118121638-99a193",
+     "version": 1,
+     "chars": 995,
+     "model_id": "qwen3.8-flash-next-coder-iq1_m",
+     "sentences": 15,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.4531,
+     "first_opening": "延迟退休重塑家庭"
+    },
+    {
+     "draft_id": "social-20261118121638-99a193",
+     "version": 2,
+     "chars": 827,
+     "model_id": "qwen3.8-flash-next-coder-iq1_m",
+     "sentences": 14,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3931,
+     "first_opening": "延迟退休与养老体"
+    },
+    {
+     "draft_id": "social-20261118121638-99a193",
+     "version": 3,
+     "chars": 827,
+     "model_id": "qwen3.8-flash-next-coder-iq1_m",
+     "sentences": 14,
+     "marker_hits": 0,
+     "markers": {},
+     "repeated_opening_kinds": 0,
+     "repeated_opening_hits": 0,
+     "repeated_openings": {},
+     "repeated_sentence_kinds": 0,
+     "duplicate_sentence_share": 0.0,
+     "parallel_pattern_hits": 0,
+     "sentence_length_cv": 0.3931,
+     "first_opening": "延迟退休与养老体"
+    }
+   ]
+  }
+ }
+}

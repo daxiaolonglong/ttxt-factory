@@ -1,0 +1,256 @@
+{
+ "generated_at": "2026-11-19T03:07:21+08:00",
+ "min_samples": 30,
+ "categories": {
+  "technology": {
+   "category": "technology",
+   "articles": 468,
+   "performance_pools": {
+    "measured": {
+     "cards": 236,
+     "mean_score": 0.0332,
+     "min_score": 0.0,
+     "max_score": 0.9804
+    }
+   },
+   "prediction_records": 40,
+   "main": {
+    "basis": "prediction_records.outcome_score(measured 池回填)",
+    "n": 19,
+    "distinct_predicted": 3,
+    "distinct_outcome": 18,
+    "spearman": -0.06,
+    "group_compare": {
+     "n": 19,
+     "median_split": 0.0263,
+     "high_group": {
+      "n": 0,
+      "mean": null
+     },
+     "low_group": {
+      "n": 9,
+      "mean": 0.04
+     },
+     "tied_at_median": 10
+    },
+    "buckets": {
+     "number": {
+      "n": 10,
+      "predicted_mean": 0.0263,
+      "outcome_mean": 0.0338,
+      "distinct_predicted": 1
+     },
+     "plain": {
+      "n": 6,
+      "predicted_mean": 0.0245,
+      "outcome_mean": 0.0485,
+      "distinct_predicted": 1
+     },
+     "question": {
+      "n": 3,
+      "predicted_mean": 0.0156,
+      "outcome_mean": 0.0231,
+      "distinct_predicted": 1
+     }
+    },
+    "mae": 0.018,
+    "mean_bias": -0.0127,
+    "status": "insufficient_sample",
+    "min_samples": 30,
+    "correlation_meaning": "秩相关,只描述本样本内的次序吻合度;n<30 不外推",
+    "note": "已回填 19 对 < 30,只能报描述统计,不得宣称评分能预测表现"
+   },
+   "sensitivity_measured_reads": {
+    "basis": "predicted_score × measured_reads 池(阅读量单调映射,与主口径不同尺子)",
+    "n": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "counts_as_pipeline_outcome": false,
+    "note": "敏感性分析,不改变 settle 规则、不构成管线结论"
+   }
+  },
+  "finance": {
+   "category": "finance",
+   "articles": 12994,
+   "performance_pools": {
+    "measured": {
+     "cards": 82,
+     "mean_score": 0.034,
+     "min_score": 0.0003,
+     "max_score": 0.2268
+    },
+    "measured_reads": {
+     "cards": 7596,
+     "mean_score": 0.0802,
+     "min_score": 0.001,
+     "max_score": 0.9983
+    }
+   },
+   "prediction_records": 20,
+   "main": {
+    "basis": "prediction_records.outcome_score(measured 池回填)",
+    "n": 0,
+    "distinct_predicted": 0,
+    "distinct_outcome": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "buckets": {},
+    "mae": null,
+    "mean_bias": null,
+    "status": "insufficient_sample",
+    "min_samples": 30,
+    "correlation_meaning": "秩相关,只描述本样本内的次序吻合度;n<30 不外推",
+    "note": "已回填 0 对 < 30,只能报描述统计,不得宣称评分能预测表现"
+   },
+   "sensitivity_measured_reads": {
+    "basis": "predicted_score × measured_reads 池(阅读量单调映射,与主口径不同尺子)",
+    "n": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "counts_as_pipeline_outcome": false,
+    "note": "敏感性分析,不改变 settle 规则、不构成管线结论"
+   }
+  },
+  "health": {
+   "category": "health",
+   "articles": 67,
+   "performance_pools": {
+    "measured": {
+     "cards": 40,
+     "mean_score": 0.023,
+     "min_score": 0.0,
+     "max_score": 0.0669
+    }
+   },
+   "prediction_records": 0,
+   "main": {
+    "basis": "prediction_records.outcome_score(measured 池回填)",
+    "n": 0,
+    "distinct_predicted": 0,
+    "distinct_outcome": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "buckets": {},
+    "mae": null,
+    "mean_bias": null,
+    "status": "insufficient_sample",
+    "min_samples": 30,
+    "correlation_meaning": "秩相关,只描述本样本内的次序吻合度;n<30 不外推",
+    "note": "已回填 0 对 < 30,只能报描述统计,不得宣称评分能预测表现"
+   },
+   "sensitivity_measured_reads": {
+    "basis": "predicted_score × measured_reads 池(阅读量单调映射,与主口径不同尺子)",
+    "n": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "counts_as_pipeline_outcome": false,
+    "note": "敏感性分析,不改变 settle 规则、不构成管线结论"
+   }
+  },
+  "history": {
+   "category": "history",
+   "articles": 216,
+   "performance_pools": {
+    "measured": {
+     "cards": 81,
+     "mean_score": 0.0323,
+     "min_score": 0.0022,
+     "max_score": 0.087
+    }
+   },
+   "prediction_records": 20,
+   "main": {
+    "basis": "prediction_records.outcome_score(measured 池回填)",
+    "n": 0,
+    "distinct_predicted": 0,
+    "distinct_outcome": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "buckets": {},
+    "mae": null,
+    "mean_bias": null,
+    "status": "insufficient_sample",
+    "min_samples": 30,
+    "correlation_meaning": "秩相关,只描述本样本内的次序吻合度;n<30 不外推",
+    "note": "已回填 0 对 < 30,只能报描述统计,不得宣称评分能预测表现"
+   },
+   "sensitivity_measured_reads": {
+    "basis": "predicted_score × measured_reads 池(阅读量单调映射,与主口径不同尺子)",
+    "n": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "counts_as_pipeline_outcome": false,
+    "note": "敏感性分析,不改变 settle 规则、不构成管线结论"
+   }
+  },
+  "social": {
+   "category": "social",
+   "articles": 40574,
+   "performance_pools": {
+    "measured": {
+     "cards": 113,
+     "mean_score": 0.0256,
+     "min_score": 0.0,
+     "max_score": 0.5336
+    },
+    "measured_reads": {
+     "cards": 25411,
+     "mean_score": 0.0904,
+     "min_score": 0.001,
+     "max_score": 0.9981
+    }
+   },
+   "prediction_records": 0,
+   "main": {
+    "basis": "prediction_records.outcome_score(measured 池回填)",
+    "n": 0,
+    "distinct_predicted": 0,
+    "distinct_outcome": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "buckets": {},
+    "mae": null,
+    "mean_bias": null,
+    "status": "insufficient_sample",
+    "min_samples": 30,
+    "correlation_meaning": "秩相关,只描述本样本内的次序吻合度;n<30 不外推",
+    "note": "已回填 0 对 < 30,只能报描述统计,不得宣称评分能预测表现"
+   },
+   "sensitivity_measured_reads": {
+    "basis": "predicted_score × measured_reads 池(阅读量单调映射,与主口径不同尺子)",
+    "n": 0,
+    "spearman": null,
+    "group_compare": {
+     "n": 0,
+     "status": "insufficient_sample"
+    },
+    "counts_as_pipeline_outcome": false,
+    "note": "敏感性分析,不改变 settle 规则、不构成管线结论"
+   }
+  }
+ }
+}
