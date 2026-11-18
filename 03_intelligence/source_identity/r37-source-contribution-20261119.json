@@ -1,0 +1,249 @@
+{
+  "generated_at": "2026-11-19T01:38:52+08:00",
+  "window": {
+    "start": "2026-11-13",
+    "end": "2026-11-19",
+    "days": 7
+  },
+  "sources": {
+    "chinanews_finance": {
+      "articles_in_window": 30,
+      "by_category": {
+        "finance": 30
+      },
+      "identity": {
+        "reprint_external": 5,
+        "own_report": 25
+      },
+      "independent_pairs": 1,
+      "paired_with": {
+        "eastmoney_rss": 1
+      },
+      "rejected": 1,
+      "reject_reasons": {
+        "同一域名 chinanews.com.cn,不构成两家独立媒体": 1
+      }
+    },
+    "eastmoney_rss": {
+      "articles_in_window": 266,
+      "by_category": {
+        "finance": 266
+      },
+      "identity": {},
+      "independent_pairs": 1,
+      "paired_with": {
+        "chinanews_finance": 1
+      },
+      "rejected": 209,
+      "reject_reasons": {
+        "同一域名 finance.eastmoney.com,不构成两家独立媒体": 66,
+        "来源不独立:eastmoney/own_report 与 eastmoney/own_report": 54,
+        "同一域名 stock.eastmoney.com,不构成两家独立媒体": 50,
+        "来源不独立:eastmoney/own_report 与 toutiao/aggregator": 25
+      }
+    },
+    "ifanr_feed": {
+      "articles_in_window": 33,
+      "by_category": {
+        "technology": 33
+      },
+      "identity": {},
+      "independent_pairs": 1,
+      "paired_with": {
+        "qbitai_feed": 1
+      },
+      "rejected": 15,
+      "reject_reasons": {
+        "来源不独立:ifanr/own_report 与 toutiao/aggregator": 5,
+        "同一域名 ifanr.com,不构成两家独立媒体": 5,
+        "标题相似度 0.179 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.122 < 0.3,不足以判定同一事件": 1
+      }
+    },
+    "ithome_rss": {
+      "articles_in_window": 60,
+      "by_category": {
+        "technology": 60
+      },
+      "identity": {
+        "own_report": 60
+      },
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 4,
+      "reject_reasons": {
+        "同一域名 ithome.com,不构成两家独立媒体": 4
+      }
+    },
+    "qbitai_feed": {
+      "articles_in_window": 10,
+      "by_category": {
+        "technology": 10
+      },
+      "identity": {
+        "own_report": 10
+      },
+      "independent_pairs": 2,
+      "paired_with": {
+        "sspai_rss": 1,
+        "ifanr_feed": 1
+      },
+      "rejected": 0,
+      "reject_reasons": {}
+    },
+    "ruanyifeng_atom": {
+      "articles_in_window": 1,
+      "by_category": {
+        "technology": 1
+      },
+      "identity": {},
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 0,
+      "reject_reasons": {}
+    },
+    "sspai_rss": {
+      "articles_in_window": 19,
+      "by_category": {
+        "technology": 19
+      },
+      "identity": {},
+      "independent_pairs": 1,
+      "paired_with": {
+        "qbitai_feed": 1
+      },
+      "rejected": 10,
+      "reject_reasons": {
+        "来源不独立:sspai/own_report 与 toutiao/aggregator": 2,
+        "同一域名 sspai.com,不构成两家独立媒体": 2,
+        "标题相似度 0.121 < 0.3,不足以判定同一事件": 1,
+        "标题相似度 0.125 < 0.3,不足以判定同一事件": 1
+      }
+    },
+    "tmtpost_rss": {
+      "articles_in_window": 110,
+      "by_category": {
+        "finance": 110
+      },
+      "identity": {},
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 19,
+      "reject_reasons": {
+        "同一域名 tmtpost.com,不构成两家独立媒体": 6,
+        "标题相似度 0.136 < 0.3,不足以判定同一事件": 4,
+        "标题相似度 0.156 < 0.3,不足以判定同一事件": 2,
+        "标题相似度 0.161 < 0.3,不足以判定同一事件": 1
+      }
+    },
+    "toutiao_finance": {
+      "articles_in_window": 111,
+      "by_category": {
+        "finance": 111
+      },
+      "identity": {},
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 36,
+      "reject_reasons": {
+        "来源不独立:toutiao/aggregator 与 eastmoney/own_report": 27,
+        "同一域名 toutiao.com,不构成两家独立媒体": 8,
+        "来源不独立:toutiao/aggregator 与 tmtpost/own_report": 1
+      }
+    },
+    "toutiao_regimen": {
+      "articles_in_window": 26,
+      "by_category": {
+        "health": 26
+      },
+      "identity": {},
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 0,
+      "reject_reasons": {}
+    },
+    "toutiao_tech": {
+      "articles_in_window": 175,
+      "by_category": {
+        "technology": 175
+      },
+      "identity": {},
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 34,
+      "reject_reasons": {
+        "同一域名 toutiao.com,不构成两家独立媒体": 19,
+        "来源不独立:toutiao/aggregator 与 ifanr/own_report": 6,
+        "来源不独立:toutiao/aggregator 与 ithome/own_report": 5,
+        "来源不独立:toutiao/aggregator 与 qbitai/own_report": 4
+      }
+    },
+    "who_cn_news": {
+      "articles_in_window": 2,
+      "by_category": {
+        "health": 2
+      },
+      "identity": {},
+      "independent_pairs": 0,
+      "paired_with": {},
+      "rejected": 0,
+      "reject_reasons": {}
+    }
+  },
+  "b_cards": [
+    {
+      "card_id": "w2t06",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    },
+    {
+      "card_id": "w2t07",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    },
+    {
+      "card_id": "w2t08",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    },
+    {
+      "card_id": "w2t09",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    },
+    {
+      "card_id": "w2t10",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    },
+    {
+      "card_id": "w2t11",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    },
+    {
+      "card_id": "w2t24",
+      "category": "technology",
+      "publisher": "qbitai_feed",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign="
+    }
+  ],
+  "totals": {
+    "candidate_pairs": 331,
+    "independent_pairs": 3,
+    "same_day_pairs": 3,
+    "scan_pairs": 140475,
+    "pair_independence_share": {
+      "independent_pairs": 3,
+      "candidate_pairs": 331,
+      "value": 0.0091,
+      "meaning": "同题候选中独立机构对占比;只读观测,不参与门禁"
+    }
+  }
+}

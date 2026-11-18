@@ -95,6 +95,7 @@ def main() -> int:
         marker: str | None = None
         probe_note = ""
         page_head = ""
+        page_tail = ""
         if index:
             time.sleep(args.rate_s)
         try:
@@ -108,6 +109,9 @@ def main() -> int:
                 result = fetcher.fetch_page(url, session=None, render=args.render)
                 text = page_text(result.page)
                 page_head = text[:2000]
+                # 文末声明(「雷峰网原创文章,未经授权禁止转载」「责任编辑:xxx」)也在页尾:
+                # 长稿的 RSS description 已是全文、不含页尾,只扫页头会漏掉唯一证据。
+                page_tail = text[-2000:]
                 marker = si.extract_page_marker(text)
                 if marker is None:
                     # 有些站点(如第一财经)不写「来源:xxx」,发布机构放在标题下方的署名行
@@ -129,6 +133,10 @@ def main() -> int:
         # 只在库里查不到时才用,避免页面导航/页脚字样覆盖正文证据。
         if dateline is None and page_head:
             dateline = si.extract_dateline(page_head)
+        # 页尾再兜底一次:原创声明/文末署名只出现在正文末尾(雷峰网实测长稿页头无电头);
+        # 只用完整电头/声明模式匹配,页脚的「Copyright © 雷峰网」不会命中。
+        if dateline is None and page_tail:
+            dateline = si.extract_dateline(page_tail)
         own_agency = si.SOURCE_PUBLISHER.get(art["source"]) or "chinanews"
         identity = si.classify(marker, dateline, own_agency=own_agency)
         if identity.kind == si.KIND_UNKNOWN and probe_note:

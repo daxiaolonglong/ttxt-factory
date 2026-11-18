@@ -46,6 +46,10 @@ AGENCY_CANON: dict[str, str] = {
     "第一财经": "yicai", "第一财经日报": "yicai",
     "每日经济新闻": "nbd", "每经": "nbd",
     "量子位": "qbitai",
+    # R37 扩源:雷峰网站内没有「来源:」署名,唯一的发布证据是文末原创声明
+    # 「雷峰网原创文章,未经授权禁止转载」;页面上全站统一的水印「雷峰网(公众号:雷峰网)」
+    # 不构成发布证据(转载稿同样带),因此只映射机构名、不拿水印当电头。
+    "雷峰网": "leiphone",
     "世界卫生组织": "who", "WHO": "who",
 }
 #: 注册来源 → 规范机构 id(采集侧用;toutiao_* 是聚合平台,单列)
@@ -58,6 +62,9 @@ SOURCE_PUBLISHER: dict[str, str] = {
     # R35 扩源:三个新增来源必须在这里显式声明发布机构,否则会被当 own_report
     # 与别家真稿件配成假独立对(回归测试 test_every_registered_source_declares_its_publisher 钉住)。
     "yicai_news": "yicai", "nbd_news": "nbd", "qbitai_feed": "qbitai",
+    # R37 扩源:雷峰网。identity_probe 会把「原创声明」判成电头,没有声明的判 unknown,
+    # 所以这里只声明发布机构,不额外放宽(unknown 不参与独立对)。
+    "leiphone_feed": "leiphone",
     "toutiao_tech": "toutiao", "toutiao_finance": "toutiao", "toutiao_history": "toutiao",
     "toutiao_regimen": "toutiao",
     "quotes_toscrape": "quotes_toscrape",
@@ -79,6 +86,9 @@ _DATELINE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("第一财经", re.compile(r"第一财经(?:日报)?(?:记者|编辑|报道)")),
     ("每日经济新闻", re.compile(r"每经(?:记者|编辑|讯)")),
     ("量子位", re.compile(r"量子位\s*[|｜]")),
+    # R37 扩源:雷峰网文末原创声明。只认这条完整声明——页面上全站统一的水印
+    # 「雷峰网(公众号:雷峰网)」连转载稿都带,不能当发布证据;没有声明的一律 unknown。
+    ("雷峰网", re.compile(r"雷峰网原创文章[,，]?\s*未经授权禁止转载")),
 ]
 #: 「来源:xxx」署名。前面紧跟 数/材/料/章/载/文/链 的「来源」是正文里的用语,不是页头署名;
 #: 「图片来源:xxx / 供图来源:xxx / 摄影来源:xxx」写的是图片版权方(常是摄影记者或图库),

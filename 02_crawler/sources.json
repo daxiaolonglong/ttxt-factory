@@ -250,10 +250,11 @@
       "title_selector": "a",
       "link_selector": "a",
       "fetch_item_pages": true,
-      "max_item_pages": 30,
+      "max_item_pages": 50,
       "item_content_selectors": ["div.g-articl-text"],
+      "item_date_selectors": ["p.u-time span.time"],
       "demo": false,
-      "notes": "R35 扩源取证(同上,r35_expand_probe.json + r35_probe3.json + r35_probe8.json):rss 路径 404;/ 与 /columns/1 会 301→302 落回首页(首页 157 条链接混着 app/专题页),不可当列表页;**/columns/3 是要闻真列表**——robots unknown=false、/columns/3 与 /articles/YYYY-MM-DD/N.html 均放行、19 条规则未禁、无 crawl-delay;列表 HTTP 200、69 条当日文章链接,卡片 ``ul.u-news-list li`` 实测 50 条,标题/链接用 li 内 ``a``(生产 extract_html_items 抽 50 条,fallback=0)。正文 div.g-articl-text 用生产 extract_article_body 实测 2598/752/1700 字,开头带「每经记者｜/每经编辑｜」署名 ⇒ 自有报道,不是通稿转载。注册动机:与第一财经同为原创新闻编辑部,两家域名/编辑部互相独立,是检验「多源同日原创覆盖」的核心样本;已知边界:要闻列表混有短快讯(如美股开盘),正文过短(<160 字)时抽取器保留标题级内容并由取证环节按血统判定,不拿快讯冒充长文"
+      "notes": "R35 扩源取证(同上,r35_expand_probe.json + r35_probe3.json + r35_probe8.json):rss 路径 404;/ 与 /columns/1 会 301→302 落回首页(首页 157 条链接混着 app/专题页),不可当列表页;**/columns/3 是要闻真列表**——robots unknown=false、/columns/3 与 /articles/YYYY-MM-DD/N.html 均放行、19 条规则未禁、无 crawl-delay;列表 HTTP 200、69 条当日文章链接,卡片 ``ul.u-news-list li`` 实测 50 条,标题/链接用 li 内 ``a``(生产 extract_html_items 抽 50 条,fallback=0)。正文 div.g-articl-text 用生产 extract_article_body 实测 2598/752/1700 字,开头带「每经记者｜/每经编辑｜」署名 ⇒ 自有报道,不是通稿转载。注册动机:与第一财经同为原创新闻编辑部,两家域名/编辑部互相独立,是检验「多源同日原创覆盖」的核心样本;已知边界:要闻列表混有短快讯(如美股开盘),正文过短(<160 字)时抽取器保留标题级内容并由取证环节按血统判定,不拿快讯冒充长文。R37 日期取证(2026-11-19):页面无 meta/JSON-LD 发布时间,且有正文外日期(页脚「下一篇文章 2026-11-18 20:00」),全页唯一时间规则会判否 ⇒ 经 ``p.u-time span.time`` 定位本文发布时间(实测 2026-11-18 19:57:15),不加这条选择器该源日期永远为空、整源掉出窗口"
     },
     {
       "id": "qbitai_feed",
@@ -270,6 +271,22 @@
       "item_content_selectors": ["div.content"],
       "demo": false,
       "notes": "R35 扩源取证(同上):robots unknown=false、/feed 与文章页放行、2 条规则未禁、无 crawl-delay;feed HTTP 200 / application/rss+xml / 10 条,标题+链接齐全但 description 为空(content_chars=0)⇒ 必须 fetch_item_pages 补正文。首条 https://www.qbitai.com/2026/11/510922.html HTTP 200,正文容器 div.content 用生产 extract_article_body 实测 2746 字(<p> 原始文本 2043 字/37 段),是 AI 科技垂直媒体,与现有 technology 池(头条/IT之家/ifanr/sspai/阮一峰)域名与编辑部均不同"
+    },
+    {
+      "id": "leiphone_feed",
+      "name": "雷峰网(公开 RSS)",
+      "category": "technology",
+      "kind": "rss",
+      "url": "https://www.leiphone.com/feed",
+      "enabled": true,
+      "rate_limit_s": 1.5,
+      "max_pages": 1,
+      "max_articles": 20,
+      "fetch_item_pages": true,
+      "max_item_pages": 20,
+      "item_content_selectors": ["div.article-left", "div.lphArticle-detail"],
+      "demo": false,
+      "notes": "R37 扩源取证(2026-11-19,07_tmp/r37_probe.py + r37_leiphone_check.py + r37_leiphone_body.py + r37_leiphone_sel.py + r37_leiphone_evidence.py):robots HTTP 200、/feed 与文章页放行;feed HTTP 200 / 20 条,20/20 带 pubDate(日期不用另取证);description 长稿已是全文(部分 47–53KB),短稿仅 154–480B ⇒ 仍逐篇补正文。正文选择器:默认 BODY_SELECTORS 命中 0 字;div.article-left 短稿 436 字、div.lphArticle-detail 1007 字(含标题/作者),按序试取。**身份边界(重要)**:页面没有「来源:xxx」署名,只有正文里的隐藏水印「雷峰网(公众号:雷峰网)」(全站统一,不能当发布证据);真正可复核的是文末声明「雷峰网原创文章,未经授权禁止转载」——抽 5 篇实测 2 篇有(另 3 篇是行业快讯/转述,无此声明)。因此本来源**只按这条原创声明判 own_report**,没有声明的一律 unknown(不当独立来源),不按域名推断"
     }
   ]
 }

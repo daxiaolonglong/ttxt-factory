@@ -53,6 +53,10 @@ class Source:
     # item_content_selectors:文章页正文选择器(按顺序试,取到足够长就停);
     # 为空时用 extract.BODY_SELECTORS 通用猜测,猜不到就保留原摘要,不猜不编造。
     item_content_selectors: list[str] = field(default_factory=list)
+    # item_date_selectors:文章页里"本条发布时间"容器的选择器(按顺序试,取第一条能解析的)。
+    # 为空时只用 meta / JSON-LD / <time> / 全页唯一时间四类通用证据;站点把时间放在
+    # 固定容器、而页面别处还有别的日期(如"下一篇文章 20:00")时,靠它取证,不猜日期。
+    item_date_selectors: list[str] = field(default_factory=list)
 
 
 def load_sources(path: Path | None = None) -> list[Source]:

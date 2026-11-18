@@ -1,0 +1,16 @@
+{
+  "probed": 20,
+  "kinds": {
+    "unknown": 13,
+    "own_report": 7
+  },
+  "agencies": {
+    "(unknown)": 13,
+    "leiphone": 7
+  },
+  "reprint_agencies": {},
+  "independent_eligible": 7,
+  "first_hand_of_event": 7,
+  "probed_at": "2026-11-19T01:57:14+08:00",
+  "out": "03_intelligence\\source_identity\\expansion-r37-20261119.jsonl"
+}

@@ -160,6 +160,9 @@ def _enrich_item_bodies(
             item.content = body
             item.excerpt = extract.excerpt(body)
             enriched += 1
+        if not item.published_at:
+            # R37:HTML 列表源(yicai/nbd)条目不带日期,从文章页取证补上;取不到就留空
+            item.published_at = extract.extract_published_at(result.page, source)
     summary["item_pages_fetched"] = fetched
     summary["items_enriched"] = enriched
     summary["item_page_errors"] = errors

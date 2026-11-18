@@ -491,7 +491,8 @@ def main(argv: list[str] | None = None) -> int:
         "kind_counts": dict(Counter(c["kind"] for c in cards)),
         "category_counts": dict(Counter(c["category"] for c in cards)),
         "pair_stats": pair_totals,
-        "pair_report": str(pairs_out.relative_to(ROOT)),
+        # --pairs-out 常以相对仓库根的路径传入(文档示例就是相对路径),先 resolve 再取相对
+        "pair_report": str(pairs_out.resolve().relative_to(ROOT)),
         "overlap_with_old": overlap_stats(cards, old_cards),
         "notes": (
             "窗口重采样只替换取材样本,不改门禁、不改分母(仍 61 张/类目 25-19-17)、"

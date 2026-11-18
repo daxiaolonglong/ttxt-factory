@@ -221,6 +221,21 @@ def test_new_r35_sources_are_declared_and_canonicalised() -> None:
     assert reprint.kind == si.KIND_REPRINT and reprint.agency == "xinhua"
 
 
+def test_leiphone_own_claim_only_counts_with_the_full_statement() -> None:
+    """R37:雷峰网只按文末「雷峰网原创文章，未经授权禁止转载」判自有报道。
+
+    站内水印「雷峰网(公众号：雷峰网)」连转载稿都带,不构成发布证据 ⇒ 不能命中。
+    """
+    claim = "雷峰网原创文章，未经授权禁止转载。"
+    assert si.extract_dateline("...正文...\n" + claim) == "雷峰网"
+    own = si.classify(None, si.extract_dateline(claim), own_agency="leiphone")
+    assert own.kind == si.KIND_OWN and own.agency == "leiphone"
+    # 水印/版权行不算电头 ⇒ 身份不明,不参与独立对
+    assert si.extract_dateline("雷峰网(公众号：雷峰网)") is None
+    assert si.extract_dateline("Copyright © 2011-2026 雷峰网") is None
+    assert si.identity_for_source("leiphone_feed").agency == "leiphone"
+
+
 def test_pair_candidate_pages_show_reprints_are_being_caught() -> None:
     """财经跨机构候选对的逐页复核:必须抓到转载稿/无署名,不许默认当自有报道。
 

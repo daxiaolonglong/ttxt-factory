@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass
 from email.utils import parsedate_to_datetime
 
-from . import clean
+from . import clean, timeparse
 from .clean import excerpt, normalize_text
 from .sources import Source
 
@@ -292,6 +293,83 @@ BODY_SELECTORS: tuple[str, ...] = (
 # 短于此长度不当作正文(实测 probe2/probe3:中新网 RSS 摘要 71–108 字符,
 # 澎湃列表页锚文本更短;取回这么长的东西不算"补到正文")。
 MIN_BODY_CHARS = 160
+
+
+# R37(2026-11-19):HTML 列表源(yicai/nbd)的条目本身不带发布时间,文章页里却有。
+# 只认四类**可复核**证据,按可信度依次尝试;全都拿不到就返回 None,绝不猜日期。
+DATE_META_KEYS = (
+    "article:published_time", "og:release_date", "pubdate", "publishdate", "publish_date",
+)
+DATE_TEXT_RE = re.compile(r"20\d{2}-\d{2}-\d{2}[ T]\d{1,2}:\d{2}(?::\d{2})?")
+
+
+def _normalize_date(value: str | None) -> str | None:
+    """非法日期(如 2026-13-40)不得让整条补全失败,按「取不到」处理。"""
+    try:
+        return timeparse.normalize_datetime(value)
+    except ValueError:
+        return None
+
+
+def _selector_published_at(page: object, selectors: list[str]) -> str | None:
+    """按来源声明的选择器取本条发布时间(站点把时间放在固定容器时用)。"""
+    for selector in selectors or ():
+        try:
+            found = page.css(selector)
+        except Exception:  # noqa: BLE001 - 选择器不适用算"取不到"
+            continue
+        for element in found:
+            getter = getattr(element, "get_all_text", None)
+            text = str(getter() if callable(getter) else getattr(element, "text", "") or "")
+            match = DATE_TEXT_RE.search(text)
+            if match:
+                value = _normalize_date(match.group(0))
+                if value:
+                    return value
+    return None
+
+
+def extract_published_at(page: object, source: Source | None = None) -> str | None:
+    """从文章页读发布时间,返回带时区 ISO 字符串;不确定就返回 None。
+
+    证据顺序:⓪ 来源声明的 ``item_date_selectors``;① ``meta`` 里的发布时间键;
+    ② JSON-LD ``datePublished``;③ ``<time datetime>``;
+    ④ 全页**唯一**的 ``YYYY-MM-DD HH:MM(:SS)`` 文本。
+    第 ④ 条要求唯一,因为同一页出现多个日期时无法判断哪个是本文发布时间
+    (列表/推荐位/版权行都会带日期),宁可留空也不能给文章编一个日期。
+    """
+    html = str(getattr(page, "html_content", "") or "")
+    if not html:
+        return None
+    if source is not None:
+        value = _selector_published_at(page, source.item_date_selectors)
+        if value:
+            return value
+    for key in DATE_META_KEYS:
+        found = re.search(
+            rf'<meta[^>]+(?:property|name)=["\']{re.escape(key)}["\'][^>]*content=["\']([^"\']+)',
+            html, re.I)
+        if found:
+            value = _normalize_date(found.group(1))
+            if value:
+                return value
+    found = re.search(r'"datePublished"\s*:\s*"([^"]+)"', html)
+    if found:
+        value = _normalize_date(found.group(1))
+        if value:
+            return value
+    found = re.search(r'<time[^>]+datetime=["\']([^"\']+)', html, re.I)
+    if found:
+        value = _normalize_date(found.group(1))
+        if value:
+            return value
+    # 同一时刻在页面里常以两种写法各出现一次(NBD 实测:``2026-11-19T00:28:39`` 与
+    # ``2026-11-19 00:28:39``),所以按**归一后的时刻**判唯一,不按原始字符串判。
+    hits = {_normalize_date(raw) for raw in DATE_TEXT_RE.findall(html)}
+    hits.discard(None)
+    if len(hits) == 1:
+        return hits.pop()
+    return None
 
 
 def _full_text(element: object) -> str:

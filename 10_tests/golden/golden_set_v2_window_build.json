@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-19T01:21:57+08:00",
+  "generated_at": "2026-11-19T01:58:34+08:00",
   "as_of": "2026-11-19",
   "window_days": 7,
   "window_start": "2026-11-13",
@@ -8,27 +8,27 @@
   "window_scan_usable_articles": {
     "1": {
       "technology": 0,
-      "finance": 0,
+      "finance": 5,
       "health": 0
     },
     "3": {
-      "technology": 180,
-      "finance": 298,
+      "technology": 196,
+      "finance": 368,
       "health": 19
     },
     "7": {
-      "technology": 297,
-      "finance": 439,
+      "technology": 313,
+      "finance": 509,
       "health": 28
     },
     "14": {
-      "technology": 423,
-      "finance": 486,
+      "technology": 439,
+      "finance": 556,
       "health": 36
     },
     "30": {
-      "technology": 431,
-      "finance": 2244,
+      "technology": 447,
+      "finance": 2314,
       "health": 45
     }
   },
@@ -39,13 +39,13 @@
   },
   "seed_sources": {
     "technology": {
+      "leiphone_feed": 1,
       "qbitai_feed": 2,
-      "ithome_rss": 2,
-      "sspai_rss": 1
+      "ithome_rss": 2
     },
     "finance": {
-      "chinanews_finance": 2,
-      "eastmoney_rss": 1
+      "nbd_news": 2,
+      "yicai_news": 1
     },
     "health": {
       "who_cn_news": 1,
@@ -53,6 +53,20 @@
     }
   },
   "seed_articles": [
+    {
+      "category": "technology",
+      "article_id": 584,
+      "source": "leiphone_feed",
+      "date": "2026-11-18",
+      "url": "https://www.leiphone.com/category/transportation/GLv3yGaPGK64teuS.html",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "leiphone",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
     {
       "category": "technology",
       "article_id": 579,
@@ -110,28 +124,14 @@
       "partner_score": null
     },
     {
-      "category": "technology",
-      "article_id": 497,
-      "source": "sspai_rss",
-      "date": "2026-11-18",
-      "url": "https://sspai.com/post/118732",
-      "identity_basis": "registered",
-      "identity_kind": "own_report",
-      "agency": "sspai",
-      "tier": "C",
-      "partner_url": null,
-      "partner_agency": null,
-      "partner_score": null
-    },
-    {
       "category": "finance",
-      "article_id": 13145,
-      "source": "chinanews_finance",
-      "date": "2026-11-18",
-      "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+      "article_id": 13173,
+      "source": "nbd_news",
+      "date": "2026-11-19",
+      "url": "https://www.nbd.com.cn/articles/2026-11-19/4652030.html",
       "identity_basis": "page_probe",
       "identity_kind": "own_report",
-      "agency": "chinanews",
+      "agency": "nbd",
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
@@ -139,13 +139,13 @@
     },
     {
       "category": "finance",
-      "article_id": 13144,
-      "source": "chinanews_finance",
-      "date": "2026-11-18",
-      "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734166.shtml",
+      "article_id": 13172,
+      "source": "nbd_news",
+      "date": "2026-11-19",
+      "url": "https://www.nbd.com.cn/articles/2026-11-19/4652032.html",
       "identity_basis": "page_probe",
       "identity_kind": "own_report",
-      "agency": "chinanews",
+      "agency": "nbd",
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
@@ -153,13 +153,13 @@
     },
     {
       "category": "finance",
-      "article_id": 13110,
-      "source": "eastmoney_rss",
+      "article_id": 13168,
+      "source": "yicai_news",
       "date": "2026-11-18",
-      "url": "http://finance.eastmoney.com/news/1354,202611183934072446.html",
-      "identity_basis": "registered",
+      "url": "https://www.yicai.com/news/103445452.html",
+      "identity_basis": "page_probe",
       "identity_kind": "own_report",
-      "agency": "eastmoney",
+      "agency": "yicai",
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
@@ -209,22 +209,24 @@
     }
   ],
   "identity_basis_counts": {
-    "page_probe/own_report": 6,
-    "registered/own_report": 3,
+    "page_probe/own_report": 8,
+    "registered/own_report": 1,
     "registered/aggregator": 2
   },
-  "excluded": {},
+  "excluded": {
+    "来源身份不可核": 11
+  },
   "tier_counts": {
-    "C": 47,
-    "B": 7,
+    "C": 48,
+    "B": 6,
     "A": 7
   },
   "kind_counts": {
     "positive": 11,
-    "negative_perturbed": 14,
-    "negative_fabricated_causal": 11,
-    "negative_wrong_entity": 8,
-    "opinion_attributed": 11,
+    "negative_perturbed": 16,
+    "negative_fabricated_causal": 10,
+    "negative_wrong_entity": 9,
+    "opinion_attributed": 9,
     "unrelated": 6
   },
   "category_counts": {
@@ -233,18 +235,18 @@
     "health": 17
   },
   "pair_stats": {
-    "candidate_pairs": 331,
+    "candidate_pairs": 359,
     "independent_pairs": 3,
     "same_day_pairs": 3,
-    "scan_pairs": 140475,
+    "scan_pairs": 175115,
     "pair_independence_share": {
       "independent_pairs": 3,
-      "candidate_pairs": 331,
-      "value": 0.0091,
+      "candidate_pairs": 359,
+      "value": 0.0084,
       "meaning": "同题候选中独立机构对占比;只读观测,不参与门禁"
     }
   },
-  "pair_report": "03_intelligence\\source_identity\\window-pairs-20261119.json",
+  "pair_report": "03_intelligence\\source_identity\\r37-pairs-20261119.json",
   "overlap_with_old": {
     "card_level": {
       "overlap": 0,

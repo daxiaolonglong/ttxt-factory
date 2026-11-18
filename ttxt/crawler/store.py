@@ -450,6 +450,31 @@ def _same_title(left: str | None, right: str | None) -> bool:
     return " ".join(str(left or "").split()).casefold() == " ".join(str(right or "").split()).casefold()
 
 
+def _backfill_published_at(
+    con: sqlite3.Connection, *, category: str, source_id: str, url_normalized: str,
+    item: ExtractedItem, existing: sqlite3.Row,
+) -> None:
+    """R37:重复条目没有新正文,但这一轮从文章页取证到了发布时间 ⇒ 补在**原行**上。
+
+    不动正文、不动 id/URL、不新增行;原行已有日期则一个字也不改。
+    """
+    if not item.published_at or existing["published_at"]:
+        return
+    con.execute(
+        "UPDATE articles SET published_at = ? WHERE id = ?",
+        (item.published_at, existing["id"]),
+    )
+    LOG.info(
+        "insert.published_at_backfilled",
+        category=category,
+        source=source_id,
+        url=url_normalized,
+        article_id=existing["id"],
+        published_at=item.published_at,
+        detail="原行 published_at 为空,已用文章页取证日期补齐",
+    )
+
+
 def insert_items(
     category: str,
     source_id: str,
@@ -594,6 +619,24 @@ def insert_items(
                     )
                 if clash:
                     duplicates += 1
+                    if same_content_elsewhere:
+                        # R37:正文与已存行完全相同(哈希一致)= 没有新内容可写,但可能
+                        # 新取证到了发布时间。旧逻辑这里直接 continue,导致 yicai/nbd
+                        # 首次入库时无日期、重采后日期永远补不上(23+50 篇整批掉出窗口)。
+                        existing = (
+                            None
+                            if url_normalized in batch_urls
+                            else con.execute(
+                                "SELECT id, title, content, published_at FROM articles"
+                                " WHERE url_normalized = ? LIMIT 1",
+                                (url_normalized,),
+                            ).fetchone()
+                        )
+                        if existing is not None:
+                            _backfill_published_at(
+                                con, category=category, source_id=source_id,
+                                url_normalized=url_normalized, item=item, existing=existing,
+                            )
                     if not same_content_elsewhere:
                         # P20(实测 2026-11-15 job 64→66):同一 URL、同一标题,这一轮
                         # 抓到了更长的正文(第一轮 RSS 摘要 98 字 → 第二轮文章页 900+ 字)。
@@ -604,7 +647,8 @@ def insert_items(
                             None
                             if url_normalized in batch_urls
                             else con.execute(
-                                "SELECT id, title, content FROM articles WHERE url_normalized = ? LIMIT 1",
+                                "SELECT id, title, content, published_at FROM articles"
+                                " WHERE url_normalized = ? LIMIT 1",
                                 (url_normalized,),
                             ).fetchone()
                         )
@@ -615,13 +659,15 @@ def insert_items(
                         ):
                             con.execute(
                                 "UPDATE articles SET content = ?, excerpt = ?, content_hash = ?,"
-                                " completeness = ?, processor_version = ? WHERE id = ?",
+                                " completeness = ?, processor_version = ?,"
+                                " published_at = COALESCE(published_at, ?) WHERE id = ?",
                                 (
                                     item.content,
                                     item.excerpt,
                                     hash_value,
                                     cleaner.completeness_of(item.content),
                                     PROCESSOR_VERSION,
+                                    item.published_at,
                                     existing["id"],
                                 ),
                             )
@@ -645,6 +691,13 @@ def insert_items(
                             # 正解:同一标题即同一身份,按"正文最长者胜"保留原行,
                             # 不新增行、不改写原行,单独计数(不得静默)。
                             kept_existing += 1
+                            if item.published_at and not existing["published_at"]:
+                                # R37:正文没变长不等于没新证据——条目原本无日期、这轮从
+                                # 文章页取证到了,就补在**原行**上(不动正文、不动 id/URL)
+                                _backfill_published_at(
+                                    con, category=category, source_id=source_id,
+                                    url_normalized=url_normalized, item=item, existing=existing,
+                                )
                             LOG.info(
                                 "insert.body_kept_existing",
                                 category=category,
