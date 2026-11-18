@@ -145,6 +145,19 @@ def test_verdict_marker_matrix():
     assert neither["blocking"] is False and neither["publishable"] is False, "没许可措辞就不给独立标签"
 
 
+def test_real_world_negative_wording_is_blocking():
+    """R30 现场口径:评审写「暂不建议直接发表」「建议大修」,旧字面标记漏判 ⇒ 必须识别为阻断。"""
+    for text in (
+        "若作为公开发表文章,**暂不建议直接发表**;若作为课程评论,经修改后仍有潜力。",
+        "**审稿结论:建议大修(Major Revision)。**",
+        "综合考虑,不宜立即发表。",
+        "这篇文章不适合刊发。",
+    ):
+        verdict = review_channel.verdict_markers(text)
+        assert verdict["blocking"] is True and verdict["publishable"] is False, text
+    assert review_channel.verdict_markers("修改后可以直接发表。")["publishable"] is True
+
+
 # --------------------------------------------------------------------------- 密钥红线
 
 
@@ -238,6 +251,7 @@ def test_different_reviewer_id_establishes_independence(tmp_path, monkeypatch):
     assert result["model_meta"]["same_model_review"] is False
     assert result["model_meta"]["reviewer_model"] == "deepseek-flash"
     assert result["review_account"] == "INDEPENDENT_REVIEW_PASSED"
+    assert result["review_account_basis"] == "independent_review_approved"
     rows, evals = _history(db_path)
     assert rows[-1][1] == "INDEPENDENT_REVIEW_PASSED"
     assert len(seen) == 1
@@ -259,6 +273,7 @@ def test_same_id_reviewer_cannot_claim_l4_pass(tmp_path, monkeypatch):
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["model_meta"]["same_model_review"] is True
     assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account_basis"] == "same_model_review"
     rows, _ = _history(db_path)
     assert rows[-1][1] == "AUTO_PASSED"
     assert "独立性受限" in result["model_meta"]["reviewer_limitation"]
@@ -280,7 +295,26 @@ def test_blocking_verdict_adds_critical_and_rejects(tmp_path, monkeypatch):
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["passed"] is False and result["status"] == "rejected"
     assert result["review_account"] == "REJECTED"
+    assert result["review_account_basis"] == "independent_review_blocked"
     assert any("独立评审判定不通过" in item for item in result["critical"]), result["critical"]
+    rows, _ = _history(db_path)
+    assert rows[-1][1] == "REJECTED"
+
+
+def test_revision_required_wording_rejects_draft(tmp_path, monkeypatch):
+    """R30 真实评审原文:旧标记漏判把「暂不建议直接发表」记成 AUTO_PASSED,现必须拒绝且依据可查。"""
+
+    def review_call(draft):
+        return _outcome(
+            "deepseek-flash",
+            "综合评分 62-68/100。**审稿结论:建议大修(Major Revision)**;若作为公开发表文章,"
+            "**暂不建议直接发表**。",
+        )
+
+    db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
+    assert result["passed"] is False and result["status"] == "rejected"
+    assert result["review_account"] == "REJECTED"
+    assert result["review_account_basis"] == "independent_review_blocked"
     rows, _ = _history(db_path)
     assert rows[-1][1] == "REJECTED"
 
@@ -293,6 +327,7 @@ def test_verdict_without_publishable_wording_gives_no_independent_label(tmp_path
     assert result["passed"] is True
     assert result["model_meta"]["same_model_review"] is False
     assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account_basis"] == "independent_review_not_approved"
     rows, _ = _history(db_path)
     assert rows[-1][1] == "AUTO_PASSED"
 
@@ -324,7 +359,7 @@ def test_unavailable_channel_leaves_auto_pass_and_records_error(tmp_path, monkey
     assert result["model_meta"]["same_model_review"] is True
     assert "独立评审通道不可用" in result["model_meta"]["reviewer_limitation"]
     assert result["review_account"] == "AUTO_PASSED"
-    assert result["independent_review"]["available"] is False
+    assert result["review_account_basis"] == "independent_review_unavailable"
     rows, evals = _history(db_path)
     assert rows[-1][1] == "AUTO_PASSED"
     assert not [row for row in evals if "independent_review" in row[2]], "通道不可用不得留评审行"
@@ -335,6 +370,7 @@ def test_channel_off_by_default_for_offline_callers(tmp_path, monkeypatch):
     assert result["model_meta"]["same_model_review"] is True
     assert result["independent_review"]["attempted"] is False
     assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account_basis"] == "independent_review_not_attempted"
 
 
 def test_production_config_points_at_an_independent_endpoint():

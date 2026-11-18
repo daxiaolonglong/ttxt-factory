@@ -430,6 +430,29 @@ def _review_account(passed: bool, meta: dict, outcome: dict | None) -> str:
     return "AUTO_PASSED"
 
 
+def _review_account_basis(
+    passed: bool, meta: dict, outcome: dict | None, error: str | None
+) -> str:
+    """把 AUTO_PASSED 的**具体依据**写进回执,避免"有独立评审却记 AUTO_PASSED"看不出原因。
+
+    这不是第四种状态,只是账目说明:
+    - 独立评审明确反对 ⇒ 稿子已判 rejected(REJECTED),依据记 independent_review_blocked;
+    - 独立评审存在但没写许可措辞 ⇒ AUTO_PASSED,依据记 independent_review_not_approved;
+    - 评审同源/未接/通道不可用 ⇒ AUTO_PASSED,各自如实记原因;
+    - 独立评审明确许可 ⇒ INDEPENDENT_REVIEW_PASSED。
+    """
+    verdict = (outcome or {}).get("verdict") or {}
+    if not passed:
+        return "independent_review_blocked" if outcome and verdict.get("blocking") else "gate_rejected"
+    if outcome is None:
+        return "independent_review_unavailable" if error else "independent_review_not_attempted"
+    if meta.get("same_model_review"):
+        return "same_model_review"
+    if verdict.get("publishable"):
+        return "independent_review_approved"
+    return "independent_review_not_approved"
+
+
 def _review_summary(outcome: dict | None, error: str | None) -> dict:
     """回执里的独立评审摘要:只放可公开字段,评审正文留精简片段(密钥与请求头不进回执)。"""
     if outcome is None:
@@ -839,6 +862,7 @@ def write_article(
         "notes": notes,
         "model_meta": model_meta,
         "review_account": account,
+        "review_account_basis": _review_account_basis(passed, model_meta, review_outcome, review_error),
         "independent_review": _review_summary(review_outcome, review_error),
         "published": False,
     }

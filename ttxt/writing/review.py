@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import os
+import re
 from typing import Any
 
 from ttxt import config as cfg
@@ -22,7 +23,23 @@ LOG = get_logger("writing.review")
 REVIEW_PROMPT = "审评这篇文章"
 # 判定只按评审自己写出的结论措辞,不猜语义:命中即算阻断,没命中也不算许可(缺证据就不给独立标签)
 BLOCKING_MARKERS = ("不建议发布", "不可发布", "不应发布", "建议拒绝", "不予发布")
-PUBLISHABLE_MARKERS = ("可以发布", "建议发布", "可发布", "达到发布标准", "符合发布标准")
+# R31(T-25 后续口径对齐):真实评审写的是「暂不建议**直接**发表」「建议大修」,旧的字面标记
+# 因为中间插了"直接"而漏判 ⇒ 稿子被记成 AUTO_PASSED。阻断措辞必须按句式识别,不能只比字面。
+BLOCKING_PATTERNS = (
+    r"不建议(?:直接|立即|马上|现在|公开发表)?(?:公开发表|发表|发布|刊发|上线)",
+    r"(?:不宜|不适合|不应|不可|不予|不能)(?:直接|立即|马上|现在)?(?:公开发表|发表|发布|刊发|上线)",
+    r"建议(?:大修|重写|退稿|拒稿|拒绝)",
+)
+PUBLISHABLE_MARKERS = (
+    "可以发布",
+    "建议发布",
+    "可发布",
+    "达到发布标准",
+    "符合发布标准",
+    "可以直接发表",
+    "可以发表",
+    "建议发表",
+)
 
 
 class ReviewUnavailable(RuntimeError):
@@ -71,6 +88,7 @@ def verdict_markers(text: str) -> dict[str, bool]:
     """按评审原文措辞判定阻断/许可;两类标记都没有 ⇒ 两者都 False(不给独立标签)。"""
     body = text or ""
     blocking = [marker for marker in BLOCKING_MARKERS if marker in body]
+    blocking += [m.group(0) for m in (re.search(p, body) for p in BLOCKING_PATTERNS) if m]
     publishable = [marker for marker in PUBLISHABLE_MARKERS if marker in body]
     return {
         "blocking": bool(blocking),
