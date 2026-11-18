@@ -85,6 +85,8 @@ def test_early_rejected_version_keeps_rejected_status(tmp_path):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
     )
@@ -105,6 +107,8 @@ def test_rejected_draft_marks_last_version_rejected(tmp_path):
         max_revisions=0,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
     )
@@ -133,6 +137,8 @@ def test_served_model_is_persisted_on_every_version(tmp_path, monkeypatch):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
     )

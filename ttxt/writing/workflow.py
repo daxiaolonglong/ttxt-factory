@@ -16,10 +16,11 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from ttxt import config as cfg
-from ttxt.analysis import rag
-from ttxt.crawler import store
+from ttxt.analysis import keywords, rag, viral
+from ttxt.crawler import cleaner, store
 from ttxt.db import connect
 from ttxt.logging import get_logger
 from ttxt.model_gate import client as model_client
@@ -29,6 +30,9 @@ from . import export, prompts, verifier
 
 LOG = get_logger("writing")
 MAX_CLAIMS = 5
+# 取材:BM25 先取 15 篇候选池,重排后只喂 5 篇进提示词(提示词体积不变,选的是最合适的 5 篇)
+MATERIAL_POOL_LIMIT = 15
+MATERIAL_TOP_K = 5
 CRITICAL_HINTS = ("事实", "编造", "虚假", "来源", "截断", "夸大", "无依据", "数据错误")
 TERMINAL_CHARS = "。！？!?…\"”'』」"
 
@@ -383,6 +387,169 @@ def _verified_review(model_call, draft, materials, evidence, enable_thinking, to
     return _merge_findings(review, det_issues, det_critical)
 
 
+def _source_host(url: str | None) -> str:
+    """证据密度的计数单位之一:URL 主机(去 ``www.``)。取不到 host 记空串,不假定"有来源"。"""
+    netloc = urlsplit(url or "").netloc.lower()
+    return netloc[4:] if netloc.startswith("www.") else netloc
+
+
+def _independence_key(author: str | None, host: str) -> tuple[str, str]:
+    """一个"独立来源"的计数键,返回 ``(轴, 键)``。
+
+    生产语料实测**每个类目只有一个域名**(正式类目全是 toutiao.com,health 全是 who.int),
+    按域名数独立性会永远等于 1 ⇒ 门禁会把所有写作请求一律拦下(自检见 07_tmp 只读探针)。
+    同平台内的真实独立性是**不同作者账号**:有作者按作者计,缺作者退回域名,**缺作者绝不
+    当成一个独立来源**(规则 6:缺失 ≠ 有)。
+    """
+    value = (author or "").strip()
+    if value:
+        return "author", f"author:{value.lower()}"
+    if host:
+        return "host", f"host:{host}"
+    return "none", ""
+
+
+def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TOP_K) -> tuple[list[dict], dict]:
+    """把 BM25 候选池按「真实爆款先验 + 证据密度」重排,并给出前置门禁要用的取材统计。
+
+    先验只认本类目库里 ``tier=measured`` 且有分数的真实标签(与 ``keywords.score_keywords``
+    同一套词表和权重),未标定类目退化为纯 BM25 并如实记 ``calibration_status="uncalibrated"``
+    —— 缺数据不虚构加分也不凭空扣 0 分(规则 6)。证据密度:全文行优先 + 独立来源计数
+    (作者优先,缺作者退回域名;见 ``_independence_key``)。
+    """
+    con = connect(db_path)
+    try:
+        calibrated = viral.load_calibration(con) is not None
+        measured = keywords._measured_label_map(con) if calibrated else {}
+        pool: list[dict] = []
+        for index, match in enumerate(matches):
+            row = con.execute(
+                "SELECT id, title, url, author, completeness, coalesce(cleaned_content, content) AS text "
+                "FROM articles WHERE id = ?",
+                (match["article_id"],),
+            ).fetchone()
+            if not row:
+                continue
+            host = _source_host(row["url"])
+            axis, key = _independence_key(row["author"], host)
+            pool.append(
+                {
+                    "id": row["id"],
+                    "title": row["title"],
+                    "url": row["url"],
+                    "text": row["text"] or "",
+                    "completeness": row["completeness"],
+                    "host": host,
+                    "author": (row["author"] or "").strip(),
+                    "source_key": key,
+                    "source_axis": axis,
+                    "bm25": float(match.get("rank") or 0.0),
+                    "pool_index": index,
+                    "label": measured.get(int(row["id"])),
+                }
+            )
+    finally:
+        con.close()
+
+    ranks = [item["bm25"] for item in pool]
+    best, worst = (min(ranks), max(ranks)) if ranks else (0.0, 0.0)
+    for item in pool:
+        # bm25() 越小越相关 ⇒ 归一到 0..1,爆款项最多占 VIRAL_WEIGHT(与关键词评分同一口径)
+        norm = 1.0 if worst == best else (worst - item["bm25"]) / (worst - best)
+        prior = keywords.LABEL_VALUE.get(item["label"]) if item["label"] else None
+        item["viral_prior"] = prior
+        item["rank_score"] = (
+            round(norm + keywords.VIRAL_WEIGHT * prior, 4) if prior is not None else round(norm, 4)
+        )
+
+    ordered = sorted(
+        pool,
+        key=lambda item: (
+            item["completeness"] != cleaner.COMPLETENESS_FULL,
+            -item["rank_score"],
+            item["pool_index"],
+        ),
+    )
+    selected = ordered[:top_k]
+    is_full = cleaner.COMPLETENESS_FULL
+    label_counts: dict[str, int] = {}
+    for item in pool:
+        if item["label"]:
+            label_counts[item["label"]] = label_counts.get(item["label"], 0) + 1
+    def independent(items: list[dict]) -> int:
+        return len({item["source_key"] for item in items if item["source_key"]})
+
+    def hosts(items: list[dict]) -> int:
+        return len({item["host"] for item in items if item["host"]})
+
+    axes = {"author": 0, "host": 0, "none": 0}
+    for item in pool:
+        axes[item["source_axis"]] += 1
+    stats = {
+        "pool_limit": len(matches),
+        "candidates": len(pool),
+        "full_candidates": sum(1 for item in pool if item["completeness"] == is_full),
+        "distinct_sources": independent(pool),
+        "distinct_hosts": hosts(pool),
+        "independence_axis": {
+            "unit": "author(缺作者退回 host,缺作者不计数)",
+            "articles_counted_by_author": axes["author"],
+            "articles_counted_by_host": axes["host"],
+            "articles_without_any_source_key": axes["none"],
+        },
+        "selected_ids": [item["id"] for item in selected],
+        "selected_full": sum(1 for item in selected if item["completeness"] == is_full),
+        "selected_distinct_sources": independent(selected),
+        "selected_distinct_hosts": hosts(selected),
+        "calibration_status": "calibrated" if calibrated else "uncalibrated",
+        "priors": {
+            "applied": calibrated,
+            "weight": keywords.VIRAL_WEIGHT,
+            "measured_label_hits": sum(1 for item in pool if item["label"]),
+            "label_counts": label_counts,
+            "reason": "" if calibrated else "本类目缺 viral_calibration ⇒ 爆款项不参与排序,退化为纯 BM25",
+        },
+        "scores": [
+            {
+                "id": item["id"],
+                "rank_score": item["rank_score"],
+                "bm25": item["bm25"],
+                "viral_prior": item["viral_prior"],
+                "completeness": item["completeness"],
+                "host": item["host"],
+                "author": item["author"],
+                "source_axis": item["source_axis"],
+            }
+            for item in selected
+        ],
+    }
+    materials = [
+        {"id": item["id"], "title": item["title"], "url": item["url"], "text": item["text"]}
+        for item in selected
+    ]
+    return materials, stats
+
+
+def _material_gate(stats: dict, min_full: int, min_sources: int) -> list[str]:
+    """取材前置门禁:密度不够就直接拦下,不烧模型。
+
+    根因(2026-11-17 14:36 三次 rejected):1 篇材料扛着「50 多个国家」这类标题数字,
+    引句绑不上 ⇒ 数字落在引句窗口外。先查密度比让模型瞎写再被事实门禁拦更省。
+    """
+    critical = []
+    if stats["full_candidates"] < min_full:
+        critical.append(
+            f"取材密度不足:候选里全文文章 {stats['full_candidates']} 篇 < {min_full}(短稿撑不起引句)"
+        )
+    if stats["distinct_sources"] < min_sources:
+        axis = stats["independence_axis"]["unit"]
+        critical.append(
+            f"来源独立性不足:候选里独立来源 {stats['distinct_sources']} 个 < {min_sources}"
+            f"(口径 {axis};单源改写风险)"
+        )
+    return critical
+
+
 def write_article(
     category: str,
     topic: str,
@@ -394,6 +561,8 @@ def write_article(
     export_dir: Path | None = None,
     gate_min_score: float | None = None,
     gate_min_chars: int | None = None,
+    material_min_full: int | None = None,
+    material_min_sources: int | None = None,
 ) -> dict:
     writing_cfg = cfg.load_config().get("writing", {})
     if max_revisions is None:
@@ -404,30 +573,48 @@ def write_article(
         gate_min_score = float(writing_cfg.get("gate_min_score", 0.6))
     if gate_min_chars is None:
         gate_min_chars = int(writing_cfg.get("gate_min_chars", 400))
+    if material_min_full is None:
+        material_min_full = int(writing_cfg.get("material_min_full", 6))
+    if material_min_sources is None:
+        material_min_sources = int(writing_cfg.get("material_min_sources", 3))
     model_call = model_call or default_model_call
     store.migrate_articles_db(category, db_path=db_path)
     db_path = store.articles_db_path(category) if db_path is None else Path(db_path)
 
-    matches = rag.search(category, topic, limit=5, db_path=db_path)
-    con = connect(db_path)
-    try:
-        materials: list[dict] = []
-        for match in matches:
-            row = con.execute(
-                "SELECT id, title, url, coalesce(cleaned_content, content) AS text FROM articles WHERE id = ?",
-                (match["article_id"],),
-            ).fetchone()
-            if row:
-                materials.append(
-                    {
-                        "id": row["id"],
-                        "title": row["title"],
-                        "url": row["url"],
-                        "text": row["text"] or "",
-                    }
-                )
-    finally:
-        con.close()
+    matches = rag.search(category, topic, limit=MATERIAL_POOL_LIMIT, db_path=db_path)
+    materials, material_stats = _rank_materials(matches, db_path)
+    LOG.info(
+        "writing.materials",
+        category=category,
+        topic=topic,
+        full=f"{material_stats['full_candidates']}/{material_stats['candidates']}",
+        sources=f"{material_stats['distinct_sources']}",
+        axis=material_stats["independence_axis"]["unit"],
+        calibration=material_stats["calibration_status"],
+        prior_hits=material_stats["priors"]["measured_label_hits"],
+    )
+    gate_critical = _material_gate(material_stats, material_min_full, material_min_sources)
+    if gate_critical:
+        LOG.warn(
+            "writing.insufficient_materials",
+            category=category,
+            topic=topic,
+            full=f"{material_stats['full_candidates']}/{material_min_full}",
+            sources=f"{material_stats['distinct_sources']}/{material_min_sources}",
+        )
+        return {
+            "category": category,
+            "topic": topic,
+            "status": "insufficient_materials",
+            "passed": False,
+            "model_calls": 0,
+            "critical": gate_critical,
+            "issues": gate_critical,
+            "materials": len(materials),
+            "material_stats": material_stats,
+            "notes": "取材前置门禁拦下,未调用模型:" + ";".join(gate_critical),
+            "published": False,
+        }
 
     materials_text = build_materials(materials)
     outline = model_call(
@@ -540,6 +727,7 @@ def write_article(
         "evidence": evidence,
         "path": str(path),
         "materials": len(materials),
+        "material_stats": material_stats,
         "notes": notes,
         "model_meta": model_meta,
         "published": False,

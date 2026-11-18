@@ -1,0 +1,392 @@
+{
+  "draft_id": "social-20261118101123-549323",
+  "title": "工龄36年养老金仅4268元？解析养老金计算背后的核心逻辑与常见误区",
+  "versions": 3,
+  "revisions": 2,
+  "status": "rejected",
+  "passed": false,
+  "truncated": false,
+  "score": 0.85,
+  "issues": [
+    "部分引用来源（如[3][4][5]）在证据链中标记为unverified，虽文章逻辑自洽，但作为严格评审需指出信源可靠性不足的风险",
+    "标题中‘常见误区’未在正文中以列表或明确小标题形式清晰拆解，结构略显松散"
+  ],
+  "critical": [
+    "事实未通过来源核验:四川地区流传的“2026年养老金调整通知已于10月31日公布”经核查多为网络谣言或误传(dates:2026年;dates锚点不在引句窗口但在正文别处出现(移花接木嫌疑):2026年)",
+    "事实未通过来源核验:高额养老金（如月入过万）是基于法定退休年龄及几十年高基数缴费积累的结果，而非仅靠交满15年社保实现(numbers:15)",
+    "事实未通过来源核验:不同群体之间的养老金待遇差距本质上是不同参保策略对退休待遇影响的直观体现(原文引句未绑定)",
+    "部分引用来源（如[3][4][5]）在证据链中标记为unverified，虽文章逻辑自洽，但作为严格评审需指出信源可靠性不足的风险"
+  ],
+  "evidence": [
+    {
+      "claim": "一位网友测算工龄36年、预计2026年10月退休的养老金约为4268元",
+      "kind": "fact",
+      "article_id": 19794,
+      "source_url": "https://www.toutiao.com/article/7688529766005195319/",
+      "quote": "最近有位网友分享，工龄36年，2026年10月办理退休，测算出来每月养老金大约4268元。",
+      "quote_offset": 148,
+      "overlap": 0.591,
+      "anchors": {
+        "numbers": [
+          "36",
+          "2026",
+          "10",
+          "4268元",
+          "一"
+        ],
+        "dates": [
+          "2026年10月"
+        ],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "36",
+            "2026",
+            "10",
+            "4268元"
+          ],
+          "missing": []
+        },
+        "numbers_advisory": [
+          {
+            "anchor": "一",
+            "in_source": true
+          }
+        ],
+        "dates": {
+          "found": [
+            "2026年10月"
+          ],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "opinion_markers": [
+          "预计"
+        ],
+        "note_opinion": "裸 hedge 词留痕,不豁免事实门禁;观点路由只按明确归属判定",
+        "anchor_window": {
+          "offset": 115,
+          "chars": 113
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "当前养老金领域最棘手的矛盾是制度性差距过大与分配不公，而非资金短缺",
+      "kind": "fact",
+      "article_id": 12222,
+      "source_url": "https://www.toutiao.com/article/7694948444410135042/",
+      "quote": "当前养老金最大问题是制度性差距过大、分配不公突出。",
+      "quote_offset": 0,
+      "overlap": 0.467,
+      "anchors": {
+        "numbers": [],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "anchor_window": {
+          "offset": 0,
+          "chars": 30
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "verified"
+    },
+    {
+      "claim": "四川地区流传的“2026年养老金调整通知已于10月31日公布”经核查多为网络谣言或误传",
+      "kind": "fact",
+      "article_id": 1717,
+      "source_url": "https://www.toutiao.com/article/7703161028124885542/",
+      "quote": "四川省退休人员，2026养老金调整通知10月31日公布了吗？",
+      "quote_offset": 0,
+      "overlap": 0.406,
+      "anchors": {
+        "numbers": [
+          "2026",
+          "10",
+          "31",
+          "四"
+        ],
+        "dates": [
+          "2026年",
+          "10月31日"
+        ],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [
+            "2026",
+            "10",
+            "31"
+          ],
+          "missing": []
+        },
+        "numbers_advisory": [
+          {
+            "anchor": "四",
+            "in_source": true
+          }
+        ],
+        "dates": {
+          "found": [
+            "10月31日"
+          ],
+          "missing": [
+            "2026年"
+          ]
+        },
+        "dates_outside_quote": [
+          "2026年"
+        ],
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "anchor_window": {
+          "offset": 0,
+          "chars": 61
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "unverified"
+    },
+    {
+      "claim": "高额养老金（如月入过万）是基于法定退休年龄及几十年高基数缴费积累的结果，而非仅靠交满15年社保实现",
+      "kind": "fact",
+      "article_id": 15408,
+      "source_url": "https://www.toutiao.com/article/7692265055195021865/",
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "anchors": {
+        "numbers": [
+          "15",
+          "万",
+          "十"
+        ],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [],
+          "missing": [
+            "15"
+          ]
+        },
+        "numbers_advisory": [
+          {
+            "anchor": "万",
+            "in_source": true
+          },
+          {
+            "anchor": "十",
+            "in_source": true
+          }
+        ],
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "unverified"
+    },
+    {
+      "claim": "不同群体之间的养老金待遇差距本质上是不同参保策略对退休待遇影响的直观体现",
+      "kind": "fact",
+      "article_id": 11105,
+      "source_url": "https://www.toutiao.com/article/7695775701156348471/",
+      "quote": null,
+      "quote_offset": null,
+      "overlap": 0.0,
+      "anchors": {
+        "numbers": [],
+        "dates": [],
+        "persons": [],
+        "orgs": [],
+        "causal": []
+      },
+      "checks": {
+        "numbers": {
+          "found": [],
+          "missing": []
+        },
+        "dates": {
+          "found": [],
+          "missing": []
+        },
+        "persons": {
+          "found": [],
+          "missing": []
+        },
+        "orgs": {
+          "found": [],
+          "missing": []
+        },
+        "causal": {
+          "found": [],
+          "missing": [],
+          "note": "claim 无因果连接词"
+        }
+      },
+      "credibility": "unverified"
+    }
+  ],
+  "path": "D:\\ttxt\\04_writing\\drafts\\social\\rejected\\social-20261118101123-549323.md",
+  "materials": 5,
+  "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+      "unit": "author(缺作者退回 host,缺作者不计数)",
+      "articles_counted_by_author": 15,
+      "articles_counted_by_host": 0,
+      "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+      19794,
+      12222,
+      1717,
+      15408,
+      11105
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+      "applied": true,
+      "weight": 0.3,
+      "measured_label_hits": 0,
+      "label_counts": {},
+      "reason": ""
+    },
+    "scores": [
+      {
+        "id": 19794,
+        "rank_score": 1.0,
+        "bm25": -14.051718463557677,
+        "viral_prior": null,
+        "completeness": "full",
+        "host": "toutiao.com",
+        "author": "当冬夜渐暖",
+        "source_axis": "author"
+      },
+      {
+        "id": 12222,
+        "rank_score": 0.8806,
+        "bm25": -14.018406339123766,
+        "viral_prior": null,
+        "completeness": "full",
+        "host": "toutiao.com",
+        "author": "源滚滚",
+        "source_axis": "author"
+      },
+      {
+        "id": 1717,
+        "rank_score": 0.7282,
+        "bm25": -13.975898245657978,
+        "viral_prior": null,
+        "completeness": "full",
+        "host": "toutiao.com",
+        "author": "平哥写民生",
+        "source_axis": "author"
+      },
+      {
+        "id": 15408,
+        "rank_score": 0.7104,
+        "bm25": -13.970926396239026,
+        "viral_prior": null,
+        "completeness": "full",
+        "host": "toutiao.com",
+        "author": "晚熟的燕子8",
+        "source_axis": "author"
+      },
+      {
+        "id": 11105,
+        "rank_score": 0.6486,
+        "bm25": -13.95368538999777,
+        "viral_prior": null,
+        "completeness": "full",
+        "host": "toutiao.com",
+        "author": "花中轻松闻香",
+        "source_axis": "author"
+      }
+    ]
+  },
+  "notes": "门禁致命问题: 事实未通过来源核验:四川地区流传的“2026年养老金调整通知已于10月31日公布”经核查多为网络谣言或误传(dates:2026年;dates锚点不在引句窗口但在正文别处出现(移花接木嫌疑):2026年);事实未通过来源核验:高额养老金（如月入过万）是基于法定退休年龄及几十年高基数缴费积累的结果，而非仅靠交满15年社保实现(numbers:15);事实未通过来源核验:不同群体之间的养老金待遇差距本质上是不同参保策略对退休待遇影响的直观体现(原文引句未绑定)",
+  "model_meta": {
+    "same_model_review": true,
+    "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+    "served_model": "qwen3.8-flash-next-iq3_s"
+  },
+  "published": false
+}

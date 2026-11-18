@@ -78,6 +78,8 @@ def _run(tmp_path, fake, max_revisions=0):
         max_revisions=max_revisions,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
     )

@@ -40,7 +40,7 @@
     "pip_cache_max_gb": 1,
     "log_max_mb": 10,
     "log_keep": 7,
-    "backup_keep": 30,
+    "backup_keep": 6,
     "db_max_mb": {
       "system": 200,
       "article": 2048
@@ -85,7 +85,10 @@
     "gate_min_chars": 400,
     "gate_max_revisions": 2,
     "draft_max_tokens": 900,
-    "draft_retry_max_tokens": 2048
+    "draft_retry_max_tokens": 2048,
+    "material_min_full": 6,
+    "material_min_sources": 3,
+    "_material_comment": "P39:取材前置门禁。候选池(BM25 取 15 篇,重排后喂 5 篇)里全文文章数 ≥ material_min_full 且独立来源数 ≥ material_min_sources 才会调用模型,不够就直接返回 insufficient_materials(零模型调用)。独立来源按**作者账号**计,缺作者才退回域名:实测每个正式类目只有一个域名(toutiao.com),只按域名计会把所有写作一律拦下。爆款先验只在类目已有 viral_calibration 时参与重排,未标定类目退化为纯 BM25 并如实标注。"
   },
   "metrics": {
     "authorized_sources": {

@@ -210,6 +210,8 @@ def test_write_evidence_persists_url_checks_and_reverifies_after_revision(tmp_pa
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
     )
@@ -262,6 +264,8 @@ def test_default_gate_evidence_has_verbatim_quote_and_url(tmp_path):
         max_revisions=0,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
     )
     assert result["passed"] is True

@@ -73,11 +73,15 @@ def analyze_step():
 
 
 def write_step():
+    # demo 语料只有一个站点(quotes.toscrape.com)且正文短:取材密度门槛显式放行(0 全文 / 1 域名),
+    # 真实门槛(6 全文 / 3 独立域名)由 10_tests/test_p39_material_prior_gate.py 与正式类目实测覆盖。
     result = workflow.write_article(
         "demo",
         "智能音箱与家庭自动化",
         max_revisions=0,
         max_tokens=900,
+        material_min_full=0,
+        material_min_sources=1,
     )
     path = Path(result["path"])
     assert path.exists(), result

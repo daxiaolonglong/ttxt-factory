@@ -91,6 +91,8 @@ def test_write_workflow(tmp_path):
         max_revisions=0,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
     )
     assert result["versions"] == 1
@@ -129,6 +131,8 @@ def test_write_workflow_revision(tmp_path):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        material_min_full=0,
+        material_min_sources=1,
         gate_min_chars=0,
     )
     assert result["versions"] == 2

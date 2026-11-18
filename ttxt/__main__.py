@@ -451,7 +451,8 @@ def cmd_write(args: argparse.Namespace) -> int:
         enable_thinking=args.think,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0
+    # 取材门禁拦下 ≠ 写出来了:给非零码,调度与脚本才不会把"没烧模型"当成功
+    return 3 if result.get("status") == "insufficient_materials" else 0
 
 
 def cmd_agents(args: argparse.Namespace) -> int:
