@@ -29,7 +29,10 @@ from ttxt.model_gate import gate
 from . import export, prompts, review as review_channel, verifier
 
 LOG = get_logger("writing")
-MAX_CLAIMS = 5
+MAX_CLAIMS = 12
+# 逐字引句版 claims(最多 12 条 claim+quote)远超旧值 400;生产实测 JSON 被截断 ⇒
+# parse_claims 返回空数组 ⇒ 证据链整段为空。给足预算,由 token 上限而不是沉默兜底。
+CLAIMS_MAX_TOKENS = 1200
 # 取材:BM25 先取 15 篇候选池,重排后只喂 5 篇进提示词(提示词体积不变,选的是最合适的 5 篇)
 MATERIAL_POOL_LIMIT = 15
 MATERIAL_TOP_K = 5
@@ -112,7 +115,12 @@ def parse_claims(text: str) -> list[dict]:
             article_id = int(item.get("article_id") or 0)
         except (TypeError, ValueError):
             article_id = 0
-        claims.append({"claim": claim, "article_id": article_id})
+        parsed = {"claim": claim, "article_id": article_id}
+        # 模型自报的逐字引句(可选):留下后由 verifier 逐字校验,非逐字一律不采信。
+        quote = str(item.get("quote") or "").strip()
+        if quote:
+            parsed["quote"] = quote
+        claims.append(parsed)
     return claims
 
 
@@ -182,7 +190,7 @@ def verify_claims(claims: list[dict], materials: list[dict]) -> list[dict]:
     for item in claims:
         number = int(item.get("article_id") or 0)
         article = materials[number - 1] if 1 <= number <= len(materials) else None
-        evidence.append(verifier.verify_claim(item["claim"], article))
+        evidence.append(verifier.verify_claim(item["claim"], article, quote=item.get("quote")))
     return evidence
 
 
@@ -705,7 +713,7 @@ def write_article(
 
     claims_text = model_call(
         prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
-        max_tokens=400,
+        max_tokens=CLAIMS_MAX_TOKENS,
         temperature=0.0,
         enable_thinking=enable_thinking,
     )
@@ -737,7 +745,7 @@ def write_article(
         # 修订后的草稿必须重新抽取声明并重新核验(旧证据不覆盖新文本)
         claims_text = model_call(
             prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
-            max_tokens=400,
+            max_tokens=CLAIMS_MAX_TOKENS,
             temperature=0.0,
             enable_thinking=enable_thinking,
         )

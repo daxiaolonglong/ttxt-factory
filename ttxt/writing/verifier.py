@@ -76,6 +76,14 @@ DATE_RE = re.compile(
 PERSON_RE = re.compile(
     r"([\u4e00-\u9fff]{2,4})(?=表示|称|说|指出|强调|透露|介绍|回应|告诉|预计|认为|称)"
 )
+# 人名与谓语之间常夹副词:原正则会把「华盛顿不断强调」截成「盛顿不断」(生产实测
+# 2026-11-18 technology 稿因此多出 persons:盛顿不断 的假 critical)。
+# 先剥掉尾部副词,再从原文左侧补回同长度汉字,得到「华盛顿」。
+_PERSON_ADVERB_TAIL = re.compile(
+    r"(?:不断|持续|正在|已经|仍将|仍然|仍|也已|也|都|还|又|将|正|再度|再次|首次|正式|同时|已|曾)+$"
+)
+# 4 字窗口会从句子中间起截(「随着华盛顿不断强调」→「着华盛顿」),剥掉开头虚词。
+_PERSON_LEADING = set("着了的地得和与在对于从被把向给为是并而及等这那其该随因由据也都还又将正已曾就才")
 ORG_RE = re.compile(
     r"[\u4e00-\u9fff]{2,8}?(?:公司|集团|研究院|研究所|科学院|大学|学院|银行|委员会|协会|学会|机构|部门|医院|学校|总局|总部|组织|部委|基金会)"
 )
@@ -129,6 +137,32 @@ def norm(text: str) -> str:
     return (text or "").translate(_FW)
 
 
+# 引用编号 [1] / 【2】 是「这句话引用了第几篇材料」的元数据,不是事实数字。
+# 生产实测(2026-11-18 technology 稿):5 条事实全部因为句末 [n] 被当成数字锚点
+# 判 critical ⇒ 门禁在结构上不可能通过。核验前一律剥掉。
+CITATION_RE = re.compile(r"[\[［【]\s*\d{1,2}\s*[\]］】]")
+
+
+def strip_citations(text: str) -> str:
+    return CITATION_RE.sub("", text or "")
+
+
+def _extract_persons(text: str) -> list[str]:
+    out: list[str] = []
+    for match in PERSON_RE.finditer(text):
+        name = match.group(1)
+        trimmed = _PERSON_ADVERB_TAIL.sub("", name)
+        if trimmed != name:
+            need = len(name) - len(trimmed)
+            left = text[max(0, match.start(1) - need): match.start(1)]
+            if len(left) == need and all("\u4e00" <= ch <= "\u9fff" for ch in left):
+                trimmed = left + trimmed
+        trimmed = trimmed.lstrip("".join(_PERSON_LEADING))
+        if len(trimmed) >= 2:
+            out.append(trimmed)
+    return out
+
+
 def _dedup(items: list[str]) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
@@ -141,17 +175,18 @@ def _dedup(items: list[str]) -> list[str]:
 
 
 def extract_anchors(text: str) -> dict[str, list[str]]:
-    """从文本提取五类事实锚点(去重,保序)。"""
-    numbers = _dedup(NUMBER_RE.findall(norm(text)))
+    """从文本提取五类事实锚点(去重,保序)。引用编号 [n] 先剥掉,不当事实数字。"""
+    clean = strip_citations(text)
+    numbers = _dedup(NUMBER_RE.findall(norm(clean)))
     # 纯中文数量词只在与阿拉伯数字不重叠时补充,避免「三大」与「3」双计
     arabic = "".join(numbers)
-    cn = [item for item in _dedup(CN_NUMBER_RE.findall(text)) if item not in arabic]
+    cn = [item for item in _dedup(CN_NUMBER_RE.findall(clean)) if item not in arabic]
     return {
         "numbers": numbers + cn,
-        "dates": _dedup(DATE_RE.findall(norm(text))),
-        "persons": _dedup(PERSON_RE.findall(text)),
-        "orgs": _dedup(ORG_RE.findall(text)),
-        "causal": _dedup(CAUSAL_RE.findall(text)),
+        "dates": _dedup(DATE_RE.findall(norm(clean))),
+        "persons": _dedup(_extract_persons(clean)),
+        "orgs": _dedup(ORG_RE.findall(clean)),
+        "causal": _dedup(CAUSAL_RE.findall(clean)),
     }
 
 
@@ -228,6 +263,25 @@ def _anchor_in(needle: str, haystack: str) -> bool:
     return re.search(pattern, haystack) is not None
 
 
+def _date_in(anchor: str, haystack: str) -> bool:
+    """日期锚点核验:整串命中优先;否则按「年/月/日」分量在同一窗口内分别命中。
+
+    生产实测(2026-11-18):claim「2026年11月7日至8日…」对来源「11月7日至8日，2026首届…」
+    被判缺失 —— 字面日期串不连续,但年/月/日三个分量都在同一句里,属于格式差异不是造假。
+    分年/月/日核验不会放过伪造日期(2026年11月15日 仍缺 15日)。
+    """
+    if _anchor_in(anchor, haystack):
+        return True
+    full = re.fullmatch(r"(\d{4})年(\d{1,2})月(?:(\d{1,2})日)?", anchor)
+    if full:
+        year, month, day = full.groups()
+        if year not in haystack or f"{month}月" not in haystack:
+            return False
+        return not day or f"{day}日" in haystack
+    year_only = re.fullmatch(r"(\d{4})年", anchor)
+    return bool(year_only) and year_only.group(1) in haystack
+
+
 def anchor_window(source_text: str, quote: str, quote_offset: int) -> tuple[str, int]:
     """数字/日期的核验窗口:绑定引句所在句 ±1 句的**连续原文**窗口。
 
@@ -297,11 +351,36 @@ def bind_quote(claim: str, source_text: str) -> tuple[str, int, float] | None:
     return stripped, offset, round(overlap, 3)
 
 
-def verify_claim(claim: str, article: dict | None) -> dict:
-    """核验单条事实。article 需含 id/title/url/text。"""
+def bind_supplied_quote(claim: str, source_text: str, quote: str | None) -> tuple[str, int, float] | None:
+    """模型自己给出的引句:必须**逐字连续**存在于来源,且与 claim 词面重叠达标,否则不采信。
+
+    它换的只是"引来源里的哪一句",不降门槛:非逐字、或重叠低于 QUOTE_MIN_OVERLAP,
+    一律退回自动绑定。创作链实测(2026-11-18)的拒稿根因是模型把几篇材料的数字
+    拼进一句、自动绑定必然绑不上;让模型指明原句能修好"引哪句",但不能放宽"必须逐字"。
+    """
+    candidate = (quote or "").strip()
+    if not candidate or not source_text:
+        return None
+    claim_tokens = set(tokenize(claim))
+    if not claim_tokens:
+        return None
+    idx = source_text.find(candidate)
+    if idx < 0:
+        return None
+    overlap = len(claim_tokens & set(tokenize(candidate))) / len(claim_tokens)
+    if overlap < QUOTE_MIN_OVERLAP:
+        return None
+    if len(candidate) > QUOTE_MAX_CHARS:
+        candidate = candidate[:QUOTE_MAX_CHARS]
+    return candidate, idx, round(overlap, 3)
+
+
+def verify_claim(claim: str, article: dict | None, quote: str | None = None) -> dict:
+    """核验单条事实。article 需含 id/title/url/text;quote 为调用方提供的候选引句(可选)。"""
     markers = is_opinion(claim)
     text = (article or {}).get("text") or ""
-    bound = bind_quote(claim, text) if text else None
+    supplied = bind_supplied_quote(claim, text, quote) if text else None
+    bound = supplied or (bind_quote(claim, text) if text else None)
     window, window_offset = anchor_window(text, bound[0], bound[1]) if bound else ("", 0)
     attribution = attribution_check(claim, window)
     if markers and not attribution.get("missing"):
@@ -337,6 +416,10 @@ def verify_claim(claim: str, article: dict | None) -> dict:
     norm_text = norm(text)
     norm_window = norm(window)
     checks: dict = {}
+    if supplied:
+        checks["quote_source"] = "model_supplied"
+    elif bound:
+        checks["quote_source"] = "auto_bound"
     if attribution:
         checks["attribution"] = attribution
     # 归属缺出处 ⇒ 这一句已经没有「转述」资格,后续锚点全部照常核验,且必须判不通过。
@@ -360,9 +443,10 @@ def verify_claim(claim: str, article: dict | None) -> dict:
                 advisory.append({"anchor": item, "in_source": _anchor_in(clean, norm_text), "note": "泛指机构锚点不参与硬判定"})
                 continue
             windowed = scoped
-            hit = _anchor_in(clean, norm_window if windowed else norm_text)
+            matcher = _date_in if dim == "dates" else (lambda a, h: _anchor_in(a, h))
+            hit = matcher(clean, norm_window if windowed else norm_text)
             (found if hit else missing).append(item)
-            if not hit and windowed and _anchor_in(clean, norm_text):
+            if not hit and windowed and matcher(clean, norm_text):
                 displaced.append(item)
         checks[dim] = {"found": found, "missing": missing}
         if displaced:
@@ -437,6 +521,17 @@ def deterministic_findings(evidence: list[dict], title: str, body: str) -> tuple
     """把核验结果转成门禁条目;确定性 critical 不依赖模型评审。"""
     issues: list[str] = []
     critical: list[str] = []
+    if not evidence:
+        # 生产实测(2026-11-18 technology 稿,3 版全 rejected):声明提取阶段返回空数组,
+        # 证据链整段为空,却没有任何确定性 critical —— 门禁只剩模型评审一条腿。
+        # 正文带可核验事实锚点而证据为空 ⇒ 要么事实无来源、要么提取失败,两种都必须阻断。
+        anchors = extract_anchors(body)
+        n_anchors = sum(len(anchors[dim]) for dim in ("numbers", "dates", "persons", "orgs"))
+        if n_anchors:
+            critical.append(
+                f"事实证据链缺失(evidence_empty):正文含 {n_anchors} 个事实锚点,"
+                "但声明提取没有产出任何可核验声明——事实无来源或提取失败,不得放行"
+            )
     facts = [item for item in evidence if item.get("kind") == "fact"]
     opinions = [item for item in evidence if item.get("kind") == "opinion"]
     for item in facts:

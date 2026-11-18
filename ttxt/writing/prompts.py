@@ -23,18 +23,25 @@ def draft_prompt(topic: str, outline: str, materials: str) -> str:
 2. 正文分 3-5 段;
 3. 引用参考材料时在句末标注 [编号];
 4. 不得编造材料中没有的时间、数字、人物;无法确认处写"待核实";
-5. 直接输出文章,不要解释。"""
+5. 不得编造统计数字,即使标注为"预测/模拟/推演"也不允许;
+6. 每条事实只依据**一篇**材料,不要把不同材料的时间/数字拼进同一句,并尽量沿用材料原句措辞;
+7. 严格按材料的时间口径写作:材料里写"将举办/预计/计划"的事件不得写成已发生;不要加入你对"当前现实时间"的论断或推测;
+8. 直接输出文章,不要解释。"""
 
 
 def claims_prompt(draft: str, article_numbers: list[int]) -> str:
     numbers = ",".join(str(n) for n in article_numbers) or "0"
-    return f"""阅读下面文章,列出 3-5 个关键事实陈述及其依据的文章编号。
+    return f"""阅读下面文章,列出**每一句**关键事实陈述(带数字/日期/机构/人物的句子一条都不能漏,最多 12 条)。
 文章:
 {draft}
 可用文章编号:{numbers}
+要求:
+1. claim 照抄文章里承载事实的那一句,不要改写、不要把几篇材料的数字/日期拼进同一句;
+2. quote 从所引文章里**逐字复制**一句原文,必须包含 claim 里的数字/日期/人物;
+3. quote 必须能在该文章里逐字找到,一个字都不能改;找不到就换一句能逐字找到的;
+4. 找不到任何逐字原文时 article_id 用 0、quote 留空。
 只输出 JSON 数组,不要其他文字,格式:
-[{{"claim":"事实陈述","article_id":1}}]
-若某条事实无对应文章,article_id 用 0。"""
+[{{"claim":"文章原句","article_id":1,"quote":"来源原文逐字句"}}]"""
 
 
 def review_prompt(draft: str, evidence_text: str) -> str:
