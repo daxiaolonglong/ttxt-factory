@@ -167,3 +167,53 @@ def test_pending_job_dedupe_still_wins_before_cooldown(tmp_path):
     assert second["queued_job_id"] == first["queued_job_id"]
     assert "不重复入队" in second["note"] and "冷却" not in second["note"]
     assert len(_jobs(kwargs["system_db"])) == 1
+
+
+# ---------------------------------------------------------------- T-08:反哺真的按 gap 词过滤 + 冷却退避
+
+
+def test_feedback_enqueue_carries_keyword_filter(tmp_path):
+    """T-08 实测根因:反哺任务只带 ``keywords`` 不带 ``keyword_filter``,runner 不设入库闸门,
+    采回来的整源条目与 gap 词无关 ⇒ ``keyword_performance.collected`` 永远是 0
+    (technology 的 ``效率工具`` 在 48 条入库后仍是 0)。"""
+    kwargs, sources_path = _env(tmp_path)
+    first = keywords.auto_feedback("demo", sources_path=sources_path, **kwargs)
+    con = sqlite3.connect(kwargs["system_db"])
+    try:
+        meta = json.loads(con.execute(
+            "SELECT meta_json FROM crawl_jobs WHERE id=?", (first["queued_job_id"],)
+        ).fetchone()[0])
+    finally:
+        con.close()
+    assert meta["reason"] == "keyword_gap_feedback"
+    assert meta["keyword_filter"] == first["gap_keywords"], "补采必须按 gap 词过滤,否则采回来也不归这个词"
+    assert meta["keywords"] == first["gap_keywords"]
+
+
+def test_effective_cooldown_escalates_and_caps():
+    assert keywords._effective_cooldown_hours(24.0, 0) == 24.0
+    assert keywords._effective_cooldown_hours(24.0, 1) == 48.0
+    assert keywords._effective_cooldown_hours(24.0, 2) == 96.0
+    assert keywords._effective_cooldown_hours(24.0, 3) == keywords.MAX_FEEDBACK_COOLDOWN_HOURS
+    assert keywords._effective_cooldown_hours(24.0, 99) == keywords.MAX_FEEDBACK_COOLDOWN_HOURS
+    assert keywords._effective_cooldown_hours(0.0, 5) == 0.0, "cool=0 是逃生阀,不得被退避逻辑改写"
+
+
+def test_second_window_escalates_after_a_real_enqueue(tmp_path):
+    """真实入队过 1 次后窗口变 48h:30h 前那次入队按旧逻辑(24h)会再排一次,现在应继续冷却。"""
+    from datetime import datetime, timedelta
+
+    kwargs, sources_path = _env(tmp_path)
+    first = keywords.auto_feedback("demo", sources_path=sources_path, **kwargs)
+    _finish_like_real_drain(first["queued_job_id"], kwargs["system_db"])
+
+    state = store.load_dispatch_state(kwargs["db_path"])
+    entry = state["keyword_feedback"]["formal_one"]
+    entry["last_enqueued_at"] = (datetime.now().astimezone() - timedelta(hours=30)).isoformat(timespec="seconds")
+    store.save_dispatch_state(state, db_path=kwargs["db_path"])
+
+    second = keywords.auto_feedback("demo", sources_path=sources_path, **kwargs)
+    assert second["queued_job_id"] is None
+    assert second["cooldown_hours_effective"] == 48.0
+    assert second["cooldown_remaining_hours"] and second["cooldown_remaining_hours"] > 0
+    assert len(_jobs(kwargs["system_db"])) == 1

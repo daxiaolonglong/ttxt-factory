@@ -42,6 +42,22 @@ VIRAL_STATUS_NO_HITS = "no_measured_hits"
 # (job 74/75/76/77),gap 词始终是那两个,health 一支每次 ``inserted 0 / duplicates 25``
 # ⇒ gap 补不上却每轮重新排队,白烧限速预算、队列永不清空。
 DEFAULT_FEEDBACK_COOLDOWN_HOURS = 24.0
+# T-08(2026-11-18):固定 24h 窗口挡不住"永远采不动"的 gap 词 —— technology 的 ``效率工具``
+# 在 4 次反哺(job 74/76/78/149/182,共入库 48 条)后 collected 仍是 0,因为入库条目根本没有
+# 这个词。冷却必须随**真实入队次数**指数退避,否则每 24h 重烧一次限速预算。
+MAX_FEEDBACK_COOLDOWN_HOURS = 168.0
+
+
+def _effective_cooldown_hours(base_hours: float, enqueued: int) -> float:
+    """反哺冷却按真实入队次数指数退避:24h → 48h → 96h → … 封顶 7 天。
+
+    ``base_hours <= 0`` 是运维逃生阀,保持"每轮都入队";``enqueued`` 只数**真正入队**的次数
+    (冷却中跳过的不算),否则调度器每 4h 一跑会把窗口瞬间顶到上限。
+    """
+    if base_hours <= 0:
+        return 0.0
+    exponent = max(0, min(int(enqueued), 8))
+    return min(base_hours * (2 ** exponent), MAX_FEEDBACK_COOLDOWN_HOURS)
 
 
 def _cooldown_remaining_hours(last_enqueued_at: str | None, cooldown_hours: float) -> float | None:
@@ -304,6 +320,7 @@ def auto_feedback(
     job_id: int | None = None
     job_note = None
     cooldown_remaining: float | None = None
+    cooldown_effective: float | None = None
     last_enqueued_at: str | None = None
     feedback_attempts: int | None = None
     if gaps:
@@ -333,25 +350,33 @@ def auto_feedback(
                 last_enqueued_at = entry.get("last_enqueued_at")
                 attempts = int(entry.get("attempts") or 0) + 1
                 feedback_attempts = attempts
-                cooldown_remaining = _cooldown_remaining_hours(last_enqueued_at, cooldown_hours)
+                enqueued = int(entry.get("enqueued") or 0)
+                effective_cooldown = _effective_cooldown_hours(cooldown_hours, enqueued)
+                cooldown_effective = effective_cooldown
+                cooldown_remaining = _cooldown_remaining_hours(last_enqueued_at, effective_cooldown)
                 if cooldown_remaining is not None:
                     # 不入队也要计数:尝试次数是"这个 gap 词采不动"的证据,不是入队的副产品。
                     entry = {**entry, "attempts": attempts}
                     job_note = (
                         f"冷却中:距上次反哺入队还需 {cooldown_remaining:g} 小时"
-                        f"(窗口 {cooldown_hours:g} 小时),本次不入队;该来源累计第 {attempts} 次反哺尝试"
+                        f"(窗口 {effective_cooldown:g} 小时,已真实入队 {enqueued} 次),本次不入队;"
+                        f"该来源累计第 {attempts} 次反哺尝试"
                     )
                 else:
+                    # T-08:反哺必须带 ``keyword_filter``,否则采回来的整源条目与 gap 词无关,
+                    # ``keyword_performance.collected`` 永远是 0(实测 48 条入库后仍是 0)。
                     job_id = store.create_crawl_job(
                         target_source.id,
                         category,
                         db_path=system_db,
                         meta={"reason": "keyword_gap_feedback", "keywords": gaps,
+                              "keyword_filter": gaps,
                               "dispatched_via": "keyword_feedback", "attempt": attempts},
                     )
-                    job_note = "已入队补充采集任务(不自动执行)"
+                    job_note = "已入队补充采集任务(不自动执行;入库侧按 gap 词过滤)"
                     last_enqueued_at = cfg.now_iso()
-                    entry = {"last_enqueued_at": last_enqueued_at, "attempts": attempts}
+                    entry = {"last_enqueued_at": last_enqueued_at, "attempts": attempts,
+                             "enqueued": enqueued + 1}
                 feedback_state[target_source.id] = entry
                 state["keyword_feedback"] = feedback_state
                 store.save_dispatch_state(state, db_path=target)
@@ -366,6 +391,7 @@ def auto_feedback(
         "queued_job_id": job_id,
         "note": job_note,
         "cooldown_hours": cooldown_hours,
+        "cooldown_hours_effective": cooldown_effective,
         "cooldown_remaining_hours": cooldown_remaining,
         "last_enqueued_at": last_enqueued_at,
         "feedback_attempts": feedback_attempts,
