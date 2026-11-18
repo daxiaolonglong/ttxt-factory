@@ -120,7 +120,7 @@ def test_analyze_reports_per_stage_timings(tmp_path):
     kwargs = dict(db_path=db_path, system_db=tmp_path / "sys.db", evidence_dir=tmp_path / "feedback")
     out = analyze.run_analysis("demo", **kwargs)
     assert set(out["stage_seconds"]) == {
-        "seed", "score_keywords", "auto_feedback", "viral", "knowledge", "index",
+        "seed", "viral", "mine_keywords", "score_keywords", "auto_feedback", "knowledge", "index",
     }, "run_analysis must report one timing per stage (T-17 baseline)"
 
 

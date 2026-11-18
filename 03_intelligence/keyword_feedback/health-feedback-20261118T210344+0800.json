@@ -1,0 +1,12 @@
+{
+  "category": "health",
+  "generated_at": "2026-11-18T21:03:44+08:00",
+  "gap_keywords": [],
+  "recovered_keywords": 1,
+  "queued_job_id": null,
+  "note": null,
+  "cooldown_hours": 24.0,
+  "cooldown_remaining_hours": null,
+  "last_enqueued_at": null,
+  "feedback_attempts": null
+}

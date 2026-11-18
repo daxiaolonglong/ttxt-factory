@@ -32,6 +32,11 @@ def run_analysis(
     path = store.migrate_articles_db(category, db_path=db_path)
     stages: dict[str, float] = {}
     seed_total = _timed(stages, "seed", keywords.seed_keywords, category, path)
+    # R28:顺序改为 seed → viral → mine → score → feedback。
+    # 原顺序里 auto_feedback 跑在 viral 之前,导致「先按旧标签挖词、再刷新标签」;
+    # 现在标签先刷新,挖词与评分用的是同一轮标签,反馈最后按 gap 入队。
+    viral_stats = _timed(stages, "viral", viral.label_category, category, path)
+    mined_stats = _timed(stages, "mine_keywords", keywords.mine_keywords, category, path)
     keyword_stats = _timed(stages, "score_keywords", keywords.score_keywords, category, path)
     feedback_stats = _timed(
         stages,
@@ -44,7 +49,6 @@ def run_analysis(
             evidence_dir=evidence_dir,
         ),
     )
-    viral_stats = _timed(stages, "viral", viral.label_category, category, path)
     knowledge_stats = _timed(stages, "knowledge", knowledge.build_assets, category, path)
     # T-17:index 段实测 236s(整库重建)。默认走 sync_index 增量(台账 vs articles 推导
     # 变更集,外部写方塞的行照样被覆盖);``--full`` 或前提不成立自动回退整库重建。
@@ -57,6 +61,7 @@ def run_analysis(
         "category": category,
         "seeded_keywords": seed_total,
         "keywords": keyword_stats,
+        "mined_keywords": mined_stats,
         "feedback": feedback_stats,
         "viral": viral_stats,
         "knowledge": knowledge_stats,

@@ -60,3 +60,7 @@ desktop.ini
 .DS_Store
 .vscode/
 .idea/
+.trae/
+
+# ---- 分词缓存(挖词词性闸门用 jieba;缓存钉在 07_tmp,根目录这份是历史残留)----
+jieba.cache

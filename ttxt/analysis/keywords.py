@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import math
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -370,3 +372,434 @@ def auto_feedback(
         file_written = str(out_path)
     evidence["evidence_file"] = file_written
     return evidence
+
+
+# ---------------------------------------------------------------------------
+# R28:关键词发现(闭环缺的另一半)
+#
+# 实测缺口(2026-11-18):``keywords`` 表的来源只有 ``seed_keywords``(origin='seed'),
+# 全项目没有任何"从语料里长出新词"的代码 ⇒ ``auto_feedback`` 只能反复为**同样那几个种子词**
+# 入队采集。目标②要的是"模型知道什么是爆款 ⇒ 把学到的话题反馈给采集",缺了这一步,
+# 系统永远只会在三个种子词里打转,不可能越来越聪明。
+#
+# 口径(全部可复算,不引入模型调用、不装分词词典——要挖的正是词典里没有的新词):
+#   - 只从**标题**取词:中文连续片段切 2-4 字 n-gram(跨标点的拼接一律不取);
+#   - 爆款样本 = ``viral_labels`` 里 label 为 verified_viral / potential 的文章;
+#   - 打分 = lift × sqrt(爆款命中篇数),lift = 爆款中出现率 / 全库出现率;
+#   - 只收在 ≥ ``min_docs`` 篇**不同**爆款文章里出现、且 lift ≥ ``min_lift`` 的词;
+#   - 五道"碎片/通用词闸门"(R28 实测:纯 n-gram 首轮 10 个词里 6 个是跨词边界的碎片):
+#       ① 首尾虚词拒收;② **出现次数**级别的延长判定:若某候选的全部出现都被同一邻字
+#          延长成更长的串(occ 完全相等),它就不是词;③ 左右邻字熵 ≥ ``_ENTROPY_MIN``:
+#          真词能跟不同字搭配,碎片只能跟固定那几个字搭配;④ 类目特异性 ≥
+#          ``MINE_MIN_SPECIFICITY``:每个类目都一样常见的词是通用词;⑤ 词性:纯副词/
+#          时间/数词/代词/动词不是话题,首尾切出单字说明跨了词边界;
+#   - 停用词、纯数字/字母、与现有词互为子串的候选一律丢弃(不制造近重复关键词);
+#   - 旧挖词退场(top_n 之外的 origin='mined' 连带评分行一起删);语料太少不出手;
+#   - **类目没标定就不挖**:阈值还是设计假定,据此挖词等于把假说当事实(与 score_keywords 同口径)。
+MINE_ORIGIN = "mined"
+MINE_MIN_DOCS = 3
+MINE_MIN_LIFT = 2.0
+MINE_TOP_N = 10
+# 挖词是"当前在火什么",不是全库考古:只挖最近 N 篇,顺便把复杂度钉在可控范围。
+MINE_MAX_TITLES = 20000
+# 语料少于这个数不做"旧挖词退场":一轮语料不够就把词表清空是自伤。
+MINE_PRUNE_MIN_TITLES = 20
+_NGRAM_MIN = 2
+_NGRAM_MAX = 4       # 候选词长度上限
+_COUNT_MAX = 5       # 统计到 5 字:4 字候选要靠"能不能再延长一个字"判碎片
+_ENTROPY_MIN = 0.5   # 左右邻字熵下限(自然对数):0.5 ≈ 至少两种邻字且不极端偏斜
+# 第四道闸门「类目特异性」:同一个词在本类目的出现率 / 其他类目出现率的中位数。
+# 实测(2026-11-18 technology):「最后 / 已有 / 年后 / 安全 / 亿美元」全都能过前三道闸门,
+# 但它们在每个类目的标题里都一样常见 —— 那是通用词,不是话题。真话题(航天/神舟二十)
+# 只在某一个类目里密集出现,比值差一个数量级以上。
+MINE_MIN_SPECIFICITY = 2.0
+MINE_BACKGROUND_TITLES = 5000   # 每个其他类目最多取多少条标题当背景(只读标题,不读标签)
+# R28 实测(2026-11-18 social):类目特异性挡不住「落地/企业」这类**全站通用**词——它们在
+# 其他类目也不常见(其他类目是科技/财经/历史),但在本类目里到处都是,做采集词只会拉回噪音。
+# 判据用"出现率"而不是绝对篇数:18000 个标题里 3% 以上的词是通用词,不是话题。
+# 小语料(< 2000 个标题)不启用:197 篇历史语料里「毛主席」占 7.6%,但它确实是话题。
+MINE_MAX_PREVALENCE = 0.02
+MINE_MAX_PREVALENCE_MIN_TITLES = 2000
+# 第五道闸门「词性」:纯副词/时间词/数词/量词/代词/动词的 n-gram 不是话题。
+# 实测(2026-11-18 technology):「最后 / 已有 / 年后 / 亿美元」都能过前四道闸门(类目特异性
+# 也有 2.0~4.0),但词性分别是 f / v / m+f / m —— 它们不是话题,是句子成分。
+# 另:首/尾切出单字词(且整体 ≥3 字)说明 n-gram 跨过了词边界(中国科 → 中国|科)。
+_POS_REJECT = frozenset({
+    "f", "t", "m", "q", "d", "r", "p", "c", "u", "y", "e", "o",
+    "v", "vd", "vn", "a", "ad", "an",
+})
+_POS_READY = False
+_CJK_RUN = re.compile(r"[\u4e00-\u9fa5]+")
+_VIRAL_LABELS = (viral.LABEL_VERIFIED, viral.LABEL_POTENTIAL)
+# 标题里的高频虚词/套话:进了关键词只会污染覆盖统计与采集过滤,不会带来新话题
+STOPWORDS = frozenset({
+    "我们", "他们", "她们", "你们", "自己", "大家", "有人", "别人",
+    "这个", "那个", "这些", "那些", "这样", "那样", "这种", "那种",
+    "一个", "一种", "一些", "什么", "怎么", "怎样", "如何", "为何", "为什么",
+    "可以", "没有", "不是", "就是", "已经", "还是", "但是", "因为", "所以",
+    "如果", "不过", "而且", "并且", "然后", "现在", "时候", "今天", "昨天", "明天",
+    "记者", "报道", "视频", "网友", "评论", "曝光", "揭秘", "真相", "震惊",
+    "注意", "提醒", "建议", "一定", "千万", "必须", "不要", "需要",
+    "表示", "认为", "发现", "最新", "重要", "到底", "居然", "原来",
+    "事情", "问题", "方法", "情况", "方面", "时间", "地方", "东西", "真的", "其实",
+    "专家", "数据显示", "值得注意",
+    # R28 实测第二轮(369 篇 technology 标题):留下的 11 个候选里还有 6 个不是话题的词。
+    # 「二十」这类纯数词另用 _NUMERAL_CHARS 判,其余在这里补。
+    "突然", "完成", "没人", "世界", "国人",
+})
+# R28 实测:纯数词串(二十 / 三百)没有任何话题含义,不该进关键词表。
+_NUMERAL_CHARS = frozenset("〇零一二三四五六七八九十百千万亿两")
+# R28 实测(technology 首次跑出 10 个词里有 6 个是碎片:的地/国这/何中/为何中…):
+# 以这些虚词开头或结尾的 n-gram 一定是跨词边界切出来的碎片,直接拒。
+_PARTICLES = frozenset("的了是在和与及也都就被把让对从到为这那之其而且个们着过吧呢吗啊")
+
+
+def _cjk_runs(text: str) -> list[str]:
+    return _CJK_RUN.findall(text or "")
+
+
+def _fragment_grams(occurrences: dict[str, int]) -> set[str]:
+    """找出"全部出现都被同一邻字延长"的碎片(R28 第二道闸门)。
+
+    判据用**出现次数**而不是文档数:``为何中`` 与 ``为何中国`` 的出现次数相等 ⇒ 每一次
+    ``为何中`` 后面都跟着 ``国``,它只是 ``为何中国`` 的前缀,不单独成词。
+    文档数口径做不到这件事(同一篇里既有 ``中国科学`` 又有 ``中国科技`` 时,``中国科``
+    的文档数会大于任何一个更长的串,于是永远漏掉)。
+    """
+    fragments: set[str] = set()
+    for gram, count in occurrences.items():
+        if len(gram) < _NGRAM_MIN + 1:
+            continue
+        for part in (gram[:-1], gram[1:]):
+            if len(part) >= _NGRAM_MIN and occurrences.get(part, 0) == count:
+                fragments.add(part)
+    return fragments
+
+
+def _neighbor_entropy(
+    candidates: set[str], titles: list[str]
+) -> dict[str, tuple[float, float]]:
+    """候选词的左右邻字熵(第三道闸门):真词能跟不同字搭配,碎片只能跟固定字搭配。
+
+    标题首尾用 ``^`` / ``$`` 当成一种邻字参与统计(总在句首出现的词也会被如实记为低熵)。
+    """
+    left: dict[str, dict[str, int]] = {}
+    right: dict[str, dict[str, int]] = {}
+    for title in titles:
+        for run in _cjk_runs(title):
+            length = len(run)
+            for size in range(_NGRAM_MIN, _NGRAM_MAX + 1):
+                for start in range(length - size + 1):
+                    gram = run[start:start + size]
+                    if gram not in candidates:
+                        continue
+                    left_char = run[start - 1] if start else "^"
+                    right_char = run[start + size] if start + size < length else "$"
+                    left.setdefault(gram, {})
+                    left[gram][left_char] = left[gram].get(left_char, 0) + 1
+                    right.setdefault(gram, {})
+                    right[gram][right_char] = right[gram].get(right_char, 0) + 1
+
+    def _entropy(counter: dict[str, int] | None) -> float:
+        if not counter:
+            return 0.0
+        total = sum(counter.values())
+        return -sum((count / total) * math.log(count / total) for count in counter.values())
+
+    return {gram: (_entropy(left.get(gram)), _entropy(right.get(gram))) for gram in candidates}
+
+
+def _pos_rejected(gram: str) -> tuple[bool, str]:
+    """词性闸门:返回 ``(是否拒绝, 词性串)``。
+
+    没有分词器时**不启用**这道闸门(返回 ``(False, "")``):装不上依赖不能把挖词停掉,
+    但也不能退化成"全过"之外的第二种瞎猜方式。
+    """
+    global _POS_READY
+    try:
+        import jieba
+        import jieba.posseg as pseg
+    except Exception:  # noqa: BLE001 - 缺依赖时跳过闸门
+        return False, ""
+    if not _POS_READY:
+        # jieba 会在当前目录写 jieba.cache:钉到 07_tmp,不给仓库根目录留垃圾
+        jieba.dt.tmp_dir = str(cfg.SCRATCH_DIR)
+        _POS_READY = True
+    tokens = [(word, flag) for word, flag in pseg.cut(gram) if word.strip()]
+    if not tokens:
+        return True, ""
+    flags = "/".join(flag for _, flag in tokens)
+    if all(flag in _POS_REJECT for _, flag in tokens):
+        return True, flags
+    if len(gram) >= 3 and (len(tokens[0][0]) == 1 or len(tokens[-1][0]) == 1):
+        return True, flags
+    return False, flags
+
+
+def _background_corpora(category: str, own_db: Path) -> list[tuple[str, list[str]]]:
+    """其他类目的**标题**(只读标题,不读标签:类目隔离不能破)。
+
+    用途只有一个:判断一个词是不是"通用词"。取不到(其他类目还没建库/读失败)就返回空,
+    调用方据此跳过类目特异性闸门,而不是把词全判成通用词。
+    """
+    try:
+        slugs = [
+            str(item.get("slug"))
+            for item in cfg.load_registry().get("categories", [])
+            if item.get("slug")
+        ]
+    except Exception:  # noqa: BLE001 - 注册表读不出来就当没有背景语料
+        return []
+    own = Path(own_db).resolve()
+    corpora: list[tuple[str, list[str]]] = []
+    for slug in slugs:
+        if slug == category:
+            continue
+        path = cfg.CATEGORIES_DIR / slug / "articles.db"
+        if not path.exists() or path.resolve() == own:
+            continue
+        try:
+            con = connect(path)
+        except Exception:  # noqa: BLE001 - 单个类目库坏了不能拖累挖词
+            continue
+        try:
+            titles = [
+                str(row["title"])
+                for row in con.execute(
+                    "SELECT title FROM articles ORDER BY id DESC LIMIT ?", (MINE_BACKGROUND_TITLES,)
+                )
+                if str(row["title"] or "").strip()
+            ]
+        except Exception:  # noqa: BLE001
+            titles = []
+        finally:
+            con.close()
+        if titles:
+            corpora.append((slug, titles))
+    return corpora
+
+
+def _drop_generic_candidates(
+    candidates: dict[str, dict],
+    doc_freq: dict[str, int],
+    total_docs: int,
+    background: list[tuple[str, list[str]]],
+    min_specificity: float,
+) -> dict[str, dict]:
+    """类目特异性闸门:只在本类目密集出现的词才算话题候选。
+
+    ``specificity = 本类目出现率 / 其他类目出现率的中位数``。其他类目都几乎不出现 ⇒ 比值大;
+    每个类目标题里都一样的词(最后/已有/安全…)⇒ 比值接近 1,不是话题。
+    没有背景语料时不启用这道闸门(不凭空判通用词)。
+    """
+    if not background:
+        return candidates
+    floor = 1.0 / max(1, total_docs)   # 其他类目 0 次时给个下限,避免除零把比值吹成无穷
+    kept: dict[str, dict] = {}
+    for gram, item in candidates.items():
+        own_prev = doc_freq[gram] / total_docs
+        prevalences = sorted(
+            sum(1 for title in titles if gram in title) / len(titles) for _, titles in background
+        )
+        base = prevalences[len(prevalences) // 2]
+        specificity = own_prev / max(base, floor)
+        if specificity < min_specificity:
+            continue
+        item["specificity"] = round(specificity, 3)
+        kept[gram] = item
+    return kept
+
+
+def mine_keywords(
+    category: str,
+    db_path: Path | None = None,
+    min_docs: int = MINE_MIN_DOCS,
+    min_lift: float = MINE_MIN_LIFT,
+    top_n: int = MINE_TOP_N,
+    specificity_min: float = MINE_MIN_SPECIFICITY,
+    background: list[tuple[str, list[str]]] | None = None,
+) -> dict:
+    """从**已标定的**爆款标题里挖新关键词,写入 ``keywords``(origin='mined')。
+
+    只读本类目,不改已有词、不入队(入队仍由 ``auto_feedback`` 在下一轮按 gap 决定);
+    返回的 ``top`` 是完整打分明细,便于任何一次引用都能复算。
+    ``background`` 传 ``None`` ⇒ 自动读其他类目标题当通用词背景(类目隔离:只读标题);
+    传 ``[]`` ⇒ 关闭类目特异性闸门(测试用,保证结果只取决于本库)。
+    """
+    target = Path(db_path) if db_path is not None else cfg.CATEGORIES_DIR / category / "articles.db"
+    con = connect(target)
+    try:
+        calibration = viral.load_calibration(con)
+        if not calibration:
+            viral_docs = con.execute(
+                "SELECT COUNT(DISTINCT article_id) FROM viral_labels WHERE label IN (%s)"
+                % ",".join("?" * len(_VIRAL_LABELS)),
+                _VIRAL_LABELS,
+            ).fetchone()[0]
+            return {"status": "skipped_uncalibrated", "viral_docs": int(viral_docs),
+                    "candidates": 0, "inserted": 0, "note": "类目未标定,不据设计假定阈值挖词"}
+        viral_ids = {
+            int(row["article_id"])
+            for row in con.execute(
+                "SELECT DISTINCT article_id FROM viral_labels WHERE label IN (%s)"
+                % ",".join("?" * len(_VIRAL_LABELS)),
+                _VIRAL_LABELS,
+            )
+        }
+        # R28 实测(2026-11-18 social):同一标题被上百篇文章重复搬用,连爆款标签也一起复制
+        # (「物理AI进入规模化验证期…」4 篇),于是「入规/成资」这种跨词边界碎片被当成
+        # "4 篇不同爆款都在用"的话题。**同一个标题是同一次编辑选择,不是多次证据** ⇒
+        # 按标题去重,只要有一篇是同标题爆款,这个标题就算爆款标题。
+        unique_titles: dict[str, list] = {}
+        raw_rows = 0
+        for row in con.execute(
+            "SELECT id, title FROM articles ORDER BY id DESC LIMIT ?", (MINE_MAX_TITLES,)
+        ):
+            text = str(row["title"] or "").strip()
+            if not text:
+                continue
+            raw_rows += 1
+            article_id = int(row["id"])
+            entry = unique_titles.get(text)
+            if entry is None:
+                unique_titles[text] = [article_id, article_id in viral_ids]
+            elif article_id in viral_ids and not entry[1]:
+                entry[1] = True
+        titles = [(article_id, text, is_viral)
+                  for text, (article_id, is_viral) in unique_titles.items()]
+        duplicate_titles = raw_rows - len(titles)
+        # 近重复判定只看**非挖词**来源:挖出来的词每轮重算,让上一轮的挖词挡住本轮候选
+        # 会让词表卡在旧说法上(实测:上一版算法留下的「中国科」会挡掉更准的「中国科学」)。
+        existing = [
+            str(row["keyword"])
+            for row in con.execute("SELECT keyword FROM keywords WHERE origin<>?", (MINE_ORIGIN,))
+        ]
+        viral_in_corpus = {article_id for article_id, _, is_viral in titles if is_viral}
+        if len(viral_in_corpus) < min_docs or not titles:
+            return {"status": "no_data", "viral_docs": len(viral_in_corpus),
+                    "candidates": 0, "inserted": 0}
+
+        total_docs = len(titles)
+        doc_freq: dict[str, int] = {}
+        occurrences: dict[str, int] = {}
+        viral_doc_freq: dict[str, int] = {}
+        for article_id, title, is_viral in titles:
+            for run in _cjk_runs(title):
+                length = len(run)
+                seen: set[str] = set()
+                for size in range(_NGRAM_MIN, _COUNT_MAX + 1):
+                    for start in range(length - size + 1):
+                        gram = run[start:start + size]
+                        occurrences[gram] = occurrences.get(gram, 0) + 1
+                        if gram in seen:
+                            continue
+                        seen.add(gram)
+                        doc_freq[gram] = doc_freq.get(gram, 0) + 1
+                        if is_viral:
+                            viral_doc_freq[gram] = viral_doc_freq.get(gram, 0) + 1
+        fragments = _fragment_grams(occurrences)
+        candidates: dict[str, dict] = {}
+        for gram, viral_docs in viral_doc_freq.items():
+            if len(gram) > _NGRAM_MAX or viral_docs < min_docs or gram in STOPWORDS:
+                continue
+            if gram in fragments or gram[0] in _PARTICLES or gram[-1] in _PARTICLES:
+                continue
+            if all(char in _NUMERAL_CHARS for char in gram):
+                continue
+            pos_rejected, pos = _pos_rejected(gram)
+            if pos_rejected:
+                continue
+            # 通用词闸门:大语料里到处都有的词做采集词只会拉回噪音(小语料不启用,见常量注释)
+            if (total_docs >= MINE_MAX_PREVALENCE_MIN_TITLES
+                    and doc_freq[gram] / total_docs >= MINE_MAX_PREVALENCE):
+                continue
+            if any(gram in word or word in gram for word in existing):
+                continue
+            lift = (viral_docs / len(viral_in_corpus)) / (doc_freq[gram] / total_docs)
+            if lift < min_lift:
+                continue
+            candidates[gram] = {
+                "keyword": gram,
+                "viral_docs": viral_docs,
+                "lift": round(lift, 3),
+                "score": round(lift * math.sqrt(viral_docs), 3),
+                "pos": pos,
+            }
+        # 类目特异性只对候选集统计:每个候选 × 每个背景类目做一次子串扫描,与库大小无关。
+        if background is None:
+            background = _background_corpora(category, target)
+        candidates = _drop_generic_candidates(candidates, doc_freq, total_docs, background, specificity_min)
+        # 熵只对候选集算一遍:每个位置最多 3 次哈希查找,与库大小线性相关。
+        entropy = _neighbor_entropy(set(candidates), [title for _, title, _ in titles])
+        scored: list[dict] = []
+        for gram, item in candidates.items():
+            left_entropy, right_entropy = entropy.get(gram, (0.0, 0.0))
+            if min(left_entropy, right_entropy) < _ENTROPY_MIN:
+                continue
+            item["left_entropy"] = round(left_entropy, 3)
+            item["right_entropy"] = round(right_entropy, 3)
+            scored.append(item)
+        # 最长优先去碎片:同一批文章里既切出「为何中」又切出「为何中国」时,只保留长的那个。
+        # 判据是**爆款命中篇数完全相等**(说明短词在这些文章里没有任何额外覆盖),不是凭长度拍脑袋。
+        by_docs: dict[int, list[str]] = {}
+        for item in scored:
+            by_docs.setdefault(item["viral_docs"], []).append(item["keyword"])
+        kept: list[dict] = []
+        for item in sorted(scored, key=lambda entry: (-len(entry["keyword"]), entry["keyword"])):
+            word = item["keyword"]
+            if any(word != other and word in other for other in by_docs[item["viral_docs"]]):
+                continue
+            kept.append(item)
+        scored = kept
+        scored.sort(key=lambda item: (-item["score"], -item["viral_docs"], item["keyword"]))
+        picked = scored[: max(0, int(top_n))]
+        inserted = 0
+        stamp = cfg.now_iso()
+        for item in picked:
+            cur = con.execute(
+                "INSERT OR IGNORE INTO keywords(keyword, category, origin, status, created_at)"
+                " VALUES (?, ?, ?, 'active', ?)",
+                (item["keyword"], category, MINE_ORIGIN, stamp),
+            )
+            inserted += int(cur.rowcount or 0)
+        # 挖词是滚动话题:这一轮不再产出的旧挖词必须退场,否则词表只增不减、gap 反哺永远
+        # 围着早就过时的词打转(实测:上一版算法留下的 10 个碎片词一直留在 technology 里)。
+        # 语料太少时不动(不能因为一轮语料不够就把词表清空)。
+        pruned = 0
+        if total_docs >= MINE_PRUNE_MIN_TITLES:
+            keep = [item["keyword"] for item in picked]
+            target_ids = [
+                int(row["id"])
+                for row in con.execute(
+                    "SELECT id, keyword FROM keywords WHERE origin=? AND category=?", (MINE_ORIGIN, category)
+                )
+                if str(row["keyword"]) not in keep
+            ]
+            for keyword_id in target_ids:
+                con.execute("DELETE FROM keyword_performance WHERE keyword_id=?", (keyword_id,))
+                con.execute("DELETE FROM keywords WHERE id=?", (keyword_id,))
+                pruned += 1
+        # 自愈:历史清理(手动删词、旧版本没有配套删 performance)会留下指向已不存在的
+        # keyword_id 的评分行。它们不参与任何 join,但会让"词表到底有多少词"的核对永远对不上。
+        con.execute(
+            "DELETE FROM keyword_performance WHERE keyword_id NOT IN (SELECT id FROM keywords)"
+        )
+        con.commit()
+        return {
+            "status": "ok",
+            "viral_docs": len(viral_in_corpus),
+            "corpus_titles": total_docs,
+            "duplicate_titles_dropped": duplicate_titles,
+            "candidates": len(scored),
+            "inserted": inserted,
+            "pruned": pruned,
+            "min_docs": min_docs,
+            "min_lift": min_lift,
+            "specificity_min": specificity_min,
+            "max_prevalence": MINE_MAX_PREVALENCE,
+            "background_categories": len(background),
+            "entropy_min": _ENTROPY_MIN,
+            "top": picked,
+        }
+    finally:
+        con.close()
