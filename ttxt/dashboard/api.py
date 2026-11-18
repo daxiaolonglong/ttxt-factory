@@ -158,7 +158,7 @@ def analysis(slug: str) -> dict:
         evaluations = [
             dict(row)
             for row in con.execute(
-                "SELECT draft_id, version, score, issues_json, created_at FROM evaluation_history ORDER BY id DESC LIMIT 20"
+                "SELECT draft_id, version, score, evaluator, issues_json, created_at FROM evaluation_history ORDER BY id DESC LIMIT 20"
             )
         ]
     finally:

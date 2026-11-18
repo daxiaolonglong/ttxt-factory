@@ -209,8 +209,8 @@ function renderAnalysis(data) {
   setContent(
     "evaluations-table",
     table(
-      ["草稿ID", "版本", "评分", "问题", "时间"],
-      (data.evaluations || []).map((e) => [e.draft_id, e.version, e.score, e.issues_json, e.created_at])
+      ["草稿ID", "版本", "评分", "评审模型", "问题", "时间"],
+      (data.evaluations || []).map((e) => [e.draft_id, e.version, e.score, e.evaluator, e.issues_json, e.created_at])
     )
   );
 }

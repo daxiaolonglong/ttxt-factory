@@ -27,17 +27,16 @@ def _base_url(base_url: str | None = None) -> str:
     return str(_config().get("base_url", "http://127.0.0.1:8080")).rstrip("/")
 
 
-def _headers() -> dict[str, str]:
+def _headers(api_key: str | None = None) -> dict[str, str]:
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    env_name = str(_config().get("api_key_env", "STRATA_API_KEY"))
-    key = os.environ.get(env_name)
+    key = (api_key or os.environ.get(str(_config().get("api_key_env", "STRATA_API_KEY"))) or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
     return headers
 
 
-def _get_json(path: str, base_url: str | None, timeout: float) -> dict | None:
-    request = urllib.request.Request(_base_url(base_url) + path, headers=_headers())
+def _get_json(path: str, base_url: str | None, timeout: float, api_key: str | None = None) -> dict | None:
+    request = urllib.request.Request(_base_url(base_url) + path, headers=_headers(api_key))
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
@@ -49,8 +48,8 @@ def health(base_url: str | None = None, timeout: float = 3.0) -> dict | None:
     return _get_json("/health", base_url, timeout)
 
 
-def models(base_url: str | None = None, timeout: float = 5.0) -> list[str]:
-    payload = _get_json("/v1/models", base_url, timeout) or {}
+def models(base_url: str | None = None, timeout: float = 5.0, api_key: str | None = None) -> list[str]:
+    payload = _get_json("/v1/models", base_url, timeout, api_key) or {}
     return [item["id"] for item in payload.get("data", []) if item.get("id")]
 
 
@@ -70,22 +69,22 @@ def wait_ready(
     raise ModelError(f"model not ready within {timeout_s}s (last health: {last})")
 
 
-def resolve_model(base_url: str | None = None) -> str:
+def resolve_model(base_url: str | None = None, api_key: str | None = None) -> str:
     global _MODEL_CACHE
     if _MODEL_CACHE:
         return _MODEL_CACHE[0]
-    ids = models(base_url)
+    ids = models(base_url, api_key=api_key)
     if not ids:
         raise ModelError("no model available from /v1/models")
     _MODEL_CACHE = ids
     return ids[0]
 
 
-def _post_chat(payload: dict, base_url: str | None, timeout_s: float) -> dict:
+def _post_chat(payload: dict, base_url: str | None, timeout_s: float, api_key: str | None = None) -> dict:
     request = urllib.request.Request(
         _base_url(base_url) + "/v1/chat/completions",
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers=_headers(),
+        headers=_headers(api_key),
         method="POST",
     )
     with urllib.request.urlopen(request, timeout=timeout_s) as response:
@@ -100,6 +99,7 @@ def chat(
     timeout_s: float | None = None,
     model_id: str | None = None,
     enable_thinking: bool | None = None,
+    api_key: str | None = None,
 ) -> dict:
     global _MODEL_CACHE
     if timeout_s is None:
@@ -107,7 +107,7 @@ def chat(
     if enable_thinking is None:
         enable_thinking = bool(_config().get("enable_thinking_default", False))
     payload: dict[str, Any] = {
-        "model": model_id or resolve_model(base_url),
+        "model": model_id or resolve_model(base_url, api_key),
         "messages": messages,
         "max_tokens": max_tokens,
         "temperature": temperature,
@@ -116,14 +116,14 @@ def chat(
     }
     started = time.monotonic()
     try:
-        body = _post_chat(payload, base_url, timeout_s)
+        body = _post_chat(payload, base_url, timeout_s, api_key)
     except Exception as exc:  # noqa: BLE001 - 模型可能已切换,刷新后重试一次
         if model_id is not None:
             raise ModelError(f"chat failed: {exc}") from exc
         _MODEL_CACHE = []
-        payload["model"] = resolve_model(base_url)
+        payload["model"] = resolve_model(base_url, api_key)
         try:
-            body = _post_chat(payload, base_url, timeout_s)
+            body = _post_chat(payload, base_url, timeout_s, api_key)
         except Exception as retry_exc:  # noqa: BLE001
             raise ModelError(f"chat failed: {retry_exc}") from retry_exc
     choice = (body.get("choices") or [{}])[0]

@@ -26,7 +26,7 @@ from ttxt.logging import get_logger
 from ttxt.model_gate import client as model_client
 from ttxt.model_gate import gate
 
-from . import export, prompts, verifier
+from . import export, prompts, review as review_channel, verifier
 
 LOG = get_logger("writing")
 MAX_CLAIMS = 5
@@ -220,11 +220,15 @@ def _set_draft_status(db_path: Path, draft_id: str, version: int, status: str) -
     v1 明明被门禁拦下,却因 v2 通过而显示 passed(P13 报告实测 13 行全 passed、
     全表 0 行 rejected,版本账目失真)。循环语义本身就说明:比当前版本更早的版本
     都在门禁上失败过,因此它们的状态是 rejected。
+
+    状态口径(账本 T-05)是 ``REJECTED / AUTO_PASSED / INDEPENDENT_REVIEW_PASSED``;
+    导出目录与 CLI 回执仍用 ``passed/rejected``(落盘目录名不变)。2026-11-18 之前的
+    旧行是小写口径,不回刷——历史行只描述当时写下的事实。
     """
     con = connect(db_path)
     try:
         con.execute(
-            "UPDATE writing_history SET status = CASE WHEN version < ? THEN 'rejected' ELSE ? END "
+            "UPDATE writing_history SET status = CASE WHEN version < ? THEN 'REJECTED' ELSE ? END "
             "WHERE draft_id = ?",
             (version, status, draft_id),
         )
@@ -233,7 +237,14 @@ def _set_draft_status(db_path: Path, draft_id: str, version: int, status: str) -
         con.close()
 
 
-def _save_evaluation(db_path: Path, draft_id: str, version: int, review: dict, meta: dict | None = None) -> None:
+def _save_evaluation(
+    db_path: Path,
+    draft_id: str,
+    version: int,
+    review: dict,
+    meta: dict | None = None,
+    evaluator: str | None = None,
+) -> None:
     con = connect(db_path)
     try:
         con.execute(
@@ -242,7 +253,8 @@ def _save_evaluation(db_path: Path, draft_id: str, version: int, review: dict, m
             (
                 draft_id,
                 version,
-                "model_review",
+                # evaluator 必须是真的提供评审的模型 id,不能笼统写 "model_review"(账本 T-04/T-05 要能追责到模型)
+                evaluator or "model_review",
                 json.dumps({"criteria": "facts/structure/title/plain", **(meta or {})}, ensure_ascii=False),
                 review.get("score"),
                 json.dumps(
@@ -359,9 +371,11 @@ def _merge_findings(review: dict, issues: list[str], critical: list[str]) -> dic
 
 
 def _model_meta(model_call) -> dict:
-    """记录「写作与评审同模型」的评审独立性限制与当前 served_model。"""
+    """写作侧 served_model + 评审独立性。此刻还没有独立评审者,先如实记同源;
+    独立评审跑完后由 ``_apply_reviewer`` 按**真实 id 比较**改判(不许为了过门禁写死 false)。"""
     meta = {
         "same_model_review": True,
+        "reviewer_model": None,
         "reviewer_limitation": (
             "写作与模型评审由同一服务模型完成,评审独立性受限;"
             "事实门禁另由 verifier 确定性规则独立判定"
@@ -377,6 +391,52 @@ def _model_meta(model_call) -> dict:
     else:
         meta["note"] = "注入 model_call(测试/离线),未探测 served_model"
     return meta
+
+
+def _apply_reviewer(meta: dict, outcome: dict | None, error: str | None) -> None:
+    """按写作侧与评审侧**真实提供的模型 id** 判定独立性;拿不到证据就继续算同源。"""
+    reviewer = (outcome or {}).get("reviewer_model")
+    writer = meta.get("served_model")
+    independent = bool(reviewer and writer and reviewer != writer)
+    meta["reviewer_model"] = reviewer
+    meta["same_model_review"] = not independent
+    meta["reviewer_limitation"] = (
+        f"评审由独立服务模型 {reviewer} 完成,与写作模型 {writer} 不同源"
+        if independent
+        else "写作与模型评审由同一服务模型完成,评审独立性受限;"
+             "事实门禁另由 verifier 确定性规则独立判定"
+    )
+    if error:
+        meta["review_error"] = error
+        meta["reviewer_limitation"] += f";独立评审通道不可用:{error}"
+
+
+def _review_account(passed: bool, meta: dict, outcome: dict | None) -> str:
+    """T-05 的版本级状态口径:只有独立评审者真实存在(与写作模型不同 id)且评审自己说可发布,
+    才给 INDEPENDENT_REVIEW_PASSED;拿不到许可措辞就不给标签(fail-closed,不猜语义)。"""
+    if not passed:
+        return "REJECTED"
+    verdict = (outcome or {}).get("verdict") or {}
+    if outcome and not meta.get("same_model_review") and verdict.get("publishable"):
+        return "INDEPENDENT_REVIEW_PASSED"
+    return "AUTO_PASSED"
+
+
+def _review_summary(outcome: dict | None, error: str | None) -> dict:
+    """回执里的独立评审摘要:只放可公开字段,评审正文留精简片段(密钥与请求头不进回执)。"""
+    if outcome is None:
+        return {"attempted": error is not None, "available": False, "error": error}
+    return {
+        "attempted": True,
+        "available": True,
+        "reviewer_model": outcome["reviewer_model"],
+        "prompt": outcome["prompt"].split("\n\n", 1)[0],
+        "verdict_markers": outcome["verdict"],
+        "verdict_excerpt": outcome["verdict_text"][:600],
+        "finish_reason": outcome.get("finish_reason"),
+        "usage": outcome.get("usage"),
+        "elapsed_s": outcome.get("elapsed_s"),
+    }
 
 
 def _verified_review(model_call, draft, materials, evidence, enable_thinking, topic):
@@ -563,6 +623,8 @@ def write_article(
     gate_min_chars: int | None = None,
     material_min_full: int | None = None,
     material_min_sources: int | None = None,
+    independent_review: bool | None = None,
+    review_call=None,
 ) -> dict:
     writing_cfg = cfg.load_config().get("writing", {})
     if max_revisions is None:
@@ -657,7 +719,7 @@ def write_article(
     served_model = model_meta.get("served_model")
     _save_version(db_path, draft_id, category, topic, version, draft, served_model)
     review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
-    _save_evaluation(db_path, draft_id, version, review, model_meta)
+    _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
 
     passed = _passed(complete, review, gate_min_score)
     revisions = 0
@@ -682,11 +744,47 @@ def write_article(
         claims = parse_claims(claims_text)
         evidence = verify_claims(claims, materials)
         review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
-        _save_evaluation(db_path, draft_id, version, review, model_meta)
+        _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
         passed = _passed(complete, review, gate_min_score)
 
+    # 独立评审只在门禁已通过时跑(账本 T-04):被事实门禁拦下的稿子不值得再花一次评审配额。
+    # 通道不可用/模型同名 ⇒ 独立性按不成立处理,绝不为了好看把 same_model_review 改成 false。
+    review_outcome: dict | None = None
+    review_error: str | None = None
+    want_review = review_channel.review_config().get("enabled", False) if independent_review is None else independent_review
+    if passed and (want_review or review_call is not None):
+        try:
+            review_outcome = review_call(draft) if review_call is not None else review_channel.review(draft)
+        except review_channel.ReviewUnavailable as exc:
+            review_error = str(exc)
+    _apply_reviewer(model_meta, review_outcome, review_error)
+    if review_outcome:
+        _save_evaluation(
+            db_path,
+            draft_id,
+            version,
+            {"score": None, "issues": [], "critical": []},
+            {
+                **model_meta,
+                "criteria": "independent_review",
+                "prompt": review_outcome["prompt"],
+                "verdict": review_outcome["verdict_text"][:6000],
+                "usage": review_outcome.get("usage"),
+            },
+            evaluator=review_outcome["reviewer_model"],
+        )
+        if review_outcome["verdict"]["blocking"]:
+            review = _merge_findings(
+                review,
+                [],
+                ["独立评审判定不通过:" + ",".join(review_outcome["verdict"]["blocking_markers"])],
+            )
+            passed = False
+
+    # status 决定导出目录与回执口径;writing_history.status 用 T-05 的三态口径(独立复核成立才给独立标签)
     status = "passed" if passed else "rejected"
-    _set_draft_status(db_path, draft_id, version, status)
+    account = _review_account(passed, model_meta, review_outcome)
+    _set_draft_status(db_path, draft_id, version, account)
     _save_evidence(db_path, draft_id, evidence)
 
     notes = None
@@ -730,7 +828,17 @@ def write_article(
         "material_stats": material_stats,
         "notes": notes,
         "model_meta": model_meta,
+        "review_account": account,
+        "independent_review": _review_summary(review_outcome, review_error),
         "published": False,
     }
-    LOG.info("writing.done", category=category, draft_id=draft_id, status=status, versions=version)
+    LOG.info(
+        "writing.done",
+        category=category,
+        draft_id=draft_id,
+        status=status,
+        account=account,
+        versions=version,
+        reviewer=model_meta.get("reviewer_model"),
+    )
     return result

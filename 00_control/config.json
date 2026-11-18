@@ -11,6 +11,18 @@
     "enable_thinking_default": false,
     "note": "Strata 由用户管理;系统只读取状态与排队调用,绝不启动/停止/重启/切换模型"
   },
+  "review": {
+    "enabled": true,
+    "base_url": "https://api.deepseek.com",
+    "model_id": "deepseek-flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "api_key_file": ".secrets/deepseek_api_key",
+    "max_tokens": 8000,
+    "temperature": 0.0,
+    "request_timeout_s": 300,
+    "enable_thinking": false,
+    "note": "P40 独立评审通道(账本 T-04):只做只读盲评,不参与写作,不改写作模型。提示词固定 6 字「审评这篇文章」写在代码里(ttxt/writing/review.py:REVIEW_PROMPT),不做成配置项,避免用细则诱导评审。密钥只允许来自 DEEPSEEK_API_KEY 或 api_key_file 指向的文件,不得进日志/回执/提交。deepseek-flash 是推理模型:max_tokens 含推理链,实测 900/4000 会 finish=length 且正文为空 ⇒ 给到 8000。端点不可用或模型名不在 /v1/models 列表里 ⇒ 独立评审按不成立处理(same_model_review 仍为 true),不得为了过门禁伪装独立性"
+  },
   "dashboard": {
     "host": "127.0.0.1",
     "port": 8765

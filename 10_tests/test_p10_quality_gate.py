@@ -78,6 +78,7 @@ def _run(tmp_path, fake, max_revisions=0):
         max_revisions=max_revisions,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        independent_review=False,
         material_min_full=0,
         material_min_sources=1,
         gate_min_chars=0,
@@ -92,7 +93,7 @@ def _assert_rejected_in_db(db_path, draft_id):
         status = con.execute(
             "SELECT status FROM writing_history WHERE draft_id=?", (draft_id,)
         ).fetchone()[0]
-        assert status == "rejected"
+        assert status == "REJECTED"
     finally:
         con.close()
 
@@ -171,7 +172,7 @@ def test_pass_flow_exports_quote_and_status(tmp_path):
     con = sqlite3.connect(db_path)
     try:
         status = con.execute("SELECT status FROM writing_history").fetchone()[0]
-        assert status == "passed"
+        assert status == "AUTO_PASSED"
         quote = con.execute("SELECT quote FROM evidence_links").fetchone()[0]
         assert quote
     finally:

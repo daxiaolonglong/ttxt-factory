@@ -270,6 +270,7 @@ def test_gate_blocks_thin_materials_with_zero_model_calls(tmp_path):
         model_call=BoomModel(),
         db_path=db_path,
         export_dir=export_dir,
+        independent_review=False,
     )
     assert result["status"] == "insufficient_materials"
     assert result["passed"] is False
@@ -313,7 +314,7 @@ def test_thresholds_come_from_config_writing_section(tmp_path, monkeypatch):
     db_path, _ = _corpus(tmp_path, hosts=("a.test",), full=1)
     fake = FakeModel()
     result = workflow.write_article(
-        "demo", TOPIC, model_call=fake, db_path=db_path, export_dir=tmp_path / "drafts"
+        "demo", TOPIC, model_call=fake, db_path=db_path, export_dir=tmp_path / "drafts", independent_review=False
     )
     assert result["status"] != "insufficient_materials"
     assert fake.draft_calls >= 1, "门槛放行后必须真的调用模型"

@@ -437,6 +437,10 @@ _RECLAIM_KEEP_RUNS = 1
 _RECLAIM_LIVE_GRACE_MINUTES = 30.0
 _RUN_DIR = re.compile(r"pytest-(\d+)$")
 _SCRATCH_KEEP_PREFIXES = ("reclaim-", "pytest_trim")
+TRIM_DIRNAME = "pytest_trim"
+_RECLAIM_KEEP_TRIM_GENERATIONS = 1
+# 测试裁剪副本缓存名 = ``<类目>-<生产库 size>-<mtime_ns>.db``:生产库一变,老份永远 cache-miss
+_TRIM_CACHE_NAME = re.compile(r"^(.+)-\d+-\d+\.db$")
 
 
 def _inside_scratch(path: Path) -> bool:
@@ -453,17 +457,72 @@ def _protected_scratch_name(name: str) -> bool:
     return name.startswith(_SCRATCH_KEEP_PREFIXES)
 
 
+def _reclaim_path(path: Path, record: dict[str, Any], dry_run: bool) -> None:
+    """改名再删:另一进程占用该 path ⇒ 记 skipped_locked,不会半途删的树。"""
+    if dry_run:
+        record["action"] = "would_delete"
+        return
+    staging = path.with_name(path.name + ".reclaiming")
+    try:
+        path.rename(staging)
+        if staging.is_dir():
+            shutil.rmtree(staging)
+        else:
+            staging.unlink(missing_ok=True)
+        record["action"] = "deleted"
+    except OSError as exc:
+        if staging.exists():
+            try:
+                staging.rename(path)
+            except OSError:
+                pass
+        record["action"] = "skipped_locked"
+        record["error"] = f"{type(exc).__name__}: {exc}"
+
+
+def _stale_trim_caches(keep_generations: int) -> list[Path]:
+    """裁剪副本缓存里每类目只最新份可达命中:老份永远 miss,只坐盘。
+
+    本轮实测(2026-11-18):``07_tmp/pytest_trim`` 里 17 份 db(加边车 34 档)总 219,041,368 字节,
+    每类目最新份只 55,684,696 字节 ⇒ 163,356,672 字节死缓存;且每 pytest 新一轮把上一份
+    新生产库 size+mtime_ns 的 key,因此无上限单调膨胀。目录名仍由 ``_protected_scratch_name``
+    保护(整目录删禁),回收里只扫每类目最新份之外的老 ``.db`` 加边车。
+    """
+    trim_dir = cfg.SCRATCH_DIR / TRIM_DIRNAME
+    if not trim_dir.is_dir():
+        return []
+    by_slug: dict[str, list[tuple[int, Path]]] = {}
+    for entry in trim_dir.iterdir():
+        if not entry.is_file():
+            continue
+        match = _TRIM_CACHE_NAME.match(entry.name)
+        if not match:
+            continue
+        try:
+            stamp = entry.stat().st_mtime_ns
+        except OSError:
+            continue
+        by_slug.setdefault(match.group(1), []).append((stamp, entry))
+    stale: list[Path] = []
+    keep = max(1, int(keep_generations))
+    for _slug, items in by_slug.items():
+        items.sort(key=lambda item: item[0], reverse=True)
+        stale.extend(entry for _stamp, entry in items[keep:])
+    return sorted(stale, key=lambda path: path.stat().st_size, reverse=True)
+
+
 def reclaim_scratch_runs(
     dry_run: bool = True,
     keep_runs: int = _RECLAIM_KEEP_RUNS,
     live_grace_minutes: float = _RECLAIM_LIVE_GRACE_MINUTES,
+    keep_trim_generations: int = _RECLAIM_KEEP_TRIM_GENERATIONS,
 ) -> dict[str, Any]:
-    """回收 ``07_tmp`` 下的 pytest 运行目录,按**字节**上限而不是按份数,逐条留回执。
+    """回收 ``07_tmp`` 下的 pytest 运行目录加裁剪副本缓存老份,按**字节**上限而不是按份数,逐条留回执。
 
     P38 根因:T-14 把 social 库扩到 1.7 GB 后,测试夹具每测复制整库 ⇒ 单轮 basetemp 实测
     28 GB(不是 conftest 注释里的"约 50 MB/轮"),按份数保留 4 份就是 56 GB。按份数回收
-    管不住体积,必须按字节。取证件(``reclaim-*``/``pytest_trim``)与 07_tmp 根下的历史
-    取证目录不在回收范围内,只有运行目录会被动。
+    管不住体积,必须按字节。取证件(``reclaim-*``)与 07_tmp 根下的历史取证目录不在回收
+    范围内。P41 之后把也扫 ``pytest_trim`` 里每类目最新份之外的老份,整目录删禁仍生效。
     """
     root = cfg.SCRATCH_DIR / BASETEMP_DIRNAME
     now = time.time()
@@ -515,29 +574,35 @@ def reclaim_scratch_runs(
             skipped_live.append({"path": rel, "bytes": size, "live": True})
             continue
         record = {"path": rel, "bytes": size, "mtime": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(st.st_mtime))}
-        if dry_run:
-            record["action"] = "would_delete"
-            records.append(record)
-            continue
-        record["action"] = "deleted"
-        staging = entry.with_name(entry.name + ".reclaiming")
-        try:
-            entry.rename(staging)
-            shutil.rmtree(staging)
-        except OSError as exc:
-            if staging.exists():
-                try:
-                    staging.rename(entry)
-                except OSError:
-                    pass
-            record["action"] = "skipped_locked"
-            record["error"] = f"{type(exc).__name__}: {exc}"
+        _reclaim_path(entry, record, dry_run)
+        if record["action"] == "skipped_locked":
             skipped_locked.append(rel)
         records.append(record)
         LOG.info("housekeep.reclaim_scratch_runs", "scratch run dir reclaimed", **record)
 
+    # 裁剪副本缓存老份同样只坐盘:每类目最新份之外永远 cache-miss(缓存键含生产库 size+mtime_ns)。
+    for path in _stale_trim_caches(keep_trim_generations):
+        side = path.with_name(path.name + ".lineage.json")
+        for target in ([side, path] if side.is_file() else [path]):
+            try:
+                st = target.stat()
+            except OSError:
+                continue
+            rel = target.relative_to(cfg.PROJECT_ROOT).as_posix()
+            if now - st.st_mtime < grace:
+                skipped_live.append({"path": rel, "bytes": st.st_size, "live": True})
+                continue
+            record = {"path": rel, "bytes": st.st_size, "kind": "trim_cache",
+                      "mtime": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(st.st_mtime))}
+            _reclaim_path(target, record, dry_run)
+            if record["action"] == "skipped_locked":
+                skipped_locked.append(rel)
+            records.append(record)
+            LOG.info("housekeep.reclaim_scratch_runs", "stale pytest trim cache reclaimed", **record)
+
     freed = sum(item["bytes"] for item in records if item["action"] == "deleted")
     candidates = sum(item["bytes"] for item in records if item["action"] == "would_delete")
+    trim_records = [item for item in records if item.get("kind") == "trim_cache"]
     receipt_path: str | None = None
     if not dry_run:
         stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
@@ -554,6 +619,7 @@ def reclaim_scratch_runs(
                         "dry_run": False,
                         "keep_runs": keep_runs,
                         "live_grace_minutes": live_grace_minutes,
+                        "keep_trim_generations": keep_trim_generations,
                         "freed_bytes": freed,
                         "deleted": len([r for r in records if r["action"] == "deleted"]),
                         "skipped_locked": skipped_locked,
@@ -577,12 +643,16 @@ def reclaim_scratch_runs(
         "would_delete_count": len([r for r in records if r["action"] == "would_delete"]),
         "deleted_count": len([r for r in records if r["action"] == "deleted"]),
         "kept_runs": kept,
+        "trim_stale_files": len(trim_records),
+        "trim_stale_bytes": sum(item["bytes"] for item in trim_records),
+        "keep_trim_generations": keep_trim_generations,
         "skipped_live": skipped_live,
         "skipped_locked": skipped_locked,
         "scratch_bytes_after": dir_size(cfg.SCRATCH_DIR),
         "scratch_max_gb": float(cfg.load_config().get("disk", {}).get("scratch_max_gb", 2)),
         "receipt": receipt_path,
         "records_sample": records[:20],
+        "trim_sample": trim_records[:8],
     }
     LOG.info(
         "housekeep.reclaim_scratch_runs",
@@ -596,10 +666,15 @@ def reclaim_scratch_runs(
 
 def run(clean: bool = False, temp_max_age_hours: float = 24.0, reclaim_scratch: bool = False,
         reclaim_apply: bool = False, reclaim_keep_runs: int = _RECLAIM_KEEP_RUNS,
+        reclaim_keep_trim_generations: int = _RECLAIM_KEEP_TRIM_GENERATIONS,
         checkpoint_wals: bool = False, checkpoint_wals_dry_run: bool = False) -> dict[str, Any]:
     result: dict[str, Any] = {"report": report()}
     if reclaim_scratch:
-        result["reclaim_scratch"] = reclaim_scratch_runs(dry_run=not reclaim_apply, keep_runs=reclaim_keep_runs)
+        result["reclaim_scratch"] = reclaim_scratch_runs(
+            dry_run=not reclaim_apply,
+            keep_runs=reclaim_keep_runs,
+            keep_trim_generations=reclaim_keep_trim_generations,
+        )
     if checkpoint_wals:
         result["checkpoint_db_wals"] = checkpoint_db_wals(dry_run=checkpoint_wals_dry_run)
     if clean:

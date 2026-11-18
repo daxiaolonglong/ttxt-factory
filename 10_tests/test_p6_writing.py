@@ -91,6 +91,7 @@ def test_write_workflow(tmp_path):
         max_revisions=0,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        independent_review=False,
         material_min_full=0,
         material_min_sources=1,
         gate_min_chars=0,
@@ -115,7 +116,7 @@ def test_write_workflow(tmp_path):
         assert con.execute("SELECT COUNT(*) FROM evaluation_history").fetchone()[0] == 1
         assert con.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == 1
         status = con.execute("SELECT status FROM writing_history").fetchone()[0]
-        assert status == "passed"
+        assert status == "AUTO_PASSED", "无独立评审者时版本账目只能记 AUTO_PASSED"
     finally:
         con.close()
 
@@ -131,6 +132,7 @@ def test_write_workflow_revision(tmp_path):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        independent_review=False,
         material_min_full=0,
         material_min_sources=1,
         gate_min_chars=0,

@@ -85,6 +85,7 @@ def test_early_rejected_version_keeps_rejected_status(tmp_path):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        independent_review=False,
         material_min_full=0,
         material_min_sources=1,
         gate_min_chars=0,
@@ -93,8 +94,8 @@ def test_early_rejected_version_keeps_rejected_status(tmp_path):
     assert result["passed"] is True and result["revisions"] == 1
     rows = _rows(db_path)
     assert [r[0] for r in rows] == [1, 2]
-    assert rows[0][1] == "rejected", "旧实现会把 v1 也刷成 passed(版本账目虚高)"
-    assert rows[1][1] == "passed"
+    assert rows[0][1] == "REJECTED", "旧实现会把 v1 也刷成 passed(版本账目虚高)"
+    assert rows[1][1] == "AUTO_PASSED", "没有独立评审者时只能记 AUTO_PASSED,不得冒充独立复核"
 
 
 def test_rejected_draft_marks_last_version_rejected(tmp_path):
@@ -107,6 +108,7 @@ def test_rejected_draft_marks_last_version_rejected(tmp_path):
         max_revisions=0,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        independent_review=False,
         material_min_full=0,
         material_min_sources=1,
         gate_min_chars=0,
@@ -114,7 +116,7 @@ def test_rejected_draft_marks_last_version_rejected(tmp_path):
     )
     assert result["passed"] is False
     rows = _rows(db_path)
-    assert len(rows) == 1 and rows[0][1] == "rejected"
+    assert len(rows) == 1 and rows[0][1] == "REJECTED"
 
 
 def test_served_model_is_persisted_on_every_version(tmp_path, monkeypatch):
@@ -137,6 +139,7 @@ def test_served_model_is_persisted_on_every_version(tmp_path, monkeypatch):
         max_revisions=1,
         db_path=db_path,
         export_dir=tmp_path / "drafts",
+        independent_review=False,
         material_min_full=0,
         material_min_sources=1,
         gate_min_chars=0,

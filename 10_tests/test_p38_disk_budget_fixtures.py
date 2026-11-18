@@ -343,6 +343,83 @@ def test_reclaim_scratch_respects_live_grace(scratch_tree):
     assert len(out["skipped_live"]) == 5
 
 
+# ------------------------------------------------- 裁剪副本缓存老份回收(P41,本轮实测根因)
+
+
+@pytest.fixture()
+def trim_tree(tmp_path, monkeypatch):
+    """每类目把几份裁剪副本缓存:缓存键含生产库 size+mtime_ns,老份永远 cache-miss。
+
+    实测 2026-11-18 ``07_tmp/pytest_trim`` 里 17 份 db 总 219,041,368 字节里最新份
+    55,684,696 字节 ⇒ 163,356,672 字节死缓存坐盘。
+    """
+    root = tmp_path / "proj"
+    scratch = root / "07_tmp"
+    trim = scratch / housekeep.TRIM_DIRNAME
+    trim.mkdir(parents=True)
+    # gen 序号 → mtime_ns:大 = 新,因此 sort(reverse) 把 gen2 判定最新
+    for slug, generations in (("social", (100, 200)), ("finance", (300,))):
+        for gen, size in enumerate(generations, start=1):
+            db = trim / f"{slug}-{size}-{gen}.db"
+            db.write_bytes(b"x" * (size * 64))
+            db.with_name(db.name + ".lineage.json").write_text("{}", encoding="utf-8")
+            os.utime(db, ns=(gen * 10**15, gen * 10**15))
+            side = db.with_name(db.name + ".lineage.json")
+            os.utime(side, ns=(gen * 10**15, gen * 10**15))
+    monkeypatch.setattr(cfg, "PROJECT_ROOT", root)
+    monkeypatch.setattr(cfg, "SCRATCH_DIR", scratch)
+    return root, scratch, trim
+
+
+def test_trim_prune_only_targets_stale_generations(trim_tree):
+    _root, _scratch, trim = trim_tree
+    out = housekeep.reclaim_scratch_runs(dry_run=True, keep_runs=9, live_grace_minutes=0.0)
+    assert out["dry_run"] is True
+    # social 里 gen1 死(gen2 最新),gen2 加 finance 唯一份 里 3 份 keep;边车一起计
+    assert out["trim_stale_files"] == 2, "只老份计(db 一份加边车一份=2 档)"
+    assert out["trim_stale_bytes"] >= 100 * 64
+    assert all((trim / f"{slug}-{size}-{gen}.db").exists()
+               for slug, size, gen in (("social", 100, 1), ("social", 200, 2), ("finance", 300, 1))), (
+        "看账不许删")
+
+
+def test_trim_prune_apply_deletes_per_item_with_ledger(trim_tree):
+    _root, scratch, trim = trim_tree
+    log_dir = Path(cfg.LOG_DIR)
+    out = housekeep.reclaim_scratch_runs(dry_run=False, keep_runs=9, live_grace_minutes=0.0)
+    assert not (trim / "social-100-1.db").exists(), "老份把实际清"
+    assert not (trim / "social-100-1.db.lineage.json").exists(), "边车不得孤留"
+    for name in ("social-200-2.db", "social-200-2.db.lineage.json", "finance-300-1.db"):
+        assert (trim / name).exists(), f"{name} 里最新份,回收不得动"
+    assert out["deleted_count"] >= 2 and out["freed_bytes"] >= 100 * 64
+    assert out["receipt"], "实删必须留回执"
+    doc = json.loads(Path(out["receipt"]).read_text(encoding="utf-8"))
+    assert doc["keep_trim_generations"] == 1
+    trim_records = [item for item in doc["records"] if item.get("kind") == "trim_cache"]
+    assert len(trim_records) == 2, "逐条记档(规则 29):每档自己一行"
+    assert {item["path"] for item in trim_records} == {
+        "07_tmp/pytest_trim/social-100-1.db",
+        "07_tmp/pytest_trim/social-100-1.db.lineage.json",
+    }
+    logged = []
+    for path in sorted(log_dir.glob("*.jsonl")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if '"trim_cache"' in line:
+                logged.append(json.loads(line))
+    assert len([item for item in logged if item.get("meta", {}).get("kind") == "trim_cache"]) >= 2, (
+        "自动删除必须逐条打日志,不得静默")
+    assert all(item.get("module") == "housekeep" for item in logged)
+
+
+def test_trim_prune_keeps_requested_generations(trim_tree):
+    _root, _scratch, trim = trim_tree
+    out = housekeep.reclaim_scratch_runs(
+        dry_run=True, keep_runs=9, live_grace_minutes=0.0, keep_trim_generations=2
+    )
+    assert out["trim_stale_files"] == 0, "每类目留 2 份 ⇒ 每份可命中,回收清"
+    assert (trim / "social-100-1.db").exists(), "留份数之外把回收把实际清,看账不动"
+
+
 # ----------------------------------------------------------------------- WAL 边车治理
 
 

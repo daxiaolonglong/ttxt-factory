@@ -58,6 +58,7 @@ def cmd_housekeep(args: argparse.Namespace) -> int:
         reclaim_scratch=getattr(args, "reclaim_scratch", False),
         reclaim_apply=getattr(args, "reclaim_apply", False),
         reclaim_keep_runs=getattr(args, "reclaim_keep_runs", 1),
+        reclaim_keep_trim_generations=getattr(args, "reclaim_keep_trim", 1),
         checkpoint_wals=getattr(args, "checkpoint_wals", False),
         checkpoint_wals_dry_run=getattr(args, "checkpoint_wals_dry_run", False),
     )
@@ -720,6 +721,7 @@ def build_parser() -> argparse.ArgumentParser:
     house.add_argument("--reclaim-scratch", action="store_true", help="巡检 07_tmp 下的 pytest 运行目录(默认 dry-run)")
     house.add_argument("--reclaim-apply", action="store_true", help="实际回收运行目录(需与 --reclaim-scratch 同用)")
     house.add_argument("--reclaim-keep-runs", type=int, default=1, help="保留最近几轮运行目录,默认 1")
+    house.add_argument("--reclaim-keep-trim", type=int, default=1, help="保留每类目几份裁剪副本缓存,默认 1(老份永远 cache-miss)")
     house.add_argument("--checkpoint-wals", action="store_true", help="把超阈值的 -wal 合并回主库并截断(只合并不删数据)")
     house.add_argument("--checkpoint-wals-dry-run", action="store_true", help="只列出将要检查点的 -wal,不执行")
     house.set_defaults(func=cmd_housekeep)

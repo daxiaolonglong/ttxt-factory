@@ -1,10 +1,10 @@
 {
   "crawl_enqueue_4h": {
-    "last_run_at": "2026-11-17T23:15:00+08:00",
+    "last_run_at": "2026-11-18T10:33:51+08:00",
     "last_status": "ok",
     "last_result": {
-      "enqueued": 11,
-      "deduped": 0,
+      "enqueued": 9,
+      "deduped": 2,
       "routing_rejected": 0,
       "errors": []
     },
@@ -81,47 +81,19 @@
     "last_error": null
   },
   "metrics_fetch_6h": {
-    "last_run_at": "2026-11-17T22:10:00+08:00",
-    "last_status": "skipped_browser_busy",
+    "last_run_at": "2026-11-18T10:33:51+08:00",
+    "last_status": "skipped_queue_busy",
     "last_result": {
-      "scheduler_status": "skipped_browser_busy",
-      "apply": true,
-      "limit": 12,
-      "sleep_s": 2.5,
+      "scheduler_status": "skipped_queue_busy",
+      "reason": "采集队列仍忙(queued=1, running=1),已等待 299.9s;这一轮一个请求都不发",
       "queue": {
-        "queued": 0,
-        "running": 0,
-        "busy": false,
-        "waited_s": 0.0,
+        "queued": 1,
+        "running": 1,
+        "busy": true,
+        "waited_s": 299.9,
         "wait_budget_s": 300.0
       },
-      "browser_lock_wait_s": 300,
-      "browser_busy_skipped": [
-        "technology"
-      ],
-      "categories": {
-        "technology": {
-          "status": "skipped_browser_busy",
-          "reason": "等浏览器 profile 锁 300.0s 没等到(持有者 tag=browser_session pid=31704);该类目不启动浏览器、不发请求,等采集 Worker 用完",
-          "browser_wait_s": 300.0
-        },
-        "finance": {
-          "status": "skipped_browser_busy",
-          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
-        },
-        "social": {
-          "status": "skipped_browser_busy",
-          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
-        },
-        "history": {
-          "status": "skipped_browser_busy",
-          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
-        },
-        "health": {
-          "status": "skipped_browser_busy",
-          "reason": "本轮已确认浏览器 profile 被占用(technology),该类目不排队"
-        }
-      },
+      "categories": {},
       "errors": []
     },
     "last_error": null

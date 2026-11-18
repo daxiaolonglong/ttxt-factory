@@ -39,6 +39,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 BASETEMP_ROOT = ROOT / "07_tmp" / "pytest_basetemp"
+_OWNED_BASETEMP = False  # set True when pytest_configure took ownership of --basetemp
 # 规则 17/27:临时目录必须有上限并回收,磁盘不得膨胀。留 4 份足够事后取证
 # (最近一轮 + 失败复现用),更早的轮次证据都在 09_logs 与 08_wiki/reports 里。
 KEEP_BASETEMP_RUNS = 4
@@ -46,7 +47,14 @@ KEEP_BASETEMP_RUNS = 4
 # 夹具每测复制整库 ⇒ 单轮 basetemp 实测 28 GB(老注释写的"约 50MB/轮"早已失真),
 # 留 4 份就是 56 GB,`07_tmp` 因此把 scratch 限额(2 GB)顶穿 28 倍。
 # 所以现在两条同时生效:份数上限 + **字节上限**,并在磁盘不够时当场拒绝开跑,而不是跑爆盘。
-BASETEMP_MAX_GB = 4.0
+# P41(2026-11-18 实测):**把字节上限本身顶穿 scratch 限额**——老值 4.0 GB 比 config里的
+# ``disk.scratch_max_gb`` 2 GB 大,因此把 conftest 压到 4.0 GB 之后 doctor 把仍红
+# (实测 07_tmp=3.798 GB:运行目录 5 份 3,063,521,084 字节 + pytest_trim 死份 219,041,368 字节)。
+# 预算把**从 config里的读 scratch 上限再留边**(最新份之外把仍压到 2 份,日志、取证件坐盘),
+# 两口径不得矛盾;测末清把也压,老值把只跑开把压。
+SCRATCH_ROOT = ROOT / "07_tmp"
+SAFETY_BYTES = 64 * 1024 * 1024  # 把 logs/receipts 把 growth 把 during  a  run 把 in  account
+MIN_BASETEMP_BUDGET_BYTES = 512 * 1024 * 1024
 MIN_FREE_GB_AT_START = 8.0
 # 类目库隔离副本改为"会话级裁剪副本":整库逐字节复制是 28 GB 的来源,裁剪副本只保留
 # 最近 N 篇及其同簇文章(聚类/近重复语义仍在),按生产库 size+mtime 做缓存键,跨会话复用。
@@ -90,10 +98,32 @@ def _dir_size(path: Path) -> int:
     return total
 
 
+def scratch_cap_bytes() -> int:
+    """The scratch cap ``doctor`` enforces for all of 07_tmp, read from config."""
+    try:
+        from ttxt import config as _cfg
+
+        cap_gb = float(_cfg.load_config().get("disk", {}).get("scratch_max_gb", 2.0))
+    except Exception:  # noqa: BLE001 - a config gap must not turn the test harness red
+        cap_gb = 2.0
+    return int(cap_gb * 1024**3)
+
+
+def basetemp_budget_bytes() -> int:
+    """P41: budget = scratch cap minus what 07_tmp already holds outside basetemp (trim
+    caches, run logs, reclaim receipts) minus a safety margin, so the cap that ``doctor``
+    enforces for all of 07_tmp can never be contradicted by this harness's own budget.
+    """
+    other = max(0, _dir_size(SCRATCH_ROOT) - _dir_size(BASETEMP_ROOT))
+    return max(MIN_BASETEMP_BUDGET_BYTES, scratch_cap_bytes() - other - SAFETY_BYTES)
+
+
 def pytest_configure(config: pytest.Config) -> None:
     """未显式指定 --basetemp 时,把 pytest 临时根目录限定在 07_tmp 下。"""
     if getattr(config.option, "basetemp", None):
         return
+    global _OWNED_BASETEMP
+    _OWNED_BASETEMP = True
     BASETEMP_ROOT.mkdir(parents=True, exist_ok=True)
     highest = -1
     stale: list[Path] = []
@@ -121,15 +151,41 @@ def pytest_configure(config: pytest.Config) -> None:
         )
         _announce(config, message)
     # P38:份数上限之外再上一道**字节**闸门——体积才是真凶,份数只是表象。
-    by_bytes = _purge_basetemp_to_budget()
+    budget = basetemp_budget_bytes()
+    by_bytes = _purge_basetemp_to_budget(budget)
     for name, size in by_bytes:
         _announce(
             config,
             f"basetemp.purged_by_bytes: 已回收 07_tmp/pytest_basetemp/{name}({size:,} 字节),"
-            f"运行目录总量必须压到 {BASETEMP_MAX_GB:g} GB 以内(P38)",
+            f"运行目录总量必须压到 {budget / 1024**3:.2f} GB 以内(P38/P41)",
+        )
+    for name, size in _purge_trim_caches(1):
+        _announce(
+            config,
+            f"trim_cache.purged: 已回收 07_tmp/pytest_trim/{name}"
+            f"({size:,} 字节),每类目只最新份可命中(缓存键含生产库 size+mtime_ns)",
         )
     config.option.basetemp = str(BASETEMP_ROOT / f"pytest-{highest + 1}")
     _require_free_disk(config)
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+    """P41: purge at session end too — a budget only enforced at configure time let one
+    suite run leave 856 MB behind and ``doctor`` still reported ``disk.scratch`` FAIL.
+    The newest run dir (this run's own evidence) is always kept.
+    """
+    if not _OWNED_BASETEMP:
+        return
+    budget = basetemp_budget_bytes()
+    for name, size in _purge_basetemp_to_budget(budget):
+        message = (
+            f"basetemp.purged_by_bytes: 已回收 07_tmp/pytest_basetemp/{name}"
+            f"({size:,} 字节),运行目录总量必须压到 {budget / 1024**3:.2f} GB 以内(P38/P41)"
+        )
+        try:
+            session.config.issue_config_time_warning(UserWarning(message), stacklevel=2)
+        except Exception:  # noqa: BLE001
+            print(message, file=sys.stderr)
 
 
 def _announce(config: pytest.Config, message: str) -> None:
@@ -138,6 +194,47 @@ def _announce(config: pytest.Config, message: str) -> None:
         config.issue_config_time_warning(UserWarning(message), stacklevel=2)
     except Exception:  # pragma: no cover - 兜底,不得静默
         print(message, file=sys.stderr)
+
+
+_TRIM_CACHE_NAME = re.compile(r"^(.+)-\d+-\d+\.db$")
+
+
+def _purge_trim_caches(keep_generations: int = 1) -> list[tuple[str, int]]:
+    """每类目只最新份可命中,老份只坐盘。"""
+    if not TRIM_DIR.is_dir():
+        return []
+    by_slug: dict[str, list[tuple[int, Path]]] = {}
+    for item in TRIM_DIR.iterdir():
+        if not item.is_file():
+            continue
+        match = _TRIM_CACHE_NAME.match(item.name)
+        if not match:
+            continue
+        try:
+            stamp = item.stat().st_mtime_ns
+        except OSError:
+            continue
+        by_slug.setdefault(match.group(1), []).append((stamp, item))
+    purged: list[tuple[str, int]] = []
+    keep = max(1, int(keep_generations))
+    for _slug, items in by_slug.items():
+        items.sort(key=lambda entry: entry[0], reverse=True)
+        for _stamp, old_db in items[keep:]:
+            side = old_db.with_name(old_db.name + ".lineage.json")
+            targets = [side, old_db] if side.is_file() else [old_db]
+            for target in targets:
+                try:
+                    size = target.stat().st_size
+                except OSError:
+                    continue
+                staging = target.with_name(target.name + ".purging")
+                try:
+                    target.rename(staging)
+                    staging.unlink(missing_ok=True)
+                    purged.append((target.name, size))
+                except OSError:
+                    continue
+    return purged
 
 
 STRAY_ROOT_PATTERNS = (re.compile(r"tmp[A-Za-z0-9_]{8}"), re.compile(r"pytest-of-.+"))
@@ -152,9 +249,11 @@ def _root_stray_dirs(root: Path) -> set[str]:
     }
 
 
-def _purge_basetemp_to_budget(budget_gb: float = BASETEMP_MAX_GB) -> list[tuple[str, int]]:
+def _purge_basetemp_to_budget(
+    budget_bytes: int | None = None, keep_newest: int = 1
+) -> list[tuple[str, int]]:
     """按最旧优先回收 basetemp 运行目录,直到总量压进字节预算;被占用的跳过并回报。"""
-    limit = int(budget_gb * 1024**3)
+    limit = int(budget_bytes) if budget_bytes is not None else basetemp_budget_bytes()
     if not BASETEMP_ROOT.exists():
         return []
     runs: list[tuple[float, int, Path]] = []
@@ -167,9 +266,14 @@ def _purge_basetemp_to_budget(budget_gb: float = BASETEMP_MAX_GB) -> list[tuple[
             continue
     total = sum(size for _mtime, size, _p in runs)
     purged: list[tuple[str, int]] = []
-    for _mtime, size, item in sorted(runs, key=lambda entry: entry[0]):
+    ordered = sorted(runs, key=lambda entry: entry[0])
+    keep = max(0, int(keep_newest))
+    protected = {entry[2].name for entry in ordered[len(ordered) - keep:]} if keep else set()
+    for _mtime, size, item in ordered:
         if total <= limit:
             break
+        if item.name in protected:
+            continue
         victim = item.with_name(item.name + ".purging")
         try:
             item.rename(victim)
