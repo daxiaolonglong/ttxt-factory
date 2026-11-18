@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated_at": "2026-11-16",
-  "notes": "P19批次(2026-11-15):补齐 history/social 的合格正式来源。取证链:07_tmp/p19_keyword_crawl/probe3.json(robots 与新鲜度)、probe5.json(通用正文选择器在中新网/澎湃**全部落空**)、probe6_page_forensics(中新网正文 819–1605 字在 HTML 里、澎湃是 Next.js 哈希类名)、probe7_tightest_container.json(自动定位正文容器:中新网 div.left_zw / div.content_maincontent_content 稳定;澎湃只有 wrap__hPMpF 这类构建哈希,不可作为长期选择器)。因此本批只注册中新网两个频道;澎湃列为待办(需要 __NEXT_DATA__ 结构化解析,不用哈希类名)。people.com.cn 全部 rss 停在 2025-06、chinanews /rss/jk.xml 停在 2026-03,均按陈旧拒绝;Google News/头条搜索/360/搜狗/百度新闻 robots 拒绝,不得配置。每个来源采集前必须通过 robots.txt 检查。P25(2026-11-16)新增 toutiao_finance / toutiao_history:两级取证在先(静态抓频道页只拿到 4827 字节 JS 外壳 0 条逐篇链接;生产适配器 browser_session+toutiao.collect 实测每频道 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1450-2985 字,当天发布),robots 放行,不登录;动机见 08_wiki/reports/P24-metrics-and-prediction-loop-20261116.md 第一、六节 —— finance/history 类目此前头条文章 0 行,公开互动指标无从谈起。news_society / news_health / news_economics / news_culture 这些 slug 实测 404 或落地 channel= 空,**不得凭猜测配置**;social/health 需先从渲染后的首页导航取真实 slug 再取证。",
+  "updated_at": "2026-11-18",
+  "notes": "R28(2026-11-18 20:53-20:55)health/social 频道 slug 浏览器取证(07_tmp/r28_health_channel/,判据=渲染后落地 URL 的 channel 参数 + 标题 + 逐篇链接数):①``/ch/news_health/`` 302 落到 ``?channel=&source=ch``(**channel 为空**)⇒ 不是频道,再次确认旧结论;②``/ch/news_regimen/`` 302 落到 ``?channel=regimen&source=ch``,标题「养生 - 今日头条」,23 条逐篇链接 ⇒ **真实频道**,已注册为 toutiao_regimen;③social 四个候选 ``/ch/society/`` ``/ch/news_social/`` ``/ch/news_guonei/`` ``/ch/news_life/`` **全部 404**,连同 ``news_society`` ⇒ 头条侧暂无可用社会频道 slug,**不再猜**;social 仍只有 chinanews_society 一个来源,其非头条域名无法产生公开互动指标,这是 social 的结构性缺口。P19批次(2026-11-15):补齐 history/social 的合格正式来源。取证链:07_tmp/p19_keyword_crawl/probe3.json(robots 与新鲜度)、probe5.json(通用正文选择器在中新网/澎湃**全部落空**)、probe6_page_forensics(中新网正文 819–1605 字在 HTML 里、澎湃是 Next.js 哈希类名)、probe7_tightest_container.json(自动定位正文容器:中新网 div.left_zw / div.content_maincontent_content 稳定;澎湃只有 wrap__hPMpF 这类构建哈希,不可作为长期选择器)。因此本批只注册中新网两个频道;澎湃列为待办(需要 __NEXT_DATA__ 结构化解析,不用哈希类名)。people.com.cn 全部 rss 停在 2025-06、chinanews /rss/jk.xml 停在 2026-03,均按陈旧拒绝;Google News/头条搜索/360/搜狗/百度新闻 robots 拒绝,不得配置。每个来源采集前必须通过 robots.txt 检查。P25(2026-11-16)新增 toutiao_finance / toutiao_history:两级取证在先(静态抓频道页只拿到 4827 字节 JS 外壳 0 条逐篇链接;生产适配器 browser_session+toutiao.collect 实测每频道 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1450-2985 字,当天发布),robots 放行,不登录;动机见 08_wiki/reports/P24-metrics-and-prediction-loop-20261116.md 第一、六节 —— finance/history 类目此前头条文章 0 行,公开互动指标无从谈起。news_society / news_health / news_economics / news_culture 这些 slug 实测 404 或落地 channel= 空,**不得凭猜测配置**;social/health 需先从渲染后的首页导航取真实 slug 再取证。",
   "sources": [
     {
       "id": "toutiao_tech",
@@ -47,6 +47,21 @@
       "max_articles": 10,
       "demo": false,
       "notes": "P25 取证(同上两份取证件):/ch/news_history/ HTTP 200 且落地 channel=history&source=ch(slug 真实存在,不是编造);生产适配器实测 pages 4 / 逐篇链接 17 / items 3 / errors 0,正文 1562/2692/2985 字,发布到 11-16 06:26。robots 放行。配额说明同上:toutiao.collect:122 用 limit or max_articles 封顶,不用 max_item_pages。注册动机:history 类目 20 行全是 chinanews.com.cn,头条文章 0 行 ⇒ 该类目无法进入实测/标定/预测闭环"
+    },
+    {
+      "id": "toutiao_regimen",
+      "name": "今日头条 · 养生频道",
+      "category": "health",
+      "kind": "html",
+      "url": "https://www.toutiao.com/ch/news_regimen/",
+      "enabled": true,
+      "rate_limit_s": 2.0,
+      "max_pages": 1,
+      "extractor": "toutiao",
+      "render": "browser",
+      "max_articles": 10,
+      "demo": false,
+      "notes": "R28 取证(2026-11-18 20:53-20:55,07_tmp/r28_health_channel/probe_news_regimen.json + regimen_collect_probe.json):静态抓是 4883 字节 JS 外壳,必须浏览器渲染;渲染后 302 落到 ``?channel=regimen&source=ch``、标题「养生 - 今日头条」、23 条逐篇链接 ⇒ slug 真实存在(不是猜的)。robots:unknown=false、/ch/news_regimen/ 与 /article/ 均放行、crawl_delay 无。生产适配器 fetcher.browser_session()+toutiao.collect(limit=3) 实测 pages 4 / links 10 / items 3 / robots_skipped 0 / errors 0,正文 2018/2177/1993 字,带作者(老巫追剧/健康语言/快嘴老付)⇒ 独立来源计数可用作者而不必退域名。注册动机:health 类目此前 27 行 100% 来自 who.int,既无头条互动指标也无法达到 30 样本标定门槛(T-07/T-16);本来源是 health 第一个能产生公开互动指标的头条源。已知边界:频道列表不是严格按时间排序,实测最新一篇为 2026-10-13(一个月前),因此它补的是**可测量的头条样本**,不承担「最新鲜」职责;max_articles=10 与其它头条频道一致,逐篇正文由适配器在浏览器会话内自取"
     },
     {
       "id": "quotes_toscrape",

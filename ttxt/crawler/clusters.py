@@ -101,7 +101,6 @@ def cluster_category(
         columns = {row[1] for row in con.execute("PRAGMA table_info(articles)")}
         has_cleaned = "cleaned_content" in columns
         sql = "SELECT id, title, content" + (", cleaned_content" if has_cleaned else "") + " FROM articles ORDER BY id"
-        rows = con.execute(sql).fetchall()
 
         def text_of(row: object) -> str:
             # cleaned_content 已包含标题;只有缺失清洗结果时才回退到原始字段
@@ -127,7 +126,7 @@ def cluster_category(
         lengths: dict[int, int] = {}
         hashes: dict[int, int] = {}
         hashes_reused = 0
-        for row in rows:
+        for row in con.execute(sql):
             article_id = int(row["id"])
             ids.append(article_id)
             entry = ledger.get(article_id)
@@ -165,11 +164,20 @@ def cluster_category(
 
         if use_bucketed:
             # 鸽笼:hamming ≤ threshold ⇒ 至少一个位块完全一致 ⇒ 桶并集是近重复对的超集。
-            # 同一对可能在多个块里同桶,用 seen 去重,保证 candidate_pairs_examined 与
-            # near_duplicate_pairs 都不重复计数(与暴力路径每条对恰好一次对齐)。
-            seen: set = set()
-            wide_ids = bool(ids) and max(ids) >= (1 << 32)
-            for block_index, (shift, width) in enumerate(_block_bounds(blocks)):
+            #
+            # R28(2026-11-18)性能修复:旧实现用**全局 seen 集合**记录"这一对已经检查过",
+            # 集合大小 = 候选对数。500k 行压测实测把进程私有内存顶到 **15.17 GB**
+            # (工作集只有 0.89 GB ⇒ 几乎全在被换页),cluster 阶段 CPU 占用跌到 5% 级,
+            # 45 分钟没有任何写盘,等于卡死。候选对数随 n 增长,不该用 O(候选对数) 的内存。
+            #
+            # 现改为**逐文章取候选**:每块先建桶(内存 O(n)),再按 id 升序遍历文章 a,
+            # 从各块里取出与 a 同桶的 id 集合(局部 set,大小 = 该文章所在桶的规模),
+            # 只保留 id > a 的 b ⇒ **每对无序组合恰好检查一次**,不需要全局 seen,
+            # candidate_pairs_examined 与旧实现逐个相等(去重语义不变)。
+            # 桶表同时保留,便于如实统计 oversized_buckets(report_over 以上必须报,不得隐藏)。
+            bounds = _block_bounds(blocks)
+            block_buckets: list[dict[int, list[int]]] = []
+            for block_index, (shift, width) in enumerate(bounds):
                 mask = (1 << width) - 1
                 buckets: dict[int, list[int]] = {}
                 for article_id in ids:
@@ -177,16 +185,19 @@ def cluster_category(
                 for bucket in buckets.values():
                     if len(bucket) > report_over:
                         oversized.append({"block": block_index, "shift": shift, "size": len(bucket)})
-                    for i in range(len(bucket)):
-                        a = bucket[i]
-                        for j in range(i + 1, len(bucket)):
-                            b = bucket[j]
-                            key = (a, b) if wide_ids else (a << 32) | b
-                            if key in seen:
-                                continue
-                            seen.add(key)
-                            candidates += 1
-                            consider(a, b)
+                block_buckets.append(buckets)
+            for a in ids:
+                candidates_for_a: set[int] = set()
+                for (shift, width), buckets in zip(bounds, block_buckets):
+                    mask = (1 << width) - 1
+                    bucket = buckets.get((hashes[a] >> shift) & mask)
+                    if bucket:
+                        candidates_for_a.update(bucket)
+                for b in candidates_for_a:
+                    if b <= a:  # ids 由 ORDER BY id 升序给出 ⇒ 只取后半,每对恰好一次
+                        continue
+                    candidates += 1
+                    consider(a, b)
         else:
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)):

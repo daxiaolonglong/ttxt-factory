@@ -272,6 +272,56 @@ def test_bucketed_matches_bruteforce_on_same_corpus(tmp_path):
     assert stats_bucketed["writeback_updates"] == 0
 
 
+def test_bucketed_candidate_pairs_equal_global_dedupe(tmp_path):
+    """R28 内存修复不得改变去重语义:逐文章取候选 == 旧的全局 seen 去重口径。
+
+    500k 压测实测旧实现把进程私有内存顶到 15.17 GB(全局 seen 集合大小 = 候选对数),
+    改成按文章取候选后内存降到 O(n);这条测试钉死"候选对集合逐个相等",
+    防止以后有人为了省内存把去重逻辑改成重复计数或漏算。
+    """
+    db_path = store.init_articles_db("demo", db_path=tmp_path / "c2.db")
+    seed, extra = _seed_corpus_split()
+    store.insert_items("demo", "t", seed, db_path=db_path)
+    store.insert_items("demo", "t", extra, db_path=db_path)
+    store.insert_items(
+        "demo",
+        "t",
+        [
+            _item(
+                f"碰撞扩展{i}",
+                "固定碰撞正文:本地生活服务业复苏指数连续三个月环比上行,商户流水样本采集自两千家门店。",
+                f"https://collision3.example.com/{i}",
+            )
+            for i in range(1, 101)
+        ],
+        db_path=db_path,
+    )
+    pipeline.run_pipeline("demo", db_path=db_path)
+    threshold = clusters.DEFAULT_THRESHOLD
+    stats = clusters.cluster_category(
+        "demo", db_path=db_path, threshold=threshold, clean_version=pipeline.CLEAN_VERSION
+    )
+    hashes = {aid: simhash.from_hex(hex_value) for aid, (_, hex_value) in _articles_state(db_path).items()}
+
+    # 旧口径:全局 seen 集合(这里用 set 显式复刻),逐块收集所有同桶组合
+    expected: set[tuple[int, int]] = set()
+    order = sorted(hashes)
+    for _shift, _width in clusters._block_bounds(threshold + 1):
+        mask = (1 << _width) - 1
+        buckets: dict[int, list[int]] = {}
+        for article_id in order:
+            buckets.setdefault((hashes[article_id] >> _shift) & mask, []).append(article_id)
+        for bucket in buckets.values():
+            for i in range(len(bucket)):
+                for j in range(i + 1, len(bucket)):
+                    expected.add((bucket[i], bucket[j]))
+
+    assert expected, "语料必须真的产生候选对,否则这条测试没有意义"
+    assert stats["candidate_pairs_examined"] == len(expected), (
+        f"候选对必须逐个相等:实测 {stats['candidate_pairs_examined']} != 去重后 {len(expected)}"
+    )
+
+
 # ------------------------------------------------------------------ 3. 无变化重跑 = 空转
 
 
