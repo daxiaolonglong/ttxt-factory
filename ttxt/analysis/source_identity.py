@@ -238,6 +238,22 @@ def find_pairs(items: list[dict], identities: dict[str, Identity], *,
     return pairs, rejected
 
 
+def pair_independence_share(pairs: list[dict], rejected: list[dict]) -> dict:
+    """只读观测:同题候选对里,通过独立性判定的占比。
+
+    分母 = 达到 ``CANDIDATE_FLOOR`` 的同题候选对(成对 + 被拒),分子 = 通过
+    ``独立机构`` 判定的成对。**不设线、不参与门禁**,只用于说明"同日多源原创
+    覆盖"在事件层面的厚度;被拒原因不在这里解释,由调用方原样保留。
+    """
+    candidate = len(pairs) + len(rejected)
+    return {
+        "independent_pairs": len(pairs),
+        "candidate_pairs": candidate,
+        "value": round(len(pairs) / candidate, 4) if candidate else None,
+        "meaning": "同题候选中独立机构对占比;只读观测,不参与门禁",
+    }
+
+
 def inventory_row(*, category: str, article_id: int, url: str, title: str | None,
                   marker: str | None, dateline: str | None, identity: Identity,
                   probed_at: str) -> dict:

@@ -1,0 +1,282 @@
+{
+  "generated_at": "2026-11-19T01:21:57+08:00",
+  "as_of": "2026-11-19",
+  "window_days": 7,
+  "window_start": "2026-11-13",
+  "window_end": "2026-11-19",
+  "window_basis": "N=7 的取值依据:①本轮要验证的是「同日多源原创覆盖」,实测首批成对发生在 2026-11-18,7 日窗口完整覆盖该日并留出同周边际;②R34/R35 扩源后的首个完整自然周就是 11-13..11-19,窗口与扩源生效期对齐,避免拿扩源前的旧覆盖充数;③窗口扫描表显示 1 日窗口(11-19)在库内没有可用正文,3 日窗口 health 仅个位数,不足以支撑每类目 ≥10 张;④14/30 日会混入 R34 之前的旧语料,削弱「同事件窗口」的含义。N 只影响重采样样本,不参与任何门禁。",
+  "window_scan_usable_articles": {
+    "1": {
+      "technology": 0,
+      "finance": 0,
+      "health": 0
+    },
+    "3": {
+      "technology": 180,
+      "finance": 298,
+      "health": 19
+    },
+    "7": {
+      "technology": 297,
+      "finance": 439,
+      "health": 28
+    },
+    "14": {
+      "technology": 423,
+      "finance": 486,
+      "health": 36
+    },
+    "30": {
+      "technology": 431,
+      "finance": 2244,
+      "health": 45
+    }
+  },
+  "targets": {
+    "technology": 25,
+    "finance": 19,
+    "health": 17
+  },
+  "seed_sources": {
+    "technology": {
+      "qbitai_feed": 2,
+      "ithome_rss": 2,
+      "sspai_rss": 1
+    },
+    "finance": {
+      "chinanews_finance": 2,
+      "eastmoney_rss": 1
+    },
+    "health": {
+      "who_cn_news": 1,
+      "toutiao_regimen": 2
+    }
+  },
+  "seed_articles": [
+    {
+      "category": "technology",
+      "article_id": 579,
+      "source": "qbitai_feed",
+      "date": "2026-11-18",
+      "url": "https://www.qbitai.com/2026/11/510707.html",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "qbitai",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "technology",
+      "article_id": 578,
+      "source": "qbitai_feed",
+      "date": "2026-11-18",
+      "url": "https://www.qbitai.com/2026/11/510726.html",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "qbitai",
+      "tier": "B",
+      "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign=",
+      "partner_agency": "ifanr",
+      "partner_score": 0.323
+    },
+    {
+      "category": "technology",
+      "article_id": 571,
+      "source": "ithome_rss",
+      "date": "2026-11-18",
+      "url": "https://www.ithome.com/1/029/021.htm",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "ithome",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "technology",
+      "article_id": 570,
+      "source": "ithome_rss",
+      "date": "2026-11-18",
+      "url": "https://www.ithome.com/1/029/022.htm",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "ithome",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "technology",
+      "article_id": 497,
+      "source": "sspai_rss",
+      "date": "2026-11-18",
+      "url": "https://sspai.com/post/118732",
+      "identity_basis": "registered",
+      "identity_kind": "own_report",
+      "agency": "sspai",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "finance",
+      "article_id": 13145,
+      "source": "chinanews_finance",
+      "date": "2026-11-18",
+      "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734157.shtml",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "chinanews",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "finance",
+      "article_id": 13144,
+      "source": "chinanews_finance",
+      "date": "2026-11-18",
+      "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734166.shtml",
+      "identity_basis": "page_probe",
+      "identity_kind": "own_report",
+      "agency": "chinanews",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "finance",
+      "article_id": 13110,
+      "source": "eastmoney_rss",
+      "date": "2026-11-18",
+      "url": "http://finance.eastmoney.com/news/1354,202611183934072446.html",
+      "identity_basis": "registered",
+      "identity_kind": "own_report",
+      "agency": "eastmoney",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "health",
+      "article_id": 77,
+      "source": "who_cn_news",
+      "date": "2026-11-13",
+      "url": "https://www.who.int/zh/news-room/13-11-2026-conflict-and-disease-outbreaks-deepen-dr-congo-s-hunger-crisis-as-record-numbers-are-projected-to-face-acute-food-insecurity",
+      "identity_basis": "registered",
+      "identity_kind": "own_report",
+      "agency": "who",
+      "tier": "A",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "health",
+      "article_id": 117,
+      "source": "toutiao_regimen",
+      "date": "2026-11-18",
+      "url": "https://www.toutiao.com/article/7709170593686176306/",
+      "identity_basis": "registered",
+      "identity_kind": "aggregator",
+      "agency": "toutiao",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    },
+    {
+      "category": "health",
+      "article_id": 116,
+      "source": "toutiao_regimen",
+      "date": "2026-11-18",
+      "url": "https://www.toutiao.com/article/7709432941402784256/",
+      "identity_basis": "registered",
+      "identity_kind": "aggregator",
+      "agency": "toutiao",
+      "tier": "C",
+      "partner_url": null,
+      "partner_agency": null,
+      "partner_score": null
+    }
+  ],
+  "identity_basis_counts": {
+    "page_probe/own_report": 6,
+    "registered/own_report": 3,
+    "registered/aggregator": 2
+  },
+  "excluded": {},
+  "tier_counts": {
+    "C": 47,
+    "B": 7,
+    "A": 7
+  },
+  "kind_counts": {
+    "positive": 11,
+    "negative_perturbed": 14,
+    "negative_fabricated_causal": 11,
+    "negative_wrong_entity": 8,
+    "opinion_attributed": 11,
+    "unrelated": 6
+  },
+  "category_counts": {
+    "technology": 25,
+    "finance": 19,
+    "health": 17
+  },
+  "pair_stats": {
+    "candidate_pairs": 331,
+    "independent_pairs": 3,
+    "same_day_pairs": 3,
+    "scan_pairs": 140475,
+    "pair_independence_share": {
+      "independent_pairs": 3,
+      "candidate_pairs": 331,
+      "value": 0.0091,
+      "meaning": "同题候选中独立机构对占比;只读观测,不参与门禁"
+    }
+  },
+  "pair_report": "03_intelligence\\source_identity\\window-pairs-20261119.json",
+  "overlap_with_old": {
+    "card_level": {
+      "overlap": 0,
+      "new": 61,
+      "eliminated": 61,
+      "key": "source_url + claim(逐字)"
+    },
+    "url_level": {
+      "old_unique_urls": 10,
+      "new_unique_urls": 11,
+      "overlap_urls": 0
+    },
+    "by_category": {
+      "technology": {
+        "old_cards": 25,
+        "new_cards": 25,
+        "overlap_cards": 0,
+        "new_only_cards": 25
+      },
+      "finance": {
+        "old_cards": 19,
+        "new_cards": 19,
+        "overlap_cards": 0,
+        "new_only_cards": 19
+      },
+      "health": {
+        "old_cards": 17,
+        "new_cards": 17,
+        "overlap_cards": 0,
+        "new_only_cards": 17
+      }
+    }
+  },
+  "notes": "窗口重采样只替换取材样本,不改门禁、不改分母(仍 61 张/类目 25-19-17)、不改卡片判定字段;旧文件 golden_set_v2.jsonl 未改动。"
+}

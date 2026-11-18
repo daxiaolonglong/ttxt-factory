@@ -35,6 +35,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ttxt.writing import verifier  # noqa: E402
+from ttxt.analysis import source_identity as si  # noqa: E402
 
 CARDS_PATH = ROOT / "10_tests" / "golden" / "golden_set_v2.jsonl"
 AI_SIDECAR_PATH = ROOT / "10_tests" / "golden" / "golden_set_v2_ai_adjudication.jsonl"
@@ -201,7 +202,8 @@ def machine_result(card: dict) -> dict:
     }
 
 
-def evaluate(cards: list[dict], ai: dict[str, dict] | None = None) -> dict:
+def evaluate(cards: list[dict], ai: dict[str, dict] | None = None,
+             pair_metrics: dict | None = None) -> dict:
     ai = ai or {}
     adjudicated = [c for c in cards if c.get("human_adjudicated") is True]
     rows = []
@@ -414,6 +416,14 @@ def evaluate(cards: list[dict], ai: dict[str, dict] | None = None) -> dict:
                 "A 级按 schema 允许 corroborating_urls 为空(一手出处即可),B 级必须非空;"
                 "要过 A+B>=50% 只能补真正的独立第二来源,不得把 A 的空白当缺陷、不得改门禁分母"
             ),
+            # 只读观测(T-02 方案 A):事件层面的独立机构对占比。没有配对报告时 value=None,
+            # 绝不参与 gate_fail / quality_claim / 退出码。
+            "pair_independence_share": pair_metrics or {
+                "independent_pairs": 0,
+                "candidate_pairs": 0,
+                "value": None,
+                "meaning": "未提供同题配对报告;该项只读,不参与门禁",
+            },
         },
         "distribution": {
             "per_category_all": dict(Counter(c.get("category") for c in cards)),
@@ -491,6 +501,11 @@ def render_report(metrics: dict, schema_errors: list[str]) -> str:
         f"AI 确认(AI 口径):{metrics['source_independence']['ai_confirmed_tiers']}",
         f"- 已人工裁定卡片中 A/B 级占比:{metrics['source_independence']['independent_share_of_human_adjudicated']};"
         f"AI 口径:{metrics['source_independence']['independent_share_of_ai_adjudicated']}",
+        f"- 成对独立机构占比(pair_independence_share,只读观测、不设线):"
+        f"{metrics['source_independence']['pair_independence_share'].get('value')}"
+        f"({metrics['source_independence']['pair_independence_share'].get('independent_pairs')}"
+        f"/{metrics['source_independence']['pair_independence_share'].get('candidate_pairs')}) —— "
+        f"{metrics['source_independence']['pair_independence_share'].get('meaning')}",
         "",
         "## 4. 覆盖分布",
         f"- 类目(全部/已人工裁定/已 AI 初审):{metrics['distribution']['per_category_all']}"
@@ -508,6 +523,32 @@ def render_report(metrics: dict, schema_errors: list[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def load_pair_metrics(path: Path) -> tuple[dict | None, list[str]]:
+    """读同题配对报告,只产出只读观测,不参与 gate_fail / 退出码。"""
+    if not path.exists():
+        return None, [f"配对报告不存在: {path}"]
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return None, [f"配对报告 JSON 解析失败: {exc}"]
+    pairs = data.get("pairs")
+    rejected = data.get("rejected")
+    if not isinstance(pairs, list) or not isinstance(rejected, list):
+        cats = data.get("categories") or {}
+        if isinstance(cats, dict) and cats:
+            pairs = [p for v in cats.values() for p in (v.get("pairs") or [])]
+            rejected = [r for v in cats.values() for r in (v.get("rejected") or [])]
+    if not isinstance(pairs, list) or not isinstance(rejected, list):
+        totals = data.get("totals") or {}
+        if isinstance(totals.get("pair_independence_share"), dict):
+            return {"source": str(path), **totals["pair_independence_share"]}, []
+        return None, [f"配对报告既无 pairs/rejected 也无 totals.pair_independence_share: {path}"]
+    metrics = si.pair_independence_share(pairs, rejected)
+    metrics.update({"source": str(path), "window_days": data.get("window_days"),
+                    "window_start": data.get("window_start"), "window_end": data.get("window_end")})
+    return metrics, []
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="黄金核验集 v2 度量器")
     parser.add_argument("--cards", default=str(CARDS_PATH))
@@ -515,18 +556,28 @@ def main(argv: list[str] | None = None) -> int:
                         help="AI 辅助初审 sidecar;默认取卡片同名 *_ai_adjudication.jsonl")
     parser.add_argument("--out", default=str(REPORT_PATH))
     parser.add_argument("--no-report", action="store_true")
+    parser.add_argument("--pair-report", default=None,
+                        help="同题配对报告 JSON(只读计算 pair_independence_share,不影响门禁)")
     args = parser.parse_args(argv)
 
     cards_path = Path(args.cards)
     cards, errors = load_cards(cards_path)
     sidecar_path = Path(args.ai_sidecar) if args.ai_sidecar else ai_sidecar_path_for(cards_path)
     ai, ai_errors = load_ai_adjudications(sidecar_path, {c.get("card_id") for c in cards})
-    metrics = evaluate(cards, ai)
+    pair_metrics, pair_errors = (None, [])
+    if args.pair_report:
+        pair_metrics, pair_errors = load_pair_metrics(Path(args.pair_report))
+    metrics = evaluate(cards, ai, pair_metrics)
     metrics["ai_sidecar_path"] = str(sidecar_path)
+    metrics["pair_report_path"] = str(args.pair_report) if args.pair_report else None
     print(json.dumps({k: v for k, v in metrics.items() if k != "rows"}, ensure_ascii=False, indent=2))
     if errors:
         print(f"\n模式校验错误 {len(errors)} 条:", file=sys.stderr)
         for item in errors:
+            print("  -", item, file=sys.stderr)
+    if pair_errors:
+        print(f"\n配对报告校验错误 {len(pair_errors)} 条:", file=sys.stderr)
+        for item in pair_errors:
             print("  -", item, file=sys.stderr)
     if ai_errors:
         print(f"\nAI sidecar 校验错误 {len(ai_errors)} 条({sidecar_path}):", file=sys.stderr)
@@ -535,9 +586,9 @@ def main(argv: list[str] | None = None) -> int:
     if not args.no_report:
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(render_report(metrics, errors + ai_errors), encoding="utf-8")
+        out.write_text(render_report(metrics, errors + ai_errors + pair_errors), encoding="utf-8")
         print(f"\n报告:{out}")
-    if errors or ai_errors:
+    if errors or ai_errors or pair_errors:
         return 1
     # 人工口径门禁未通过必须让 CI / 每周巡检能机器识别:NOT_AVAILABLE → 退出码 2。
     # AI 口径只报数,不参与退出码 —— 否则 AI 初审一做,CI 就自己变绿了。
