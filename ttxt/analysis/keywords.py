@@ -18,7 +18,9 @@ DEMO_SEEDS = ["人工智能", "开源", "效率工具", "数据"]
 # "覆盖了几篇文章 + 正文质量",完全不读 ``viral_labels`` ⇒ 同一个词采到 4 篇验证爆款
 # 和采到 4 篇低质文章,评分一模一样(红证据 07_tmp/p28_viral_signal/red_evidence.txt)。
 # 口径(与 viral.py 同一套词表,不另建一套):
-#   1) 只认 ``confidence_tier='measured'`` 且 ``score`` 非空 的真实测得样本;
+#   1) 只认 ``confidence_tier IN ('measured','measured_reads')`` 且 ``score`` 非空 的真实测得样本;
+#      measured_reads 是 T-25 的独立口径(无曝光量、按阅读量计分,阈值另标定),
+#      这里只复用它的**标签词表**,不把两池的分值混算或合池重标定;
 #      unscored / missing_data / incomplete_data / no_impressions 不进分母,更不当 0 分(规则 6);
 #   2) 类目内真实测得样本 < viral.MIN_CALIBRATION_SAMPLE(30)⇒ 标签本身是设计假定阈值,
 #      不宣称已标定,爆款项不参与评分(只如实记录状态);
@@ -87,14 +89,20 @@ def seed_keywords(category: str, db_path: Path | None = None) -> int:
 
 
 def _measured_label_map(con) -> dict[int, str]:
-    """本类目库里**真实测得**(tier=measured 且 score 非空)的爆款标签,article_id -> label。
+    """本类目库里**真实测得**的爆款标签,article_id -> label。
 
-    其余一律不进样本:unscored / missing_data / incomplete_data / no_impressions 没有真实表现数据,
+    包含两个**互不混池**的口径:
+    - ``measured``:有曝光量,按曝光率计分;
+    - ``measured_reads``(T-25):无曝光量但有阅读量,按阅读量计分,阈值单独标定。
+
+    这里只是把两者的标签词表拿来当信号(verified 1.0 / potential 0.6 / normal 0.2 / low 0.0),
+    不合并分值、不共用阈值。其余一律不进样本:
+    unscored / missing_data / incomplete_data / no_impressions 没有真实表现数据,
     把它们当 0 分等于凭空给关键词扣钱(规则 6:缺失 ≠ 0)。
     """
     rows = con.execute(
-        "SELECT article_id, label FROM viral_labels WHERE confidence_tier=? AND score IS NOT NULL",
-        (viral.TIER_MEASURED,),
+        "SELECT article_id, label FROM viral_labels WHERE confidence_tier IN (?, ?) AND score IS NOT NULL",
+        (viral.TIER_MEASURED, viral.TIER_MEASURED_READS),
     ).fetchall()
     return {int(row["article_id"]): row["label"] for row in rows}
 
@@ -231,7 +239,7 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
                         " base = 0.6 * collected_norm + 0.4 * quality_ratio;"
                         " collected_norm = collected / max_collected;"
                         " quality_ratio = quality / collected(正文 >= 120 字);"
-                        " signal = 命中文章里 tier=measured 样本的标签均值"
+                        " signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值"
                         "(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base"),
             "score_and_signal_are_different_metrics": True,
             "details": signal_details,

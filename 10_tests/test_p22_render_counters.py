@@ -383,9 +383,15 @@ def test_core_engagement_field_missing_is_still_incomplete_data():
         assert "缺失不等于 0" in reason
 
 
-def test_no_impressions_stays_unscored():
+def test_reads_only_uses_independent_pool_and_missing_reads_stays_unscored():
+    # T-25:有阅读量、无曝光量 ⇒ 进 measured_reads 独立池(按阅读量计分),不再卡在 no_impressions
     metrics = {"impressions": None, "reads": 8937, "likes": 437, "favorites": None, "comments": 47}
-    _label, tier, score, _reason = viral.score_with_metrics(_f(), metrics)
+    _label, tier, score, reason = viral.score_with_metrics(_f(), metrics)
+    assert tier == viral.TIER_MEASURED_READS and score is not None
+    assert "独立口径" in reason and "不与 measured 池共用阈值" in reason
+    # 连阅读量都没有 ⇒ 仍然如实不评分
+    empty = {"impressions": None, "reads": None, "likes": 437, "favorites": None, "comments": 47}
+    _label, tier, score, _reason = viral.score_with_metrics(_f(), empty)
     assert tier == viral.TIER_NO_IMPRESSIONS and score is None
 
 

@@ -547,9 +547,12 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     if args.calibrate:
         # 标定统计的是"已测得"的标签行:先按当前指标把标签算出来,再标定;
         # 标定成功后阈值变了,必须再按新阈值重算一遍,否则库里留着旧口径的标签。
+        # T-25:measured 与 measured_reads 是两个独立池,各自标定、各自落 meta key,
+        # 绝不互相补样本或共用 p90/p60/p25。
         if not args.no_relabel:
             viral.label_category(args.category)
         report = viral.calibrate(args.category)
+        report["reads"] = viral.calibrate_reads(args.category)
         if not args.no_relabel:
             report["relabel"] = viral.label_category(args.category)
         print(json.dumps(report, ensure_ascii=False, indent=2))

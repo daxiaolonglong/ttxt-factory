@@ -259,3 +259,35 @@ def test_gap_and_feedback_candidates_unchanged_by_new_score(tmp_path):
     stats = keywords.score_keywords("demo", db_path=db_path)
     assert stats["feedback_candidates"] == ["冷门词"]
     assert stats["zero_coverage"] == 1
+
+
+def test_reads_pool_feeds_keyword_signal(tmp_path):
+    """T-25:measured_reads 独立池的标签同样要喂回关键词,不能因为缺曝光量就当作没有表现。"""
+    texts = _articles(3, "开源") + _fillers(30)
+    db_path = _make_db(tmp_path, "demo", texts, ["开源"])
+    now = "2026-11-16T10:05:00+08:00"
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    try:
+        hit_ids = [row["id"] for row in con.execute(
+            "SELECT id FROM articles WHERE cleaned_content LIKE '%开源%' ORDER BY id")]
+        filler_ids = [row["id"] for row in con.execute(
+            "SELECT id FROM articles WHERE cleaned_content LIKE '%无关文章%' ORDER BY id")]
+        for article_id, label, score in (
+            [(article_id, "verified_viral", 0.2) for article_id in hit_ids]
+            + [(article_id, "normal", 0.01) for article_id in filler_ids[:27]]
+        ):
+            con.execute(
+                "INSERT OR REPLACE INTO viral_labels(article_id, label, confidence_tier, score, reason,"
+                " features_json, labeled_at) VALUES(?, ?, ?, ?, '测试构造的阅读量口径样本', '{}', ?)",
+                (article_id, label, viral.TIER_MEASURED_READS, score, now),
+            )
+        con.commit()
+    finally:
+        con.close()
+    stats = keywords.score_keywords("demo", db_path=db_path)
+    assert stats["viral"]["measured_samples"] == 30, "reads 池样本要计入类目可用样本"
+    assert stats["viral"]["status"] == "applied"
+    assert stats["viral"]["details"]["开源"]["measured_hits"] == 3
+    assert stats["viral"]["details"]["开源"]["signal"] == pytest.approx(1.0, abs=1e-6)
+    assert _rows(db_path)["开源"]["score"] == pytest.approx(0.7 + 0.3 * 1.0, abs=1e-4)
