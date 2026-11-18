@@ -1,0 +1,1174 @@
+{
+  "generated_at": "2026-11-19T02:39:32+08:00",
+  "as_of": "2026-11-19",
+  "window_days": 7,
+  "window_start": "2026-11-13",
+  "window_end": "2026-11-19",
+  "rule_stages": [
+    "domain",
+    "identity",
+    "independence",
+    "reprint_copy",
+    "structured"
+  ],
+  "params": {
+    "min_shared_entities": 2,
+    "min_shared_core_entities": 2,
+    "min_shared_strong_entities": 2,
+    "min_shared_numbers": 2,
+    "min_shared_number_ratio": 0.5,
+    "copy_containment": 0.45,
+    "min_tokens_for_copy": 40
+  },
+  "groups": {
+    "same_domain": {
+      "evaluated": 14975,
+      "accepted": 0,
+      "samples": [
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707198548781285888/",
+            "title": "美国全新X-70试验机亮相，媒体欢呼：总算拉近和中国之间的差距了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707542024001552939/",
+            "title": "史上最冷的双11，2026年各大电商平台表现解析",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.022,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707582391136797218/",
+            "title": "可燃冰曾被称为可代替石油，中国储量全球第一，现在怎么不提了？",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707526791782613519/",
+            "title": "所有人都低估刘强东了！国内外卖还在厮杀，又砸百亿拿下欧洲龙头",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707666880600867328/",
+            "title": "手机电池再升级！最高15000mAh，3款“超大电池”新机要来了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.02,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707491498182459914/",
+            "title": "Character.AI都要破产了，AI陪伴却开始闷声赚大钱",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707551622393594410/",
+            "title": "刚刚，各大电商的双11成绩单出来了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.026,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707568050836357668/",
+            "title": "4000元制作、6000万热度 四川40岁设计师“早九晚六”做短剧，被全网催着上班",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707660578285781554/",
+            "title": "央媒发声后，网信部门整治AI仿冒乱象，未提郭晶晶",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707198548781285888/",
+            "title": "美国全新X-70试验机亮相，媒体欢呼：总算拉近和中国之间的差距了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707542024001552939/",
+            "title": "史上最冷的双11，2026年各大电商平台表现解析",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707198548781285888/",
+            "title": "美国全新X-70试验机亮相，媒体欢呼：总算拉近和中国之间的差距了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707582391136797218/",
+            "title": "可燃冰曾被称为可代替石油，中国储量全球第一，现在怎么不提了？",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.019,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707198548781285888/",
+            "title": "美国全新X-70试验机亮相，媒体欢呼：总算拉近和中国之间的差距了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.toutiao.com/article/7707526791782613519/",
+            "title": "所有人都低估刘强东了！国内外卖还在厮杀，又砸百亿拿下欧洲龙头",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "title_score_aux": 0.0,
+          "stage": "domain",
+          "accepted": false,
+          "reason": "同一域名 toutiao.com,不构成两家独立媒体",
+          "evidence": null
+        }
+      ]
+    },
+    "same_agency": {
+      "evaluated": 19800,
+      "accepted": 0,
+      "samples": [
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118999",
+            "title": "本周看什么 | 最近值得一看的 10 部作品",
+            "domain": "sspai.com",
+            "date": "2026-11-13",
+            "agency": "sspai"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 sspai/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118153",
+            "title": "研究生如何用 AI 辅助完成一篇综述：我的科研写作工具与实践经验",
+            "domain": "sspai.com",
+            "date": "2026-11-13",
+            "agency": "sspai"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 sspai/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118512",
+            "title": "在快 AI 时代，我是怎么把 Mole 做成一款「慢产品」的？",
+            "domain": "sspai.com",
+            "date": "2026-11-13",
+            "agency": "sspai"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 sspai/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118966",
+            "title": "派早报：英伟达 CEO 黄仁勋宣布辞职等",
+            "domain": "sspai.com",
+            "date": "2026-11-13",
+            "agency": "sspai"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 sspai/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689409?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "iPhone 20 爆料汇总：一整块玻璃，藏着苹果下一个十年",
+            "domain": "ifanr.com",
+            "date": "2026-11-13",
+            "agency": "ifanr"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 ifanr/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689379?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "李飞飞最新世界模型正式开放，我用它一句话造出重庆山城",
+            "domain": "ifanr.com",
+            "date": "2026-11-13",
+            "agency": "ifanr"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 ifanr/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689360?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "黄仁勋自嘲是「人渣」，英伟达员工集体喊话求回归",
+            "domain": "ifanr.com",
+            "date": "2026-11-13",
+            "agency": "ifanr"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 ifanr/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689182?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "AI 时代，公司的「新厂房」长什么样？",
+            "domain": "ifanr.com",
+            "date": "2026-11-13",
+            "agency": "ifanr"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 ifanr/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689292?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "早报｜黄仁勋仍为英伟达最大个人股东/豆包工作接入多款第三方模型/微信「看一看」测试短剧入口",
+            "domain": "ifanr.com",
+            "date": "2026-11-13",
+            "agency": "ifanr"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 ifanr/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707323493436539433/",
+            "title": "16GB+2TB！华为新机官宣：11月13日，再次开售",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://www.ifanr.com/1689267?utm_source=rss&utm_medium=rss&utm_campaign=",
+            "title": "刚刚，Gemini 4 新模型叒来了，终于人人可用",
+            "domain": "ifanr.com",
+            "date": "2026-11-13",
+            "agency": "ifanr"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 ifanr/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707198548781285888/",
+            "title": "美国全新X-70试验机亮相，媒体欢呼：总算拉近和中国之间的差距了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118999",
+            "title": "本周看什么 | 最近值得一看的 10 部作品",
+            "domain": "sspai.com",
+            "date": "2026-11-13",
+            "agency": "sspai"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 sspai/own_report",
+          "evidence": null
+        },
+        {
+          "category": "technology",
+          "left": {
+            "url": "https://www.toutiao.com/article/7707198548781285888/",
+            "title": "美国全新X-70试验机亮相，媒体欢呼：总算拉近和中国之间的差距了",
+            "domain": "toutiao.com",
+            "date": "2026-11-13",
+            "agency": "toutiao"
+          },
+          "right": {
+            "url": "https://sspai.com/post/118153",
+            "title": "研究生如何用 AI 辅助完成一篇综述：我的科研写作工具与实践经验",
+            "domain": "sspai.com",
+            "date": "2026-11-13",
+            "agency": "sspai"
+          },
+          "title_score_aux": 0.0,
+          "stage": "independence",
+          "accepted": false,
+          "reason": "来源不独立:toutiao/aggregator 与 sspai/own_report",
+          "evidence": null
+        }
+      ]
+    },
+    "reprint_copy": {
+      "evaluated": 6,
+      "accepted": 0,
+      "samples": [
+        {
+          "category": "finance",
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611183934093662.html",
+            "title": "新易盛：目前不存在需求预期下修或砍单情形 1.6T光模块已进入大规模放量阶段",
+            "domain": "finance.eastmoney.com",
+            "date": "2026-11-18",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651832.html",
+            "title": "618.87元到158.21元：光模块龙头新易盛，股价回撤74%后公告喊话，订单充足、没有砍单",
+            "domain": "nbd.com.cn",
+            "date": "2026-11-18",
+            "agency": "nbd"
+          },
+          "title_score_aux": 0.07,
+          "stage": "structured",
+          "accepted": false,
+          "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 4(核心 1,强 1,比例 1.00),数字重合 2(1.00),正文 5-gram 重合 0.820",
+          "evidence": {
+            "same_event": false,
+            "shared_entities": [
+              "acronym:cpo",
+              "acronym:npo",
+              "acronym:ocs",
+              "org:光模块为"
+            ],
+            "shared_core": [
+              "org:光模块为"
+            ],
+            "shared_strong": [
+              "org:光模块为"
+            ],
+            "shared_numbers": [
+              "1.6",
+              "800"
+            ],
+            "entity_ratio": 1.0,
+            "number_ratio": 1.0,
+            "copy_containment": 0.82,
+            "reasons": [
+              "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 4(核心 1,强 1,比例 1.00),数字重合 2(1.00),正文 5-gram 重合 0.820"
+            ]
+          }
+        },
+        {
+          "category": "finance",
+          "left": {
+            "url": "http://stock.eastmoney.com/news/1407,202611183933949034.html",
+            "title": "13:11分科技股集体拉升 大盘翻红！三大原因找到了",
+            "domain": "stock.eastmoney.com",
+            "date": "2026-11-18",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734213.shtml",
+            "title": "“国常会上有人表态不会再频繁救市了”系谣言",
+            "domain": "chinanews.com.cn",
+            "date": "2026-11-18",
+            "agency": "chinanews"
+          },
+          "title_score_aux": 0.0,
+          "stage": "structured",
+          "accepted": false,
+          "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 0(0.00),正文 5-gram 重合 0.650",
+          "evidence": {
+            "same_event": false,
+            "shared_entities": [],
+            "shared_core": [],
+            "shared_strong": [],
+            "shared_numbers": [],
+            "entity_ratio": 0.0,
+            "number_ratio": 0.0,
+            "copy_containment": 0.65,
+            "reasons": [
+              "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 0(0.00),正文 5-gram 重合 0.650"
+            ]
+          }
+        },
+        {
+          "category": "finance",
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611183933941252.html",
+            "title": "外交部：中俄美三国元首将就事关全球和平的重要问题深入交换意见",
+            "domain": "finance.eastmoney.com",
+            "date": "2026-11-18",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4652003.html",
+            "title": "英伟达拉升，AI产业链走高；哈啰回应单车“骑行30分钟收费15元”；最高40亿元，中际旭",
+            "domain": "nbd.com.cn",
+            "date": "2026-11-18",
+            "agency": "nbd"
+          },
+          "title_score_aux": 0.0,
+          "stage": "structured",
+          "accepted": false,
+          "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 1(核心 1,强 1,比例 1.00),数字重合 0(0.00),正文 5-gram 重合 0.839",
+          "evidence": {
+            "same_event": false,
+            "shared_entities": [
+              "person:郭嘉昆"
+            ],
+            "shared_core": [
+              "person:郭嘉昆"
+            ],
+            "shared_strong": [
+              "person:郭嘉昆"
+            ],
+            "shared_numbers": [],
+            "entity_ratio": 1.0,
+            "number_ratio": 0.0,
+            "copy_containment": 0.839,
+            "reasons": [
+              "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 1(核心 1,强 1,比例 1.00),数字重合 0(0.00),正文 5-gram 重合 0.839"
+            ]
+          }
+        },
+        {
+          "category": "finance",
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611183933941252.html",
+            "title": "外交部：中俄美三国元首将就事关全球和平的重要问题深入交换意见",
+            "domain": "finance.eastmoney.com",
+            "date": "2026-11-18",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.nbd.com.cn/articles/2026-11-18/4651909.html",
+            "title": "美股纳指高开0.65% ，AI产业链走高；哈啰回应单车“骑行30分钟收费15元”；最高40亿元",
+            "domain": "nbd.com.cn",
+            "date": "2026-11-18",
+            "agency": "nbd"
+          },
+          "title_score_aux": 0.0,
+          "stage": "structured",
+          "accepted": false,
+          "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 1(核心 1,强 1,比例 1.00),数字重合 0(0.00),正文 5-gram 重合 0.839",
+          "evidence": {
+            "same_event": false,
+            "shared_entities": [
+              "person:郭嘉昆"
+            ],
+            "shared_core": [
+              "person:郭嘉昆"
+            ],
+            "shared_strong": [
+              "person:郭嘉昆"
+            ],
+            "shared_numbers": [],
+            "entity_ratio": 1.0,
+            "number_ratio": 0.0,
+            "copy_containment": 0.839,
+            "reasons": [
+              "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 1(核心 1,强 1,比例 1.00),数字重合 0(0.00),正文 5-gram 重合 0.839"
+            ]
+          }
+        },
+        {
+          "category": "finance",
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1345,202611183933933885.html",
+            "title": "科创50指数涨超2% 三市成交额不足1.4万亿 算力租赁概念掀涨停潮",
+            "domain": "finance.eastmoney.com",
+            "date": "2026-11-18",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734213.shtml",
+            "title": "“国常会上有人表态不会再频繁救市了”系谣言",
+            "domain": "chinanews.com.cn",
+            "date": "2026-11-18",
+            "agency": "chinanews"
+          },
+          "title_score_aux": 0.0,
+          "stage": "structured",
+          "accepted": false,
+          "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 1(1.00),正文 5-gram 重合 0.570",
+          "evidence": {
+            "same_event": false,
+            "shared_entities": [],
+            "shared_core": [],
+            "shared_strong": [],
+            "shared_numbers": [
+              "18"
+            ],
+            "entity_ratio": 0.0,
+            "number_ratio": 1.0,
+            "copy_containment": 0.57,
+            "reasons": [
+              "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 1(1.00),正文 5-gram 重合 0.570"
+            ]
+          }
+        },
+        {
+          "category": "finance",
+          "left": {
+            "url": "http://finance.eastmoney.com/news/1351,202611183934332462.html",
+            "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+            "domain": "finance.eastmoney.com",
+            "date": "2026-11-18",
+            "agency": "eastmoney"
+          },
+          "right": {
+            "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734424.shtml",
+            "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+            "domain": "chinanews.com.cn",
+            "date": "2026-11-18",
+            "agency": "mofcom"
+          },
+          "title_score_aux": 1.0,
+          "stage": "structured",
+          "accepted": false,
+          "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 6(1.00),正文 5-gram 重合 0.997",
+          "evidence": {
+            "same_event": false,
+            "shared_entities": [],
+            "shared_core": [],
+            "shared_strong": [],
+            "shared_numbers": [
+              "1.2",
+              "11",
+              "17",
+              "3312.4",
+              "4409",
+              "63.7"
+            ],
+            "entity_ratio": 0.0,
+            "number_ratio": 1.0,
+            "copy_containment": 0.997,
+            "reasons": [
+              "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 6(1.00),正文 5-gram 重合 0.997"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "known_false": [
+    {
+      "label": "同题不同事:新易盛(东财) × 天孚通信(每经)——两家公司被标题/行业词拉近",
+      "status": "evaluated",
+      "expected": "structured",
+      "left": {
+        "url": "http://finance.eastmoney.com/news/1345,202611183934093662.html",
+        "title": "新易盛：目前不存在需求预期下修或砍单情形 1.6T光模块已进入大规模放量阶段",
+        "domain": "finance.eastmoney.com",
+        "date": "2026-11-18",
+        "agency": "eastmoney"
+      },
+      "right": {
+        "url": "https://www.nbd.com.cn/articles/2026-11-18/4651797.html",
+        "title": "从150元买到103.17元，CPO龙头天孚通信，累计耗资1亿元回购88万股，股价较年内高点回撤",
+        "domain": "nbd.com.cn",
+        "date": "2026-11-18",
+        "agency": "nbd"
+      },
+      "title_score_aux": 0.0,
+      "stage": "structured",
+      "accepted": false,
+      "reason": "结构化判定否:具名机构/人物/书名号重合不足(<2);只有英文品牌或行业缩写不算同一事件;实体重合 2(核心 0,强 0,比例 0.50),数字重合 2(1.00),正文 5-gram 重合 0.000",
+      "evidence": {
+        "same_event": false,
+        "shared_entities": [
+          "acronym:cpo",
+          "acronym:npo"
+        ],
+        "shared_core": [],
+        "shared_strong": [],
+        "shared_numbers": [
+          "1.6",
+          "800"
+        ],
+        "entity_ratio": 0.5,
+        "number_ratio": 1.0,
+        "copy_containment": 0.0,
+        "reasons": [
+          "具名机构/人物/书名号重合不足(<2);只有英文品牌或行业缩写不算同一事件;实体重合 2(核心 0,强 0,比例 0.50),数字重合 2(1.00),正文 5-gram 重合 0.000"
+        ]
+      }
+    },
+    {
+      "label": "同题不同事:科创50行情(东财) × 国常会救市谣言(中新网)——同日财经稿共享行情数字",
+      "status": "evaluated",
+      "expected": "structured",
+      "left": {
+        "url": "http://finance.eastmoney.com/news/1345,202611183933933885.html",
+        "title": "科创50指数涨超2% 三市成交额不足1.4万亿 算力租赁概念掀涨停潮",
+        "domain": "finance.eastmoney.com",
+        "date": "2026-11-18",
+        "agency": "eastmoney"
+      },
+      "right": {
+        "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734213.shtml",
+        "title": "“国常会上有人表态不会再频繁救市了”系谣言",
+        "domain": "chinanews.com.cn",
+        "date": "2026-11-18",
+        "agency": "chinanews"
+      },
+      "title_score_aux": 0.0,
+      "stage": "structured",
+      "accepted": false,
+      "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 1(1.00),正文 5-gram 重合 0.570",
+      "evidence": {
+        "same_event": false,
+        "shared_entities": [],
+        "shared_core": [],
+        "shared_strong": [],
+        "shared_numbers": [
+          "18"
+        ],
+        "entity_ratio": 0.0,
+        "number_ratio": 1.0,
+        "copy_containment": 0.57,
+        "reasons": [
+          "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 1(1.00),正文 5-gram 重合 0.570"
+        ]
+      }
+    },
+    {
+      "label": "转载冒充独立:商务部答问(东财) × 中新网同稿——不同域名、不同署名,正文 99.7% 重合",
+      "status": "evaluated",
+      "expected": "structured",
+      "left": {
+        "url": "http://finance.eastmoney.com/news/1351,202611183934332462.html",
+        "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+        "domain": "finance.eastmoney.com",
+        "date": "2026-11-18",
+        "agency": "eastmoney"
+      },
+      "right": {
+        "url": "https://www.chinanews.com.cn/cj/2026/11-18/10734424.shtml",
+        "title": "商务部国际司负责人就实质性完成中韩自贸协定第二阶段谈判有关情况答记者问",
+        "domain": "chinanews.com.cn",
+        "date": "2026-11-18",
+        "agency": "mofcom"
+      },
+      "title_score_aux": 1.0,
+      "stage": "structured",
+      "accepted": false,
+      "reason": "结构化判定否:正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 6(1.00),正文 5-gram 重合 0.997",
+      "evidence": {
+        "same_event": false,
+        "shared_entities": [],
+        "shared_core": [],
+        "shared_strong": [],
+        "shared_numbers": [
+          "1.2",
+          "11",
+          "17",
+          "3312.4",
+          "4409",
+          "63.7"
+        ],
+        "entity_ratio": 0.0,
+        "number_ratio": 1.0,
+        "copy_containment": 0.997,
+        "reasons": [
+          "正文高度重合,按同稿/转载处理(不作为独立对);实体重合 0(核心 0,强 0,比例 0.00),数字重合 6(1.00),正文 5-gram 重合 0.997"
+        ]
+      }
+    }
+  ],
+  "known_true": [
+    {
+      "label": "真同事件:行云科技 20 亿元 AI 词元跨境订单(东财 × 每经)",
+      "status": "evaluated",
+      "expected": "accepted",
+      "left": {
+        "url": "http://finance.eastmoney.com/news/1354,202611183934169142.html",
+        "title": "行云科技签订不超20亿元AI词元跨境销售服务合同",
+        "domain": "finance.eastmoney.com",
+        "date": "2026-11-18",
+        "agency": "eastmoney"
+      },
+      "right": {
+        "url": "https://www.nbd.com.cn/articles/2026-11-18/4651857.html",
+        "title": "最高20亿元！行云科技，再签AI词元跨境“大订单”！股价年内涨超300%",
+        "domain": "nbd.com.cn",
+        "date": "2026-11-18",
+        "agency": "nbd"
+      },
+      "title_score_aux": 0.25,
+      "stage": "structured",
+      "accepted": true,
+      "reason": "同日且实体/数字高度重合:实体重合 3(核心 3,强 3,比例 1.00),数字重合 5(0.83),正文 5-gram 重合 0.155",
+      "evidence": {
+        "same_event": true,
+        "shared_entities": [
+          "org:新丝路控股",
+          "quote:AI词元跨境销售服务合同",
+          "quote:销售订单"
+        ],
+        "shared_core": [
+          "org:新丝路控股",
+          "quote:AI词元跨境销售服务合同",
+          "quote:销售订单"
+        ],
+        "shared_strong": [
+          "org:新丝路控股",
+          "quote:AI词元跨境销售服务合同",
+          "quote:销售订单"
+        ],
+        "shared_numbers": [
+          "11.75",
+          "2.69",
+          "20",
+          "22.15",
+          "60"
+        ],
+        "entity_ratio": 1.0,
+        "number_ratio": 0.833,
+        "copy_containment": 0.155,
+        "reasons": [
+          "同日且实体/数字高度重合:实体重合 3(核心 3,强 3,比例 1.00),数字重合 5(0.83),正文 5-gram 重合 0.155"
+        ]
+      }
+    },
+    {
+      "label": "真同事件:多家房企股价跌破 1 元拉响退市警报(第一财经 × 每经)",
+      "status": "evaluated",
+      "expected": "accepted",
+      "left": {
+        "url": "https://www.yicai.com/news/103445713.html",
+        "title": "股价下挫拉响多家房企退市警报，“护盘”行动已经开启",
+        "domain": "yicai.com",
+        "date": "2026-11-18",
+        "agency": "yicai"
+      },
+      "right": {
+        "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+        "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+        "domain": "nbd.com.cn",
+        "date": "2026-11-18",
+        "agency": "nbd"
+      },
+      "title_score_aux": 0.176,
+      "stage": "structured",
+      "accepted": true,
+      "reason": "同日且实体/数字高度重合:实体重合 4(核心 3,强 3,比例 0.29),数字重合 15(0.50),正文 5-gram 重合 0.123",
+      "evidence": {
+        "same_event": true,
+        "shared_entities": [
+          "acronym:st",
+          "org:中指研究院",
+          "org:房地产上市",
+          "person:刘水"
+        ],
+        "shared_core": [
+          "org:中指研究院",
+          "org:房地产上市",
+          "person:刘水"
+        ],
+        "shared_strong": [
+          "org:中指研究院",
+          "org:房地产上市",
+          "person:刘水"
+        ],
+        "shared_numbers": [
+          "0.83",
+          "0.90",
+          "0.92",
+          "0.93",
+          "0.97",
+          "1200",
+          "17",
+          "19.85",
+          "20",
+          "24.6",
+          "3.33",
+          "30",
+          "31.12",
+          "600",
+          "75.05"
+        ],
+        "entity_ratio": 0.286,
+        "number_ratio": 0.5,
+        "copy_containment": 0.123,
+        "reasons": [
+          "同日且实体/数字高度重合:实体重合 4(核心 3,强 3,比例 0.29),数字重合 15(0.50),正文 5-gram 重合 0.123"
+        ]
+      }
+    }
+  ],
+  "accepted_pairs": [
+    {
+      "category": "finance",
+      "left": {
+        "url": "http://finance.eastmoney.com/news/1354,202611183934169142.html",
+        "title": "行云科技签订不超20亿元AI词元跨境销售服务合同",
+        "domain": "finance.eastmoney.com",
+        "date": "2026-11-18",
+        "agency": "eastmoney"
+      },
+      "right": {
+        "url": "https://www.nbd.com.cn/articles/2026-11-18/4651857.html",
+        "title": "最高20亿元！行云科技，再签AI词元跨境“大订单”！股价年内涨超300%",
+        "domain": "nbd.com.cn",
+        "date": "2026-11-18",
+        "agency": "nbd"
+      },
+      "title_score_aux": 0.25,
+      "stage": "structured",
+      "accepted": true,
+      "reason": "同日且实体/数字高度重合:实体重合 3(核心 3,强 3,比例 1.00),数字重合 5(0.83),正文 5-gram 重合 0.155",
+      "evidence": {
+        "same_event": true,
+        "shared_entities": [
+          "org:新丝路控股",
+          "quote:AI词元跨境销售服务合同",
+          "quote:销售订单"
+        ],
+        "shared_core": [
+          "org:新丝路控股",
+          "quote:AI词元跨境销售服务合同",
+          "quote:销售订单"
+        ],
+        "shared_strong": [
+          "org:新丝路控股",
+          "quote:AI词元跨境销售服务合同",
+          "quote:销售订单"
+        ],
+        "shared_numbers": [
+          "11.75",
+          "2.69",
+          "20",
+          "22.15",
+          "60"
+        ],
+        "entity_ratio": 1.0,
+        "number_ratio": 0.833,
+        "copy_containment": 0.155,
+        "reasons": [
+          "同日且实体/数字高度重合:实体重合 3(核心 3,强 3,比例 1.00),数字重合 5(0.83),正文 5-gram 重合 0.155"
+        ]
+      }
+    },
+    {
+      "category": "finance",
+      "left": {
+        "url": "https://www.yicai.com/news/103445713.html",
+        "title": "股价下挫拉响多家房企退市警报，“护盘”行动已经开启",
+        "domain": "yicai.com",
+        "date": "2026-11-18",
+        "agency": "yicai"
+      },
+      "right": {
+        "url": "https://www.nbd.com.cn/articles/2026-11-18/4651846.html",
+        "title": "两天三家上市房企股价跌破1元，拉响退市警报",
+        "domain": "nbd.com.cn",
+        "date": "2026-11-18",
+        "agency": "nbd"
+      },
+      "title_score_aux": 0.176,
+      "stage": "structured",
+      "accepted": true,
+      "reason": "同日且实体/数字高度重合:实体重合 4(核心 3,强 3,比例 0.29),数字重合 15(0.50),正文 5-gram 重合 0.123",
+      "evidence": {
+        "same_event": true,
+        "shared_entities": [
+          "acronym:st",
+          "org:中指研究院",
+          "org:房地产上市",
+          "person:刘水"
+        ],
+        "shared_core": [
+          "org:中指研究院",
+          "org:房地产上市",
+          "person:刘水"
+        ],
+        "shared_strong": [
+          "org:中指研究院",
+          "org:房地产上市",
+          "person:刘水"
+        ],
+        "shared_numbers": [
+          "0.83",
+          "0.90",
+          "0.92",
+          "0.93",
+          "0.97",
+          "1200",
+          "17",
+          "19.85",
+          "20",
+          "24.6",
+          "3.33",
+          "30",
+          "31.12",
+          "600",
+          "75.05"
+        ],
+        "entity_ratio": 0.286,
+        "number_ratio": 0.5,
+        "copy_containment": 0.123,
+        "reasons": [
+          "同日且实体/数字高度重合:实体重合 4(核心 3,强 3,比例 0.29),数字重合 15(0.50),正文 5-gram 重合 0.123"
+        ]
+      }
+    }
+  ],
+  "unlabeled_accepts": [],
+  "problems": [],
+  "verdict": "PASS"
+}

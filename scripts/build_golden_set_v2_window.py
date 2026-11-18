@@ -42,6 +42,7 @@ if str(ROOT / "scripts") not in sys.path:
 
 import build_golden_set_v2 as base           # noqa: E402
 from ttxt import config as cfg               # noqa: E402
+from ttxt.analysis import event_identity as event_identity  # noqa: E402
 from ttxt.analysis import source_identity as si  # noqa: E402
 from ttxt.writing import verifier            # noqa: E402
 
@@ -191,12 +192,19 @@ def select_seeds(category: str, rows: list[dict], probes: dict[str, si.Identity]
 
 
 def attach_partners(articles: dict[str, list[dict]], identities: dict[str, si.Identity]) -> dict:
-    """在窗口内跑生产配对,返回 url -> 最佳独立同题伙伴。"""
+    """在窗口内跑**两套**配对(A:标题相似度; B:结构化同日+实体/数字),返回 url -> 伙伴。
+
+    两套并行保留:标题通路是 R36 起的既有口径,结构化通路是 R38 新增的补充通路;
+    B 卡取"任一通路成立"(即新增通路只加不减),并分别落盘两套读数。
+    """
     partner: dict[str, dict] = {}
     pair_report: dict[str, dict] = {}
+    structured_report: dict[str, dict] = {}
+    structured_stats_all: dict = {}
     for category, rows in articles.items():
         items = [{"url": r["url"], "title": r["title"], "domain": si.domain_of(r["url"]),
-                  "source": r["source"], "article_id": r["id"], "date": _d(r["published_at"])}
+                  "source": r["source"], "article_id": r["id"], "date": _d(r["published_at"]),
+                  "text": r.get("text") or ""}
                  for r in rows if r["url"] in identities]
         pairs, rejected = si.find_pairs(items, identities)
         ranked = sorted(pairs, key=lambda p: p["score"], reverse=True)
@@ -207,21 +215,89 @@ def attach_partners(articles: dict[str, list[dict]], identities: dict[str, si.Id
                         "url": other["url"], "title": other["title"],
                         "domain": other["domain"], "agency": identities[other["url"]].agency,
                         "kind": identities[other["url"]].kind, "score": p["score"],
-                        "date": other.get("date"),
+                        "date": other.get("date"), "match_mode": "title",
                     }
         pair_report[category] = {
-            "pairs": [{"left": p["left"], "right": p["right"], "score": p["score"]} for p in pairs],
-            "rejected": rejected,
+            "pairs": [{"left": event_identity.slim_item(p["left"]),
+                       "right": event_identity.slim_item(p["right"]), "score": p["score"]}
+                      for p in pairs],
+            "rejected": [{**{k: v for k, v in r.items() if k not in ("left", "right")},
+                          "left": event_identity.slim_item(r["left"]),
+                          "right": event_identity.slim_item(r["right"])} for r in rejected],
             "same_day_pairs": sum(1 for p in pairs if p["left"].get("date") == p["right"].get("date")),
             "scan_pairs": len(items) * (len(items) - 1) // 2,
         }
-    return {"partner": partner, "report": pair_report}
+
+        structured_pairs, structured_rejected, structured_stats = \
+            event_identity.find_pairs_structured(items, identities)
+        ranked_new = sorted(structured_pairs,
+                            key=lambda p: len(p["evidence"]["shared_core"]), reverse=True)
+        for p in ranked_new:
+            for me, other in ((p["left"], p["right"]), (p["right"], p["left"])):
+                if me["url"] not in partner:
+                    partner[me["url"]] = {
+                        "url": other["url"], "title": other["title"],
+                        "domain": other["domain"], "agency": identities[other["url"]].agency,
+                        "kind": identities[other["url"]].kind, "score": p["title_score_aux"],
+                        "date": other.get("date"), "match_mode": "structured",
+                        "evidence": p["evidence"],
+                    }
+        structured_report[category] = {
+            "pairs": [{"left": p["left"], "right": p["right"],
+                       "title_score_aux": p["title_score_aux"],
+                       "agencies": p["agencies"], "evidence": p["evidence"]}
+                      for p in structured_pairs],
+            "rejected": structured_rejected,
+            "stats": structured_stats,
+        }
+        for key in ("scan_pairs", "same_day_pairs", "domain_rejected", "identity_rejected",
+                    "independence_rejected", "reprint_rejected", "structured_rejected", "accepted"):
+            structured_stats_all[key] = structured_stats_all.get(key, 0) + structured_stats[key]
+    candidate = (structured_stats_all.get("accepted", 0)
+                 + structured_stats_all.get("reprint_rejected", 0)
+                 + structured_stats_all.get("structured_rejected", 0)
+                 + structured_stats_all.get("domain_rejected", 0)
+                 + structured_stats_all.get("identity_rejected", 0)
+                 + structured_stats_all.get("independence_rejected", 0))
+    structured_stats_all["candidate_pairs"] = candidate
+    structured_stats_all["scan_pairs"] = structured_stats_all.get("same_day_pairs", 0)
+    structured_stats_all["independent_pairs"] = structured_stats_all.get("accepted", 0)
+    structured_stats_all["pair_independence_share"] = (
+        round(structured_stats_all["independent_pairs"] / candidate, 4) if candidate else None)
+    return {"partner": partner, "report": pair_report, "structured_report": structured_report,
+            "structured_stats": structured_stats_all}
+
+
+def _pair_totals(report: dict, rejected_key: str = "rejected") -> dict:
+    totals = {
+        "candidate_pairs": sum(len(v["pairs"]) + len(v[rejected_key]) for v in report.values()),
+        "independent_pairs": sum(len(v["pairs"]) for v in report.values()),
+        "same_day_pairs": sum(v["same_day_pairs"] for v in report.values()),
+        "scan_pairs": sum(v["scan_pairs"] for v in report.values()),
+    }
+    totals["pair_independence_share"] = si.pair_independence_share(
+        [p for v in report.values() for p in v["pairs"]],
+        [r for v in report.values() for r in v[rejected_key]],
+    )
+    return totals
 
 
 def tier_and_note(art: dict) -> tuple[str, list[str], str]:
     ident = art["identity"]
     basis = art["identity_basis"]
     partner = art.get("partner")
+    if partner and partner.get("match_mode") == "structured":
+        ev = partner.get("evidence") or {}
+        core = "、".join(ev.get("shared_core") or [])
+        nums = "、".join(ev.get("shared_numbers") or [])
+        note = (
+            f"B 级:同事件独立机构 {partner['agency']}({partner['domain']},结构化判定,"
+            f"日期 {partner['date']});本页身份 {ident.kind}/{ident.agency}({basis})。"
+            f"同日双方正文共享具名实体:{core};共享数字:{nums}。"
+            "两篇由结构化通路判定为不同机构、非互相转载(正文 5-gram 重合低于转载阈值),"
+            "corroborating_urls 可核"
+        )
+        return "B", [partner["url"]], note
     if partner:
         note = (
             f"B 级:同事件独立机构 {partner['agency']}({partner['domain']},score {partner['score']},"
@@ -449,23 +525,26 @@ def main(argv: list[str] | None = None) -> int:
     out_cards.write_text("\n".join(json.dumps(c, ensure_ascii=False) for c in cards) + "\n",
                          encoding="utf-8")
 
-    pair_totals = {
-        "candidate_pairs": sum(len(v["pairs"]) + len(v["rejected"]) for v in pairing["report"].values()),
-        "independent_pairs": sum(len(v["pairs"]) for v in pairing["report"].values()),
-        "same_day_pairs": sum(v["same_day_pairs"] for v in pairing["report"].values()),
-        "scan_pairs": sum(v["scan_pairs"] for v in pairing["report"].values()),
-    }
-    pair_totals["pair_independence_share"] = si.pair_independence_share(
-        [p for v in pairing["report"].values() for p in v["pairs"]],
-        [r for v in pairing["report"].values() for r in v["rejected"]],
-    )
+    pair_totals = _pair_totals(pairing["report"])
+    structured_totals = pairing["structured_stats"]
     pairs_out = Path(args.pairs_out) if args.pairs_out else Path(
         str(OUT_PAIRS).format(as_of=as_of.strftime("%Y%m%d")))
     pairs_out.parent.mkdir(parents=True, exist_ok=True)
     pairs_out.write_text(json.dumps({
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "window_days": args.days, "window_start": start, "window_end": end,
+        # 两套判定并排落盘:R36 起的标题相似度通路 + R38 新增的结构化通路
         "categories": pairing["report"], "totals": pair_totals,
+        "structured_categories": pairing["structured_report"],
+        "structured_totals": structured_totals,
+        "structured_params": {
+            "min_shared_entities": event_identity.MIN_SHARED_ENTITIES,
+            "min_shared_core_entities": event_identity.MIN_SHARED_CORE_ENTITIES,
+            "min_shared_strong_entities": event_identity.MIN_SHARED_STRONG_ENTITIES,
+            "min_shared_numbers": event_identity.MIN_SHARED_NUMBERS,
+            "min_shared_number_ratio": event_identity.MIN_SHARED_NUMBER_RATIO,
+            "copy_containment": event_identity.COPY_CONTAINMENT,
+        },
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     tier_counts = Counter(c["source_tier"] for c in cards)
@@ -482,7 +561,8 @@ def main(argv: list[str] | None = None) -> int:
              "identity_kind": a["identity"].kind, "agency": a["identity"].agency,
              "tier": tier_and_note(a)[0], "partner_url": (a.get("partner") or {}).get("url"),
              "partner_agency": (a.get("partner") or {}).get("agency"),
-             "partner_score": (a.get("partner") or {}).get("score")}
+             "partner_score": (a.get("partner") or {}).get("score"),
+             "partner_match_mode": (a.get("partner") or {}).get("match_mode")}
             for cat, seeds in seeds_by_cat.items() for a in seeds
         ],
         "identity_basis_counts": dict(identity_basis),
@@ -491,6 +571,7 @@ def main(argv: list[str] | None = None) -> int:
         "kind_counts": dict(Counter(c["kind"] for c in cards)),
         "category_counts": dict(Counter(c["category"] for c in cards)),
         "pair_stats": pair_totals,
+        "structured_pair_stats": structured_totals,
         # --pairs-out 常以相对仓库根的路径传入(文档示例就是相对路径),先 resolve 再取相对
         "pair_report": str(pairs_out.resolve().relative_to(ROOT)),
         "overlap_with_old": overlap_stats(cards, old_cards),
@@ -505,7 +586,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(json.dumps({k: meta[k] for k in (
         "window_days", "window_start", "window_end", "category_counts", "tier_counts",
-        "identity_basis_counts", "excluded", "pair_stats", "overlap_with_old")},
+        "identity_basis_counts", "excluded", "pair_stats", "structured_pair_stats", "overlap_with_old")},
         ensure_ascii=False, indent=2))
     print(f"\n卡片:{out_cards}\n元数据:{meta_out}\n配对报告:{pairs_out}")
     return 0

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-19T01:58:34+08:00",
+  "generated_at": "2026-11-19T02:38:47+08:00",
   "as_of": "2026-11-19",
   "window_days": 7,
   "window_start": "2026-11-13",
@@ -65,7 +65,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "technology",
@@ -79,7 +80,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "technology",
@@ -93,7 +95,8 @@
       "tier": "B",
       "partner_url": "https://www.ifanr.com/1689994?utm_source=rss&utm_medium=rss&utm_campaign=",
       "partner_agency": "ifanr",
-      "partner_score": 0.323
+      "partner_score": 0.323,
+      "partner_match_mode": "title"
     },
     {
       "category": "technology",
@@ -107,7 +110,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "technology",
@@ -121,7 +125,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "finance",
@@ -135,7 +140,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "finance",
@@ -149,7 +155,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "finance",
@@ -163,7 +170,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "health",
@@ -177,7 +185,8 @@
       "tier": "A",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "health",
@@ -191,7 +200,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     },
     {
       "category": "health",
@@ -205,7 +215,8 @@
       "tier": "C",
       "partner_url": null,
       "partner_agency": null,
-      "partner_score": null
+      "partner_score": null,
+      "partner_match_mode": null
     }
   ],
   "identity_basis_counts": {
@@ -246,7 +257,20 @@
       "meaning": "同题候选中独立机构对占比;只读观测,不参与门禁"
     }
   },
-  "pair_report": "03_intelligence\\source_identity\\r37-pairs-20261119.json",
+  "structured_pair_stats": {
+    "scan_pairs": 49487,
+    "same_day_pairs": 49487,
+    "domain_rejected": 14975,
+    "identity_rejected": 0,
+    "independence_rejected": 19800,
+    "reprint_rejected": 6,
+    "structured_rejected": 14704,
+    "accepted": 2,
+    "candidate_pairs": 49487,
+    "independent_pairs": 2,
+    "pair_independence_share": 0.0
+  },
+  "pair_report": "03_intelligence\\source_identity\\window-pairs-20261119-r38.json",
   "overlap_with_old": {
     "card_level": {
       "overlap": 0,
