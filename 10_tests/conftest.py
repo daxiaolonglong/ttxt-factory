@@ -61,8 +61,9 @@ MIN_FREE_GB_AT_START = 8.0
 TRIM_DIR = ROOT / "07_tmp" / "pytest_trim"
 TRIM_ARTICLE_ROWS = 400
 # 裁剪逻辑版本:改裁剪规则(比如新增要清的非内容表)必须 +1,否则旧缓存会按
-# "生产库 size+mtime 没变"直接复用,新规则等于没生效。R42 起 = 2(清 ``metrics_due_queue``)。
-TRIM_LOGIC_VERSION = 2
+# "生产库 size+mtime 没变"直接复用,新规则等于没生效。R42 起 = 2(清 ``metrics_due_queue``);
+# R47 起 = 3(清 ``score_v2_labels``,并列评分表同样是每篇文章一行)。
+TRIM_LOGIC_VERSION = 3
 TEST_COPY_MAX_MB = 40.0
 TEST_COPY_BUDGET_MB = 200.0
 
@@ -622,7 +623,8 @@ def _trim_with_sql(staging: Path, rows: int) -> tuple[int, int]:
         con.execute("DELETE FROM articles WHERE id NOT IN (SELECT id FROM temp.kept_ids)")
         # R42:``metrics_due_queue`` 是取数排队表(每篇文章一行),不是内容表;
         # 不跟着裁剪会让类目库副本因排队行超 40 MB 上限,而排队状态对测试语义为零。
-        for table in ("viral_labels", "article_metrics", "metric_snapshots", "metrics_due_queue"):
+        # R47:``score_v2_labels`` 同理(并列评分,每篇一行),对测试语义同样为零。
+        for table in ("viral_labels", "article_metrics", "metric_snapshots", "metrics_due_queue", "score_v2_labels"):
             if table in tables:
                 con.execute(f"DELETE FROM {table} WHERE article_id NOT IN (SELECT id FROM temp.kept_ids)")
         if "evidence_links" in tables:

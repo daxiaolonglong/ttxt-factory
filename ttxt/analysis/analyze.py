@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ttxt.crawler import store
 
-from . import keywords, knowledge, rag, viral
+from . import keywords, knowledge, rag, score_v2_apply, viral
 from ttxt.logging import get_logger
 
 LOG = get_logger("analysis")
@@ -36,6 +36,9 @@ def run_analysis(
     # 原顺序里 auto_feedback 跑在 viral 之前,导致「先按旧标签挖词、再刷新标签」;
     # 现在标签先刷新,挖词与评分用的是同一轮标签,反馈最后按 gap 入队。
     viral_stats = _timed(stages, "viral", viral.label_category, category, path)
+    # R47(只增不改):score_v2 并列评分只写新表 score_v2_labels;模型产物缺失或
+    # 校验失败时返回 status,不抛异常 —— 旧链路与退出码零影响,随时可回退。
+    score_v2_stats = _timed(stages, "score_v2", lambda: score_v2_apply.apply_category(category, db_path=path))
     mined_stats = _timed(stages, "mine_keywords", keywords.mine_keywords, category, path)
     keyword_stats = _timed(stages, "score_keywords", keywords.score_keywords, category, path)
     feedback_stats = _timed(
@@ -64,6 +67,7 @@ def run_analysis(
         "mined_keywords": mined_stats,
         "feedback": feedback_stats,
         "viral": viral_stats,
+        "score_v2": score_v2_stats,
         "knowledge": knowledge_stats,
         "index": index_stats,
         "stage_seconds": stages,

@@ -12,7 +12,7 @@ from . import __version__
 from . import config as cfg
 from . import db, doctor, housekeep, scheduler, supervisor
 from .analysis import analyze as analyzer
-from .analysis import metrics_import, prediction, viral
+from .analysis import metrics_import, prediction, score_v2_apply, viral
 from .analysis import rag as analyzer_rag
 from .crawler import dedupe as crawler_dedupe
 from .crawler import keyword_crawl as crawler_keyword_crawl
@@ -770,6 +770,16 @@ def cmd_predict(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_score_v2(args: argparse.Namespace) -> int:
+    # R47(只增不改):并列评分的手动入口。apply=全量刷新新表;status=只读落库状态。
+    if args.action == "apply":
+        report = score_v2_apply.apply_category(args.category)
+    else:
+        report = score_v2_apply.status(args.category)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_schedule(args: argparse.Namespace) -> int:
     if args.once:
         report = scheduler.run_due()
@@ -998,6 +1008,11 @@ def build_parser() -> argparse.ArgumentParser:
     predict.add_argument("--category", required=True)
     predict.add_argument("--limit", type=int, default=None)
     predict.set_defaults(func=cmd_predict)
+
+    score_v2_cmd = sub.add_parser("score-v2", help="R47 并列连续分:apply=刷新 score_v2_labels 新表 / status=只读落库状态")
+    score_v2_cmd.add_argument("action", choices=["apply", "status"])
+    score_v2_cmd.add_argument("--category", required=True)
+    score_v2_cmd.set_defaults(func=cmd_score_v2)
 
     schedule = sub.add_parser("schedule", help="本地调度器(只入队采集与本地分析,绝不写作/发布)")
     schedule.add_argument("--once", action="store_true", help="执行一轮到期任务后退出")

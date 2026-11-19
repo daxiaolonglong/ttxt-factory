@@ -219,6 +219,18 @@ CREATE TABLE IF NOT EXISTS prediction_records (
 );
 """
 
+# R47(只增):score_v2 连续分并列落库表。旧 viral_labels / prediction_records
+# 一行不动;score_v2 分数只进这张新表,便于并列读数与回退。
+SCORE_V2_SCHEMA = """
+CREATE TABLE IF NOT EXISTS score_v2_labels (
+  article_id INTEGER PRIMARY KEY,
+  score_v2 REAL NOT NULL,
+  features_json TEXT NOT NULL,
+  model_version TEXT NOT NULL,
+  applied_at TEXT NOT NULL
+);
+"""
+
 
 def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
     """P2 → P3 → P4 → P6:清洗/聚类列、分析表、FTS5 索引与写作表,幂等。"""
@@ -240,6 +252,7 @@ def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
         con.executescript(V3_SCHEMA)
         con.executescript(V4_SCHEMA)
         con.executescript(PIPELINE_STATE_SCHEMA)
+        con.executescript(SCORE_V2_SCHEMA)
         writing_columns = {row[1] for row in con.execute("PRAGMA table_info(writing_history)")}
         if "status" not in writing_columns:
             con.execute("ALTER TABLE writing_history ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'")

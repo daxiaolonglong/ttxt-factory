@@ -1,0 +1,248 @@
+{
+  "schema": "r47-score-v2-production-compare-v2",
+  "model_version": "score_v2",
+  "model_n_train": 23294,
+  "train_ratio": 0.7,
+  "time_split": {
+    "mode": "global",
+    "rows_all": 33603,
+    "dated": 33286,
+    "train": 23300,
+    "holdout": 9986,
+    "train_published_max": "2026-10-06T17:38:05+08:00",
+    "holdout_published_min": "2026-10-06T17:38:59+08:00"
+  },
+  "metric_semantics": {
+    "actual": "文章实测 log10(reads) 在类目全局-holdout 内的**名次分位 (rank−0.5)/n**(均值恰为 0.5,随机选择期望 0.5;旧口径 rank/n 期望 0.5+1/(2n),已弃用)",
+    "v2_source": "score_v2_labels(正式链路 apply 落库值,原样读取)",
+    "old_source": "viral_labels.score(生产 label_category 最近一轮落库值;旧实现读取过结果类字段,属既有错位,并列展示不假装可比)",
+    "lift": "按分数取类目 top-decile,其实测分位均值 / 0.5"
+  },
+  "categories": {
+    "technology": {
+      "rows_with_reads": 239,
+      "dated": 239,
+      "holdout_in_global": 230,
+      "holdout_scored": 230,
+      "full_table_distinct": {
+        "old_distinct_full": 196,
+        "old_rows_full": 236
+      },
+      "holdout_metrics": {
+        "n": 230,
+        "actual_log10_reads_p90": 4.539,
+        "v2": {
+          "distinct_score_values": 230,
+          "spearman_vs_actual_pct": 0.128,
+          "spearman_ci95": [
+            0.0029,
+            0.266
+          ],
+          "top_decile": {
+            "selected": 23,
+            "mean_actual_percentile": 0.5233,
+            "lift": 1.047
+          }
+        },
+        "old": {
+          "n_with_label": 226,
+          "distinct_score_values": 188,
+          "spearman_vs_actual_pct": 0.5062,
+          "spearman_ci95": [
+            0.3947,
+            0.6114
+          ],
+          "top_decile": {
+            "selected": 22,
+            "mean_actual_percentile": 0.6305,
+            "lift": 1.261
+          }
+        }
+      }
+    },
+    "finance": {
+      "rows_with_reads": 7684,
+      "dated": 7642,
+      "holdout_in_global": 2010,
+      "holdout_scored": 2010,
+      "full_table_distinct": {
+        "old_distinct_full": 1014,
+        "old_rows_full": 7678
+      },
+      "holdout_metrics": {
+        "n": 2010,
+        "actual_log10_reads_p90": 2.391,
+        "v2": {
+          "distinct_score_values": 2008,
+          "spearman_vs_actual_pct": 0.2183,
+          "spearman_ci95": [
+            0.1761,
+            0.2584
+          ],
+          "top_decile": {
+            "selected": 201,
+            "mean_actual_percentile": 0.6757,
+            "lift": 1.351
+          }
+        },
+        "old": {
+          "n_with_label": 2004,
+          "distinct_score_values": 380,
+          "spearman_vs_actual_pct": 0.9849,
+          "spearman_ci95": [
+            0.9806,
+            0.9892
+          ],
+          "top_decile": {
+            "selected": 200,
+            "mean_actual_percentile": 0.9246,
+            "lift": 1.849
+          }
+        }
+      }
+    },
+    "health": {
+      "rows_with_reads": 39,
+      "dated": 39,
+      "holdout_in_global": 34,
+      "holdout_scored": 34,
+      "full_table_distinct": {
+        "old_distinct_full": 39,
+        "old_rows_full": 40
+      },
+      "holdout_metrics": {
+        "n": 34,
+        "actual_log10_reads_p90": 4.219,
+        "v2": {
+          "distinct_score_values": 34,
+          "spearman_vs_actual_pct": 0.1682,
+          "spearman_ci95": [
+            -0.1284,
+            0.4976
+          ],
+          "top_decile": {
+            "selected": 3,
+            "mean_actual_percentile": 0.6422,
+            "lift": 1.284
+          }
+        },
+        "old": {
+          "n_with_label": 34,
+          "distinct_score_values": 32,
+          "spearman_vs_actual_pct": 0.4644,
+          "spearman_ci95": [
+            0.0838,
+            0.8056
+          ],
+          "top_decile": {
+            "selected": 3,
+            "mean_actual_percentile": 0.5931,
+            "lift": 1.186
+          }
+        }
+      }
+    },
+    "history": {
+      "rows_with_reads": 103,
+      "dated": 103,
+      "holdout_in_global": 86,
+      "holdout_scored": 86,
+      "full_table_distinct": {
+        "old_distinct_full": 75,
+        "old_rows_full": 81
+      },
+      "holdout_metrics": {
+        "n": 86,
+        "actual_log10_reads_p90": 4.455,
+        "v2": {
+          "distinct_score_values": 86,
+          "spearman_vs_actual_pct": 0.2185,
+          "spearman_ci95": [
+            -0.0137,
+            0.4176
+          ],
+          "top_decile": {
+            "selected": 8,
+            "mean_actual_percentile": 0.4709,
+            "lift": 0.942
+          }
+        },
+        "old": {
+          "n_with_label": 69,
+          "distinct_score_values": 66,
+          "spearman_vs_actual_pct": 0.5274,
+          "spearman_ci95": [
+            0.2743,
+            0.683
+          ],
+          "top_decile": {
+            "selected": 6,
+            "mean_actual_percentile": 0.7074,
+            "lift": 1.415
+          }
+        }
+      }
+    },
+    "social": {
+      "rows_with_reads": 25538,
+      "dated": 25263,
+      "holdout_in_global": 7626,
+      "holdout_scored": 7626,
+      "full_table_distinct": {
+        "old_distinct_full": 2151,
+        "old_rows_full": 25524
+      },
+      "holdout_metrics": {
+        "n": 7626,
+        "actual_log10_reads_p90": 2.248,
+        "v2": {
+          "distinct_score_values": 7581,
+          "spearman_vs_actual_pct": 0.1501,
+          "spearman_ci95": [
+            0.1287,
+            0.1684
+          ],
+          "top_decile": {
+            "selected": 762,
+            "mean_actual_percentile": 0.557,
+            "lift": 1.114
+          }
+        },
+        "old": {
+          "n_with_label": 7590,
+          "distinct_score_values": 745,
+          "spearman_vs_actual_pct": 1.0,
+          "spearman_ci95": [
+            1.0,
+            1.0
+          ],
+          "top_decile": {
+            "selected": 759,
+            "mean_actual_percentile": 0.9502,
+            "lift": 1.9
+          }
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n": 9986,
+    "v2": {
+      "spearman": 0.1627,
+      "ci95": [
+        0.1434,
+        0.1845
+      ],
+      "distinct": 9915
+    },
+    "old": {
+      "n": 9923,
+      "spearman": 0.9775,
+      "ci95": [
+        0.9731,
+        0.9807
+      ],
+      "distinct": 1107
+    }
+  }
+}

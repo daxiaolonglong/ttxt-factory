@@ -15,8 +15,10 @@
 
 from __future__ import annotations
 
+import json
 import math
 from datetime import datetime
+from pathlib import Path
 
 VERSION = "score_v2"
 DEFAULT_TAU = 0.5
@@ -257,3 +259,60 @@ def time_split(rows: list[dict], *, train_ratio: float = 0.7) -> tuple[list[dict
     train = [{**row, "published_at": moment.isoformat()} for moment, row in dated[:cut]]
     test = [{**row, "published_at": moment.isoformat()} for moment, row in dated[cut:]]
     return train, test
+
+
+# ------------------------------------------------------------------ R47:模型产物持久化(只增,不改拟合与预测口径)
+
+
+class ModelFileError(ValueError):
+    """模型产物缺字段/版本不符/特征名不符,一律拒绝加载。"""
+
+
+def save_model(model: dict, path: Path | str, *, meta: dict | None = None) -> Path:
+    """把 ``fit`` 产出的模型写成 JSON 产物;写前复核无结果类特征,防止把泄漏模型落盘。"""
+    target = Path(path)
+    if model.get("version") != VERSION:
+        raise ModelFileError(f"模型版本不符:{model.get('version')!r} != {VERSION!r}")
+    names = list(model.get("feature_names") or [])
+    if not names:
+        raise ModelFileError("模型缺少 feature_names")
+    assert_no_leakage(names)
+    payload = {"model": model, "saved_at": datetime.now().isoformat(timespec="seconds")}
+    if meta:
+        payload["meta"] = meta
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return target
+
+
+def load_model(path: Path | str) -> dict:
+    """读取模型产物并校验:版本、特征名与内置清单一致、无结果类字段。
+
+    校验失败直接抛 ``ModelFileError`` —— 宁可不打分,也不能拿一个口径不明的模型进正式链路。
+    """
+    target = Path(path)
+    try:
+        payload = json.loads(target.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ModelFileError(f"模型产物不存在:{target}") from exc
+    except (TypeError, ValueError) as exc:
+        raise ModelFileError(f"模型产物不是合法 JSON:{target}") from exc
+    if not isinstance(payload, dict):
+        raise ModelFileError("模型产物顶层不是对象")
+    # 兼容直接存裸 model 字典的历史写法;标准形态是 {"model": {...}, "saved_at": ...}
+    model = payload.get("model") if isinstance(payload.get("model"), dict) else payload
+    if model.get("version") != VERSION:
+        raise ModelFileError(f"模型版本不符:{model.get('version')!r} != {VERSION!r}")
+    names = list(model.get("feature_names") or [])
+    if names != list(FEATURE_NAMES):
+        raise ModelFileError(f"特征名与当前 {VERSION} 清单不一致:{names}")
+    coefficients = model.get("coefficients_raw")
+    if not isinstance(coefficients, dict) or not coefficients:
+        raise ModelFileError("模型缺少 coefficients_raw")
+    if "intercept_raw" not in model:
+        raise ModelFileError("模型缺少 intercept_raw")
+    assert_no_leakage(names)
+    for name in coefficients:
+        if name in OUTCOME_FIELDS:
+            raise LeakageError(f"模型系数包含结果类字段(泄漏):{name}")
+    return model

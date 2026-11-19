@@ -1,0 +1,90 @@
+{
+  "model": {
+    "version": "score_v2",
+    "method": "quantile_regression_irls",
+    "tau": 0.5,
+    "n_train": 23294,
+    "feature_names": [
+      "has_digit",
+      "has_quote",
+      "has_exclaim",
+      "has_colon",
+      "title_len_x10",
+      "log10_body_chars",
+      "log10_paragraphs",
+      "avg_para_x10",
+      "cat_finance",
+      "cat_health",
+      "cat_history",
+      "cat_technology"
+    ],
+    "category_reference": "social",
+    "coefficients_raw": {
+      "has_digit": 0.166898,
+      "has_quote": 0.334419,
+      "has_exclaim": 0.262339,
+      "has_colon": 0.07316,
+      "title_len_x10": 0.138766,
+      "log10_body_chars": 0.140877,
+      "log10_paragraphs": 0.136111,
+      "avg_para_x10": -0.001163,
+      "cat_finance": 0.061711,
+      "cat_health": -0.344315,
+      "cat_history": 0.104408,
+      "cat_technology": -0.189192
+    },
+    "intercept_raw": -1.261011,
+    "standardization": {
+      "mean": {
+        "has_digit": 0.530566,
+        "has_quote": 0.150253,
+        "has_exclaim": 0.188246,
+        "has_colon": 0.291964,
+        "title_len_x10": 2.718653,
+        "log10_body_chars": 3.342634,
+        "log10_paragraphs": 1.590549,
+        "avg_para_x10": 7.146852,
+        "cat_finance": 0.241736,
+        "cat_health": 0.000215,
+        "cat_history": 0.00073,
+        "cat_technology": 0.000386
+      },
+      "std": {
+        "has_digit": 0.499065,
+        "has_quote": 0.35732,
+        "has_exclaim": 0.390908,
+        "has_colon": 0.454666,
+        "title_len_x10": 0.765328,
+        "log10_body_chars": 0.250627,
+        "log10_paragraphs": 0.346049,
+        "avg_para_x10": 14.551628,
+        "cat_finance": 0.428135,
+        "cat_health": 0.014649,
+        "cat_history": 0.027005,
+        "cat_technology": 0.019652
+      }
+    }
+  },
+  "saved_at": "2026-11-19T12:24:16",
+  "meta": {
+    "fit_source": "scripts/score_v2_fit_model.py",
+    "study_evidence": "03_intelligence/score_v2_study-20261119.json",
+    "sample": {
+      "rows_with_reads": 33595,
+      "dated": 33278,
+      "train": 23294,
+      "holdout": 9984,
+      "train_published_min": "2014-05-13T14:48:22+08:00",
+      "train_published_max": "2026-10-06T17:22:51+08:00",
+      "holdout_published_min": "2026-10-06T17:23:48+08:00",
+      "category_median_log10_reads_train": {
+        "social": 1.1761,
+        "history": 3.7859,
+        "finance": 1.0792,
+        "technology": 3.6551,
+        "health": 3.5339
+      }
+    },
+    "target": "log10(reads) - 训练集类目中位数;特征无结果类字段"
+  }
+}
