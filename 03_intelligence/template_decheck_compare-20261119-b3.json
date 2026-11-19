@@ -1,0 +1,790 @@
+{
+ "generated_at": "2026-11-19 17:10:53",
+ "modes": {
+  "before": "template_decheck=False(改前:生成后不做去模板化检查)",
+  "after": "template_decheck=True(改后:超类目预算段落经本地模型定向重写一次,仍超标只标记)"
+ },
+ "budget_file": "D:\\ttxt\\00_control\\template_budgets.json",
+ "model": null,
+ "batch": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了"
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能"
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动"
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康"
+  }
+ ],
+ "runs": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "mode": "before",
+   "draft_id": null,
+   "status": "insufficient_materials",
+   "passed": false,
+   "versions": null,
+   "score": null,
+   "fact_check_rate": null,
+   "early_return_reason": "{\"category\": \"technology\", \"topic\": \"刚刚,各大电商的双11成绩单出来了\", \"status\": \"insufficient_materials\", \"passed\": false, \"model_calls\": 0, \"critical\": [\"取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句)\", \"来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)\"], \"issues\": [\"取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句)\", \"来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)\"], \"material_stats\": {\"pool_limit\": 1, \"candidates\": 1, \"full_candidates\": 1, \"distinct_sources\": 1, \"distinct_hosts\": 1, \"independence_axis\": {\"unit\":",
+   "check_status": null,
+   "template_check": null,
+   "template_flags": null,
+   "elapsed_s": 0.0
+  },
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "mode": "after",
+   "draft_id": null,
+   "status": "insufficient_materials",
+   "passed": false,
+   "versions": null,
+   "score": null,
+   "fact_check_rate": null,
+   "early_return_reason": "{\"category\": \"technology\", \"topic\": \"刚刚,各大电商的双11成绩单出来了\", \"status\": \"insufficient_materials\", \"passed\": false, \"model_calls\": 0, \"critical\": [\"取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句)\", \"来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)\"], \"issues\": [\"取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句)\", \"来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)\"], \"material_stats\": {\"pool_limit\": 1, \"candidates\": 1, \"full_candidates\": 1, \"distinct_sources\": 1, \"distinct_hosts\": 1, \"independence_axis\": {\"unit\":",
+   "check_status": null,
+   "template_check": null,
+   "template_flags": null,
+   "elapsed_s": 0.0
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "mode": "before",
+   "draft_id": "technology-20261119171530-25f1f9",
+   "status": "passed",
+   "passed": true,
+   "versions": 3,
+   "score": 0.95,
+   "fact_check_rate": 1.0,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 921.4,
+   "signals": {
+    "sentences": 20,
+    "marker_hits": 4,
+    "parallel_pattern_hits": 1,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.3182
+   }
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "mode": "after",
+   "draft_id": "technology-20261119172659-9b60bf",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.85,
+   "fact_check_rate": 0.75,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 246.1,
+   "signals": {
+    "sentences": 20,
+    "marker_hits": 1,
+    "parallel_pattern_hits": 0,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.2328
+   }
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "mode": "before",
+   "draft_id": "finance-20261119173105-3f74d2",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.95,
+   "fact_check_rate": 1.0,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 127.3,
+   "signals": {
+    "sentences": 26,
+    "marker_hits": 2,
+    "parallel_pattern_hits": 0,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.305
+   }
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "mode": "after",
+   "draft_id": "finance-20261119173314-cc93ec",
+   "status": "passed",
+   "passed": true,
+   "versions": 1,
+   "score": 0.95,
+   "fact_check_rate": 1.0,
+   "early_return_reason": null,
+   "check_status": "within_budget",
+   "template_check": {
+    "category": "finance",
+    "budget_status": "ok",
+    "before": {
+     "status": "within_budget",
+     "reasons": [],
+     "marker_per_100_sent": 9.52,
+     "parallel_per_100_sent": 4.76,
+     "budget": {
+      "marker": 10.61,
+      "parallel": 5.14
+     },
+     "basis_drafts": 4,
+     "sentences": 21
+    },
+    "before_signals": {
+     "sentences": 21,
+     "marker_hits": 2,
+     "parallel_pattern_hits": 1,
+     "sentence_length_cv": 0.4941
+    },
+    "rewrite_count": 0,
+    "over_budget_paragraphs": 0,
+    "draft": "财报季变局：从个股异动到全球资产配置的深层逻辑\n\n近期市场波动加剧，个股基本面与股价表现的背离现象引发关注。ST交昂（SH600530）在11月18日盘后发布《股票交易异常波动公告》，指出其股票在2026年11月16日、11月17日、11月18日连续三个交易日内收盘价格涨幅偏离值累计超过20%，属于股票交易异常波动情形 [2]。然而，该公司同时提示，前三季度净利下滑1149% [2]。这一案例警示投资者，在财报季中需警惕个股异常波动与基本面严重背离的风险，盲目追高可能面临巨大的估值回归压力。\n\n与此同时，企业出海面临的挑战也在升级。复旦安联金融保险研究中心发布的《中国企业出海风险识别与管理研究报告》指出，如今企业出海的风险更多表现为相互交织的复合形态，任何一环的疏漏都可能触发连锁反应 [1]。与早期以汇率波动、市场需求为主的经营性风险相比，当前风险环境更为复杂 [1]。在此背景下，商业保险正进入企业属地经营的细分场景，成为应对复合化风险的关键工具 [1]。\n\n从更宏观的视角看，AI正在重塑金融行业的底层逻辑。未来十年，AI将重构金融的底层逻辑：信息获取门槛消失、风险定价模式革新、服务普惠化、组织架构重构，同时催生全新风险与监管体系 [4]。在投资研究与交易领域，投研民主化成为趋势，人机协同将成为主流 [4]。这意味着传统分析师耗费数天完成的工作将被智能投研全面普及所改变，金融服务的效率与覆盖面将发生根本性变化 [4]。\n\n面对AI科技股的高波动行情，全球资产配置策略显得尤为重要。很多投资者在布局AI科技股时，容易把所有海外资金全部投入这一个赛道，一旦板块迎来调整，整个账户就会受到冲击 [5]。想要长期参与美股AI赛道，资金管理和账户统筹，远比单次选股更影响最终的投资体验 [5]。因此，应对波动不应仅聚焦于个股涨跌，而应注重整体资金管理的规划与平衡。\n\n最后，瑞·达利欧警示了AI红利集中化的现实。AI带来的生产力变革是时代不可逆的进步，但技术创造的增量财富正在呈现明显的集中趋势 [3]。头部家庭占据了市场绝大部分权益资产，多数普通人仅通过基础理财、养老账户间接参与市场，很难真正分享到技术红利 [3]。对于仅靠劳动力换取收入的普通从业者而言，不仅难以分享企业提效增收带来的增长收益，还需警惕在体力和思维都能被AI替代的背景下，单一收入来源的局限性 [3]。",
+    "check_status": "within_budget"
+   },
+   "template_flags": [],
+   "elapsed_s": 101.1,
+   "signals": {
+    "sentences": 21,
+    "marker_hits": 2,
+    "parallel_pattern_hits": 1,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.4941
+   }
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "mode": "before",
+   "draft_id": "technology-20261119173456-6d3a9c",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.95,
+   "fact_check_rate": 0.375,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 127.2,
+   "signals": {
+    "sentences": 20,
+    "marker_hits": 1,
+    "parallel_pattern_hits": 1,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.4144
+   }
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "mode": "after",
+   "draft_id": "technology-20261119173658-8e7d44",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.95,
+   "fact_check_rate": 1.0,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 228.3,
+   "signals": {
+    "sentences": 18,
+    "marker_hits": 1,
+    "parallel_pattern_hits": 1,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 1,
+    "sentence_length_cv": 0.5113
+   }
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "mode": "before",
+   "draft_id": "social-20261119174101-2eded9",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.85,
+   "fact_check_rate": 0.167,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 148.8,
+   "signals": {
+    "sentences": 23,
+    "marker_hits": 0,
+    "parallel_pattern_hits": 1,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.4039
+   }
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "mode": "after",
+   "draft_id": "social-20261119174325-76a88a",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.85,
+   "fact_check_rate": 0.111,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 159.4,
+   "signals": {
+    "sentences": 21,
+    "marker_hits": 0,
+    "parallel_pattern_hits": 0,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.3773
+   }
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "mode": "before",
+   "draft_id": "health-20261119174606-31cc2c",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.65,
+   "fact_check_rate": 0.083,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 149.3,
+   "signals": {
+    "sentences": 22,
+    "marker_hits": 2,
+    "parallel_pattern_hits": 0,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.4108
+   }
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "mode": "after",
+   "draft_id": "health-20261119174836-cd8273",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "score": 0.85,
+   "fact_check_rate": 0.2,
+   "early_return_reason": null,
+   "check_status": null,
+   "template_check": null,
+   "template_flags": [],
+   "elapsed_s": 288.4,
+   "signals": {
+    "sentences": 29,
+    "marker_hits": 0,
+    "parallel_pattern_hits": 1,
+    "repeated_sentence_kinds": 0,
+    "repeated_opening_kinds": 0,
+    "sentence_length_cv": 0.4282
+   }
+  }
+ ],
+ "aggregate": {
+  "before": {
+   "runs": 5,
+   "marker_per_100_sent": {
+    "mean": 8.357,
+    "median": 7.692,
+    "min": 0.0,
+    "max": 20.0,
+    "n": 5
+   },
+   "parallel_per_100_sent": {
+    "mean": 2.87,
+    "median": 4.348,
+    "min": 0.0,
+    "max": 5.0,
+    "n": 5
+   },
+   "parallel_hits_abs": {
+    "mean": 0.6,
+    "median": 1,
+    "min": 0,
+    "max": 1,
+    "n": 5
+   },
+   "sentence_length_cv": {
+    "mean": 0.37,
+    "median": 0.404,
+    "min": 0.305,
+    "max": 0.414,
+    "n": 5
+   },
+   "marker_hits_total": 9,
+   "repeated_sentence_kinds_total": 0,
+   "repeated_opening_kinds_total": 0,
+   "check_status": {
+    "within_budget": 0,
+    "through": 0,
+    "still_over_budget": 0,
+    "rewrite_failed": 0,
+    "not_available": 0,
+    "insufficient_sentences": 0,
+    "null": 5
+   },
+   "rewrite_calls_total": 0,
+   "flags_total": 0,
+   "by_category": {
+    "finance": {
+     "runs": 1,
+     "marker_per_100_sent": {
+      "mean": 7.692,
+      "median": 7.692,
+      "min": 7.692,
+      "max": 7.692,
+      "n": 1
+     },
+     "parallel_per_100_sent": {
+      "mean": 0.0,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 1
+     },
+     "parallel_hits_abs": {
+      "mean": 0.0,
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+     },
+     "sentence_length_cv": {
+      "mean": 0.305,
+      "median": 0.305,
+      "min": 0.305,
+      "max": 0.305,
+      "n": 1
+     },
+     "marker_hits_total": 2,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 1
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    },
+    "health": {
+     "runs": 1,
+     "marker_per_100_sent": {
+      "mean": 9.091,
+      "median": 9.091,
+      "min": 9.091,
+      "max": 9.091,
+      "n": 1
+     },
+     "parallel_per_100_sent": {
+      "mean": 0.0,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 1
+     },
+     "parallel_hits_abs": {
+      "mean": 0.0,
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+     },
+     "sentence_length_cv": {
+      "mean": 0.411,
+      "median": 0.411,
+      "min": 0.411,
+      "max": 0.411,
+      "n": 1
+     },
+     "marker_hits_total": 2,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 1
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    },
+    "technology": {
+     "runs": 2,
+     "marker_per_100_sent": {
+      "mean": 12.5,
+      "median": 12.5,
+      "min": 5.0,
+      "max": 20.0,
+      "n": 2
+     },
+     "parallel_per_100_sent": {
+      "mean": 5.0,
+      "median": 5.0,
+      "min": 5.0,
+      "max": 5.0,
+      "n": 2
+     },
+     "parallel_hits_abs": {
+      "mean": 1.0,
+      "median": 1.0,
+      "min": 1,
+      "max": 1,
+      "n": 2
+     },
+     "sentence_length_cv": {
+      "mean": 0.366,
+      "median": 0.366,
+      "min": 0.318,
+      "max": 0.414,
+      "n": 2
+     },
+     "marker_hits_total": 5,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 2
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    },
+    "social": {
+     "runs": 1,
+     "marker_per_100_sent": {
+      "mean": 0.0,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 1
+     },
+     "parallel_per_100_sent": {
+      "mean": 4.348,
+      "median": 4.348,
+      "min": 4.348,
+      "max": 4.348,
+      "n": 1
+     },
+     "parallel_hits_abs": {
+      "mean": 1.0,
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "n": 1
+     },
+     "sentence_length_cv": {
+      "mean": 0.404,
+      "median": 0.404,
+      "min": 0.404,
+      "max": 0.404,
+      "n": 1
+     },
+     "marker_hits_total": 0,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 1
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    }
+   }
+  },
+  "after": {
+   "runs": 5,
+   "marker_per_100_sent": {
+    "mean": 4.016,
+    "median": 5.0,
+    "min": 0.0,
+    "max": 9.524,
+    "n": 5
+   },
+   "parallel_per_100_sent": {
+    "mean": 2.753,
+    "median": 3.448,
+    "min": 0.0,
+    "max": 5.556,
+    "n": 5
+   },
+   "parallel_hits_abs": {
+    "mean": 0.6,
+    "median": 1,
+    "min": 0,
+    "max": 1,
+    "n": 5
+   },
+   "sentence_length_cv": {
+    "mean": 0.409,
+    "median": 0.428,
+    "min": 0.233,
+    "max": 0.511,
+    "n": 5
+   },
+   "marker_hits_total": 4,
+   "repeated_sentence_kinds_total": 0,
+   "repeated_opening_kinds_total": 1,
+   "check_status": {
+    "within_budget": 1,
+    "through": 0,
+    "still_over_budget": 0,
+    "rewrite_failed": 0,
+    "not_available": 0,
+    "insufficient_sentences": 0,
+    "null": 4
+   },
+   "rewrite_calls_total": 0,
+   "flags_total": 0,
+   "by_category": {
+    "finance": {
+     "runs": 1,
+     "marker_per_100_sent": {
+      "mean": 9.524,
+      "median": 9.524,
+      "min": 9.524,
+      "max": 9.524,
+      "n": 1
+     },
+     "parallel_per_100_sent": {
+      "mean": 4.762,
+      "median": 4.762,
+      "min": 4.762,
+      "max": 4.762,
+      "n": 1
+     },
+     "parallel_hits_abs": {
+      "mean": 1.0,
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "n": 1
+     },
+     "sentence_length_cv": {
+      "mean": 0.494,
+      "median": 0.494,
+      "min": 0.494,
+      "max": 0.494,
+      "n": 1
+     },
+     "marker_hits_total": 2,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 1,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 0
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    },
+    "health": {
+     "runs": 1,
+     "marker_per_100_sent": {
+      "mean": 0.0,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 1
+     },
+     "parallel_per_100_sent": {
+      "mean": 3.448,
+      "median": 3.448,
+      "min": 3.448,
+      "max": 3.448,
+      "n": 1
+     },
+     "parallel_hits_abs": {
+      "mean": 1.0,
+      "median": 1,
+      "min": 1,
+      "max": 1,
+      "n": 1
+     },
+     "sentence_length_cv": {
+      "mean": 0.428,
+      "median": 0.428,
+      "min": 0.428,
+      "max": 0.428,
+      "n": 1
+     },
+     "marker_hits_total": 0,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 1
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    },
+    "technology": {
+     "runs": 2,
+     "marker_per_100_sent": {
+      "mean": 5.278,
+      "median": 5.278,
+      "min": 5.0,
+      "max": 5.556,
+      "n": 2
+     },
+     "parallel_per_100_sent": {
+      "mean": 2.778,
+      "median": 2.778,
+      "min": 0.0,
+      "max": 5.556,
+      "n": 2
+     },
+     "parallel_hits_abs": {
+      "mean": 0.5,
+      "median": 0.5,
+      "min": 0,
+      "max": 1,
+      "n": 2
+     },
+     "sentence_length_cv": {
+      "mean": 0.372,
+      "median": 0.372,
+      "min": 0.233,
+      "max": 0.511,
+      "n": 2
+     },
+     "marker_hits_total": 2,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 1,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 2
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    },
+    "social": {
+     "runs": 1,
+     "marker_per_100_sent": {
+      "mean": 0.0,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 1
+     },
+     "parallel_per_100_sent": {
+      "mean": 0.0,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 1
+     },
+     "parallel_hits_abs": {
+      "mean": 0.0,
+      "median": 0,
+      "min": 0,
+      "max": 0,
+      "n": 1
+     },
+     "sentence_length_cv": {
+      "mean": 0.377,
+      "median": 0.377,
+      "min": 0.377,
+      "max": 0.377,
+      "n": 1
+     },
+     "marker_hits_total": 0,
+     "repeated_sentence_kinds_total": 0,
+     "repeated_opening_kinds_total": 0,
+     "check_status": {
+      "within_budget": 0,
+      "through": 0,
+      "still_over_budget": 0,
+      "rewrite_failed": 0,
+      "not_available": 0,
+      "insufficient_sentences": 0,
+      "null": 1
+     },
+     "rewrite_calls_total": 0,
+     "flags_total": 0
+    }
+   }
+  }
+ }
+}

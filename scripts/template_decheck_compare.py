@@ -30,7 +30,7 @@ from ttxt.writing import workflow
 from ttxt.writing.style import template_signals
 
 MODES = ("before", "after")
-SIG_KEYS = ("sentences", "marker_hits", "parallel_pattern_hits", "duplicate_sentence_kinds",
+SIG_KEYS = ("sentences", "marker_hits", "parallel_pattern_hits",
             "repeated_sentence_kinds", "repeated_opening_kinds")
 
 
@@ -38,9 +38,8 @@ def _final_text(db_snapshot: Path, draft_id: str) -> str:
     con = sqlite3.connect(db_snapshot)
     try:
         row = con.execute(
-            "SELECT content FROM writing_versions WHERE draft_id=? AND version=("
-            "SELECT MAX(version) FROM writing_versions WHERE draft_id=?)",
-            (draft_id, draft_id),
+            "SELECT content FROM writing_history WHERE draft_id=? ORDER BY version DESC LIMIT 1",
+            (draft_id,),
         ).fetchone()
     finally:
         con.close()
@@ -63,7 +62,7 @@ def _aggregate(runs: list[dict]) -> dict:
                 "max": round(max(series), 3),
                 "n": len(series),
             }
-    for key in ("marker_hits", "duplicate_sentence_kinds", "repeated_sentence_kinds", "repeated_opening_kinds"):
+    for key in ("marker_hits", "repeated_sentence_kinds", "repeated_opening_kinds"):
         out[key + "_total"] = sum(r["signals"][key] for r in runs)
     out["check_status"] = {s: sum(1 for r in runs if r.get("check_status") == s)
                            for s in ("within_budget", "through", "still_over_budget",
@@ -124,20 +123,26 @@ def main() -> int:
                     db_path=snap,
                     template_decheck=(mode == "after"),
                 )
-                text = _final_text(snap, res["draft_id"])
-                sig = template_signals(text)
+                # 取材门禁等分支会在写稿前提前返回,没有 draft_id;照记状态,不给假读数
+                did = res.get("draft_id")
                 run = {
                     "category": cat, "topic": topic, "mode": mode,
-                    "draft_id": res["draft_id"], "status": res["status"],
-                    "passed": res["passed"], "versions": res["versions"],
-                    "score": res["score"],
+                    "draft_id": did, "status": res.get("status"),
+                    "passed": res.get("passed"), "versions": res.get("versions"),
+                    "score": res.get("score"),
                     "fact_check_rate": (res.get("fact_checkability") or {}).get("rate"),
-                    "signals": {k: sig[k] for k in SIG_KEYS} | {"sentence_length_cv": sig["sentence_length_cv"]},
+                    "early_return_reason": None if did else json.dumps(
+                        {k: v for k, v in res.items()
+                         if k not in ("materials", "claims", "review", "fact_check")},
+                        ensure_ascii=False)[:500],
                     "check_status": (res.get("template_check") or {}).get("check_status"),
                     "template_check": res.get("template_check"),
                     "template_flags": res.get("template_flags"),
                     "elapsed_s": round(time.time() - t0, 1),
                 }
+                if did:
+                    sig = template_signals(_final_text(snap, did))
+                    run["signals"] = {k: sig[k] for k in SIG_KEYS} | {"sentence_length_cv": sig["sentence_length_cv"]}
             except Exception as exc:  # noqa: BLE001 - 对照实验必须把失败也照记
                 run = {"category": cat, "topic": topic, "mode": mode, "error": str(exc)[:300],
                        "elapsed_s": round(time.time() - t0, 1)}

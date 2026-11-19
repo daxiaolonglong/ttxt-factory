@@ -1,0 +1,107 @@
+{
+ "generated_at": "2026-11-19 14:48:25",
+ "modes": {
+  "before": "template_decheck=False(改前:生成后不做去模板化检查)",
+  "after": "template_decheck=True(改后:超类目预算段落经本地模型定向重写一次,仍超标只标记)"
+ },
+ "budget_file": "D:\\ttxt\\00_control\\template_budgets.json",
+ "model": null,
+ "batch": [
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康"
+  }
+ ],
+ "runs": [
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "mode": "before",
+   "error": "no such table: writing_versions",
+   "elapsed_s": 1040.1
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "mode": "after",
+   "error": "no such table: writing_versions",
+   "elapsed_s": 1255.5
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "mode": "before",
+   "error": "no such table: writing_versions",
+   "elapsed_s": 1050.5
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "mode": "after",
+   "error": "no such table: writing_versions",
+   "elapsed_s": 124.7
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "mode": "before",
+   "error": "no such table: writing_versions",
+   "elapsed_s": 706.1
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "mode": "after",
+   "error": "no such table: writing_versions",
+   "elapsed_s": 148.8
+  }
+ ],
+ "aggregate": {
+  "before": {
+   "runs": 0,
+   "marker_hits_total": 0,
+   "duplicate_sentence_kinds_total": 0,
+   "repeated_sentence_kinds_total": 0,
+   "repeated_opening_kinds_total": 0,
+   "check_status": {
+    "within_budget": 0,
+    "through": 0,
+    "still_over_budget": 0,
+    "rewrite_failed": 0,
+    "not_available": 0,
+    "insufficient_sentences": 0,
+    "null": 0
+   },
+   "rewrite_calls_total": 0,
+   "flags_total": 0,
+   "by_category": {}
+  },
+  "after": {
+   "runs": 0,
+   "marker_hits_total": 0,
+   "duplicate_sentence_kinds_total": 0,
+   "repeated_sentence_kinds_total": 0,
+   "repeated_opening_kinds_total": 0,
+   "check_status": {
+    "within_budget": 0,
+    "through": 0,
+    "still_over_budget": 0,
+    "rewrite_failed": 0,
+    "not_available": 0,
+    "insufficient_sentences": 0,
+    "null": 0
+   },
+   "rewrite_calls_total": 0,
+   "flags_total": 0,
+   "by_category": {}
+  }
+ }
+}

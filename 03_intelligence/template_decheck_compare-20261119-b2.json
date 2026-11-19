@@ -1,0 +1,161 @@
+{
+ "generated_at": "2026-11-19 16:06:23",
+ "modes": {
+  "before": "template_decheck=False(改前:生成后不做去模板化检查)",
+  "after": "template_decheck=True(改后:超类目预算段落经本地模型定向重写一次,仍超标只标记)"
+ },
+ "budget_file": "D:\\ttxt\\00_control\\template_budgets.json",
+ "model": null,
+ "batch": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了"
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能"
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动"
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康"
+  }
+ ],
+ "runs": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "mode": "before",
+   "error": "'draft_id'",
+   "elapsed_s": 0.0
+  },
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "mode": "after",
+   "error": "'draft_id'",
+   "elapsed_s": 0.0
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "mode": "before",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 731.4
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "mode": "after",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 204.6
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "mode": "before",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 270.1
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "mode": "after",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 96.1
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "mode": "before",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 134.5
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "mode": "after",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 115.7
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "mode": "before",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 147.1
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "mode": "after",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 467.3
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "mode": "before",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 220.7
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "mode": "after",
+   "error": "'duplicate_sentence_kinds'",
+   "elapsed_s": 164.3
+  }
+ ],
+ "aggregate": {
+  "before": {
+   "runs": 0,
+   "marker_hits_total": 0,
+   "duplicate_sentence_kinds_total": 0,
+   "repeated_sentence_kinds_total": 0,
+   "repeated_opening_kinds_total": 0,
+   "check_status": {
+    "within_budget": 0,
+    "through": 0,
+    "still_over_budget": 0,
+    "rewrite_failed": 0,
+    "not_available": 0,
+    "insufficient_sentences": 0,
+    "null": 0
+   },
+   "rewrite_calls_total": 0,
+   "flags_total": 0,
+   "by_category": {}
+  },
+  "after": {
+   "runs": 0,
+   "marker_hits_total": 0,
+   "duplicate_sentence_kinds_total": 0,
+   "repeated_sentence_kinds_total": 0,
+   "repeated_opening_kinds_total": 0,
+   "check_status": {
+    "within_budget": 0,
+    "through": 0,
+    "still_over_budget": 0,
+    "rewrite_failed": 0,
+    "not_available": 0,
+    "insufficient_sentences": 0,
+    "null": 0
+   },
+   "rewrite_calls_total": 0,
+   "flags_total": 0,
+   "by_category": {}
+  }
+ }
+}
