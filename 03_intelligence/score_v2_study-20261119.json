@@ -1,0 +1,441 @@
+{
+  "generated_at": "2026-11-19T10:09:41",
+  "version": "score_v2",
+  "target": "log10(reads) - 训练集类目中位数(去偏);特征不含任何结果类字段",
+  "sample": {
+    "rows_with_reads": 33574,
+    "dated": 33257,
+    "train": 23279,
+    "test": 9978,
+    "train_published_max": "2026-10-06T16:25:37+08:00",
+    "test_published_min": "2026-10-06T16:25:55+08:00",
+    "category_median_log10_reads_train": {
+      "history": 3.8036,
+      "technology": 3.6551,
+      "finance": 1.0792,
+      "social": 1.1761,
+      "health": 3.5339
+    }
+  },
+  "model": {
+    "version": "score_v2",
+    "method": "quantile_regression_irls",
+    "tau": 0.5,
+    "n_train": 23279,
+    "feature_names": [
+      "has_digit",
+      "has_quote",
+      "has_exclaim",
+      "has_colon",
+      "title_len_x10",
+      "log10_body_chars",
+      "log10_paragraphs",
+      "avg_para_x10",
+      "cat_finance",
+      "cat_health",
+      "cat_history",
+      "cat_technology"
+    ],
+    "category_reference": "social",
+    "coefficients_raw": {
+      "has_digit": 0.167475,
+      "has_quote": 0.334208,
+      "has_exclaim": 0.26251,
+      "has_colon": 0.07482,
+      "title_len_x10": 0.138509,
+      "log10_body_chars": 0.141228,
+      "log10_paragraphs": 0.135587,
+      "avg_para_x10": -0.001166,
+      "cat_finance": 0.061827,
+      "cat_health": -0.343803,
+      "cat_history": 0.089033,
+      "cat_technology": -0.188964
+    },
+    "intercept_raw": -1.261374,
+    "standardization": {
+      "mean": {
+        "has_digit": 0.530564,
+        "has_quote": 0.150307,
+        "has_exclaim": 0.188281,
+        "has_colon": 0.291894,
+        "title_len_x10": 2.718747,
+        "log10_body_chars": 3.342612,
+        "log10_paragraphs": 1.590506,
+        "avg_para_x10": 7.147227,
+        "cat_finance": 0.241806,
+        "cat_health": 0.000215,
+        "cat_history": 0.000601,
+        "cat_technology": 0.000387
+      },
+      "std": {
+        "has_digit": 0.499065,
+        "has_quote": 0.357372,
+        "has_exclaim": 0.390937,
+        "has_colon": 0.454634,
+        "title_len_x10": 0.765386,
+        "log10_body_chars": 0.250609,
+        "log10_paragraphs": 0.34601,
+        "avg_para_x10": 14.555882,
+        "cat_finance": 0.428177,
+        "cat_health": 0.014654,
+        "cat_history": 0.024516,
+        "cat_technology": 0.019659
+      }
+    }
+  },
+  "evaluation": {
+    "pooled": {
+      "v2": {
+        "n": 9978,
+        "spearman": 0.1354,
+        "ci95": [
+          0.1161,
+          0.1547
+        ],
+        "top_decile": {
+          "n": 9859,
+          "precision_top10pct": 0.168357,
+          "lift": 1.7308,
+          "lift_ci95": [
+            1.535,
+            2.0086
+          ],
+          "scope": "pooled over categories with n_test>=200, within-category deciles"
+        },
+        "distinct_values": 9932
+      },
+      "old_bucket": {
+        "n": 9978,
+        "spearman": -0.0651,
+        "ci95": [
+          -0.0846,
+          -0.0455
+        ],
+        "top_decile": {
+          "n": 9859,
+          "precision_top10pct": 0.10142,
+          "lift": 1.0426,
+          "lift_ci95": [
+            0.7319,
+            1.0471
+          ],
+          "scope": "pooled over categories with n_test>=200, within-category deciles"
+        },
+        "distinct_values": 15
+      },
+      "old_reads_score": {
+        "n": 9978,
+        "spearman": 0.8366,
+        "ci95": [
+          0.8306,
+          0.8424
+        ],
+        "top_decile": {
+          "n": 9859,
+          "precision_top10pct": 0.875254,
+          "lift": 8.998,
+          "lift_ci95": [
+            8.5519,
+            9.088
+          ],
+          "scope": "pooled over categories with n_test>=200, within-category deciles"
+        },
+        "distinct_values": 1091
+      }
+    },
+    "per_category": {
+      "social": {
+        "v2": {
+          "n": 7621,
+          "spearman": 0.1201,
+          "ci95": [
+            0.0979,
+            0.1422
+          ],
+          "top_decile": {
+            "n": 7621,
+            "base_rate": 0.099331,
+            "precision_top10pct": 0.148294,
+            "lift": 1.4929,
+            "lift_ci95": [
+              1.268,
+              1.7532
+            ]
+          }
+        },
+        "old_bucket": {
+          "n": 7621,
+          "spearman": -0.081,
+          "ci95": [
+            -0.1033,
+            -0.0587
+          ],
+          "top_decile": {
+            "n": 7621,
+            "base_rate": 0.099331,
+            "precision_top10pct": 0.111549,
+            "lift": 1.123,
+            "lift_ci95": [
+              0.764,
+              1.1354
+            ]
+          }
+        },
+        "old_reads_score": {
+          "n": 7621,
+          "spearman": 0.8415,
+          "ci95": [
+            0.8348,
+            0.8479
+          ],
+          "top_decile": {
+            "n": 7621,
+            "base_rate": 0.099331,
+            "precision_top10pct": 0.871391,
+            "lift": 8.7726,
+            "lift_ci95": [
+              8.3471,
+              8.9212
+            ]
+          }
+        }
+      },
+      "finance": {
+        "v2": {
+          "n": 2010,
+          "spearman": 0.1923,
+          "ci95": [
+            0.1498,
+            0.2341
+          ],
+          "top_decile": {
+            "n": 2010,
+            "base_rate": 0.091045,
+            "precision_top10pct": 0.253731,
+            "lift": 2.7869,
+            "lift_ci95": [
+              2.2727,
+              3.5135
+            ]
+          }
+        },
+        "old_bucket": {
+          "n": 2010,
+          "spearman": -0.0857,
+          "ci95": [
+            -0.129,
+            -0.0422
+          ],
+          "top_decile": {
+            "n": 2010,
+            "base_rate": 0.091045,
+            "precision_top10pct": 0.059701,
+            "lift": 0.6557,
+            "lift_ci95": [
+              0.4598,
+              1.1161
+            ]
+          }
+        },
+        "old_reads_score": {
+          "n": 2010,
+          "spearman": 0.9644,
+          "ci95": [
+            0.9612,
+            0.9673
+          ],
+          "top_decile": {
+            "n": 2010,
+            "base_rate": 0.091045,
+            "precision_top10pct": 0.900498,
+            "lift": 9.8907,
+            "lift_ci95": [
+              8.5849,
+              10.0
+            ]
+          }
+        }
+      },
+      "technology": {
+        "v2": {
+          "n": 228,
+          "spearman": 0.1339,
+          "ci95": [
+            0.0041,
+            0.2594
+          ],
+          "top_decile": {
+            "n": 228,
+            "base_rate": 0.083333,
+            "precision_top10pct": 0.086957,
+            "lift": 1.0435,
+            "lift_ci95": [
+              0.0,
+              2.4783
+            ]
+          }
+        },
+        "old_bucket": {
+          "n": 228,
+          "spearman": -0.0916,
+          "ci95": [
+            -0.219,
+            0.0388
+          ],
+          "top_decile": {
+            "n": 228,
+            "base_rate": 0.083333,
+            "precision_top10pct": 0.130435,
+            "lift": 1.5652,
+            "lift_ci95": [
+              0.0,
+              1.9826
+            ]
+          }
+        },
+        "old_reads_score": {
+          "n": 228,
+          "spearman": 0.9458,
+          "ci95": [
+            0.9301,
+            0.958
+          ],
+          "top_decile": {
+            "n": 228,
+            "base_rate": 0.083333,
+            "precision_top10pct": 0.782609,
+            "lift": 9.3913,
+            "lift_ci95": [
+              5.7826,
+              9.913
+            ]
+          }
+        }
+      },
+      "history": {
+        "v2": {
+          "n": 85,
+          "spearman": 0.1551,
+          "ci95": [
+            -0.0601,
+            0.3564
+          ],
+          "top_decile": {
+            "n": 85,
+            "base_rate": 0.129412,
+            "precision_top10pct": 0.125,
+            "lift": 0.9659,
+            "lift_ci95": [
+              0.0,
+              2.6562
+            ]
+          }
+        },
+        "old_bucket": {
+          "n": 85,
+          "spearman": 0.0416,
+          "ci95": [
+            -0.173,
+            0.2525
+          ],
+          "top_decile": {
+            "n": 85,
+            "base_rate": 0.129412,
+            "precision_top10pct": 0.25,
+            "lift": 1.9318,
+            "lift_ci95": [
+              0.0,
+              2.3611
+            ]
+          }
+        },
+        "old_reads_score": {
+          "n": 85,
+          "spearman": 0.8393,
+          "ci95": [
+            0.7625,
+            0.8927
+          ],
+          "top_decile": {
+            "n": 85,
+            "base_rate": 0.129412,
+            "precision_top10pct": 1.0,
+            "lift": 7.7273,
+            "lift_ci95": [
+              5.0,
+              10.625
+            ]
+          }
+        }
+      },
+      "health": {
+        "v2": {
+          "n": 34,
+          "spearman": 0.1661,
+          "ci95": [
+            -0.1823,
+            0.4774
+          ],
+          "top_decile": {
+            "n": 34,
+            "base_rate": 0.117647,
+            "precision_top10pct": 0.0,
+            "lift": 0.0,
+            "lift_ci95": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "old_bucket": {
+          "n": 34,
+          "spearman": 0.1018,
+          "ci95": [
+            -0.2448,
+            0.4253
+          ],
+          "top_decile": {
+            "n": 34,
+            "base_rate": 0.117647,
+            "precision_top10pct": 0.0,
+            "lift": 0.0,
+            "lift_ci95": [
+              0.0,
+              5.6667
+            ]
+          }
+        },
+        "old_reads_score": {
+          "n": 34,
+          "spearman": 1.0,
+          "ci95": null,
+          "top_decile": {
+            "n": 34,
+            "base_rate": 0.117647,
+            "precision_top10pct": 1.0,
+            "lift": 8.5,
+            "lift_ci95": [
+              4.25,
+              11.3333
+            ]
+          }
+        }
+      }
+    }
+  },
+  "pooled_lift_categories": [
+    "social",
+    "finance",
+    "technology"
+  ],
+  "old_bucket_coverage": {
+    "covered": 9978,
+    "total": 9978,
+    "distinct_values": 15
+  },
+  "notes": [
+    "old_reads_score = reads/(reads+1000),是按读取数定义的单调映射;其 Spearman≈1 是构造使然,不是预测力证据(泄漏)。",
+    "old_bucket 仅覆盖有 measured 基线的桶;样本不足按不足报,不凑样本。",
+    "v2 的 Spearman 与 top-decile lift 都按类目内阅读分位计算,消除类目量级差。"
+  ]
+}
