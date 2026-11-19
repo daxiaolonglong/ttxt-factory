@@ -1,0 +1,145 @@
+{
+  "category": "technology",
+  "job": "metrics_due_60m",
+  "run_at": "2026-11-19T14:11:36+08:00",
+  "plan": {
+    "category": "technology",
+    "now": "2026-11-19T14:11:02+08:00",
+    "eligible": 2,
+    "gone_skipped": 0,
+    "batch": [
+      {
+        "article_id": 390,
+        "state": "ready",
+        "due_at": "2026-11-19T13:57:00+08:00",
+        "window_end": "2026-11-20T13:57:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 331,
+        "state": "ready",
+        "due_at": "2026-11-19T13:58:00+08:00",
+        "window_end": "2026-11-20T13:58:00+08:00",
+        "attempts": 0
+      }
+    ],
+    "article_ids": [
+      390,
+      331
+    ]
+  },
+  "window_days": 3,
+  "apply": true,
+  "queue_sync": {
+    "category": "technology",
+    "window_days": 3,
+    "now": "2026-11-19T14:11:02+08:00",
+    "total": 468,
+    "states": {
+      "scheduled": 240,
+      "ready": 2,
+      "backlog": 0,
+      "done": 226,
+      "exhausted": 0
+    },
+    "removed": 0
+  },
+  "eligible": 2,
+  "claimed": 2,
+  "claimed_ids": [
+    390,
+    331
+  ],
+  "gone_skipped": 0,
+  "collection": {
+    "candidates": 2,
+    "fetched": 2,
+    "written": 0,
+    "updated": 2,
+    "snapshots": 2,
+    "would_write": null,
+    "robots_refused": 0,
+    "fetch_errors": 0,
+    "no_metrics_skipped": 0,
+    "known_gone_skipped": 0,
+    "outcome_counts": {
+      "metrics_ok": 2
+    }
+  },
+  "attempts": {
+    "category": "technology",
+    "apply": true,
+    "planned": [
+      {
+        "article_id": 390,
+        "outcome": "metrics_ok",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 331,
+        "outcome": "metrics_ok",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      }
+    ],
+    "updated": 2
+  },
+  "unsupported_host_skipped": 0,
+  "windows_refreshed": 2,
+  "after": {
+    "category": "technology",
+    "window_days": 3,
+    "now": "2026-11-19T14:11:36+08:00",
+    "articles_with_published_at": 587,
+    "windows": 468,
+    "readings": 166,
+    "status_counts": {
+      "on_time": 69,
+      "late": 97,
+      "early": 74,
+      "pending": 172,
+      "overdue": 1,
+      "unavailable": 55
+    },
+    "late_ratio": 0.584337,
+    "on_time_coverage": 0.117547,
+    "on_time_share_of_readings": 0.415663,
+    "missing_counts": {
+      "reads": 7,
+      "likes": 0,
+      "favorites": 166,
+      "comments": 0,
+      "impressions": 7
+    },
+    "missing_ratio": {
+      "reads": 0.042169,
+      "likes": 0.0,
+      "favorites": 1.0,
+      "comments": 0.0,
+      "impressions": 0.042169
+    },
+    "recoverable_on_time_in_window": 8,
+    "queue": {
+      "scheduled": 240,
+      "ready": 0,
+      "backlog": 0,
+      "done": 228,
+      "exhausted": 0
+    },
+    "queue_total": 468,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_hours": [
+        1.0,
+        6.0,
+        24.0
+      ],
+      "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+    }
+  }
+}

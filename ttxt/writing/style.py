@@ -7,14 +7,24 @@
 - 句长方差系数(结构过于均匀也是模板化信号);
 - 跨稿共享段首(由 ``scripts/template_probe.py`` 汇总)。
 
-该模块不生成文本、不做门禁判断,只提供可复算的读数。
+度量口径不做门禁判断,只提供可复算的读数。
+
+R48 追加(T-10 第一小步):``budget_eval`` 把读数对照
+``00_control/template_budgets.json`` 的类目预算(预算由
+``scripts/template_budget_compute.py`` 从现有语料分布算出,不拍脑袋);
+``decheck_draft`` 在写作链路"门禁全部通过后"对超阈值段落经注入的
+model_call(生产即本地 model_gate 通道)定向重写一次,重写后仍超标只标记、
+不拦截、不改变 passed 口径——它不新增门禁,只留可复算的账。
 """
 
 from __future__ import annotations
 
+import json
 import re
 import statistics
 from collections import Counter
+from pathlib import Path
+from typing import Callable
 
 # 明确的套话/公式化连接词:出现即计数,不做同义扩展,避免主观加码。
 FORMULAIC_MARKERS = (
@@ -72,4 +82,197 @@ def template_signals(text: str) -> dict:
         "duplicate_sentence_share": round(dup_sentence_tokens / n, 4) if n else 0.0,
         "parallel_pattern_hits": parallel,
         "sentence_length_cv": cv,
+    }
+
+
+# ------------------------------------------------------------------ R48 预算与去模板化
+
+DEFAULT_BUDGET_PATH = Path("00_control/template_budgets.json")
+DEFAULT_MIN_SENTENCES = 12
+_MIN_REWRITE_RATIO = 0.6  # 重写产出短于原文 60% 视为被截断/缩水,拒绝采用
+
+
+def _percentile(values: list[float], p: float) -> float:
+    """线性插值分位数(p ∈ [0,1])。与 scripts/template_budget_compute.py 同一实现。"""
+    values = sorted(values)
+    if not values:
+        raise ValueError("空分布没有分位数")
+    k = (len(values) - 1) * p
+    f = int(k)
+    c = min(f + 1, len(values) - 1)
+    return values[f] + (values[c] - values[f]) * (k - f)
+
+
+def load_budget(category: str, budget_path: Path | None = None) -> dict:
+    """读取类目预算。fail-open 口径与 model_gate 的"模型故障不击穿主流程"一致:
+    文件缺失/损坏/该类目无预算 → status=not_available(调用方必须如实记账,
+    不得把 not_available 当 through 处理)。"""
+    path = Path(budget_path) if budget_path is not None else DEFAULT_BUDGET_PATH
+    if not path.exists():
+        return {"status": "not_available", "reason": f"预算文件不存在:{path}"}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 - JSON/编码损坏必须兜底,不得击穿主流程
+        return {"status": "not_available", "reason": f"预算文件不可解析:{exc}"}
+    entry = (data.get("budgets") or {}).get(category)
+    if not entry:
+        return {"status": "not_available", "reason": f"预算文件不含类目 {category}"}
+    return {
+        "status": "ok",
+        "marker_per_100_sent": float(entry["marker_per_100_sent"]),
+        "parallel_per_100_sent": float(entry["parallel_per_100_sent"]),
+        "basis_drafts": entry.get("basis_drafts"),
+        "min_sentences": int(data.get("min_sentences", DEFAULT_MIN_SENTENCES)),
+    }
+
+
+def budget_eval(sig: dict, budget: dict) -> dict:
+    """把 template_signals 读数对照类目预算。只判"超没超预算",不决定放行。"""
+    if budget.get("status") != "ok":
+        return {"status": "not_available", "reason": budget.get("reason")}
+    n = int(sig.get("sentences") or 0)
+    min_sent = int(budget.get("min_sentences") or DEFAULT_MIN_SENTENCES)
+    if n < min_sent:
+        return {
+            "status": "insufficient_sentences",
+            "reason": f"句数 {n} < 度量下限 {min_sent},密度读数不可靠,不做判定",
+            "sentences": n,
+        }
+    marker100 = 100.0 * int(sig.get("marker_hits") or 0) / n
+    parallel100 = 100.0 * int(sig.get("parallel_pattern_hits") or 0) / n
+    reasons: list[str] = []
+    if marker100 > budget["marker_per_100_sent"]:
+        reasons.append(
+            f"套话/连接词密度 {marker100:.2f}/百句 超预算 {budget['marker_per_100_sent']}"
+        )
+    if parallel100 > budget["parallel_per_100_sent"]:
+        reasons.append(
+            f"并列句式密度 {parallel100:.2f}/百句 超预算 {budget['parallel_per_100_sent']}"
+        )
+    return {
+        "status": "over_budget" if reasons else "within_budget",
+        "reasons": reasons,
+        "marker_per_100_sent": round(marker100, 2),
+        "parallel_per_100_sent": round(parallel100, 2),
+        "budget": {
+            "marker": budget["marker_per_100_sent"],
+            "parallel": budget["parallel_per_100_sent"],
+        },
+        "basis_drafts": budget.get("basis_drafts"),
+        "sentences": n,
+    }
+
+
+def paragraphs(text: str) -> list[str]:
+    return (text or "").replace("\r\n", "\n").replace("\r", "\n").split("\n")
+
+
+def over_budget_paragraphs(text: str, budget: dict) -> list[dict]:
+    """定位超预算段落(段级密度只作重写定位线索,预算判定仍以整篇读数为准)。
+    预算不可用或句数过少的段落直接跳过——不给"没尺子就动手"的机会。"""
+    if budget.get("status") != "ok":
+        return []
+    out: list[dict] = []
+    for idx, para in enumerate(paragraphs(text)):
+        if not para.strip():
+            continue
+        sig = template_signals(para)
+        n = sig["sentences"]
+        if n < 4:
+            continue
+        marker100 = 100.0 * sig["marker_hits"] / n
+        parallel100 = 100.0 * sig["parallel_pattern_hits"] / n
+        if marker100 > budget["marker_per_100_sent"] or parallel100 > budget["parallel_per_100_sent"]:
+            out.append(
+                {
+                    "index": idx,
+                    "marker_per_100_sent": round(marker100, 2),
+                    "parallel_per_100_sent": round(parallel100, 2),
+                    "markers": sig["markers"],
+                }
+            )
+    return out
+
+
+def decheck_draft(
+    draft: str,
+    category: str,
+    model_call: Callable[[str], str],
+    budget_path: Path | None = None,
+    max_tokens: int = 2048,
+    temperature: float = 0.3,
+    enable_thinking: bool = False,
+) -> dict:
+    """T-10 第一小步:生成后去模板化检查。
+
+    - 整篇读数在预算内 → through,零额外模型调用;
+    - 超预算 → 对超阈值段落经 model_call(生产为本地 model_gate 通道)定向重写
+      **一次**;重写产出缩水过甚或调用失败 → rewrite_failed,保留原稿并标记;
+    - 重写后仍超预算 → still_over_budget,必须标记,**不拦截、不改写 passed 口径**。
+    任何分支都如实回账,绝不静默放过。
+    """
+    from . import prompts  # 局部导入,避免与 prompts 形成环
+
+    budget = load_budget(category, budget_path=budget_path)
+    before_sig = template_signals(draft)
+    before = budget_eval(before_sig, budget)
+    base = {
+        "category": category,
+        "budget_status": budget.get("status"),
+        "before": before,
+        "before_signals": {
+            k: before_sig[k]
+            for k in ("sentences", "marker_hits", "parallel_pattern_hits", "sentence_length_cv")
+        },
+        "rewrite_count": 0,
+        "over_budget_paragraphs": 0,
+    }
+    if before["status"] != "over_budget":
+        return {**base, "draft": draft, "check_status": before["status"]}
+
+    flagged = over_budget_paragraphs(draft, budget)
+    issues: list[str] = list(before["reasons"])
+    for f in flagged:
+        marker_text = "、".join(f"{k}×{v}" for k, v in (f["markers"] or {}).items()) or "无"
+        issues.append(
+            f"第 {f['index'] + 1} 段:套话 {f['marker_per_100_sent']}/百句"
+            f"(命中:{marker_text}),并列句式 {f['parallel_per_100_sent']}/百句"
+        )
+    try:
+        rewritten = model_call(
+            prompts.detemplatize_prompt(draft, issues),
+            max_tokens=max_tokens,
+            temperature=temperature,
+            enable_thinking=enable_thinking,
+        )
+    except Exception as exc:  # noqa: BLE001 - 模型故障不得击穿主流程,但必须留痕
+        return {
+            **base,
+            "draft": draft,
+            "check_status": "rewrite_failed",
+            "over_budget_paragraphs": len(flagged),
+            "error": str(exc)[:300],
+        }
+    if not rewritten or len(rewritten) < len(draft) * _MIN_REWRITE_RATIO:
+        return {
+            **base,
+            "draft": draft,
+            "check_status": "rewrite_failed",
+            "over_budget_paragraphs": len(flagged),
+            "error": "重写产出为空或长度缩水低于原文 60%,疑似截断,保留原稿",
+        }
+    after_sig = template_signals(rewritten)
+    after = budget_eval(after_sig, budget)
+    check_status = "through" if after["status"] == "within_budget" else "still_over_budget"
+    return {
+        **base,
+        "draft": rewritten,
+        "check_status": check_status,
+        "rewrite_count": 1,
+        "over_budget_paragraphs": len(flagged),
+        "after": after,
+        "after_signals": {
+            k: after_sig[k]
+            for k in ("sentences", "marker_hits", "parallel_pattern_hits", "sentence_length_cv")
+        },
     }

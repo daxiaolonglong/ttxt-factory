@@ -62,3 +62,17 @@ def revise_prompt(draft: str, issues: list[str]) -> str:
 {issues_text}
 原文:
 {draft}"""
+
+
+def detemplatize_prompt(draft: str, issues: list[str]) -> str:
+    issues_text = "\n".join(f"- {issue}" for issue in issues)
+    return f"""下面这篇文章的模板化读数超标,请做**定向重写**。
+超标读数(每百句命中数):
+{issues_text}
+重写规则(违反任何一条即为失败):
+1. 只处理上述读数涉及的句子:删除或改写公式化连接词/套话(如"首先/与此同时/综上所述"),改为具体表达或直接删除;拆分或替换"不仅…而且""从…到…"等并列模板句式;
+2. 所有事实、数字、日期、人名、机构、引用标注[编号]必须逐字保留,不得改写、不得删除、不得新增;
+3. 不得删减段落与句子数量(套话词本身除外),不得输出解释、说明或前后缀;
+4. 直接输出重写后的完整文章,第一行仍是标题。
+原文:
+{draft}"""

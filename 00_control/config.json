@@ -99,6 +99,8 @@
     "draft_retry_max_tokens": 2048,
     "material_min_full": 6,
     "material_min_sources": 3,
+    "template_decheck_enabled": true,
+    "_template_decheck_comment": "R48 T-10 第一小步:门禁全部通过后、独立评审前,对草稿做去模板化检查(预算见 00_control/template_budgets.json,由现有语料分布 p75 算出)。超预算段落经本地模型定向重写一次;仍超标只标记不拦截,不改任何既有门禁口径。false=完全跳过该步(对照实验/回退用)。",
     "_material_comment": "P39:取材前置门禁。候选池(BM25 取 15 篇,重排后喂 5 篇)里全文文章数 ≥ material_min_full 且独立来源数 ≥ material_min_sources 才会调用模型,不够就直接返回 insufficient_materials(零模型调用)。独立来源按**作者账号**计,缺作者才退回域名:实测每个正式类目只有一个域名(toutiao.com),只按域名计会把所有写作一律拦下。爆款先验只在类目已有 viral_calibration 时参与重排,未标定类目退化为纯 BM25 并如实标注。"
   },
   "metrics": {

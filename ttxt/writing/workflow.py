@@ -26,7 +26,7 @@ from ttxt.logging import get_logger
 from ttxt.model_gate import client as model_client
 from ttxt.model_gate import gate
 
-from . import export, prompts, review as review_channel, verifier
+from . import export, prompts, review as review_channel, style, verifier
 
 LOG = get_logger("writing")
 MAX_CLAIMS = 12
@@ -705,6 +705,8 @@ def write_article(
     material_min_sources: int | None = None,
     independent_review: bool | None = None,
     review_call=None,
+    budget_path: Path | None = None,
+    template_decheck: bool | None = None,
 ) -> dict:
     writing_cfg = cfg.load_config().get("writing", {})
     if max_revisions is None:
@@ -835,6 +837,38 @@ def write_article(
         fact_check = fact_checkability(evidence)
         passed = passed and fact_check["release_condition_met"]
 
+    # R48 T-10 第一小步:去模板化检查只在所有既有门禁通过之后、独立评审之前跑一次。
+    # 结构红线:不新增/不修改任何门禁 —— template_check 不参与 passed 判定;
+    # 超预算段落经 model_call(生产即本地 model_gate 通道)定向重写一次,
+    # 仍超标只标记(回执 template_check 字段 + 导出文件标记清单),绝不静默放过。
+    decheck_enabled = bool(writing_cfg.get("template_decheck_enabled", True)) if template_decheck is None else template_decheck
+    template_check: dict | None = None
+    template_flags: list[str] = []
+    if passed and decheck_enabled:
+        template_check = style.decheck_draft(
+            draft, category, model_call, budget_path=budget_path, enable_thinking=enable_thinking
+        )
+        if template_check["draft"] != draft:
+            draft = template_check["draft"]
+            version += 1
+            _save_version(db_path, draft_id, category, topic, version, draft, served_model)
+        if template_check["check_status"] in ("still_over_budget", "rewrite_failed"):
+            before_eval = template_check["before"]
+            template_flags = list(before_eval.get("reasons") or [])
+            if template_check["check_status"] == "rewrite_failed":
+                template_flags.append("定向重写未成功:" + str(template_check.get("error", ""))[:200])
+            else:
+                after_eval = template_check.get("after") or {}
+                template_flags = [
+                    f"{r}(定向重写一次后仍超:{'; '.join(after_eval.get('reasons') or []) or after_eval.get('status')})"
+                    for r in before_eval.get("reasons") or []
+                ]
+        elif template_check["check_status"] == "not_available":
+            # 预算不可用同样不得静默:回执与导出都要露一行,人工复核时能看见"没尺子"
+            template_flags = [
+                f"类目预算不可用,去模板化检查未执行:{template_check.get('before', {}).get('reason') or template_check.get('budget_status')}"
+            ]
+
     # 独立评审只在门禁已通过时跑(账本 T-04):被事实门禁拦下的稿子不值得再花一次评审配额。
     # 通道不可用/模型同名 ⇒ 独立性按不成立处理,绝不为了好看把 same_model_review 改成 false。
     review_outcome: dict | None = None
@@ -903,6 +937,7 @@ def write_article(
         export_dir=export_dir,
         status=status,
         notes=notes,
+        template_flags=template_flags,
     )
     result = {
         "draft_id": draft_id,
@@ -922,6 +957,8 @@ def write_article(
             "fact_checkability": fact_check["release_condition_met"],
             "note": "两套条件分别记账、取「与」放行;事实可核率不替代原有门禁",
         },
+        "template_check": template_check,
+        "template_flags": template_flags,
         "path": str(path),
         "materials": len(materials),
         "material_stats": material_stats,

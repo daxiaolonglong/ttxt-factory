@@ -21,6 +21,7 @@ def render_markdown(
     version: int,
     status: str = "passed",
     notes: str | None = None,
+    template_flags: list[str] | None = None,
 ) -> str:
     lines: list[str] = [
         f"# {title}",
@@ -66,6 +67,10 @@ def render_markdown(
     lines.append(f"- 致命问题:{len(critical)}")
     for item in critical:
         lines.append(f"  - {item}")
+    if template_flags:
+        lines += ["", "## 去模板化标记(R48,定向重写一次后仍超标,未静默放过)", ""]
+        for flag in template_flags:
+            lines.append(f"- ⚠️ {flag}")
     lines += ["", "---", "本文件仅为待人工确认草稿,未经授权不得发布。"]
     return "\n".join(lines)
 
@@ -82,6 +87,7 @@ def write_export(
     export_dir: Path | None = None,
     status: str = "passed",
     notes: str | None = None,
+    template_flags: list[str] | None = None,
 ) -> Path:
     base = Path(export_dir) if export_dir is not None else cfg.WRITING_DIR / "drafts"
     target = base / category
@@ -90,7 +96,10 @@ def write_export(
     target.mkdir(parents=True, exist_ok=True)
     path = target / f"{draft_id}.md"
     path.write_text(
-        render_markdown(category, draft_id, title, topic, content, evidence, review, version, status=status, notes=notes),
+        render_markdown(
+            category, draft_id, title, topic, content, evidence, review, version,
+            status=status, notes=notes, template_flags=template_flags,
+        ),
         encoding="utf-8",
     )
     return path

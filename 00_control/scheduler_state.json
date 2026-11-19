@@ -1,6 +1,6 @@
 {
   "crawl_enqueue_4h": {
-    "last_run_at": "2026-11-19T08:03:22+08:00",
+    "last_run_at": "2026-11-19T12:06:03+08:00",
     "last_status": "ok",
     "last_result": {
       "enqueued": 18,
@@ -1698,7 +1698,7 @@
     "last_error": null
   },
   "metrics_due_60m": {
-    "last_run_at": "2026-11-19T11:23:23+08:00",
+    "last_run_at": "2026-11-19T15:17:14+08:00",
     "last_status": "ok",
     "last_result": {
       "scheduler_status": "ok",
@@ -1714,127 +1714,127 @@
       "categories": {
         "technology": {
           "status": "ok",
-          "claimed": 12,
-          "eligible": 13,
-          "fetched": 2,
+          "claimed": 6,
+          "eligible": 6,
+          "fetched": 5,
           "written": 0,
-          "snapshots": 2,
+          "snapshots": 5,
           "would_write": 0,
-          "unsupported_host_skipped": 10,
-          "windows_refreshed": 2,
+          "unsupported_host_skipped": 0,
+          "windows_refreshed": 5,
           "queue_states": {
-            "scheduled": 249,
-            "ready": 3,
-            "backlog": 10,
-            "done": 206,
+            "scheduled": 234,
+            "ready": 6,
+            "backlog": 0,
+            "done": 228,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 2
+            "metrics_ok": 5,
+            "article_gone": 1
           },
           "after": {
-            "late_ratio": 0.617834,
-            "on_time_coverage": 0.117188,
+            "late_ratio": 0.567251,
+            "on_time_coverage": 0.126065,
             "missing_ratio": {
-              "reads": 0.044586,
+              "reads": 0.040936,
               "likes": 0.0,
               "favorites": 1.0,
               "comments": 0.0,
-              "impressions": 0.044586
+              "impressions": 0.040936
             },
-            "recoverable_on_time_in_window": 8
+            "recoverable_on_time_in_window": 9
           }
         },
         "finance": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 4232,
-          "fetched": 3,
-          "written": 2,
-          "snapshots": 3,
+          "eligible": 4190,
+          "fetched": 9,
+          "written": 8,
+          "snapshots": 9,
           "would_write": 0,
-          "unsupported_host_skipped": 9,
-          "windows_refreshed": 3,
+          "unsupported_host_skipped": 1,
+          "windows_refreshed": 9,
           "queue_states": {
-            "scheduled": 521,
+            "scheduled": 515,
             "ready": 3,
-            "backlog": 4229,
-            "done": 8071,
+            "backlog": 4187,
+            "done": 8119,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 3
+            "metrics_ok": 9,
+            "article_gone": 2
           },
           "after": {
-            "late_ratio": 0.998253,
-            "on_time_coverage": 0.001087,
+            "late_ratio": 0.997758,
+            "on_time_coverage": 0.001388,
             "missing_ratio": {
-              "reads": 0.05489,
-              "likes": 0.489396,
+              "reads": 0.054801,
+              "likes": 0.488604,
               "favorites": 1.0,
-              "comments": 0.734281,
-              "impressions": 0.997255
+              "comments": 0.733093,
+              "impressions": 0.995641
             },
-            "recoverable_on_time_in_window": 0
+            "recoverable_on_time_in_window": 2
           }
         },
         "social": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 13600,
-          "fetched": 11,
-          "written": 11,
-          "snapshots": 11,
+          "eligible": 13568,
+          "fetched": 6,
+          "written": 6,
+          "snapshots": 6,
           "would_write": 0,
-          "unsupported_host_skipped": 0,
-          "windows_refreshed": 11,
+          "unsupported_host_skipped": 4,
+          "windows_refreshed": 6,
           "queue_states": {
-            "scheduled": 146,
-            "ready": 0,
-            "backlog": 13600,
-            "done": 26400,
+            "scheduled": 142,
+            "ready": 4,
+            "backlog": 13564,
+            "done": 26436,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 11,
-            "article_gone": 1
+            "article_gone": 2,
+            "metrics_ok": 6
           },
           "after": {
             "late_ratio": 1.0,
             "on_time_coverage": 0.0,
             "missing_ratio": {
-              "reads": 0.041754,
-              "likes": 0.471083,
+              "reads": 0.041711,
+              "likes": 0.470602,
               "favorites": 1.0,
-              "comments": 0.759035,
-              "impressions": 0.998445
+              "comments": 0.758259,
+              "impressions": 0.997424
             },
             "recoverable_on_time_in_window": 15
           }
         },
         "history": {
           "status": "ok",
-          "claimed": 4,
-          "eligible": 4,
-          "fetched": 1,
+          "claimed": 2,
+          "eligible": 2,
+          "fetched": 0,
           "written": 0,
-          "snapshots": 1,
+          "snapshots": 0,
           "would_write": 0,
-          "unsupported_host_skipped": 3,
-          "windows_refreshed": 1,
+          "unsupported_host_skipped": 2,
+          "windows_refreshed": 0,
           "queue_states": {
-            "scheduled": 116,
-            "ready": 4,
+            "scheduled": 112,
+            "ready": 2,
             "backlog": 0,
-            "done": 96,
+            "done": 102,
             "exhausted": 0
           },
-          "outcome_counts": {
-            "metrics_ok": 1
-          },
+          "outcome_counts": {},
           "after": {
-            "late_ratio": 0.714286,
-            "on_time_coverage": 0.08547,
+            "late_ratio": 0.704225,
+            "on_time_coverage": 0.08502,
             "missing_ratio": {
               "reads": 0.0,
               "likes": 0.0,
@@ -1842,7 +1842,7 @@
               "comments": 0.0,
               "impressions": 0.0
             },
-            "recoverable_on_time_in_window": 11
+            "recoverable_on_time_in_window": 13
           }
         },
         "health": {
@@ -1856,18 +1856,18 @@
           "unsupported_host_skipped": 0,
           "windows_refreshed": 1,
           "queue_states": {
-            "scheduled": 25,
+            "scheduled": 22,
             "ready": 1,
             "backlog": 0,
-            "done": 41,
+            "done": 44,
             "exhausted": 0
           },
           "outcome_counts": {
             "metrics_ok": 1
           },
           "after": {
-            "late_ratio": 0.933333,
-            "on_time_coverage": 0.011905,
+            "late_ratio": 0.777778,
+            "on_time_coverage": 0.042553,
             "missing_ratio": {
               "reads": 0.0,
               "likes": 0.0,

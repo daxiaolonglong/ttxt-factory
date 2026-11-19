@@ -1,0 +1,44 @@
+{
+ "rule": "类目预算=该类目历史版本每百句命中数 p75(线性插值);历史版本数<8 的类目改用全体合并分布 p75 并标注 pooled_p75_fallback;读数四舍五入 2 位冻结,生成链路只读该文件",
+ "probe_source": "03_intelligence/template_probe-20261119.json",
+ "probe_generated_at": "2026-11-19T03:08:23+08:00",
+ "min_basis": 8,
+ "min_sentences": 12,
+ "pooled_basis_drafts": 38,
+ "pooled_p75": {
+  "marker_per_100_sent": 10.61,
+  "parallel_per_100_sent": 5.14
+ },
+ "budgets": {
+  "technology": {
+   "marker_per_100_sent": 5.26,
+   "parallel_per_100_sent": 5.26,
+   "basis": "category_p75",
+   "basis_drafts": 19
+  },
+  "finance": {
+   "marker_per_100_sent": 10.61,
+   "parallel_per_100_sent": 5.14,
+   "basis": "pooled_p75_fallback",
+   "basis_drafts": 4
+  },
+  "health": {
+   "marker_per_100_sent": 10.61,
+   "parallel_per_100_sent": 5.14,
+   "basis": "pooled_p75_fallback",
+   "basis_drafts": 6
+  },
+  "history": {
+   "marker_per_100_sent": 10.61,
+   "parallel_per_100_sent": 5.14,
+   "basis": "pooled_p75_fallback",
+   "basis_drafts": 0
+  },
+  "social": {
+   "marker_per_100_sent": 13.64,
+   "parallel_per_100_sent": 4.35,
+   "basis": "category_p75",
+   "basis_drafts": 9
+  }
+ }
+}

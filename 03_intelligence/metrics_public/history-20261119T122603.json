@@ -1,0 +1,126 @@
+{
+  "category": "history",
+  "job": "metrics_due_60m",
+  "run_at": "2026-11-19T12:27:59+08:00",
+  "plan": {
+    "category": "history",
+    "now": "2026-11-19T12:27:57+08:00",
+    "eligible": 1,
+    "gone_skipped": 0,
+    "batch": [
+      {
+        "article_id": 51,
+        "state": "ready",
+        "due_at": "2026-11-19T11:45:46+08:00",
+        "window_end": "2026-11-20T11:45:46+08:00",
+        "attempts": 0
+      }
+    ],
+    "article_ids": [
+      51
+    ]
+  },
+  "window_days": 3,
+  "apply": true,
+  "queue_sync": {
+    "category": "history",
+    "window_days": 3,
+    "now": "2026-11-19T12:27:57+08:00",
+    "total": 216,
+    "states": {
+      "scheduled": 115,
+      "ready": 1,
+      "backlog": 0,
+      "done": 100,
+      "exhausted": 0
+    },
+    "removed": 0
+  },
+  "eligible": 1,
+  "claimed": 1,
+  "claimed_ids": [
+    51
+  ],
+  "gone_skipped": 0,
+  "collection": {
+    "candidates": 0,
+    "fetched": 0,
+    "written": 0,
+    "updated": 0,
+    "snapshots": 0,
+    "would_write": null,
+    "robots_refused": 0,
+    "fetch_errors": 0,
+    "no_metrics_skipped": 0,
+    "known_gone_skipped": 0,
+    "outcome_counts": {}
+  },
+  "attempts": {
+    "category": "history",
+    "apply": true,
+    "planned": [
+      {
+        "article_id": 51,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      }
+    ],
+    "updated": 1
+  },
+  "unsupported_host_skipped": 1,
+  "windows_refreshed": 0,
+  "after": {
+    "category": "history",
+    "window_days": 3,
+    "now": "2026-11-19T12:27:59+08:00",
+    "articles_with_published_at": 247,
+    "windows": 216,
+    "readings": 70,
+    "status_counts": {
+      "on_time": 20,
+      "late": 50,
+      "early": 33,
+      "pending": 91,
+      "overdue": 0,
+      "unavailable": 22
+    },
+    "late_ratio": 0.714286,
+    "on_time_coverage": 0.080972,
+    "on_time_share_of_readings": 0.285714,
+    "missing_counts": {
+      "reads": 0,
+      "likes": 0,
+      "favorites": 70,
+      "comments": 0,
+      "impressions": 0
+    },
+    "missing_ratio": {
+      "reads": 0.0,
+      "likes": 0.0,
+      "favorites": 1.0,
+      "comments": 0.0,
+      "impressions": 0.0
+    },
+    "recoverable_on_time_in_window": 12,
+    "queue": {
+      "scheduled": 115,
+      "ready": 0,
+      "backlog": 0,
+      "done": 101,
+      "exhausted": 0
+    },
+    "queue_total": 216,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_hours": [
+        1.0,
+        6.0,
+        24.0
+      ],
+      "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+    }
+  }
+}
