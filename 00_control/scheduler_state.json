@@ -1698,7 +1698,7 @@
     "last_error": null
   },
   "metrics_due_60m": {
-    "last_run_at": "2026-11-19T09:13:47+08:00",
+    "last_run_at": "2026-11-19T11:23:23+08:00",
     "last_status": "ok",
     "last_result": {
       "scheduler_status": "ok",
@@ -1715,7 +1715,7 @@
         "technology": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 30,
+          "eligible": 13,
           "fetched": 2,
           "written": 0,
           "snapshots": 2,
@@ -1723,24 +1723,24 @@
           "unsupported_host_skipped": 10,
           "windows_refreshed": 2,
           "queue_states": {
-            "scheduled": 256,
-            "ready": 6,
-            "backlog": 24,
-            "done": 182,
+            "scheduled": 249,
+            "ready": 3,
+            "backlog": 10,
+            "done": 206,
             "exhausted": 0
           },
           "outcome_counts": {
             "metrics_ok": 2
           },
           "after": {
-            "late_ratio": 0.642384,
-            "on_time_coverage": 0.105469,
+            "late_ratio": 0.617834,
+            "on_time_coverage": 0.117188,
             "missing_ratio": {
-              "reads": 0.046358,
+              "reads": 0.044586,
               "likes": 0.0,
               "favorites": 1.0,
               "comments": 0.0,
-              "impressions": 0.046358
+              "impressions": 0.044586
             },
             "recoverable_on_time_in_window": 8
           }
@@ -1748,94 +1748,93 @@
         "finance": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 4247,
-          "fetched": 2,
-          "written": 1,
-          "snapshots": 2,
+          "eligible": 4232,
+          "fetched": 3,
+          "written": 2,
+          "snapshots": 3,
           "would_write": 0,
           "unsupported_host_skipped": 9,
-          "windows_refreshed": 2,
+          "windows_refreshed": 3,
           "queue_states": {
-            "scheduled": 530,
-            "ready": 0,
-            "backlog": 4247,
-            "done": 8047,
+            "scheduled": 521,
+            "ready": 3,
+            "backlog": 4229,
+            "done": 8071,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 2,
-            "article_gone": 1
+            "metrics_ok": 3
           },
           "after": {
-            "late_ratio": 0.999376,
-            "on_time_coverage": 0.000388,
+            "late_ratio": 0.998253,
+            "on_time_coverage": 0.001087,
             "missing_ratio": {
-              "reads": 0.054952,
-              "likes": 0.489946,
+              "reads": 0.05489,
+              "likes": 0.489396,
               "favorites": 1.0,
-              "comments": 0.735107,
-              "impressions": 0.998376
+              "comments": 0.734281,
+              "impressions": 0.997255
             },
-            "recoverable_on_time_in_window": 1
+            "recoverable_on_time_in_window": 0
           }
         },
         "social": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 13624,
-          "fetched": 9,
-          "written": 9,
-          "snapshots": 9,
+          "eligible": 13600,
+          "fetched": 11,
+          "written": 11,
+          "snapshots": 11,
           "would_write": 0,
           "unsupported_host_skipped": 0,
-          "windows_refreshed": 9,
+          "windows_refreshed": 11,
           "queue_states": {
             "scheduled": 146,
             "ready": 0,
-            "backlog": 13624,
-            "done": 26376,
+            "backlog": 13600,
+            "done": 26400,
             "exhausted": 0
           },
           "outcome_counts": {
-            "article_gone": 3,
-            "metrics_ok": 9
+            "metrics_ok": 11,
+            "article_gone": 1
           },
           "after": {
             "late_ratio": 1.0,
             "on_time_coverage": 0.0,
             "missing_ratio": {
-              "reads": 0.041785,
-              "likes": 0.471441,
+              "reads": 0.041754,
+              "likes": 0.471083,
               "favorites": 1.0,
-              "comments": 0.759611,
-              "impressions": 0.999203
+              "comments": 0.759035,
+              "impressions": 0.998445
             },
-            "recoverable_on_time_in_window": 18
+            "recoverable_on_time_in_window": 15
           }
         },
         "history": {
           "status": "ok",
-          "claimed": 12,
-          "eligible": 15,
-          "fetched": 10,
-          "written": 10,
-          "snapshots": 10,
+          "claimed": 4,
+          "eligible": 4,
+          "fetched": 1,
+          "written": 0,
+          "snapshots": 1,
           "would_write": 0,
-          "unsupported_host_skipped": 2,
-          "windows_refreshed": 10,
+          "unsupported_host_skipped": 3,
+          "windows_refreshed": 1,
           "queue_states": {
-            "scheduled": 124,
-            "ready": 2,
-            "backlog": 13,
-            "done": 77,
+            "scheduled": 116,
+            "ready": 4,
+            "backlog": 0,
+            "done": 96,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 10
+            "metrics_ok": 1
           },
           "after": {
-            "late_ratio": 0.734375,
-            "on_time_coverage": 0.07265,
+            "late_ratio": 0.714286,
+            "on_time_coverage": 0.08547,
             "missing_ratio": {
               "reads": 0.0,
               "likes": 0.0,
@@ -1843,20 +1842,41 @@
               "comments": 0.0,
               "impressions": 0.0
             },
-            "recoverable_on_time_in_window": 8
+            "recoverable_on_time_in_window": 11
           }
         },
         "health": {
-          "status": "no_due",
+          "status": "ok",
+          "claimed": 1,
+          "eligible": 1,
+          "fetched": 1,
+          "written": 0,
+          "snapshots": 1,
+          "would_write": 0,
+          "unsupported_host_skipped": 0,
+          "windows_refreshed": 1,
           "queue_states": {
-            "scheduled": 26,
-            "ready": 0,
+            "scheduled": 25,
+            "ready": 1,
             "backlog": 0,
             "done": 41,
             "exhausted": 0
           },
-          "eligible": 0,
-          "gone_skipped": 0
+          "outcome_counts": {
+            "metrics_ok": 1
+          },
+          "after": {
+            "late_ratio": 0.933333,
+            "on_time_coverage": 0.011905,
+            "missing_ratio": {
+              "reads": 0.0,
+              "likes": 0.0,
+              "favorites": 1.0,
+              "comments": 0.0,
+              "impressions": 0.0
+            },
+            "recoverable_on_time_in_window": 0
+          }
         }
       },
       "errors": []
