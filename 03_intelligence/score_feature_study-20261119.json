@@ -1,0 +1,1182 @@
+{
+  "generated_at": "2026-11-19T09:48:43+08:00",
+  "target": "article_metrics.reads(采集时点截面),log10;按(类目,log2 龄段)中位数去偏",
+  "overview": {
+    "technology": {
+      "n": 237,
+      "median_reads": 1084,
+      "p90_reads": 30463,
+      "median_age_hours": 83.2,
+      "p10_age_hours": 4.3,
+      "p90_age_hours": 216.4
+    },
+    "finance": {
+      "n": 7639,
+      "median_reads": 11,
+      "p90_reads": 353,
+      "median_age_hours": 1588.9,
+      "p10_age_hours": 561.9,
+      "p90_age_hours": 5818.1
+    },
+    "social": {
+      "n": 25243,
+      "median_reads": 13,
+      "p90_reads": 390,
+      "median_age_hours": 1510.1,
+      "p10_age_hours": 516.1,
+      "p90_age_hours": 4281.3
+    },
+    "history": {
+      "n": 99,
+      "median_reads": 1360,
+      "p90_reads": 28882,
+      "median_age_hours": 92.7,
+      "p10_age_hours": 7.8,
+      "p90_age_hours": 1163.3
+    },
+    "health": {
+      "n": 39,
+      "median_reads": 618,
+      "p90_reads": 18104,
+      "median_age_hours": 55.0,
+      "p10_age_hours": 16.0,
+      "p90_age_hours": 1162.8
+    }
+  },
+  "metric_source_split": {
+    "legacy_factory_search_ssr": 32781,
+    "toutiao_public_article": 476
+  },
+  "age_effect_spearman": {
+    "rho": 0.1863,
+    "ci95": [
+      0.1759,
+      0.1966
+    ],
+    "n": 33257
+  },
+  "title_length_bands": {
+    "0-10": {
+      "n": 303,
+      "median_reads": 8,
+      "median_adj": -0.189
+    },
+    "10-16": {
+      "n": 1675,
+      "median_reads": 8,
+      "median_adj": -0.185
+    },
+    "16-22": {
+      "n": 4240,
+      "median_reads": 9,
+      "median_adj": -0.125
+    },
+    "22-30": {
+      "n": 14233,
+      "median_reads": 11,
+      "median_adj": -0.051
+    },
+    "30-100": {
+      "n": 12805,
+      "median_reads": 19,
+      "median_adj": 0.168
+    }
+  },
+  "binary_features": [
+    {
+      "feature": "has_digit",
+      "label": "标题含数字",
+      "n1": 18035,
+      "n0": 15222,
+      "insufficient": false,
+      "adj_log_diff": 0.178,
+      "adj_log_diff_ci95": [
+        0.1582,
+        0.1978
+      ],
+      "ratio_of_median_reads": 1.507,
+      "median_reads_1": 16,
+      "median_reads_0": 10,
+      "top_decile_rate_1": 0.1136,
+      "top_decile_rate_0": 0.0844,
+      "top_decile_diff": 0.0293,
+      "top_decile_diff_ci95": [
+        0.0228,
+        0.0356
+      ],
+      "per_category_diff": [
+        {
+          "category": "technology",
+          "n1": 121,
+          "n0": 116,
+          "diff": 0.10354284480738873
+        },
+        {
+          "category": "finance",
+          "n1": 2964,
+          "n0": 4675,
+          "diff": 0.15689554643872025
+        },
+        {
+          "category": "social",
+          "n1": 14898,
+          "n0": 10345,
+          "diff": 0.1900618416151909
+        },
+        {
+          "category": "history",
+          "n1": 31,
+          "n0": 68,
+          "diff": 0.17927530223681373
+        }
+      ],
+      "per_category_sign_consistent": true,
+      "stable": true,
+      "same_source_adj_diff": 0.178,
+      "same_source_adj_diff_ci95": [
+        0.1582,
+        0.1978
+      ],
+      "same_source_sign": "+",
+      "import_only_n1": 17795,
+      "import_only_n0": 14986,
+      "import_only_adj_diff": 0.1781,
+      "import_only_ci95": [
+        0.1582,
+        0.198
+      ],
+      "import_only_sign": "+"
+    },
+    {
+      "feature": "has_question",
+      "label": "标题是疑问句/提问",
+      "n1": 6440,
+      "n0": 26817,
+      "insufficient": false,
+      "adj_log_diff": -0.1851,
+      "adj_log_diff_ci95": [
+        -0.209,
+        -0.1611
+      ],
+      "ratio_of_median_reads": 0.653,
+      "median_reads_1": 9,
+      "median_reads_0": 14,
+      "top_decile_rate_1": 0.0753,
+      "top_decile_rate_0": 0.1062,
+      "top_decile_diff": -0.0309,
+      "top_decile_diff_ci95": [
+        -0.0381,
+        -0.0233
+      ],
+      "per_category_diff": [
+        {
+          "category": "technology",
+          "n1": 49,
+          "n0": 188,
+          "diff": -0.20327093125530227
+        },
+        {
+          "category": "finance",
+          "n1": 1694,
+          "n0": 5945,
+          "diff": -0.12872954724318766
+        },
+        {
+          "category": "social",
+          "n1": 4634,
+          "n0": 20609,
+          "diff": -0.20602353266831902
+        },
+        {
+          "category": "history",
+          "n1": 42,
+          "n0": 57,
+          "diff": 0.08401493648780249
+        }
+      ],
+      "per_category_sign_consistent": false,
+      "stable": false,
+      "same_source_adj_diff": -0.1851,
+      "same_source_adj_diff_ci95": [
+        -0.209,
+        -0.1611
+      ],
+      "same_source_sign": "-",
+      "import_only_n1": 6306,
+      "import_only_n0": 26475,
+      "import_only_adj_diff": -0.1871,
+      "import_only_ci95": [
+        -0.2113,
+        -0.1629
+      ],
+      "import_only_sign": "-"
+    },
+    {
+      "feature": "has_exclaim",
+      "label": "标题含感叹号",
+      "n1": 6393,
+      "n0": 26864,
+      "insufficient": false,
+      "adj_log_diff": 0.1828,
+      "adj_log_diff_ci95": [
+        0.1571,
+        0.2085
+      ],
+      "ratio_of_median_reads": 1.523,
+      "median_reads_1": 20,
+      "median_reads_0": 11,
+      "top_decile_rate_1": 0.1281,
+      "top_decile_rate_0": 0.0936,
+      "top_decile_diff": 0.0345,
+      "top_decile_diff_ci95": [
+        0.0258,
+        0.0436
+      ],
+      "per_category_diff": [
+        {
+          "category": "technology",
+          "n1": 84,
+          "n0": 153,
+          "diff": 0.0901964097747846
+        },
+        {
+          "category": "finance",
+          "n1": 1404,
+          "n0": 6235,
+          "diff": 0.18057204055225254
+        },
+        {
+          "category": "social",
+          "n1": 4888,
+          "n0": 20355,
+          "diff": 0.1875681211593228
+        }
+      ],
+      "per_category_sign_consistent": true,
+      "stable": true,
+      "same_source_adj_diff": 0.1828,
+      "same_source_adj_diff_ci95": [
+        0.1571,
+        0.2085
+      ],
+      "same_source_sign": "+",
+      "import_only_n1": 6264,
+      "import_only_n0": 26517,
+      "import_only_adj_diff": 0.1842,
+      "import_only_ci95": [
+        0.1582,
+        0.2101
+      ],
+      "import_only_sign": "+"
+    },
+    {
+      "feature": "has_colon",
+      "label": "标题含冒号/竖线",
+      "n1": 9673,
+      "n0": 23584,
+      "insufficient": false,
+      "adj_log_diff": 0.0601,
+      "adj_log_diff_ci95": [
+        0.0379,
+        0.0822
+      ],
+      "ratio_of_median_reads": 1.148,
+      "median_reads_1": 15,
+      "median_reads_0": 12,
+      "top_decile_rate_1": 0.1149,
+      "top_decile_rate_0": 0.0942,
+      "top_decile_diff": 0.0206,
+      "top_decile_diff_ci95": [
+        0.0134,
+        0.0281
+      ],
+      "per_category_diff": [
+        {
+          "category": "technology",
+          "n1": 69,
+          "n0": 168,
+          "diff": 0.2689439602947825
+        },
+        {
+          "category": "finance",
+          "n1": 2237,
+          "n0": 5402,
+          "diff": 0.09629019523172037
+        },
+        {
+          "category": "social",
+          "n1": 7311,
+          "n0": 17932,
+          "diff": 0.04603277101129655
+        },
+        {
+          "category": "history",
+          "n1": 38,
+          "n0": 61,
+          "diff": 0.36578361837378504
+        }
+      ],
+      "per_category_sign_consistent": true,
+      "stable": true,
+      "same_source_adj_diff": 0.0601,
+      "same_source_adj_diff_ci95": [
+        0.0379,
+        0.0822
+      ],
+      "same_source_sign": "+",
+      "import_only_n1": 9518,
+      "import_only_n0": 23263,
+      "import_only_adj_diff": 0.0579,
+      "import_only_ci95": [
+        0.0356,
+        0.0802
+      ],
+      "import_only_sign": "+"
+    },
+    {
+      "feature": "has_quote",
+      "label": "标题含引号",
+      "n1": 4860,
+      "n0": 28397,
+      "insufficient": false,
+      "adj_log_diff": 0.2005,
+      "adj_log_diff_ci95": [
+        0.1711,
+        0.2298
+      ],
+      "ratio_of_median_reads": 1.587,
+      "median_reads_1": 22,
+      "median_reads_0": 11,
+      "top_decile_rate_1": 0.1409,
+      "top_decile_rate_0": 0.0932,
+      "top_decile_diff": 0.0477,
+      "top_decile_diff_ci95": [
+        0.0376,
+        0.0583
+      ],
+      "per_category_diff": [
+        {
+          "category": "technology",
+          "n1": 35,
+          "n0": 202,
+          "diff": 0.0675501697199331
+        },
+        {
+          "category": "finance",
+          "n1": 1337,
+          "n0": 6302,
+          "diff": 0.19898164114594014
+        },
+        {
+          "category": "social",
+          "n1": 3470,
+          "n0": 21773,
+          "diff": 0.20379456346752797
+        }
+      ],
+      "per_category_sign_consistent": true,
+      "stable": true,
+      "same_source_adj_diff": 0.2005,
+      "same_source_adj_diff_ci95": [
+        0.1711,
+        0.2298
+      ],
+      "same_source_sign": "+",
+      "import_only_n1": 4789,
+      "import_only_n0": 27992,
+      "import_only_adj_diff": 0.2032,
+      "import_only_ci95": [
+        0.1736,
+        0.2328
+      ],
+      "import_only_sign": "+"
+    },
+    {
+      "feature": "has_contrast",
+      "label": "标题含对比/转折词",
+      "n1": 2774,
+      "n0": 30483,
+      "insufficient": false,
+      "adj_log_diff": -0.0487,
+      "adj_log_diff_ci95": [
+        -0.084,
+        -0.0134
+      ],
+      "ratio_of_median_reads": 0.894,
+      "median_reads_1": 9,
+      "median_reads_0": 13,
+      "top_decile_rate_1": 0.0923,
+      "top_decile_rate_0": 0.1009,
+      "top_decile_diff": -0.0087,
+      "top_decile_diff_ci95": [
+        -0.0194,
+        0.0032
+      ],
+      "per_category_diff": [
+        {
+          "category": "finance",
+          "n1": 590,
+          "n0": 7049,
+          "diff": -0.0382303237897309
+        },
+        {
+          "category": "social",
+          "n1": 2150,
+          "n0": 23093,
+          "diff": -0.05698383107824828
+        }
+      ],
+      "per_category_sign_consistent": false,
+      "stable": false,
+      "same_source_adj_diff": -0.0487,
+      "same_source_adj_diff_ci95": [
+        -0.084,
+        -0.0134
+      ],
+      "same_source_sign": "-",
+      "import_only_n1": 2733,
+      "import_only_n0": 30048,
+      "import_only_adj_diff": -0.0536,
+      "import_only_ci95": [
+        -0.0892,
+        -0.0179
+      ],
+      "import_only_sign": "-"
+    },
+    {
+      "feature": "has_emotion",
+      "label": "标题含情绪/冲突词",
+      "n1": 2430,
+      "n0": 30827,
+      "insufficient": false,
+      "adj_log_diff": 0.0249,
+      "adj_log_diff_ci95": [
+        -0.0158,
+        0.0657
+      ],
+      "ratio_of_median_reads": 1.059,
+      "median_reads_1": 10,
+      "median_reads_0": 13,
+      "top_decile_rate_1": 0.1185,
+      "top_decile_rate_0": 0.0988,
+      "top_decile_diff": 0.0197,
+      "top_decile_diff_ci95": [
+        0.007,
+        0.0336
+      ],
+      "per_category_diff": [
+        {
+          "category": "finance",
+          "n1": 450,
+          "n0": 7189,
+          "diff": 0.1448431732230363
+        },
+        {
+          "category": "social",
+          "n1": 1958,
+          "n0": 23285,
+          "diff": -0.010862956122775408
+        }
+      ],
+      "per_category_sign_consistent": false,
+      "stable": false,
+      "same_source_adj_diff": 0.0249,
+      "same_source_adj_diff_ci95": [
+        -0.0158,
+        0.0657
+      ],
+      "same_source_sign": "+",
+      "import_only_n1": 2399,
+      "import_only_n0": 30382,
+      "import_only_adj_diff": 0.0164,
+      "import_only_ci95": [
+        -0.0247,
+        0.0574
+      ],
+      "import_only_sign": "+"
+    },
+    {
+      "feature": "has_subhead",
+      "label": "正文含小标题加粗",
+      "n1": 0,
+      "n0": 33257,
+      "insufficient": true,
+      "adj_log_diff": null,
+      "adj_log_diff_ci95": null,
+      "ratio_of_median_reads": null,
+      "median_reads_1": null,
+      "median_reads_0": 13,
+      "top_decile_rate_1": null,
+      "top_decile_rate_0": 0.1002,
+      "top_decile_diff": null,
+      "top_decile_diff_ci95": null,
+      "per_category_diff": [],
+      "per_category_sign_consistent": false,
+      "stable": false,
+      "same_source_adj_diff": null,
+      "same_source_adj_diff_ci95": null,
+      "same_source_sign": null,
+      "import_only_n1": 0,
+      "import_only_n0": 32781,
+      "import_only_adj_diff": null,
+      "import_only_ci95": null,
+      "import_only_sign": null
+    },
+    {
+      "feature": "has_image",
+      "label": "正文含图片",
+      "n1": 14,
+      "n0": 33243,
+      "insufficient": true,
+      "adj_log_diff": -0.5314,
+      "adj_log_diff_ci95": [
+        -0.9934,
+        -0.0694
+      ],
+      "ratio_of_median_reads": 0.294,
+      "median_reads_1": 4,
+      "median_reads_0": 13,
+      "top_decile_rate_1": 0.0714,
+      "top_decile_rate_0": 0.1002,
+      "top_decile_diff": -0.0288,
+      "top_decile_diff_ci95": [
+        -0.0876,
+        0.2145
+      ],
+      "per_category_diff": [],
+      "per_category_sign_consistent": false,
+      "stable": false,
+      "same_source_adj_diff": -0.5314,
+      "same_source_adj_diff_ci95": [
+        -0.9934,
+        -0.0694
+      ],
+      "same_source_sign": "-",
+      "import_only_n1": 14,
+      "import_only_n0": 32767,
+      "import_only_adj_diff": -0.5331,
+      "import_only_ci95": [
+        -0.9951,
+        -0.0711
+      ],
+      "import_only_sign": "-"
+    }
+  ],
+  "continuous_features": [
+    {
+      "feature": "title_len",
+      "label": "标题字数",
+      "spearman": {
+        "rho": 0.1495,
+        "ci95": [
+          0.139,
+          0.16
+        ],
+        "n": 33257
+      },
+      "median": 28.0,
+      "p10": 18.0,
+      "p90": 34.0
+    },
+    {
+      "feature": "body_chars",
+      "label": "正文字数",
+      "spearman": {
+        "rho": 0.0885,
+        "ci95": [
+          0.0778,
+          0.0992
+        ],
+        "n": 33257
+      },
+      "median": 2272.0,
+      "p10": 1078.0,
+      "p90": 4823.0
+    },
+    {
+      "feature": "paragraphs",
+      "label": "正文段数",
+      "spearman": {
+        "rho": 0.0861,
+        "ci95": [
+          0.0755,
+          0.0968
+        ],
+        "n": 33257
+      },
+      "median": 36.0,
+      "p10": 11.0,
+      "p90": 88.0
+    },
+    {
+      "feature": "avg_para",
+      "label": "平均段长",
+      "spearman": {
+        "rho": -0.0292,
+        "ci95": [
+          -0.04,
+          -0.0185
+        ],
+        "n": 33257
+      },
+      "median": 67.19,
+      "p10": 34.53,
+      "p90": 129.89
+    },
+    {
+      "feature": "age_hours",
+      "label": "发布→采集间隔(小时)",
+      "spearman": {
+        "rho": 0.1863,
+        "ci95": [
+          0.1759,
+          0.1966
+        ],
+        "n": 33257
+      },
+      "median": 1513.35,
+      "p10": 504.7,
+      "p90": 4569.2
+    }
+  ],
+  "title_bucket_vs_reads": {
+    "ALL": {
+      "question": {
+        "n": 6440,
+        "median_reads": 9,
+        "p75_reads": 48
+      },
+      "number": {
+        "n": 15221,
+        "median_reads": 18,
+        "p75_reads": 95
+      },
+      "plain": {
+        "n": 11596,
+        "median_reads": 10,
+        "p75_reads": 57
+      }
+    },
+    "technology": {
+      "question": {
+        "n": 49,
+        "median_reads": 823,
+        "p75_reads": 4501
+      },
+      "number": {
+        "n": 101,
+        "median_reads": 1456,
+        "p75_reads": 5926
+      },
+      "plain": {
+        "n": 87,
+        "median_reads": 695,
+        "p75_reads": 7372
+      }
+    },
+    "finance": {
+      "question": {
+        "n": 1694,
+        "median_reads": 9,
+        "p75_reads": 46
+      },
+      "number": {
+        "n": 2389,
+        "median_reads": 14,
+        "p75_reads": 94
+      },
+      "plain": {
+        "n": 3556,
+        "median_reads": 10,
+        "p75_reads": 55
+      }
+    },
+    "social": {
+      "question": {
+        "n": 4634,
+        "median_reads": 8,
+        "p75_reads": 43
+      },
+      "number": {
+        "n": 12700,
+        "median_reads": 18,
+        "p75_reads": 92
+      },
+      "plain": {
+        "n": 7909,
+        "median_reads": 10,
+        "p75_reads": 54
+      }
+    },
+    "history": {
+      "question": {
+        "n": 42,
+        "median_reads": 2431,
+        "p75_reads": 9661
+      },
+      "number": {
+        "n": 20,
+        "median_reads": 1455,
+        "p75_reads": 4193
+      },
+      "plain": {
+        "n": 37,
+        "median_reads": 417,
+        "p75_reads": 2645
+      }
+    },
+    "health": {
+      "question": {
+        "n": 21,
+        "median_reads": 618,
+        "p75_reads": 3419
+      },
+      "number": {
+        "n": 11,
+        "median_reads": 339,
+        "p75_reads": 3269
+      },
+      "plain": {
+        "n": 7,
+        "median_reads": 745,
+        "p75_reads": 1059
+      }
+    }
+  },
+  "source_split": {
+    "social|aggregator": {
+      "n": 25243,
+      "median_reads": 13,
+      "median_body": 2401,
+      "has_image_rate": 0.0,
+      "has_digit_rate": 0.59
+    },
+    "finance|aggregator": {
+      "n": 7554,
+      "median_reads": 11,
+      "median_body": 1884,
+      "has_image_rate": 0.001,
+      "has_digit_rate": 0.385
+    },
+    "technology|toutiao": {
+      "n": 237,
+      "median_reads": 1084,
+      "median_body": 2207,
+      "has_image_rate": 0.0,
+      "has_digit_rate": 0.511
+    },
+    "history|toutiao": {
+      "n": 99,
+      "median_reads": 1360,
+      "median_body": 3078,
+      "has_image_rate": 0.0,
+      "has_digit_rate": 0.313
+    },
+    "finance|toutiao": {
+      "n": 85,
+      "median_reads": 1344,
+      "median_body": 2542,
+      "has_image_rate": 0.0,
+      "has_digit_rate": 0.682
+    },
+    "health|toutiao": {
+      "n": 39,
+      "median_reads": 618,
+      "median_body": 2094,
+      "has_image_rate": 0.0,
+      "has_digit_rate": 0.538
+    }
+  },
+  "tier_profile": {
+    "top": {
+      "n": 3333,
+      "title_len": {
+        "n": 3333,
+        "median": 30.0,
+        "p25": 25.0,
+        "p75": 33.0
+      },
+      "body_chars": {
+        "n": 3333,
+        "median": 2464.0,
+        "p25": 1638.0,
+        "p75": 3550.0
+      },
+      "paragraphs": {
+        "n": 3333,
+        "median": 41.0,
+        "p25": 25.0,
+        "p75": 63.0
+      },
+      "avg_para": {
+        "n": 3333,
+        "median": 62.3,
+        "p25": 44.82,
+        "p75": 86.64
+      }
+    },
+    "low": {
+      "n": 16472,
+      "title_len": {
+        "n": 16472,
+        "median": 27.0,
+        "p25": 23.0,
+        "p75": 30.0
+      },
+      "body_chars": {
+        "n": 16472,
+        "median": 2179.0,
+        "p25": 1470.0,
+        "p75": 3327.0
+      },
+      "paragraphs": {
+        "n": 16472,
+        "median": 34.0,
+        "p25": 19.0,
+        "p75": 56.0
+      },
+      "avg_para": {
+        "n": 16472,
+        "median": 67.38,
+        "p25": 47.15,
+        "p75": 97.25
+      }
+    },
+    "continuous": [
+      {
+        "feature": "title_len",
+        "median_top": 30.0,
+        "median_low": 27.0,
+        "median_diff": 3.0,
+        "median_diff_boot_ci95": [
+          2.0,
+          3.0
+        ]
+      },
+      {
+        "feature": "body_chars",
+        "median_top": 2464.0,
+        "median_low": 2179.0,
+        "median_diff": 285.0,
+        "median_diff_boot_ci95": [
+          204.0,
+          361.0
+        ]
+      },
+      {
+        "feature": "paragraphs",
+        "median_top": 41.0,
+        "median_low": 34.0,
+        "median_diff": 7.0,
+        "median_diff_boot_ci95": [
+          5.0,
+          8.0
+        ]
+      },
+      {
+        "feature": "avg_para",
+        "median_top": 62.3,
+        "median_low": 67.38,
+        "median_diff": -5.08,
+        "median_diff_boot_ci95": [
+          -7.24,
+          -3.14
+        ]
+      }
+    ],
+    "rates": [
+      {
+        "feature": "has_digit",
+        "label": "标题含数字",
+        "top_rate": 0.6148,
+        "low_rate": 0.502,
+        "diff": 0.1128,
+        "diff_ci95": [
+          0.0944,
+          0.1308
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_question",
+        "label": "标题是疑问句/提问",
+        "top_rate": 0.1455,
+        "low_rate": 0.2199,
+        "diff": -0.0744,
+        "diff_ci95": [
+          -0.0876,
+          -0.0606
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_exclaim",
+        "label": "标题含感叹号",
+        "top_rate": 0.2457,
+        "low_rate": 0.1641,
+        "diff": 0.0816,
+        "diff_ci95": [
+          0.0662,
+          0.0975
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_colon",
+        "label": "标题含冒号/竖线",
+        "top_rate": 0.3333,
+        "low_rate": 0.2743,
+        "diff": 0.059,
+        "diff_ci95": [
+          0.0418,
+          0.0766
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_quote",
+        "label": "标题含引号",
+        "top_rate": 0.2055,
+        "low_rate": 0.1175,
+        "diff": 0.088,
+        "diff_ci95": [
+          0.0737,
+          0.1028
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_contrast",
+        "label": "标题含对比/转折词",
+        "top_rate": 0.0768,
+        "low_rate": 0.0939,
+        "diff": -0.0171,
+        "diff_ci95": [
+          -0.0268,
+          -0.0066
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_emotion",
+        "label": "标题含情绪/冲突词",
+        "top_rate": 0.0864,
+        "low_rate": 0.0769,
+        "diff": 0.0096,
+        "diff_ci95": [
+          -0.0004,
+          0.0203
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_subhead",
+        "label": "正文含小标题加粗",
+        "top_rate": 0.0,
+        "low_rate": 0.0,
+        "diff": 0.0,
+        "diff_ci95": [
+          -0.0002,
+          0.0012
+        ],
+        "insufficient": false
+      },
+      {
+        "feature": "has_image",
+        "label": "正文含图片",
+        "top_rate": 0.0003,
+        "low_rate": 0.0005,
+        "diff": -0.0002,
+        "diff_ci95": [
+          -0.0008,
+          0.0012
+        ],
+        "insufficient": false
+      }
+    ]
+  },
+  "joint_effects": {
+    "intercept": 0.0008,
+    "coef_adj_log": {
+      "has_digit": 0.1687,
+      "has_question": -0.1342,
+      "has_exclaim": 0.1606,
+      "has_colon": 0.0605,
+      "has_quote": 0.2267,
+      "has_contrast": -0.0314,
+      "has_emotion": 0.0047,
+      "has_image": -0.5447
+    },
+    "note": "线性概率模型,仅描述控制其余特征后的平均效应;不是因果,也不用于生产评分"
+  },
+  "slot_effects": [
+    {
+      "slot": "早6-9",
+      "n": 4418,
+      "adj_log_diff_vs_rest": -0.0137,
+      "ci95": [
+        -0.0423,
+        0.0149
+      ],
+      "ratio": 0.969,
+      "per_category_diff": [
+        0.0454,
+        -0.0329
+      ]
+    },
+    {
+      "slot": "午11-14",
+      "n": 5695,
+      "adj_log_diff_vs_rest": 0.008,
+      "ci95": [
+        -0.0186,
+        0.0345
+      ],
+      "ratio": 1.018,
+      "per_category_diff": [
+        0.0069,
+        -0.0173,
+        0.0158
+      ]
+    },
+    {
+      "slot": "晚17-22",
+      "n": 8846,
+      "adj_log_diff_vs_rest": 0.0014,
+      "ci95": [
+        -0.0212,
+        0.0241
+      ],
+      "ratio": 1.003,
+      "per_category_diff": [
+        0.0061,
+        0.041,
+        -0.01,
+        -0.0303
+      ]
+    },
+    {
+      "slot": "其他",
+      "n": 14298,
+      "adj_log_diff_vs_rest": 0.0007,
+      "ci95": [
+        -0.0194,
+        0.0208
+      ],
+      "ratio": 1.002,
+      "per_category_diff": [
+        -0.0693,
+        -0.0431,
+        0.0146,
+        0.1298
+      ]
+    }
+  ],
+  "existing_labels": {
+    "technology": {
+      "labeled": 468,
+      "distinct_scores": 195,
+      "modal_label_share": 0.4957,
+      "label_counts": {
+        "low_quality": 57,
+        "normal": 83,
+        "potential": 73,
+        "unscored": 232,
+        "verified_viral": 23
+      }
+    },
+    "finance": {
+      "labeled": 12994,
+      "distinct_scores": 1013,
+      "modal_label_share": 0.4091,
+      "label_counts": {
+        "unscored": 5316,
+        "low_quality": 2338,
+        "potential": 2316,
+        "verified_viral": 775,
+        "normal": 2249
+      }
+    },
+    "social": {
+      "labeled": 40574,
+      "distinct_scores": 2150,
+      "modal_label_share": 0.3709,
+      "label_counts": {
+        "unscored": 15050,
+        "low_quality": 7093,
+        "potential": 7787,
+        "verified_viral": 2550,
+        "normal": 8094
+      }
+    },
+    "history": {
+      "labeled": 216,
+      "distinct_scores": 74,
+      "modal_label_share": 0.625,
+      "label_counts": {
+        "unscored": 135,
+        "normal": 27,
+        "verified_viral": 12,
+        "low_quality": 20,
+        "potential": 22
+      }
+    },
+    "health": {
+      "labeled": 67,
+      "distinct_scores": 38,
+      "modal_label_share": 0.403,
+      "label_counts": {
+        "unscored": 27,
+        "normal": 12,
+        "potential": 15,
+        "low_quality": 9,
+        "verified_viral": 4
+      }
+    }
+  },
+  "import_only": {
+    "n": 32781,
+    "continuous_spearman": {
+      "title_len": {
+        "rho": 0.1492,
+        "ci95": [
+          0.1386,
+          0.1598
+        ],
+        "n": 32781
+      },
+      "body_chars": {
+        "rho": 0.0902,
+        "ci95": [
+          0.0794,
+          0.1009
+        ],
+        "n": 32781
+      },
+      "paragraphs": {
+        "rho": 0.0875,
+        "ci95": [
+          0.0767,
+          0.0982
+        ],
+        "n": 32781
+      },
+      "avg_para": {
+        "rho": -0.0292,
+        "ci95": [
+          -0.04,
+          -0.0184
+        ],
+        "n": 32781
+      }
+    }
+  },
+  "caveats": [
+    "读数是采集时点快照(发布后数小时到数年),不是统一 T+N;已按类目×log2 龄段去偏,但仍不能完全消除时间累积与平台推荐差异。",
+    "样本里 98.3% 的读数来自 legacy_factory_search_ssr 批量导入,只有约 1.7% 来自公开页当面计数;两者口径不同,合并统计只作相关性参考。",
+    "impressions 只有 finance 85 / social 134 等共 196 条,绝大多数样本只有 reads,不能算曝光率。",
+    "favorites 全库 0 条非空,任何含收藏的指标都不可复核。",
+    "has_image 与来源强共线,且当前读数样本里只有 6 篇正文含图,图片效应无法估计(样本不足)。",
+    "35k 样本来自若干固定站点/账号,不能外推到整个平台;所有效应是相关性,不是因果。"
+  ]
+}
