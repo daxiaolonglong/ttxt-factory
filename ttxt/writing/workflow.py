@@ -124,6 +124,47 @@ def parse_claims(text: str) -> list[dict]:
     return claims
 
 
+_CONCESSION_SUB_RE = re.compile(r"虽然|虽|尽管|即便|即使")
+_CONTRAST_RE = re.compile(r"但是|但|不过|然而|可是")
+# 让步半句里的否定包裹(如"不影响事实准确性"):critical 词被否定,不构成负面断言。
+# 不含"无"——"无来源断言"的"无"是指控本身,不是软化(R49 生产实测的误伤方向是软化,不是指控)。
+_NEGATED_HINT_RE = re.compile(r"(?:并?不|未|没有)\s*(?:影响|改变|构成|涉及|触及|削弱)?\s*$")
+
+
+def _soft_concession(text: str) -> bool:
+    """条目是否"让步+转折"式软意见:critical 词只出现在让步/否定半句里。
+
+    R49 探针生产实测被误杀的两条:"虽引用来源但缺乏具体数据支撑"、
+    "虽不影响事实准确性但略减信息密度"——"来源/事实"都是让步时引用的对象,
+    转折后半句没有任何针对事实的负面断言。判死必须是真的负面断言:
+    critical 词出现在非让步、非否定的分句里(如"数据与来源矛盾，虽然简短但属于事实错误"
+    里"事实错误"在转折后半句,照常判死)。
+    边界(如实):词表子串判定没有语义理解,"虽然缺乏事实依据但建议补充来源"这种
+    让步词与指控词交叉的措辞仍可能判软;误判方向是放行软批评、保留 issues 供修订。
+    """
+    text = (text or "").strip()
+    if not text or not _CONTRAST_RE.search(text):
+        return False
+    occurrences = 0
+    for hint in CRITICAL_HINTS:
+        start = 0
+        while True:
+            pos = text.find(hint, start)
+            if pos < 0:
+                break
+            occurrences += 1
+            sub_start = max((text.rfind(p, 0, pos) for p in "，,；;。：:"), default=-1) + 1
+            prefix = text[sub_start:pos]
+            if _NEGATED_HINT_RE.search(prefix[-6:]):
+                start = pos + len(hint)
+                continue
+            if _CONCESSION_SUB_RE.search(prefix):
+                start = pos + len(hint)
+                continue
+            return False  # 该 critical 词在非让步、非否定位置 = 真的负面断言
+    return occurrences > 0
+
+
 def parse_review(text: str) -> dict:
     cleaned = _strip_fences(text)
     payload: dict | None = None
@@ -160,6 +201,12 @@ def parse_review(text: str) -> dict:
             critical = [raw_critical.strip()]
     if not critical:
         critical = [issue for issue in issues if any(hint in issue for hint in CRITICAL_HINTS)]
+    # R50:让步/转折式软意见不得判死——无论来自 CRITICAL_HINTS 升级还是模型自报 critical 数组,
+    # 一律降级回 issues(保留给修订参考),门禁只认"真的负面断言"。
+    demoted = [item for item in critical if _soft_concession(item)]
+    if demoted:
+        critical = [item for item in critical if item not in demoted]
+        issues = issues + [item for item in demoted if item not in issues]
     if score is None:
         match = re.search(r"(?:score|评分)\D{0,4}(0(?:\.\d+)?|1(?:\.0+)?)", cleaned)
         if match:
