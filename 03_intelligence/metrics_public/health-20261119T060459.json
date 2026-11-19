@@ -1,0 +1,160 @@
+{
+  "category": "health",
+  "job": "metrics_due_60m",
+  "run_at": "2026-11-19T06:06:18+08:00",
+  "plan": {
+    "category": "health",
+    "now": "2026-11-19T06:06:17+08:00",
+    "eligible": 3,
+    "gone_skipped": 0,
+    "batch": [
+      {
+        "article_id": 23,
+        "state": "backlog",
+        "due_at": "2026-09-26T16:50:44+08:00",
+        "window_end": "2026-09-27T16:50:44+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 24,
+        "state": "backlog",
+        "due_at": "2026-09-21T23:12:41+08:00",
+        "window_end": "2026-09-22T23:12:41+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 25,
+        "state": "backlog",
+        "due_at": "2026-09-18T17:07:07+08:00",
+        "window_end": "2026-09-19T17:07:07+08:00",
+        "attempts": 0
+      }
+    ],
+    "article_ids": [
+      23,
+      24,
+      25
+    ]
+  },
+  "window_days": 3,
+  "apply": true,
+  "queue_sync": {
+    "category": "health",
+    "window_days": 3,
+    "now": "2026-11-19T06:06:17+08:00",
+    "total": 67,
+    "states": {
+      "scheduled": 26,
+      "ready": 0,
+      "backlog": 3,
+      "done": 38,
+      "exhausted": 0
+    },
+    "removed": 0
+  },
+  "eligible": 3,
+  "claimed": 3,
+  "claimed_ids": [
+    23,
+    24,
+    25
+  ],
+  "gone_skipped": 0,
+  "collection": {
+    "candidates": 0,
+    "fetched": 0,
+    "written": 0,
+    "updated": 0,
+    "snapshots": 0,
+    "would_write": null,
+    "robots_refused": 0,
+    "fetch_errors": 0,
+    "no_metrics_skipped": 0,
+    "known_gone_skipped": 0,
+    "outcome_counts": {}
+  },
+  "attempts": {
+    "category": "health",
+    "apply": true,
+    "planned": [
+      {
+        "article_id": 23,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 24,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 25,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      }
+    ],
+    "updated": 3
+  },
+  "unsupported_host_skipped": 3,
+  "windows_refreshed": 0,
+  "after": {
+    "category": "health",
+    "window_days": 3,
+    "now": "2026-11-19T06:06:18+08:00",
+    "articles_with_published_at": 77,
+    "windows": 67,
+    "readings": 14,
+    "status_counts": {
+      "on_time": 0,
+      "late": 14,
+      "early": 26,
+      "pending": 0,
+      "overdue": 0,
+      "unavailable": 27
+    },
+    "late_ratio": 1.0,
+    "on_time_coverage": 0.0,
+    "on_time_share_of_readings": 0.0,
+    "missing_counts": {
+      "reads": 0,
+      "likes": 0,
+      "favorites": 14,
+      "comments": 0,
+      "impressions": 0
+    },
+    "missing_ratio": {
+      "reads": 0.0,
+      "likes": 0.0,
+      "favorites": 1.0,
+      "comments": 0.0,
+      "impressions": 0.0
+    },
+    "recoverable_on_time_in_window": 0,
+    "queue": {
+      "scheduled": 26,
+      "ready": 0,
+      "backlog": 0,
+      "done": 41,
+      "exhausted": 0
+    },
+    "queue_total": 67,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_hours": [
+        1.0,
+        6.0,
+        24.0
+      ],
+      "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+    }
+  }
+}

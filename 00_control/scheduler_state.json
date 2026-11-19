@@ -1,9 +1,9 @@
 {
   "crawl_enqueue_4h": {
-    "last_run_at": "2026-11-19T00:01:01+08:00",
+    "last_run_at": "2026-11-19T08:03:22+08:00",
     "last_status": "ok",
     "last_result": {
-      "enqueued": 12,
+      "enqueued": 18,
       "deduped": 0,
       "routing_rejected": 0,
       "errors": []
@@ -1698,7 +1698,7 @@
     "last_error": null
   },
   "metrics_due_60m": {
-    "last_run_at": "2026-11-19T03:59:48+08:00",
+    "last_run_at": "2026-11-19T09:13:47+08:00",
     "last_status": "ok",
     "last_result": {
       "scheduler_status": "ok",
@@ -1715,122 +1715,127 @@
         "technology": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 72,
-          "fetched": 11,
-          "written": 1,
-          "snapshots": 11,
+          "eligible": 30,
+          "fetched": 2,
+          "written": 0,
+          "snapshots": 2,
           "would_write": 0,
-          "unsupported_host_skipped": 0,
-          "windows_refreshed": 11,
+          "unsupported_host_skipped": 10,
+          "windows_refreshed": 2,
           "queue_states": {
-            "scheduled": 262,
-            "ready": 9,
-            "backlog": 63,
-            "done": 134,
+            "scheduled": 256,
+            "ready": 6,
+            "backlog": 24,
+            "done": 182,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 11,
-            "article_gone": 1
+            "metrics_ok": 2
           },
           "after": {
-            "late_ratio": 0.620438,
-            "on_time_coverage": 0.111111,
+            "late_ratio": 0.642384,
+            "on_time_coverage": 0.105469,
             "missing_ratio": {
-              "reads": 0.051095,
+              "reads": 0.046358,
               "likes": 0.0,
               "favorites": 1.0,
               "comments": 0.0,
-              "impressions": 0.051095
+              "impressions": 0.046358
             },
-            "recoverable_on_time_in_window": 4
+            "recoverable_on_time_in_window": 8
           }
         },
         "finance": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 4294,
-          "fetched": 0,
-          "written": 0,
-          "snapshots": 0,
+          "eligible": 4247,
+          "fetched": 2,
+          "written": 1,
+          "snapshots": 2,
           "would_write": 0,
-          "unsupported_host_skipped": 12,
-          "windows_refreshed": 0,
+          "unsupported_host_skipped": 9,
+          "windows_refreshed": 2,
           "queue_states": {
-            "scheduled": 531,
-            "ready": 19,
-            "backlog": 4275,
-            "done": 7999,
+            "scheduled": 530,
+            "ready": 0,
+            "backlog": 4247,
+            "done": 8047,
             "exhausted": 0
           },
-          "outcome_counts": {},
+          "outcome_counts": {
+            "metrics_ok": 2,
+            "article_gone": 1
+          },
           "after": {
-            "late_ratio": 1.0,
-            "on_time_coverage": 0.0,
+            "late_ratio": 0.999376,
+            "on_time_coverage": 0.000388,
             "missing_ratio": {
-              "reads": 0.055007,
-              "likes": 0.490436,
+              "reads": 0.054952,
+              "likes": 0.489946,
               "favorites": 1.0,
-              "comments": 0.735842,
-              "impressions": 0.999375
+              "comments": 0.735107,
+              "impressions": 0.998376
             },
-            "recoverable_on_time_in_window": 19
+            "recoverable_on_time_in_window": 1
           }
         },
         "social": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 13672,
-          "fetched": 0,
-          "written": 0,
-          "snapshots": 0,
+          "eligible": 13624,
+          "fetched": 9,
+          "written": 9,
+          "snapshots": 9,
           "would_write": 0,
-          "unsupported_host_skipped": 12,
-          "windows_refreshed": 0,
+          "unsupported_host_skipped": 0,
+          "windows_refreshed": 9,
           "queue_states": {
             "scheduled": 146,
-            "ready": 21,
-            "backlog": 13651,
-            "done": 26328,
+            "ready": 0,
+            "backlog": 13624,
+            "done": 26376,
             "exhausted": 0
           },
-          "outcome_counts": {},
+          "outcome_counts": {
+            "article_gone": 3,
+            "metrics_ok": 9
+          },
           "after": {
             "late_ratio": 1.0,
             "on_time_coverage": 0.0,
             "missing_ratio": {
-              "reads": 0.041819,
-              "likes": 0.471817,
+              "reads": 0.041785,
+              "likes": 0.471441,
               "favorites": 1.0,
-              "comments": 0.760217,
-              "impressions": 1.0
+              "comments": 0.759611,
+              "impressions": 0.999203
             },
-            "recoverable_on_time_in_window": 21
+            "recoverable_on_time_in_window": 18
           }
         },
         "history": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 61,
-          "fetched": 7,
-          "written": 3,
-          "snapshots": 7,
+          "eligible": 15,
+          "fetched": 10,
+          "written": 10,
+          "snapshots": 10,
           "would_write": 0,
-          "unsupported_host_skipped": 5,
-          "windows_refreshed": 7,
+          "unsupported_host_skipped": 2,
+          "windows_refreshed": 10,
           "queue_states": {
-            "scheduled": 126,
-            "ready": 19,
-            "backlog": 42,
-            "done": 29,
+            "scheduled": 124,
+            "ready": 2,
+            "backlog": 13,
+            "done": 77,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 7
+            "metrics_ok": 10
           },
           "after": {
-            "late_ratio": 0.657143,
-            "on_time_coverage": 0.055556,
+            "late_ratio": 0.734375,
+            "on_time_coverage": 0.07265,
             "missing_ratio": {
               "reads": 0.0,
               "likes": 0.0,
@@ -1838,39 +1843,20 @@
               "comments": 0.0,
               "impressions": 0.0
             },
-            "recoverable_on_time_in_window": 12
+            "recoverable_on_time_in_window": 8
           }
         },
         "health": {
-          "status": "ok",
-          "claimed": 12,
-          "eligible": 27,
-          "fetched": 0,
-          "written": 0,
-          "snapshots": 0,
-          "would_write": 0,
-          "unsupported_host_skipped": 12,
-          "windows_refreshed": 0,
+          "status": "no_due",
           "queue_states": {
             "scheduled": 26,
             "ready": 0,
-            "backlog": 27,
-            "done": 14,
+            "backlog": 0,
+            "done": 41,
             "exhausted": 0
           },
-          "outcome_counts": {},
-          "after": {
-            "late_ratio": 1.0,
-            "on_time_coverage": 0.0,
-            "missing_ratio": {
-              "reads": 0.0,
-              "likes": 0.0,
-              "favorites": 1.0,
-              "comments": 0.0,
-              "impressions": 0.0
-            },
-            "recoverable_on_time_in_window": 0
-          }
+          "eligible": 0,
+          "gone_skipped": 0
         }
       },
       "errors": []

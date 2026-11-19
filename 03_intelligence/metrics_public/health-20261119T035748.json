@@ -1,0 +1,313 @@
+{
+  "category": "health",
+  "job": "metrics_due_60m",
+  "run_at": "2026-11-19T03:59:48+08:00",
+  "plan": {
+    "category": "health",
+    "now": "2026-11-19T03:59:46+08:00",
+    "eligible": 27,
+    "gone_skipped": 0,
+    "batch": [
+      {
+        "article_id": 77,
+        "state": "backlog",
+        "due_at": "2026-11-16T17:10:19+08:00",
+        "window_end": "2026-11-17T17:10:19+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 76,
+        "state": "backlog",
+        "due_at": "2026-11-16T00:16:10+08:00",
+        "window_end": "2026-11-17T00:16:10+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 1,
+        "state": "backlog",
+        "due_at": "2026-11-13T02:11:11+08:00",
+        "window_end": "2026-11-14T02:11:11+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 2,
+        "state": "backlog",
+        "due_at": "2026-11-07T23:25:48+08:00",
+        "window_end": "2026-11-08T23:25:48+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 3,
+        "state": "backlog",
+        "due_at": "2026-11-07T22:55:22+08:00",
+        "window_end": "2026-11-08T22:55:22+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 4,
+        "state": "backlog",
+        "due_at": "2026-11-07T20:56:19+08:00",
+        "window_end": "2026-11-08T20:56:19+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 5,
+        "state": "backlog",
+        "due_at": "2026-11-07T15:50:12+08:00",
+        "window_end": "2026-11-08T15:50:12+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 6,
+        "state": "backlog",
+        "due_at": "2026-11-02T22:52:48+08:00",
+        "window_end": "2026-11-03T22:52:48+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 7,
+        "state": "backlog",
+        "due_at": "2026-11-02T00:04:20+08:00",
+        "window_end": "2026-11-03T00:04:20+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 8,
+        "state": "backlog",
+        "due_at": "2026-11-01T18:18:03+08:00",
+        "window_end": "2026-11-02T18:18:03+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 9,
+        "state": "backlog",
+        "due_at": "2026-10-26T16:40:00+08:00",
+        "window_end": "2026-10-27T16:40:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 10,
+        "state": "backlog",
+        "due_at": "2026-10-24T17:54:40+08:00",
+        "window_end": "2026-10-25T17:54:40+08:00",
+        "attempts": 0
+      }
+    ],
+    "article_ids": [
+      77,
+      76,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  "window_days": 3,
+  "apply": true,
+  "queue_sync": {
+    "category": "health",
+    "window_days": 3,
+    "now": "2026-11-19T03:59:46+08:00",
+    "total": 67,
+    "states": {
+      "scheduled": 26,
+      "ready": 0,
+      "backlog": 27,
+      "done": 14,
+      "exhausted": 0
+    },
+    "removed": 0
+  },
+  "eligible": 27,
+  "claimed": 12,
+  "claimed_ids": [
+    77,
+    76,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "gone_skipped": 0,
+  "collection": {
+    "candidates": 0,
+    "fetched": 0,
+    "written": 0,
+    "updated": 0,
+    "snapshots": 0,
+    "would_write": null,
+    "robots_refused": 0,
+    "fetch_errors": 0,
+    "no_metrics_skipped": 0,
+    "known_gone_skipped": 0,
+    "outcome_counts": {}
+  },
+  "attempts": {
+    "category": "health",
+    "apply": true,
+    "planned": [
+      {
+        "article_id": 1,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 2,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 3,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 4,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 5,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 6,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 7,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 8,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 9,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 10,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 76,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 77,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      }
+    ],
+    "updated": 12
+  },
+  "unsupported_host_skipped": 12,
+  "windows_refreshed": 0,
+  "after": {
+    "category": "health",
+    "window_days": 3,
+    "now": "2026-11-19T03:59:48+08:00",
+    "articles_with_published_at": 67,
+    "windows": 67,
+    "readings": 14,
+    "status_counts": {
+      "on_time": 0,
+      "late": 14,
+      "early": 26,
+      "pending": 0,
+      "overdue": 0,
+      "unavailable": 27
+    },
+    "late_ratio": 1.0,
+    "on_time_coverage": 0.0,
+    "on_time_share_of_readings": 0.0,
+    "missing_counts": {
+      "reads": 0,
+      "likes": 0,
+      "favorites": 14,
+      "comments": 0,
+      "impressions": 0
+    },
+    "missing_ratio": {
+      "reads": 0.0,
+      "likes": 0.0,
+      "favorites": 1.0,
+      "comments": 0.0,
+      "impressions": 0.0
+    },
+    "recoverable_on_time_in_window": 0,
+    "queue": {
+      "scheduled": 26,
+      "ready": 0,
+      "backlog": 15,
+      "done": 26,
+      "exhausted": 0
+    },
+    "queue_total": 67,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_hours": [
+        1.0,
+        6.0,
+        24.0
+      ],
+      "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+    }
+  }
+}

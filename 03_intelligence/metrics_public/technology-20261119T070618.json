@@ -1,0 +1,315 @@
+{
+  "category": "technology",
+  "job": "metrics_due_60m",
+  "run_at": "2026-11-19T07:06:40+08:00",
+  "plan": {
+    "category": "technology",
+    "now": "2026-11-19T07:06:18+08:00",
+    "eligible": 36,
+    "gone_skipped": 0,
+    "batch": [
+      {
+        "article_id": 246,
+        "state": "backlog",
+        "due_at": "2026-11-15T22:47:00+08:00",
+        "window_end": "2026-11-16T22:47:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 47,
+        "state": "backlog",
+        "due_at": "2026-11-15T22:36:47+08:00",
+        "window_end": "2026-11-16T22:36:47+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 368,
+        "state": "backlog",
+        "due_at": "2026-11-15T21:47:00+08:00",
+        "window_end": "2026-11-16T21:47:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 48,
+        "state": "backlog",
+        "due_at": "2026-11-15T21:39:12+08:00",
+        "window_end": "2026-11-16T21:39:12+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 265,
+        "state": "backlog",
+        "due_at": "2026-11-15T19:37:00+08:00",
+        "window_end": "2026-11-16T19:37:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 49,
+        "state": "backlog",
+        "due_at": "2026-11-15T19:23:59+08:00",
+        "window_end": "2026-11-16T19:23:59+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 50,
+        "state": "backlog",
+        "due_at": "2026-11-15T18:47:53+08:00",
+        "window_end": "2026-11-16T18:47:53+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 24,
+        "state": "backlog",
+        "due_at": "2026-11-15T16:37:25+08:00",
+        "window_end": "2026-11-16T16:37:25+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 25,
+        "state": "backlog",
+        "due_at": "2026-11-15T14:42:04+08:00",
+        "window_end": "2026-11-16T14:42:04+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 51,
+        "state": "backlog",
+        "due_at": "2026-11-15T12:50:05+08:00",
+        "window_end": "2026-11-16T12:50:05+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 52,
+        "state": "backlog",
+        "due_at": "2026-11-15T12:00:07+08:00",
+        "window_end": "2026-11-16T12:00:07+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 26,
+        "state": "backlog",
+        "due_at": "2026-11-15T11:12:02+08:00",
+        "window_end": "2026-11-16T11:12:02+08:00",
+        "attempts": 0
+      }
+    ],
+    "article_ids": [
+      246,
+      47,
+      368,
+      48,
+      265,
+      49,
+      50,
+      24,
+      25,
+      51,
+      52,
+      26
+    ]
+  },
+  "window_days": 3,
+  "apply": true,
+  "queue_sync": {
+    "category": "technology",
+    "window_days": 3,
+    "now": "2026-11-19T07:06:18+08:00",
+    "total": 468,
+    "states": {
+      "scheduled": 262,
+      "ready": 0,
+      "backlog": 36,
+      "done": 170,
+      "exhausted": 0
+    },
+    "removed": 0
+  },
+  "eligible": 36,
+  "claimed": 12,
+  "claimed_ids": [
+    246,
+    47,
+    368,
+    48,
+    265,
+    49,
+    50,
+    24,
+    25,
+    51,
+    52,
+    26
+  ],
+  "gone_skipped": 0,
+  "collection": {
+    "candidates": 3,
+    "fetched": 3,
+    "written": 1,
+    "updated": 2,
+    "snapshots": 3,
+    "would_write": null,
+    "robots_refused": 0,
+    "fetch_errors": 0,
+    "no_metrics_skipped": 0,
+    "known_gone_skipped": 0,
+    "outcome_counts": {
+      "metrics_ok": 3
+    }
+  },
+  "attempts": {
+    "category": "technology",
+    "apply": true,
+    "planned": [
+      {
+        "article_id": 246,
+        "outcome": "metrics_ok",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 368,
+        "outcome": "metrics_ok",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 265,
+        "outcome": "metrics_ok",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 24,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 25,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 26,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 47,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 48,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 49,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 50,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 51,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 52,
+        "outcome": "unsupported_host",
+        "previous_state": "backlog",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      }
+    ],
+    "updated": 12
+  },
+  "unsupported_host_skipped": 9,
+  "windows_refreshed": 3,
+  "after": {
+    "category": "technology",
+    "window_days": 3,
+    "now": "2026-11-19T07:06:40+08:00",
+    "articles_with_published_at": 484,
+    "windows": 468,
+    "readings": 149,
+    "status_counts": {
+      "on_time": 52,
+      "late": 97,
+      "early": 88,
+      "pending": 175,
+      "overdue": 1,
+      "unavailable": 55
+    },
+    "late_ratio": 0.651007,
+    "on_time_coverage": 0.107438,
+    "on_time_share_of_readings": 0.348993,
+    "missing_counts": {
+      "reads": 7,
+      "likes": 0,
+      "favorites": 149,
+      "comments": 0,
+      "impressions": 7
+    },
+    "missing_ratio": {
+      "reads": 0.04698,
+      "likes": 0.0,
+      "favorites": 1.0,
+      "comments": 0.0,
+      "impressions": 0.04698
+    },
+    "recoverable_on_time_in_window": 4,
+    "queue": {
+      "scheduled": 262,
+      "ready": 0,
+      "backlog": 24,
+      "done": 182,
+      "exhausted": 0
+    },
+    "queue_total": 468,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_hours": [
+        1.0,
+        6.0,
+        24.0
+      ],
+      "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+    }
+  }
+}

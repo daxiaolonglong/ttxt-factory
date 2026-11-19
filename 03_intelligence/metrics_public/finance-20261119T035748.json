@@ -1,0 +1,313 @@
+{
+  "category": "finance",
+  "job": "metrics_due_60m",
+  "run_at": "2026-11-19T03:59:07+08:00",
+  "plan": {
+    "category": "finance",
+    "now": "2026-11-19T03:59:05+08:00",
+    "eligible": 4294,
+    "gone_skipped": 0,
+    "batch": [
+      {
+        "article_id": 154,
+        "state": "ready",
+        "due_at": "2026-11-18T04:40:37+08:00",
+        "window_end": "2026-11-19T04:40:37+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 153,
+        "state": "ready",
+        "due_at": "2026-11-18T05:39:06+08:00",
+        "window_end": "2026-11-19T05:39:06+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 152,
+        "state": "ready",
+        "due_at": "2026-11-18T05:55:00+08:00",
+        "window_end": "2026-11-19T05:55:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 151,
+        "state": "ready",
+        "due_at": "2026-11-18T07:05:32+08:00",
+        "window_end": "2026-11-19T07:05:32+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 150,
+        "state": "ready",
+        "due_at": "2026-11-18T07:22:19+08:00",
+        "window_end": "2026-11-19T07:22:19+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 149,
+        "state": "ready",
+        "due_at": "2026-11-18T07:22:22+08:00",
+        "window_end": "2026-11-19T07:22:22+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 148,
+        "state": "ready",
+        "due_at": "2026-11-18T07:28:20+08:00",
+        "window_end": "2026-11-19T07:28:20+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 147,
+        "state": "ready",
+        "due_at": "2026-11-18T07:33:41+08:00",
+        "window_end": "2026-11-19T07:33:41+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 146,
+        "state": "ready",
+        "due_at": "2026-11-18T08:07:27+08:00",
+        "window_end": "2026-11-19T08:07:27+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 145,
+        "state": "ready",
+        "due_at": "2026-11-18T08:10:00+08:00",
+        "window_end": "2026-11-19T08:10:00+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 144,
+        "state": "ready",
+        "due_at": "2026-11-18T08:22:44+08:00",
+        "window_end": "2026-11-19T08:22:44+08:00",
+        "attempts": 0
+      },
+      {
+        "article_id": 143,
+        "state": "ready",
+        "due_at": "2026-11-18T08:40:38+08:00",
+        "window_end": "2026-11-19T08:40:38+08:00",
+        "attempts": 0
+      }
+    ],
+    "article_ids": [
+      154,
+      153,
+      152,
+      151,
+      150,
+      149,
+      148,
+      147,
+      146,
+      145,
+      144,
+      143
+    ]
+  },
+  "window_days": 3,
+  "apply": true,
+  "queue_sync": {
+    "category": "finance",
+    "window_days": 3,
+    "now": "2026-11-19T03:59:05+08:00",
+    "total": 12824,
+    "states": {
+      "scheduled": 531,
+      "ready": 19,
+      "backlog": 4275,
+      "done": 7999,
+      "exhausted": 0
+    },
+    "removed": 0
+  },
+  "eligible": 4294,
+  "claimed": 12,
+  "claimed_ids": [
+    154,
+    153,
+    152,
+    151,
+    150,
+    149,
+    148,
+    147,
+    146,
+    145,
+    144,
+    143
+  ],
+  "gone_skipped": 0,
+  "collection": {
+    "candidates": 0,
+    "fetched": 0,
+    "written": 0,
+    "updated": 0,
+    "snapshots": 0,
+    "would_write": null,
+    "robots_refused": 0,
+    "fetch_errors": 0,
+    "no_metrics_skipped": 0,
+    "known_gone_skipped": 0,
+    "outcome_counts": {}
+  },
+  "attempts": {
+    "category": "finance",
+    "apply": true,
+    "planned": [
+      {
+        "article_id": 143,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 144,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 145,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 146,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 147,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 148,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 149,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 150,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 151,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 152,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 153,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      },
+      {
+        "article_id": 154,
+        "outcome": "unsupported_host",
+        "previous_state": "ready",
+        "attempts": 1,
+        "state": "done",
+        "next_attempt_at": null
+      }
+    ],
+    "updated": 12
+  },
+  "unsupported_host_skipped": 12,
+  "windows_refreshed": 0,
+  "after": {
+    "category": "finance",
+    "window_days": 3,
+    "now": "2026-11-19T03:59:06+08:00",
+    "articles_with_published_at": 12824,
+    "windows": 12824,
+    "readings": 7999,
+    "status_counts": {
+      "on_time": 0,
+      "late": 7999,
+      "early": 73,
+      "pending": 458,
+      "overdue": 4,
+      "unavailable": 4290
+    },
+    "late_ratio": 1.0,
+    "on_time_coverage": 0.0,
+    "on_time_share_of_readings": 0.0,
+    "missing_counts": {
+      "reads": 440,
+      "likes": 3923,
+      "favorites": 7999,
+      "comments": 5886,
+      "impressions": 7994
+    },
+    "missing_ratio": {
+      "reads": 0.055007,
+      "likes": 0.490436,
+      "favorites": 1.0,
+      "comments": 0.735842,
+      "impressions": 0.999375
+    },
+    "recoverable_on_time_in_window": 19,
+    "queue": {
+      "scheduled": 531,
+      "ready": 7,
+      "backlog": 4275,
+      "done": 8011,
+      "exhausted": 0
+    },
+    "queue_total": 12824,
+    "retry_policy": {
+      "max_attempts": 3,
+      "backoff_hours": [
+        1.0,
+        6.0,
+        24.0
+      ],
+      "success_stops": "窗口内成功一次即 done(取最早,重复采无意义)"
+    }
+  }
+}
