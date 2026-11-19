@@ -10,6 +10,7 @@
 
 import json
 import sqlite3
+from urllib.parse import urlparse
 
 import pytest
 
@@ -23,6 +24,8 @@ from ttxt.writing import workflow
 
 SENTINEL = "sk-SENTINEL-DO-NOT-LEAK-abcdef"
 WRITER_ID = "writer-model-under-test"
+# R44:评审已强制走本地模型,模型 id 从配置读,不再写死云端名
+REVIEW_MODEL = str(review_channel.review_config().get("model_id") or "")
 
 
 def _item(title: str, content: str, url: str) -> ExtractedItem:
@@ -171,26 +174,27 @@ def test_missing_key_raises_without_leaking_anything(tmp_path, monkeypatch):
 
 def test_key_reads_env_then_file_without_network(tmp_path, monkeypatch):
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.delenv("STRATA_API_KEY", raising=False)
     monkeypatch.setattr(cfg, "PROJECT_ROOT", tmp_path)
     secret = tmp_path / ".secrets"
     secret.mkdir()
     (secret / "deepseek_api_key").write_text(SENTINEL + "\n", encoding="utf-8")
     assert review_channel.api_key({"api_key_file": ".secrets/deepseek_api_key"}) == SENTINEL
-    monkeypatch.setenv("DEEPSEEK_API_KEY", "from-env")
+    monkeypatch.setenv("STRATA_API_KEY", "from-env")
     assert review_channel.api_key({"api_key_file": ".secrets/deepseek_api_key"}) == "from-env"
 
 
 def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch):
-    monkeypatch.setenv("DEEPSEEK_API_KEY", SENTINEL)
+    monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
     captured: dict = {}
 
     def fake_chat(messages, **kwargs):
         captured["messages"] = messages
         captured.update(kwargs)
-        return {"model": "deepseek-flash", "text": "论证尚可,可以发布。", "finish_reason": "stop",
+        return {"model": REVIEW_MODEL, "text": "论证尚可,可以发布。", "finish_reason": "stop",
                 "usage": {"completion_tokens": 7}, "elapsed_s": 0.2}
 
-    monkeypatch.setattr(model_client, "models", lambda **kw: ["deepseek-flash"])
+    monkeypatch.setattr(model_client, "models", lambda **kw: [REVIEW_MODEL])
     monkeypatch.setattr(model_client, "chat", fake_chat)
     logs: list = []
     monkeypatch.setattr(review_channel.LOG, "info", lambda event, **kw: logs.append((event, kw)))
@@ -203,9 +207,9 @@ def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch)
     for phrase in ("评分", "细则", "score", "致命"):
         assert phrase not in sent
     assert captured["api_key"] == SENTINEL
-    assert captured["model_id"] == "deepseek-flash"
+    assert captured["model_id"] == REVIEW_MODEL
     assert captured["base_url"] == review_channel.review_config()["base_url"]
-    assert outcome["reviewer_model"] == "deepseek-flash"
+    assert outcome["reviewer_model"] == REVIEW_MODEL
     assert outcome["verdict"]["publishable"] is True
     blob = json.dumps(outcome, ensure_ascii=False) + repr(logs)
     assert SENTINEL not in blob, "密钥不得进返回值或日志"
@@ -213,11 +217,11 @@ def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch)
 
 
 def test_unlisted_model_and_dead_endpoint_both_mean_unavailable(monkeypatch):
-    monkeypatch.setenv("DEEPSEEK_API_KEY", SENTINEL)
+    monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
     monkeypatch.setattr(model_client, "models", lambda **kw: ["some-other-model"])
     with pytest.raises(review_channel.ReviewUnavailable) as exc:
         review_channel.served_model()
-    assert "deepseek-flash" in str(exc.value)
+    assert REVIEW_MODEL in str(exc.value)
 
     def boom(**kwargs):
         raise OSError("connection refused")
@@ -235,6 +239,29 @@ def test_http_client_threads_the_review_key_not_the_writing_one(monkeypatch):
     monkeypatch.setenv("STRATA_API_KEY", "writing-side-key")
     assert model_client._headers(None)["Authorization"] == "Bearer writing-side-key"
     assert model_client._headers(SENTINEL)["Authorization"] == f"Bearer {SENTINEL}"
+
+
+def test_cloud_endpoint_is_rejected_without_network(monkeypatch):
+    """R44:非回环端点必须显式失败,且不得发起任何网络请求(不静默兜底)。"""
+    def no_network(**kwargs):  # pragma: no cover - 被调用即失败
+        raise AssertionError("禁止向云端发起请求")
+
+    monkeypatch.setattr(model_client, "models", no_network)
+    monkeypatch.setattr(model_client, "chat", no_network)
+    cloudy = {
+        "enabled": True,
+        "base_url": "https://api.deepseek.com",
+        "model_id": "deepseek-flash",
+        "api_key_env": "DEEPSEEK_API_KEY",
+    }
+    with pytest.raises(review_channel.ReviewUnavailable) as exc:
+        review_channel.served_model(cloudy)
+    assert "云端模型已禁用" in str(exc.value)
+    with pytest.raises(review_channel.ReviewUnavailable) as exc2:
+        review_channel.review("正文", section=cloudy)
+    assert "云端模型已禁用" in str(exc2.value)
+    assert review_channel._require_local("http://127.0.0.1:8080") == "http://127.0.0.1:8080"
+    assert review_channel._require_local("http://localhost:8080") == "http://localhost:8080"
 
 
 # --------------------------------------------------------------------------- 写作链路:独立性判定
@@ -373,10 +400,12 @@ def test_channel_off_by_default_for_offline_callers(tmp_path, monkeypatch):
     assert result["review_account_basis"] == "independent_review_not_attempted"
 
 
-def test_production_config_points_at_an_independent_endpoint():
+def test_production_config_points_at_a_local_endpoint():
+    """R44:线上配置必须是本地回环端点,云端地址不得再出现在 review 段。"""
     section = review_channel.review_config()
     assert section.get("enabled") is True
-    assert section["base_url"].startswith("https://")
-    assert section["base_url"] != cfg.load_config()["strata"]["base_url"], "评审端点必须与写作端点不同"
-    assert section["api_key_file"].startswith(".secrets/"), "密钥文件只能在 .secrets/ 下"
+    host = urlparse(str(section.get("base_url") or "")).hostname
+    assert host in review_channel.LOCAL_HOSTS, f"评审端点必须是本地回环地址,实际 {section.get('base_url')}"
+    for key in ("base_url", "model_id", "api_key_env", "api_key_file"):
+        assert "deepseek" not in str(section.get(key) or "").lower(), f"review.{key} 不得残留云端配置"
     assert "prompt" not in section

@@ -13,15 +13,14 @@
   },
   "review": {
     "enabled": true,
-    "base_url": "https://api.deepseek.com",
-    "model_id": "deepseek-flash",
-    "api_key_env": "DEEPSEEK_API_KEY",
-    "api_key_file": ".secrets/deepseek_api_key",
+    "base_url": "http://127.0.0.1:8080",
+    "model_id": "qwen3.8-flash-next-iq3_s",
+    "api_key_env": "STRATA_API_KEY",
     "max_tokens": 8000,
     "temperature": 0.0,
     "request_timeout_s": 300,
     "enable_thinking": false,
-    "note": "P40 独立评审通道(账本 T-04):只做只读盲评,不参与写作,不改写作模型。提示词固定 6 字「审评这篇文章」写在代码里(ttxt/writing/review.py:REVIEW_PROMPT),不做成配置项,避免用细则诱导评审。密钥只允许来自 DEEPSEEK_API_KEY 或 api_key_file 指向的文件,不得进日志/回执/提交。deepseek-flash 是推理模型:max_tokens 含推理链,实测 900/4000 会 finish=length 且正文为空 ⇒ 给到 8000。端点不可用或模型名不在 /v1/models 列表里 ⇒ 独立评审按不成立处理(same_model_review 仍为 true),不得为了过门禁伪装独立性"
+    "note": "P40 独立评审通道(账本 T-04):只做只读盲评,不参与写作。R44 合规纠正(2026-11-19):原配置指向云端 https://api.deepseek.com + deepseek-flash,违反「只用本地模型」约束,已改为本地端点 http://127.0.0.1:8080 + 本地模型;ttxt/writing/review.py::_require_local 在代码层强制拒绝任何非回环端点并显式抛错,不静默兜底到云端。提示词固定 6 字「审评这篇文章」写在代码里,不做配置项,避免被写作侧口径诱导。本地端点不要求密钥(STRATA_API_KEY 可选,配置为空即不带 Authorization)。评审与写作共用同一台本地模型 ⇒ same_model_review 恒为 true,不得宣称 L4 独立评审通过"
   },
   "dashboard": {
     "host": "127.0.0.1",

@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 import re
 from typing import Any
+from urllib.parse import urlparse
 
 from ttxt import config as cfg
 from ttxt.logging import get_logger
@@ -46,15 +47,34 @@ class ReviewUnavailable(RuntimeError):
     """通道缺密钥、缺配置或端点不通:独立评审不成立。"""
 
 
+# R44 合规约束:项目只允许本地模型。评审通道历史上指向云端 https://api.deepseek.com,
+# 现在在代码层强制拒绝任何非回环端点 —— 配错就显式失败,绝不静默兜底到云端。
+LOCAL_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
+
+
+def _require_local(base_url: str) -> str:
+    """端点必须是回环地址,否则显式抛错(不降级、不重试、不回退)。"""
+    host = (urlparse(base_url or "").hostname or "").lower()
+    if host not in LOCAL_HOSTS:
+        raise ReviewUnavailable(
+            f"云端模型已禁用:评审端点必须是本地回环地址(127.0.0.1/localhost),"
+            f"当前配置为 {base_url or '(空)'}"
+        )
+    return base_url
+
+
 def review_config() -> dict:
     section = cfg.load_config().get("review")
     return section if isinstance(section, dict) else {}
 
 
-def api_key(section: dict | None = None) -> str:
-    """按 `api_key_env` → `api_key_file` 的顺序取密钥;取不到就抛,不返回空串。"""
+def api_key(section: dict | None = None, *, required: bool = True) -> str:
+    """按 `api_key_env` → `api_key_file` 的顺序取密钥;取不到就抛,不返回空串。
+
+    本地端点通常不校验密钥,调用方传 ``required=False`` 时允许返回空串(即不带 Authorization)。
+    """
     section = review_config() if section is None else section
-    env_name = str(section.get("api_key_env") or "DEEPSEEK_API_KEY")
+    env_name = str(section.get("api_key_env") or "STRATA_API_KEY")
     value = (os.environ.get(env_name) or "").strip()
     if value:
         return value
@@ -63,6 +83,8 @@ def api_key(section: dict | None = None) -> str:
         path = cfg.PROJECT_ROOT / file_name
         if path.is_file():
             return path.read_text(encoding="utf-8").strip()
+    if not required:
+        return ""
     raise ReviewUnavailable(f"缺独立评审密钥:环境变量 {env_name} 未设,文件 {file_name or '(未配置)'} 不存在")
 
 
@@ -72,8 +94,9 @@ def served_model(section: dict | None = None) -> str:
     base_url = str(section.get("base_url") or "")
     if not base_url:
         raise ReviewUnavailable("缺独立评审端点:config.review.base_url 未配置")
+    _require_local(base_url)
     try:
-        ids = model_client.models(base_url=base_url, api_key=api_key(section), timeout=15.0)
+        ids = model_client.models(base_url=base_url, api_key=api_key(section, required=False), timeout=15.0)
     except ReviewUnavailable:
         raise
     except Exception as exc:  # noqa: BLE001 - 端点不通要如实上报,不猜模型名
@@ -101,6 +124,7 @@ def verdict_markers(text: str) -> dict[str, bool]:
 def review(draft: str, section: dict | None = None) -> dict[str, Any]:
     """让评审模型只看「审评这篇文章 + 正文」;返回判定、模型 id 与原文,不含密钥。"""
     section = review_config() if section is None else section
+    base_url = _require_local(str(section.get("base_url") or ""))
     reviewer_id = served_model(section)
     prompt = f"{REVIEW_PROMPT}\n\n{(draft or '').strip()}"
     try:
@@ -108,9 +132,9 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
             [{"role": "user", "content": prompt}],
             max_tokens=int(section.get("max_tokens", 8000)),
             temperature=float(section.get("temperature", 0.0)),
-            base_url=str(section["base_url"]),
+            base_url=base_url,
             model_id=reviewer_id,
-            api_key=api_key(section),
+            api_key=api_key(section, required=False),
             timeout_s=float(section.get("request_timeout_s", 300)),
             enable_thinking=bool(section.get("enable_thinking", False)),
         )
