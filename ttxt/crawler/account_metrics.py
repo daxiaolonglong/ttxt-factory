@@ -393,6 +393,14 @@ def _article_by_title(con, category: str, title: str) -> int | None:
     return int(rows[0]["id"]) if len(rows) == 1 else None
 
 
+def _article_by_title_any(con, category: str, title: str) -> int | None:
+    """登记判重专用:同名 1 篇也算"库内已有"(登记会造出更多同名行,宁缺毋滥)。"""
+    rows = con.execute(
+        "SELECT id FROM articles WHERE title=? AND category=?", (title, category)
+    ).fetchall()
+    return int(rows[0]["id"]) if rows else None
+
+
 #: 注册进库的自有文章统一用这个 source 标记(溯源清楚,不会被当成竞品语料混淆)。
 OWN_SOURCE = "own_account"
 
@@ -454,10 +462,11 @@ def register_pass(items: list[dict], categories: list[str],
         if key in seen_keys:
             continue
         seen_keys.add(key)
+        if any(str(i.get("title") or "").strip() == title for i in
+               (registered_by_cat.get(target) or [])):
+            continue  # 同一轮里同标题只登记一条(后台 feed 一行 + 弹层一行是同一作品)
         exists_in = None
         for category in categories:
-            if category == target:
-                continue
             con = connect(cfg.category_db_path(category))
             try:
                 _ensure_metrics_tables(con)
@@ -466,9 +475,10 @@ def register_pass(items: list[dict], categories: list[str],
                     article_id = _article_by_url(
                         con, category, f"https://www.toutiao.com/article/{item['item_id']}/")
                 if article_id is None:
-                    # 同名唯一命中也是"库内已有":后台作品与库内采集文章 url 形态可能
-                    # 不同(微头条 vs 文章 url),标题唯一匹配是同一判定口径。
-                    article_id = _article_by_title(con, category, title)
+                    # 同名命中也是"库内已有":后台作品与库内采集文章 url 形态可能
+                    # 不同(微头条 vs 文章 url),标题匹配是同一判定口径。
+                    # 同名多篇同样拦下:登记只会制造更多同名行,不如不登记。
+                    article_id = _article_by_title_any(con, category, title)
                 if article_id is not None:
                     exists_in = (category, article_id)
                     break

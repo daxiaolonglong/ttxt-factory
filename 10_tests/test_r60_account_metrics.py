@@ -320,6 +320,28 @@ def test_register_pass_skips_categories_that_already_have_the_work(tmp_path, mon
     con.close()
 
 
+def test_register_pass_title_hit_in_target_category_blocks_re_registration(tmp_path, monkeypatch):
+    """库内已有同名文章(url 形态不同)在**目标类目自己身上** → 不得再登记(实测污染根因)。"""
+    target = store.init_articles_db("demo", db_path=tmp_path / "demo.db")
+    con = account_metrics.connect(target)
+    con.execute(
+        "INSERT INTO articles(category, source, title, content, url, url_normalized,"
+        " fetched_at, content_hash, completeness, credibility, processor_version)"
+        " VALUES('demo','legacy_factory_search_ssr','同名作品','正文采集',"
+        "'https://www.toutiao.com/article/177/','https://www.toutiao.com/article/177/',"
+        "'2026-01-01T00:00:00','h2','full','x','v')")
+    con.commit()
+    con.close()
+    monkeypatch.setattr(account_metrics.cfg, "category_db_path", lambda c: target)
+    item = {"title": "同名作品", "url": "https://www.toutiao.com/a187874/",
+            "item_id": "187874", "favorites": 1}
+    reg = account_metrics.register_pass([item], ["demo"], own_work_category="demo")
+    assert reg == {}, "目标类目库里同名即视为已有,登记会造重复行"
+    con = account_metrics.connect(target)
+    assert con.execute("select count(*) from articles").fetchone()[0] == 1
+    con.close()
+
+
 def test_dedup_captured_items_unions_fields_across_responses():
     items = [
         {"title": "甲", "url": "https://www.toutiao.com/a1/?mod=1", "item_id": "1",
