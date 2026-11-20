@@ -278,6 +278,40 @@ def merge_modal_items(feed_items: list[dict], modal_items: list[dict]) -> list[d
     return out
 
 
+def dedup_captured_items(items: list[dict]) -> list[dict]:
+    """跨响应去重:同一作品在多条 XHR 响应里重复出现(实测 4 篇 ≈ 24 条)。
+
+    key = 去 scheme/查询参数后的 host+path(feed 与弹层、不同响应的 url 参数不同
+    但同一作品);没有 url 退回标题;同 key 的数值字段取"先到非 None"并集
+    (同源读数是同一份数据,不存在"后一次刷新覆盖前一次"的语义,合并只会更全)。
+    """
+    def key_of(url: str, title: str) -> str:
+        if url:
+            from urllib.parse import urlsplit
+            parts = urlsplit(url)
+            return f"{parts.netloc.lower()}{parts.path.rstrip('/')}"
+        return f"title:{title}"
+
+    out: list[dict] = []
+    index: dict[str, dict] = {}
+    for item in items:
+        url = str(item.get("url") or "").strip()
+        title = str(item.get("title") or "").strip()
+        if not url and not title:
+            continue  # url 和标题都没有的条目无法判重也无法匹配,直接丢
+        key = key_of(url, title)
+        first = index.get(key)
+        if first is None:
+            index[key] = item
+            out.append(item)
+            continue
+        for field in ("url", "item_id", "reads", "favorites", "likes", "comments",
+                      "impressions"):
+            if first.get(field) is None and item.get(field) is not None:
+                first[field] = item[field]
+    return out
+
+
 def _read_open_stat_modal(page: Any) -> str:
     """读当前打开的"查看数据"弹层文本,轮询到指标出现(或 12s 超时)。"""
     deadline = time.monotonic() + 12.0
@@ -396,6 +430,67 @@ def register_own_work(con, category: str, item: dict, now: str) -> dict | None:
     return {"article_id": int(cur.lastrowid), "created": True}
 
 
+def register_pass(items: list[dict], categories: list[str],
+                  own_work_category: str | None = None) -> dict:
+    """R60 跨类目登记:自有作品只登记一次、只进目标类目。
+
+    先扫全部类目库做 url/item_id 判重(命中即认为"库内已有",不重复登记),
+    全库都没有的才登记进 own_work_category(默认 social;账号后台的自有作品
+    以微头条/短文为主,由配置显式指定,不按标题瞎猜类目)。
+    返回 {category: [已登记 item 摘要]} 供 fetch 汇总与审计。
+    """
+    target = own_work_category or str(
+        (cfg.load_config().get("account") or {}).get("own_work_category") or "social")
+    if target not in categories:
+        categories = [*categories, target]
+    registered_by_cat: dict[str, list[dict]] = {}
+    seen_keys: set[str] = set()
+    for item in items:
+        url = str(item.get("url") or "").strip()
+        title = str(item.get("title") or "").strip()
+        if not url or not title:
+            continue
+        key = normalize_url(url)
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        exists_in = None
+        for category in categories:
+            if category == target:
+                continue
+            con = connect(cfg.category_db_path(category))
+            try:
+                _ensure_metrics_tables(con)
+                article_id = _article_by_url(con, category, url)
+                if article_id is None and item.get("item_id"):
+                    article_id = _article_by_url(
+                        con, category, f"https://www.toutiao.com/article/{item['item_id']}/")
+                if article_id is None:
+                    # 同名唯一命中也是"库内已有":后台作品与库内采集文章 url 形态可能
+                    # 不同(微头条 vs 文章 url),标题唯一匹配是同一判定口径。
+                    article_id = _article_by_title(con, category, title)
+                if article_id is not None:
+                    exists_in = (category, article_id)
+                    break
+            finally:
+                con.close()
+        if exists_in:
+            continue
+        con = connect(cfg.category_db_path(target))
+        try:
+            _ensure_metrics_tables(con)
+            reg = register_own_work(con, target, item, cfg.now_iso())
+            con.commit()
+        finally:
+            con.close()
+        if reg and reg["created"]:
+            LOG.info("account.fetch.own_registered", category=target,
+                     article_id=reg["article_id"], title=title[:40])
+            registered_by_cat.setdefault(target, []).append(
+                {"title": title, "url": url, "article_id": reg["article_id"]})
+    return registered_by_cat
+
+
 def _ensure_metrics_tables(con) -> None:
     """article_metrics/metric_snapshots 在建库脚本切片里常被跳过;写入前幂等补齐,
     与 store 现有表结构逐列一致(IF NOT EXISTS,不动已有数据)。"""
@@ -430,8 +525,12 @@ def _ensure_metrics_tables(con) -> None:
 
 
 def match_and_write(category: str, items: list[dict], *, db_path: Path | None = None,
-                    apply: bool = True) -> dict:
-    """把账号取回的条目按高置信匹配写进该类目库;返回 matched/unmatched/写入回执。"""
+                    apply: bool = True, allow_register: bool = False) -> dict:
+    """把账号取回的条目按高置信匹配写进该类目库;返回 matched/unmatched/写入回执。
+
+    登记自有作品默认关闭(allow_register=False):同一作品会被登记进每个被遍历的
+    类目库,造成跨类目污染。登记统一走 register_pass(全库判重、只进目标类目)。
+    """
     from ttxt.analysis import metrics_import
 
     target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
@@ -456,7 +555,7 @@ def match_and_write(category: str, items: list[dict], *, db_path: Path | None = 
                 article_id = _article_by_title(con, category, item["title"])
                 if article_id is not None:
                     how = "title_unique"
-            if article_id is None and apply and item.get("url") and item.get("title"):
+            if article_id is None and allow_register and apply and item.get("url") and item.get("title"):
                 # R60 映射:我方已发布作品不在库 → 先登记(source=own_account)再挂指标。
                 # 只在 --apply 时登记:dry-run 不动库;非自有数据到不了这里(入口仅自有后台)。
                 reg = register_own_work(con, category, item, cfg.now_iso())
@@ -734,6 +833,13 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
 
         if categories is None:
             categories = [str(slug) for slug in cfg.load_config().get("categories", []) if slug]
+        captured_items = dedup_captured_items(captured_items)
+        LOG.info("account.fetch.deduped", items=len(captured_items))
+        registered_by_cat: dict[str, list[dict]] = {}
+        if apply:
+            # R60:登记与匹配解耦 —— 先全库判重、只登记一次、只进目标类目(默认 social),
+            # 再从匹配写库开始,目标类目就能按 url 命中刚登记的文章。
+            registered_by_cat = register_pass(captured_items, categories)
         summaries = []
         total_matched = 0
         for category in categories:
@@ -747,7 +853,7 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
             save_state(state)
         return {"status": "ok" if total_matched else "no_match",
                 "items": len(captured_items), "responses": payload_count,
-                "categories": summaries}
+                "registered": registered_by_cat, "categories": summaries}
     except browser_lock.ProfileBusyError as exc:
         LOG.warn("account.fetch.busy", error=str(exc)[:160])
         return {"status": "busy", "note": f"账号 profile 正被占用:{str(exc)[:160]}"}

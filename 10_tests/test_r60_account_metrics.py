@@ -266,24 +266,72 @@ def test_merge_modal_items_backfills_favorites_into_feed_item():
     assert len(merged) == 2 and merged[1]["title"] == "乙"
 
 
-def test_register_own_work_is_idempotent_and_metrics_attach(tmp_path):
+def test_register_own_work_is_idempotent_and_metrics_attach(tmp_path, monkeypatch):
     db_path = store.init_articles_db("demo", db_path=tmp_path / "demo.db")
+    monkeypatch.setattr(account_metrics.cfg, "category_db_path",
+                        lambda category: db_path)
     item = {"title": "我方已发布作品", "url": "https://www.toutiao.com/item/7000000000000000001/",
             "item_id": "7000000000000000001", "reads": 3, "favorites": 2,
             "likes": 1, "comments": 0, "impressions": 995}
-    # 第一轮:库内没有 → match_and_write 自己登记 + 挂指标
+    # 匹配写库默认不再登记(防跨类目重复登记):未命中就只落 unmatched
+    solo = account_metrics.match_and_write("demo", [dict(item)], db_path=db_path, apply=True)
+    assert solo["matched"] == 0 and solo["registered"] == 0
+    # 第一轮:register_pass 全库判重后登记一次 → match_and_write url 命中挂指标
+    reg = account_metrics.register_pass([dict(item)], ["demo"], own_work_category="demo")
+    assert len(reg.get("demo", [])) == 1, "首轮应登记 1 条"
     first = account_metrics.match_and_write("demo", [dict(item)], db_path=db_path, apply=True)
-    assert first["matched"] == 1 and first["registered"] == 1
-    # 第二轮:已登记 → 直接 url 命中,不重复登记
+    assert first["matched"] == 1
+    # 第二轮:已登记 → 判重命中,不再登记;url 直接命中
+    again = account_metrics.register_pass([dict(item)], ["demo"], own_work_category="demo")
+    assert again == {}, "同一作品重复取数不得重复登记"
     second = account_metrics.match_and_write("demo", [dict(item)], db_path=db_path, apply=True)
-    assert second["matched"] == 1 and second["registered"] == 0
+    assert second["matched"] == 1
     con = account_metrics.connect(db_path)
     rows = con.execute(
         "SELECT m.favorites, m.reads, m.data_source, a.source FROM article_metrics m"
         " JOIN articles a ON a.id=m.article_id").fetchall()
     own_count = con.execute("select count(*) from articles where source='own_account'").fetchone()[0]
     con.close()
-    assert own_count == 1, "同一作品重复取数不得重复登记"
+    assert own_count == 1, "同一作品多轮取数全库只允许一条登记"
     assert rows and rows[0]["favorites"] == 2, "自有作品收藏必须能落库(验收口径 favorites 非空 >0)"
     assert rows[0]["data_source"] == account_metrics.SOURCE_ID
     assert rows[0]["source"] == account_metrics.OWN_SOURCE
+
+
+def test_register_pass_skips_categories_that_already_have_the_work(tmp_path, monkeypatch):
+    """库内已有同 url 文章(哪怕在别的类目)→ 不再登记,避免跨类目重复。"""
+    other = store.init_articles_db("other", db_path=tmp_path / "other.db")
+    target = store.init_articles_db("demo", db_path=tmp_path / "demo.db")
+    con = account_metrics.connect(other)
+    con.execute(
+        "INSERT INTO articles(category, source, title, content, url, url_normalized,"
+        " fetched_at, content_hash, completeness, credibility, processor_version)"
+        " VALUES('other','x','已存在作品','正文','https://www.toutiao.com/item/99/"
+        "','https://www.toutiao.com/item/99/','2026-01-01T00:00:00','h','full','x','v')")
+    con.commit()
+    con.close()
+    paths = {"other": other, "demo": target}
+    monkeypatch.setattr(account_metrics.cfg, "category_db_path", lambda c: paths[c])
+    item = {"title": "已存在作品", "url": "https://www.toutiao.com/item/99/", "favorites": 1}
+    reg = account_metrics.register_pass([item], ["other", "demo"], own_work_category="demo")
+    assert reg == {}
+    con = account_metrics.connect(target)
+    assert con.execute("select count(*) from articles").fetchone()[0] == 0
+    con.close()
+
+
+def test_dedup_captured_items_unions_fields_across_responses():
+    items = [
+        {"title": "甲", "url": "https://www.toutiao.com/a1/?mod=1", "item_id": "1",
+         "reads": 14, "favorites": None, "likes": 0, "comments": 0, "impressions": 693},
+        {"title": "", "url": "https://www.toutiao.com/a1/", "item_id": None,
+         "reads": None, "favorites": 1, "likes": None, "comments": None, "impressions": None},
+        {"title": "甲", "url": "", "item_id": None,
+         "reads": None, "favorites": 1, "likes": 0, "comments": 0, "impressions": None},
+        {"title": "乙", "url": "https://www.toutiao.com/a2/", "reads": 3},
+    ]
+    out = account_metrics.dedup_captured_items(items)
+    assert len(out) == 3, "url 同路径跨响应合并;无 url 的弹层条目不得仅凭标题并库(宁缺毋滥)"
+    assert out[0]["favorites"] == 1 and out[0]["reads"] == 14 and out[0]["item_id"] == "1"
+    assert out[1]["title"] == "甲" and not out[1]["url"]
+    assert out[2]["title"] == "乙"
