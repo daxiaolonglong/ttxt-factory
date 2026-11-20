@@ -29,6 +29,20 @@ from . import viral
 
 _INT_FIELDS = ("reads", "likes", "favorites", "comments", "impressions")
 
+# R60 G1 备份通道 c:头条后台手动导出的表头是中文,归一到规范字段名再走同一白名单写入口。
+# 只认已登记表头,认不出的列原样保留(不会被误写)。
+EXPORT_HEADER_ALIASES: dict[str, str] = {
+    "标题": "title", "作品标题": "title", "文章标题": "title",
+    "链接": "url", "文章链接": "url", "作品链接": "url",
+    "作品id": "article_id", "文章id": "article_id", "itemid": "article_id",
+    "item_id": "article_id", "group id": "article_id",
+    "阅读量": "reads", "阅读数": "reads", "阅读": "reads",
+    "收藏量": "favorites", "收藏数": "favorites", "收藏": "favorites",
+    "点赞量": "likes", "点赞数": "likes", "点赞": "likes",
+    "评论量": "comments", "评论数": "comments", "评论": "comments",
+    "展示量": "impressions", "展现量": "impressions", "展示数": "impressions",
+}
+
 # 可信度分级(数值越大越可信)。config.metrics.credibility_rank 可覆盖/扩展。
 DEFAULT_CREDIBILITY_RANK: dict[str, int] = {
     "verified": 5,        # 人工核验
@@ -71,7 +85,7 @@ def _parse_int(value, field: str, row_no: int) -> tuple[int | None, str | None]:
         if value < 0:
             return None, f"第 {row_no} 行 {field}={value} 为负数"
         return value, None
-    text = str(value).strip()
+    text = str(value).strip().replace(",", "").replace("，", "")
     if text == "" or text.lower() in {"null", "none", "na", "n/a", "-"}:
         return None, None
     try:
@@ -92,11 +106,22 @@ def _read_rows(file_path: Path) -> list[dict]:
         data = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(data, list):
             raise ValueError("JSON 指标文件必须是行数组")
-        return [row for row in data if isinstance(row, dict)]
+        return [_normalize_headers(row) for row in data if isinstance(row, dict)]
     if suffix == ".csv":
         with path.open("r", encoding="utf-8-sig", newline="") as handle:
-            return [dict(row) for row in csv.DictReader(handle)]
+            return [_normalize_headers(dict(row)) for row in csv.DictReader(handle)]
     raise ValueError(f"仅支持 .csv/.json 指标文件,收到 {suffix or '(无扩展名)'}")
+
+
+def _normalize_headers(row: dict) -> dict:
+    """中文后台导出表头 → 规范字段名;未登记的列原样保留,不会被误写。"""
+    out: dict = {}
+    for key, value in row.items():
+        raw = str(key or "").strip()
+        canon = EXPORT_HEADER_ALIASES.get(raw) or EXPORT_HEADER_ALIASES.get(raw.lower()) or raw
+        if canon and (canon not in out or out[canon] in (None, "")):
+            out[canon] = value
+    return out
 
 
 def _find_article(con, row: dict, category: str) -> int | None:
@@ -112,6 +137,13 @@ def _find_article(con, row: dict, category: str) -> int | None:
             "SELECT id FROM articles WHERE url_normalized=? AND category=?", (normalize_url(url), category)
         ).fetchone()
         return int(hit["id"]) if hit else None
+    # 备份通道 c:后台导出常只有标题。仅**全库唯一同名**才允许匹配,同名多篇宁缺毋滥。
+    title = str(row.get("title") or "").strip()
+    if title:
+        hits = con.execute(
+            "SELECT id FROM articles WHERE title=? AND category=?", (title, category)).fetchall()
+        if len(hits) == 1:
+            return int(hits[0]["id"])
     return None
 
 

@@ -74,6 +74,24 @@ def test_extract_metric_items_known_fields_only_and_no_zero_fill():
         "缺失字段必须保持 None,不能填 0"
 
 
+def test_extract_handles_nested_mp_provider_shape():
+    # 实测后台 mp_provider feed 的嵌套结构:计数在 itemCounter、标题/链接在 articleBase
+    payload = {"data": [{"assembleCell": {"itemCell": {
+        "itemCounter": {"commentCount": 0, "diggCount": 5, "readCount": 30,
+                        "repinCount": 1, "showCount": 70},
+        "articleBase": {"gidStr": "1878743119879176", "title": "我的作品",
+                        "displayURL": "https://www.toutiao.com/a1878743119879176"},
+    }}}]}
+    items = account_metrics.extract_metric_items(payload)
+    assert len(items) == 1
+    item = items[0]
+    assert item["title"] == "我的作品"
+    assert item["reads"] == 30 and item["likes"] == 5 and item["comments"] == 0
+    assert item["impressions"] == 70
+    assert item["item_id"] == "1878743119879176"
+    assert item["favorites"] is None, "该接口没有收藏字段,必须保持 None"
+
+
 def test_interval_blocked_uses_last_success_only():
     now = datetime(2026, 11, 21, 2, 0, tzinfo=timezone.utc)
     assert account_metrics.interval_blocked({}, now) is None

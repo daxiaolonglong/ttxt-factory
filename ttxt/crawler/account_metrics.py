@@ -58,13 +58,18 @@ SESSION_COOKIE_NAMES = {"sessionid", "sid_tt", "sid_guard"}
 
 # 后台接口的字段名在不同页面不一致,这里做保守归一:只认已知键,认不出就整条跳过,
 # 不猜、不把缺失当 0(规则 6)。
+# 实测(mp_provider feed 取证 2026-11-21):后台 JSON 用 camelCase(readCount/diggCount/
+# commentCount/showCount/displayURL/gidStr),别名必须同时覆盖 snake_case 与 camelCase。
 _TITLE_KEYS = ("title", "title_text", "titleText")
-_URL_KEYS = ("url", "article_url", "detail_url", "share_url", "public_url")
-_ID_KEYS = ("item_id", "group_id", "article_id")
-_READ_KEYS = ("read_count", "read_cnt", "read_num", "view_count")
-_FAV_KEYS = ("favorite_count", "fav_cnt", "favorites_count", "collect_count")
-_LIKE_KEYS = ("like_count", "digg_count", "like_cnt")
-_COMMENT_KEYS = ("comment_count", "comment_cnt", "comments_count")
+_URL_KEYS = ("url", "article_url", "detail_url", "share_url", "public_url",
+             "displayURL", "display_url", "shareURL")
+_ID_KEYS = ("item_id", "group_id", "article_id", "gidStr", "gid_str")
+_READ_KEYS = ("read_count", "read_cnt", "read_num", "view_count", "readCount", "readCnt")
+_FAV_KEYS = ("favorite_count", "fav_cnt", "favorites_count", "collect_count",
+             "favoriteCount", "favCount", "collectCount", "favsCount")
+_LIKE_KEYS = ("like_count", "digg_count", "like_cnt", "diggCount", "likeCount")
+_COMMENT_KEYS = ("comment_count", "comment_cnt", "comments_count", "commentCount")
+_IMPRESSION_KEYS = ("impressions", "show_count", "showCount", "display_count")
 
 
 def state_path() -> Path:
@@ -144,6 +149,22 @@ def extract_metric_items(payload: Any) -> list[dict]:
     found: list[dict] = []
     seen_signatures: set[tuple] = set()
 
+    def _flatten(node: dict) -> dict:
+        """把一层子对象(itemCounter/articleBase/shareInfo 等)并入本层再识别。
+
+        实测后台列表:title 在 articleBase、计数在 itemCounter,
+        不扁平化就永远配不上对。只并一层,不跨行乱拼。
+        """
+        merged: dict[str, Any] = {}
+        for key, value in node.items():
+            if isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    if not isinstance(sub_value, (dict, list)):
+                        merged.setdefault(sub_key, sub_value)
+            elif not isinstance(value, (dict, list)):
+                merged.setdefault(key, value)
+        return merged
+
     def walk(node: Any) -> None:
         if isinstance(node, list):
             for child in node:
@@ -151,17 +172,19 @@ def extract_metric_items(payload: Any) -> list[dict]:
             return
         if not isinstance(node, dict):
             return
-        title = _first_key(node, _TITLE_KEYS)
+        flat = _flatten(node)
+        title = _first_key(flat, _TITLE_KEYS) or _first_key(node, _TITLE_KEYS)
         if isinstance(title, str) and title.strip():
             counts = {
-                "reads": _as_int(_first_key(node, _READ_KEYS)),
-                "favorites": _as_int(_first_key(node, _FAV_KEYS)),
-                "likes": _as_int(_first_key(node, _LIKE_KEYS)),
-                "comments": _as_int(_first_key(node, _COMMENT_KEYS)),
+                "reads": _as_int(_first_key(flat, _READ_KEYS)),
+                "favorites": _as_int(_first_key(flat, _FAV_KEYS)),
+                "likes": _as_int(_first_key(flat, _LIKE_KEYS)),
+                "comments": _as_int(_first_key(flat, _COMMENT_KEYS)),
+                "impressions": _as_int(_first_key(flat, _IMPRESSION_KEYS)),
             }
             if any(value is not None for value in counts.values()):
-                item_id = _first_key(node, _ID_KEYS)
-                url = _first_key(node, _URL_KEYS)
+                item_id = _first_key(flat, _ID_KEYS) or _first_key(node, _ID_KEYS)
+                url = _first_key(flat, _URL_KEYS) or _first_key(node, _URL_KEYS)
                 signature = (title.strip(), str(item_id or ""), str(url or ""))
                 if signature not in seen_signatures:
                     seen_signatures.add(signature)
@@ -223,7 +246,7 @@ def match_and_write(category: str, items: list[dict], *, db_path: Path | None = 
                 unmatched.append(item)
                 continue
             row = {"article_id": article_id}
-            for field in ("reads", "favorites", "likes", "comments"):
+            for field in ("reads", "favorites", "likes", "comments", "impressions"):
                 if item.get(field) is not None:
                     row[field] = item[field]
             row["_matched_by"] = how
@@ -372,35 +395,83 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
             return {"status": "not_logged_in",
                     "note": "profile 无登录态(未登录或会话过期),先跑 account-login 扫码"}
 
+        seen_requests: list[str] = []
+        raw_bodies: list[dict] = []
+        row_texts: dict[str, list[str]] = {}
+        diag_path: str | None = None
+
         def on_response(response: Any) -> None:
             nonlocal payload_count
             try:
-                host = (response.url.split("/")[2] if "://" in response.url else "")
-                if not host.endswith(ALLOWED_HOST_SUFFIX):
+                url = str(response.url)
+                host = (url.split("/")[2] if "://" in url else "")
+                if not host.endswith("toutiao.com"):
                     return
                 ctype = str(response.headers.get("content-type") or "")
                 if "json" not in ctype:
                     return
-                data = response.json()
+                try:
+                    body = response.text()
+                except Exception:  # noqa: BLE001 - 响应体已被释放
+                    return
+                data = json.loads(body)
             except Exception:  # noqa: BLE001 - 非 JSON/已关闭响应直接跳过
                 return
             items = extract_metric_items(data)
             if items:
                 payload_count += 1
                 captured_items.extend(items)
+            elif len(raw_bodies) < 20:
+                # 取证:认不出字段的 JSON 原样留一份,离线核对真实字段名后再扩别名
+                raw_bodies.append({"url": url[:200], "body": body[:4000]})
+
+        def on_request(request: Any) -> None:
+            if "toutiao.com" in request.url and len(seen_requests) < 80:
+                seen_requests.append(f"{request.resource_type}:{request.url[:160]}")
 
         page.on("response", on_response)
+        page.on("request", on_request)
+        page_final: dict[str, str] = {}
         for url in DATA_PAGES:
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=60_000)
-                page.wait_for_timeout(4000)
+                page.wait_for_timeout(8000)
+                for _ in range(3):  # 触发懒加载/分页:统计页列表接口要滚动/久等才发
+                    try:
+                        page.mouse.wheel(0, 2400)
+                    except Exception:  # noqa: BLE001
+                        pass
+                    page.wait_for_timeout(3000)
+                page.wait_for_timeout(6000)
+                page_final[url] = f"{page.url} | {(page.title() or '')[:60]}"
+                # 取证:列表已渲染的行文本(UI 上"收藏"列可见,渲染文本是 DOM 兜底的数据源)
+                try:
+                    row_texts[url] = page.evaluate(
+                        """() => Array.from(document.querySelectorAll('a[href*=".toutiao.com/"]'))
+                             .map(a => { const row = a.closest('li,tr') || a.closest('div');
+                                return row ? (row.innerText || '').slice(0, 400) : ''; })
+                             .filter(t => t.trim()).slice(0, 20)""")
+                except Exception:  # noqa: BLE001
+                    row_texts[url] = []
             except Exception as exc:  # noqa: BLE001 - 单页失败不带走整轮
+                page_final[url] = f"FAILED {str(exc)[:120]}"
                 LOG.warn("account.fetch.page_failed", url=url, error=str(exc)[:160])
+
+        if raw_bodies or not captured_items or any(row_texts.values()):
+            out_dir = cfg.INTELLIGENCE_DIR / "account_metrics"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            diag = out_dir / f"diag-fetch-{cfg.now_iso().replace(':', '').replace('-', '')}.json"
+            diag.write_text(json.dumps(
+                {"pages": page_final, "requests": seen_requests, "unparsed_json": raw_bodies,
+                 "row_texts": row_texts},
+                ensure_ascii=False, indent=2), encoding="utf-8")
+            diag_path = str(diag)
+            LOG.info("account.fetch.diag", path=str(diag), requests=len(seen_requests))
 
         LOG.info("account.fetch.captured", responses=payload_count, items=len(captured_items))
         if not captured_items:
             return {"status": "no_data", "note": "后台响应里没有可识别的文章指标(页面结构变化?)",
-                    "pages": DATA_PAGES}
+                    "pages": page_final, "diag": diag_path}
 
         if categories is None:
             categories = [str(slug) for slug in cfg.load_config().get("categories", []) if slug]
