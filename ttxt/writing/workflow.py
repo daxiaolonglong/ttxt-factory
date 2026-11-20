@@ -26,7 +26,7 @@ from ttxt.logging import get_logger
 from ttxt.model_gate import client as model_client
 from ttxt.model_gate import gate
 
-from . import export, prompts, review as review_channel, style, verifier
+from . import export, prompts, repair, review as review_channel, style, verifier
 
 LOG = get_logger("writing")
 MAX_CLAIMS = 12
@@ -867,10 +867,22 @@ def write_article(
 
     draft_id = _new_draft_id(category, topic)
     version = 1
+    repair_total = repair.new_stats()
     model_meta = _model_meta(model_call)
     # 版本行必须记录实际出稿模型(P13 实测 13/13 行 model_id 为 NULL,无法追责到模型)
     served_model = model_meta.get("served_model")
     _save_version(db_path, draft_id, category, topic, version, draft, served_model)
+    # R53:绑定纪律定点修复——草稿完成后逐条 claim 跑校验(与门禁同一套 verify_claim 判定),
+    # 失败句定点重写(请求带它原本应绑的来源引句),改完立刻复验同一句,每条 claim 最多 2 轮;
+    # 修不好的证据行原样保留、照进 critical 与可核率统计;只有复验通过的句子才替换。
+    # 重写后的草稿另存新版本,但不计门禁修订计数 revisions(R48 去模板化定向重写同一先例)。
+    draft, evidence, repair_stats = repair.repair_failing_claims(
+        model_call, draft, evidence, materials, enable_thinking=enable_thinking
+    )
+    repair.merge_stats(repair_total, repair_stats)
+    if repair_stats["changed_sentences"]:
+        version += 1
+        _save_version(db_path, draft_id, category, topic, version, draft, served_model)
     review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
     _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
 
@@ -900,6 +912,13 @@ def write_article(
         )
         claims = parse_claims(claims_text)
         evidence = verify_claims(claims, materials)
+        draft, evidence, repair_stats = repair.repair_failing_claims(
+            model_call, draft, evidence, materials, enable_thinking=enable_thinking
+        )
+        repair.merge_stats(repair_total, repair_stats)
+        if repair_stats["changed_sentences"]:
+            version += 1
+            _save_version(db_path, draft_id, category, topic, version, draft, served_model)
         review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
         _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
         passed = _passed(complete, review, gate_min_score)
@@ -1021,6 +1040,7 @@ def write_article(
         "critical": review.get("critical") or [],
         "evidence": evidence,
         "fact_checkability": fact_check,
+        "targeted_repair": repair_total,
         "release_conditions": {
             "existing_gate": _passed(complete, review, gate_min_score),
             "fact_checkability": fact_check["release_condition_met"],
