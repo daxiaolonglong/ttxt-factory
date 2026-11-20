@@ -1,6 +1,6 @@
 {
   "crawl_enqueue_4h": {
-    "last_run_at": "2026-11-19T12:06:03+08:00",
+    "last_run_at": "2026-11-21T00:51:23+08:00",
     "last_status": "ok",
     "last_result": {
       "enqueued": 18,
@@ -11,7 +11,7 @@
     "last_error": null
   },
   "analyze_daily": {
-    "last_run_at": "2026-11-18T19:57:34+08:00",
+    "last_run_at": "2026-11-20T20:06:48+08:00",
     "last_status": "ok",
     "last_result": {
       "technology": "ok",
@@ -24,7 +24,7 @@
     "last_error": null
   },
   "recover_daily": {
-    "last_run_at": "2026-11-18T19:57:34+08:00",
+    "last_run_at": "2026-11-20T20:06:48+08:00",
     "last_status": "ok",
     "last_result": {
       "model_stale_requeued": 0,
@@ -34,47 +34,106 @@
     "last_error": null
   },
   "housekeep_weekly": {
-    "last_run_at": "2026-11-12T19:57:35+08:00",
+    "last_run_at": "2026-11-19T20:01:07+08:00",
     "last_status": "ok",
     "last_result": {
       "report": {
         "root": "D:\\ttxt",
         "sizes_bytes": {
-          "control": 163438,
-          "categories": 1564672,
-          "crawler": 2133,
-          "intelligence": 2292,
-          "writing": 21461,
-          "dashboard": 22653,
-          "agents": 9612,
-          "rules": 2951,
-          "wiki": 62158,
-          "logs": 53161,
-          "tests": 369134,
-          "backups": 3451520,
-          "temp": 1705025,
-          "venv": 288247467,
-          "pip_cache": 95691429
+          "control": 4853447,
+          "categories": 2330660864,
+          "crawler": 705977912,
+          "intelligence": 3972973,
+          "writing": 124877,
+          "dashboard": 22682,
+          "agents": 11124,
+          "rules": 27051,
+          "wiki": 2518523,
+          "logs": 2345366,
+          "tests": 4993096,
+          "backups": 1245341755,
+          "temp": 4218,
+          "scratch": 9732636090,
+          "assets": 4879389619,
+          "venv": 331211743,
+          "pip_cache": 95691429,
+          "tools": 195013391,
+          "git": 10398620,
+          "secrets": 79,
+          "pytest_of": 0
         },
-        "project_total_gb": 0.364,
+        "project_total_gb": 18.203,
         "budget_gb": 20.0,
         "within_budget": true,
-        "free_gb": 109.5,
+        "free_gb": 132.5,
         "min_free_gb": 5.0,
         "free_ok": true,
+        "root_total_bytes": 19554979990,
+        "root_total_gb": 18.212,
+        "within_root_budget": true,
+        "unaccounted_bytes": 9785131,
+        "unaccounted_dirs": [
+          {
+            "name": "_model_fix",
+            "bytes": 6931824
+          },
+          {
+            "name": "ttxt",
+            "bytes": 1908726
+          },
+          {
+            "name": "scripts",
+            "bytes": 678266
+          },
+          {
+            "name": "tmpezrupdu9",
+            "bytes": 138215
+          },
+          {
+            "name": ".pytest_cache",
+            "bytes": 90534
+          },
+          {
+            "name": ".dsh",
+            "bytes": 12217
+          },
+          {
+            "name": "README.md",
+            "bytes": 10523
+          },
+          {
+            "name": ".trae",
+            "bytes": 7488
+          },
+          {
+            "name": "__pycache__",
+            "bytes": 3693
+          },
+          {
+            "name": "conftest.py",
+            "bytes": 1828
+          }
+        ],
+        "root_scan_error": null,
         "caps": {
           "temp_max_gb": 2,
+          "scratch_max_gb": 2,
           "pip_cache_max_gb": 1,
           "log_max_mb": 10,
-          "backup_keep": 7,
+          "backup_keep": 6,
           "browser_max_gb": 3
         },
         "caps_status": {
           "pip_cache_bytes": 95691429,
           "pip_cache_within": true,
-          "browser_bytes": 0,
+          "temp_bytes": 4218,
+          "temp_within": true,
+          "scratch_bytes": 9732636090,
+          "scratch_within": false,
+          "browser_bytes": 705957241,
           "browser_within": true,
-          "db_warnings": []
+          "db_warnings": [],
+          "wal_warnings": []
         }
       }
     },
@@ -1698,7 +1757,7 @@
     "last_error": null
   },
   "metrics_due_60m": {
-    "last_run_at": "2026-11-19T15:17:14+08:00",
+    "last_run_at": "2026-11-21T01:31:57+08:00",
     "last_status": "ok",
     "last_result": {
       "scheduler_status": "ok",
@@ -1714,127 +1773,149 @@
       "categories": {
         "technology": {
           "status": "ok",
-          "claimed": 6,
-          "eligible": 6,
+          "claimed": 7,
+          "eligible": 7,
           "fetched": 5,
-          "written": 0,
+          "written": 5,
           "snapshots": 5,
           "would_write": 0,
           "unsupported_host_skipped": 0,
+          "enqueued_windows": 0,
+          "host_skipped": 176,
+          "archived_unsupported": {},
+          "infra_failures": 0,
+          "infra_paused": false,
           "windows_refreshed": 5,
           "queue_states": {
-            "scheduled": 234,
-            "ready": 6,
-            "backlog": 0,
-            "done": 228,
+            "scheduled": 144,
+            "ready": 14,
+            "backlog": 24,
+            "done": 251,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 5,
-            "article_gone": 1
+            "article_gone": 2,
+            "metrics_ok": 5
           },
           "after": {
-            "late_ratio": 0.567251,
-            "on_time_coverage": 0.126065,
+            "late_ratio": 0.479675,
+            "on_time_coverage": 0.116364,
             "missing_ratio": {
-              "reads": 0.040936,
+              "reads": 0.028455,
               "likes": 0.0,
               "favorites": 1.0,
               "comments": 0.0,
-              "impressions": 0.040936
+              "impressions": 0.028455
             },
-            "recoverable_on_time_in_window": 9
+            "recoverable_on_time_in_window": 32
           }
         },
         "finance": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 4190,
-          "fetched": 9,
-          "written": 8,
-          "snapshots": 9,
+          "eligible": 4130,
+          "fetched": 11,
+          "written": 7,
+          "snapshots": 11,
           "would_write": 0,
-          "unsupported_host_skipped": 1,
-          "windows_refreshed": 9,
+          "unsupported_host_skipped": 0,
+          "enqueued_windows": 0,
+          "host_skipped": 524,
+          "archived_unsupported": {},
+          "infra_failures": 0,
+          "infra_paused": false,
+          "windows_refreshed": 11,
           "queue_states": {
-            "scheduled": 515,
-            "ready": 3,
-            "backlog": 4187,
-            "done": 8119,
+            "scheduled": 117,
+            "ready": 11,
+            "backlog": 4144,
+            "done": 8136,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 9,
-            "article_gone": 2
+            "metrics_ok": 11,
+            "article_gone": 1
           },
           "after": {
-            "late_ratio": 0.997758,
-            "on_time_coverage": 0.001388,
+            "late_ratio": 0.992496,
+            "on_time_coverage": 0.00443,
             "missing_ratio": {
-              "reads": 0.054801,
-              "likes": 0.488604,
+              "reads": 0.054127,
+              "likes": 0.482593,
               "favorites": 1.0,
-              "comments": 0.733093,
-              "impressions": 0.995641
+              "comments": 0.724074,
+              "impressions": 0.983393
             },
-            "recoverable_on_time_in_window": 2
+            "recoverable_on_time_in_window": 135
           }
         },
         "social": {
           "status": "ok",
           "claimed": 12,
-          "eligible": 13568,
-          "fetched": 6,
-          "written": 6,
-          "snapshots": 6,
+          "eligible": 13410,
+          "fetched": 8,
+          "written": 8,
+          "snapshots": 8,
           "would_write": 0,
-          "unsupported_host_skipped": 4,
-          "windows_refreshed": 6,
+          "unsupported_host_skipped": 0,
+          "enqueued_windows": 0,
+          "host_skipped": 179,
+          "archived_unsupported": {},
+          "infra_failures": 0,
+          "infra_paused": false,
+          "windows_refreshed": 8,
           "queue_states": {
-            "scheduled": 142,
-            "ready": 4,
-            "backlog": 13564,
-            "done": 26436,
-            "exhausted": 0
+            "scheduled": 0,
+            "ready": 0,
+            "backlog": 13410,
+            "done": 26497,
+            "exhausted": 60
           },
           "outcome_counts": {
-            "article_gone": 2,
-            "metrics_ok": 6
+            "article_gone": 4,
+            "metrics_ok": 8
           },
           "after": {
             "late_ratio": 1.0,
             "on_time_coverage": 0.0,
             "missing_ratio": {
-              "reads": 0.041711,
-              "likes": 0.470602,
+              "reads": 0.04158,
+              "likes": 0.469126,
               "favorites": 1.0,
-              "comments": 0.758259,
-              "impressions": 0.997424
+              "comments": 0.755882,
+              "impressions": 0.994297
             },
-            "recoverable_on_time_in_window": 15
+            "recoverable_on_time_in_window": 59
           }
         },
         "history": {
           "status": "ok",
-          "claimed": 2,
-          "eligible": 2,
-          "fetched": 0,
-          "written": 0,
-          "snapshots": 0,
+          "claimed": 5,
+          "eligible": 5,
+          "fetched": 5,
+          "written": 4,
+          "snapshots": 5,
           "would_write": 0,
-          "unsupported_host_skipped": 2,
-          "windows_refreshed": 0,
+          "unsupported_host_skipped": 0,
+          "enqueued_windows": 0,
+          "host_skipped": 98,
+          "archived_unsupported": {},
+          "infra_failures": 0,
+          "infra_paused": false,
+          "windows_refreshed": 5,
           "queue_states": {
-            "scheduled": 112,
-            "ready": 2,
-            "backlog": 0,
-            "done": 102,
+            "scheduled": 77,
+            "ready": 6,
+            "backlog": 15,
+            "done": 132,
             "exhausted": 0
           },
-          "outcome_counts": {},
+          "outcome_counts": {
+            "metrics_ok": 5
+          },
           "after": {
-            "late_ratio": 0.704225,
-            "on_time_coverage": 0.08502,
+            "late_ratio": 0.659259,
+            "on_time_coverage": 0.127072,
             "missing_ratio": {
               "reads": 0.0,
               "likes": 0.0,
@@ -1842,32 +1923,37 @@
               "comments": 0.0,
               "impressions": 0.0
             },
-            "recoverable_on_time_in_window": 13
+            "recoverable_on_time_in_window": 28
           }
         },
         "health": {
           "status": "ok",
-          "claimed": 1,
-          "eligible": 1,
-          "fetched": 1,
-          "written": 0,
-          "snapshots": 1,
+          "claimed": 4,
+          "eligible": 4,
+          "fetched": 4,
+          "written": 3,
+          "snapshots": 4,
           "would_write": 0,
           "unsupported_host_skipped": 0,
-          "windows_refreshed": 1,
+          "enqueued_windows": 0,
+          "host_skipped": 27,
+          "archived_unsupported": {},
+          "infra_failures": 0,
+          "infra_paused": false,
+          "windows_refreshed": 4,
           "queue_states": {
-            "scheduled": 22,
-            "ready": 1,
-            "backlog": 0,
-            "done": 44,
+            "scheduled": 65,
+            "ready": 4,
+            "backlog": 4,
+            "done": 80,
             "exhausted": 0
           },
           "outcome_counts": {
-            "metrics_ok": 1
+            "metrics_ok": 4
           },
           "after": {
-            "late_ratio": 0.777778,
-            "on_time_coverage": 0.042553,
+            "late_ratio": 0.666667,
+            "on_time_coverage": 0.151351,
             "missing_ratio": {
               "reads": 0.0,
               "likes": 0.0,
@@ -1875,7 +1961,7 @@
               "comments": 0.0,
               "impressions": 0.0
             },
-            "recoverable_on_time_in_window": 0
+            "recoverable_on_time_in_window": 3
           }
         }
       },

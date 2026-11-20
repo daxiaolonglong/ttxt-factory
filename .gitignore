@@ -68,3 +68,7 @@ desktop.ini
 
 # ---- 分词缓存(挖词词性闸门用 jieba;缓存钉在 07_tmp,根目录这份是历史残留)----
 jieba.cache
+
+# ---- R60:运行时审计 JSON(每小时/每日机器生成,只作本机取证,仪表盘不读取;housekeep 保留 7 天)----
+03_intelligence/metrics_public/
+03_intelligence/keyword_feedback/
