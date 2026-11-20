@@ -537,6 +537,43 @@ def _job_metrics_due(job: dict) -> dict:
     }
 
 
+def _job_account_metrics(job: dict) -> dict:
+    """R60 G1:自有账号后台读数回流(收藏只在后台拿得到)。
+
+    只读自己的账号;没登录/被节流/浏览器被占都明确记 skipped_*，不伪装成 ok。
+    """
+    from ttxt.crawler import account_metrics
+
+    raw_categories = job.get("categories")
+    if raw_categories is None and job.get("category"):
+        raw_categories = [job["category"]]
+    categories = [str(c) for c in raw_categories] if raw_categories else None
+    report = account_metrics.account_fetch_metrics(
+        apply=bool(job.get("apply", False)), categories=categories)
+    raw_status = str(report.get("status") or "error")
+    mapping = {
+        "ok": "ok",
+        "no_match": "no_match",
+        "no_data": "no_data",
+        "throttled": "skipped_throttled",
+        "not_logged_in": "skipped_not_logged_in",
+        "busy": "skipped_account_busy",
+    }
+    status = mapping.get(raw_status, "error")
+    categories_report = report.get("categories") or []
+    total_matched = sum(
+        int(item.get("matched", 0) or 0)
+        for item in categories_report if isinstance(item, dict)
+    )
+    if status == "error":
+        LOG.error("scheduler.account_metrics.failed", status=raw_status,
+                  note=str(report.get("note") or "")[:200])
+    else:
+        LOG.info("scheduler.account_metrics.round", status=status,
+                 items=report.get("items"), matched=total_matched)
+    return {"scheduler_status": status, "total_matched": total_matched, **report}
+
+
 _JOB_RUNNERS = {
     "crawl_enqueue": _job_crawl_enqueue,
     "analyze": _job_analyze,
@@ -544,6 +581,7 @@ _JOB_RUNNERS = {
     "housekeep": _job_housekeep,
     "metrics_fetch": _job_metrics_fetch,
     "metrics_due": _job_metrics_due,
+    "account_metrics": _job_account_metrics,
 }
 
 

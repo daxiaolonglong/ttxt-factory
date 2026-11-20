@@ -1,0 +1,245 @@
+{
+  "schema": "r60-score-v2-t3-eval-v1",
+  "generated_at": "2026-11-21T01:04:00+08:00",
+  "window_days": 3,
+  "grace_hours": 24,
+  "sample_rule": "performance_windows(subject_type='article', window_days=3, status='on_time', reads>0) ∩ score_v2_labels 有分 ∩ URL 主机在公开指标白名单(头条域:www.toutiao.com / m.toutiao.com);late/early/overdue/unavailable/pending 一律不计(口径不同)",
+  "metric_semantics": {
+    "actual": "T+3 实测 log10(reads) 的**类目内**名次分位 (rank−0.5)/n(均值恰为 0.5)",
+    "lift": "按 score_v2 取类目 top-decile,其实测分位均值 / 0.5(1.0=无 lift)",
+    "formula_source": "scripts/score_v2_production_compare.py(import,不复制)"
+  },
+  "leakage_note": {
+    "model_holdout_boundary_published_min": "2026-10-06T19:09:31+08:00",
+    "in_sample_n": 0,
+    "out_of_sample_n": 250,
+    "meaning": "boundary 之前发布 ⇒ 拟合时见过(样本内);之后 ⇒ 模型没见过"
+  },
+  "categories": {
+    "technology": {
+      "category": "technology",
+      "db_exists": true,
+      "has_performance_windows": true,
+      "has_score_v2_labels": true,
+      "has_articles": true,
+      "window_rows": {
+        "early": 48,
+        "late": 115,
+        "on_time": 126,
+        "overdue": 1,
+        "pending": 254,
+        "unavailable": 56
+      },
+      "on_time_with_reads": 123,
+      "scored_on_time": 123,
+      "whitelist_pairs": 123,
+      "metrics": {
+        "n": 123,
+        "distinct_score_values": 123,
+        "spearman_vs_actual_pct": 0.1672,
+        "spearman_ci95": [
+          0.0074,
+          0.3311
+        ],
+        "top_decile": {
+          "selected": 12,
+          "mean_actual_percentile": 0.5949,
+          "lift": 1.19
+        },
+        "median_actual_reads": 806
+      }
+    },
+    "finance": {
+      "category": "finance",
+      "db_exists": true,
+      "has_performance_windows": true,
+      "has_score_v2_labels": true,
+      "has_articles": true,
+      "window_rows": {
+        "early": 43,
+        "late": 8061,
+        "on_time": 57,
+        "pending": 528,
+        "unavailable": 4235
+      },
+      "on_time_with_reads": 57,
+      "scored_on_time": 56,
+      "whitelist_pairs": 56,
+      "metrics": {
+        "n": 56,
+        "distinct_score_values": 56,
+        "spearman_vs_actual_pct": 0.3125,
+        "spearman_ci95": [
+          0.0419,
+          0.5495
+        ],
+        "top_decile": {
+          "selected": 5,
+          "mean_actual_percentile": 0.7446,
+          "lift": 1.489
+        },
+        "median_actual_reads": 1901
+      }
+    },
+    "social": {
+      "category": "social",
+      "db_exists": true,
+      "has_performance_windows": true,
+      "has_score_v2_labels": true,
+      "has_articles": true,
+      "window_rows": {
+        "late": 26471,
+        "pending": 146,
+        "unavailable": 13529
+      },
+      "on_time_with_reads": 0,
+      "scored_on_time": 0,
+      "whitelist_pairs": 0,
+      "metrics": {
+        "n": 0
+      }
+    },
+    "history": {
+      "category": "history",
+      "db_exists": true,
+      "has_performance_windows": true,
+      "has_score_v2_labels": true,
+      "has_articles": true,
+      "window_rows": {
+        "early": 25,
+        "late": 85,
+        "on_time": 45,
+        "pending": 141,
+        "unavailable": 22
+      },
+      "on_time_with_reads": 45,
+      "scored_on_time": 44,
+      "whitelist_pairs": 44,
+      "metrics": {
+        "n": 44,
+        "distinct_score_values": 44,
+        "spearman_vs_actual_pct": 0.2832,
+        "spearman_ci95": [
+          0.018,
+          0.5664
+        ],
+        "top_decile": {
+          "selected": 4,
+          "mean_actual_percentile": 0.6364,
+          "lift": 1.273
+        },
+        "median_actual_reads": 572
+      }
+    },
+    "health": {
+      "category": "health",
+      "db_exists": true,
+      "has_performance_windows": true,
+      "has_score_v2_labels": true,
+      "has_articles": true,
+      "window_rows": {
+        "early": 13,
+        "late": 53,
+        "on_time": 27,
+        "pending": 50,
+        "unavailable": 27
+      },
+      "on_time_with_reads": 27,
+      "scored_on_time": 27,
+      "whitelist_pairs": 27,
+      "metrics": {
+        "n": 27,
+        "distinct_score_values": 27,
+        "spearman_vs_actual_pct": -0.207,
+        "spearman_ci95": null,
+        "top_decile": {
+          "selected": 2,
+          "mean_actual_percentile": 0.463,
+          "lift": 0.926
+        },
+        "median_actual_reads": 118
+      }
+    }
+  },
+  "pooled": {
+    "n": 250,
+    "distinct_score_values": 250,
+    "spearman_vs_actual_pct": 0.243,
+    "spearman_ci95": [
+      0.1337,
+      0.3458
+    ],
+    "top_decile": {
+      "selected": 25,
+      "mean_actual_percentile": 0.6653,
+      "lift": 1.331
+    },
+    "median_actual_reads": 785
+  },
+  "by_leakage": {
+    "in_sample": {
+      "n": 0
+    },
+    "out_of_sample": {
+      "n": 250,
+      "distinct_score_values": 250,
+      "spearman_vs_actual_pct": 0.243,
+      "spearman_ci95": [
+        0.1337,
+        0.3458
+      ],
+      "top_decile": {
+        "selected": 25,
+        "mean_actual_percentile": 0.6653,
+        "lift": 1.331
+      },
+      "median_actual_reads": 785
+    }
+  },
+  "sample_size": {
+    "formula": "n ≈ ((z(1−α/2)+z(1−β))/ρ)²,α=0.05 双侧、power=0.80 ⇒ z 和=2.8016(R58 同式)",
+    "z_sum": 2.8016,
+    "smallest_detectable_rho_at_current_n": 0.1772,
+    "current_n": 250,
+    "targets": [
+      {
+        "rho": 0.1,
+        "n_needed": 785,
+        "gap_pairs": 535,
+        "days_at_observed_rate": 15.0
+      },
+      {
+        "rho": 0.15,
+        "n_needed": 349,
+        "gap_pairs": 99,
+        "days_at_observed_rate": 2.8
+      },
+      {
+        "rho": 0.2,
+        "n_needed": 197,
+        "gap_pairs": 0,
+        "days_at_observed_rate": 0.0
+      },
+      {
+        "rho": 0.3,
+        "n_needed": 88,
+        "gap_pairs": 0,
+        "days_at_observed_rate": 0.0
+      }
+    ],
+    "observation_growth": {
+      "captured_day_hist": {
+        "2026-11-15": 4,
+        "2026-11-16": 29,
+        "2026-11-19": 95,
+        "2026-11-20": 110,
+        "2026-11-21": 9,
+        "2026-11-17": 3
+      },
+      "observed_days": 6,
+      "span_days": 7,
+      "pairs_per_day": 35.71,
+      "caveat": "captured_at 是窗口内观测时刻(补采会改写),按观测日历折算是可核对的上界,不是稳态日增"
+    }
+  }
+}

@@ -639,6 +639,30 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0 if not report["row_errors"] else 0
 
 
+def cmd_account_login(args: argparse.Namespace) -> int:
+    """R60 G1:扫码登录头条自有账号一次,profile 保存在 02_crawler/.account。"""
+    from .crawler import account_metrics
+
+    report = account_metrics.account_login(timeout_s=int(args.timeout))
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report.get("status") == "ok" else 1
+
+
+def cmd_account_fetch(args: argparse.Namespace) -> int:
+    """R60 G1:用已登录的账号 profile 只读自有文章指标(含 favorites)。"""
+    from .crawler import account_metrics
+
+    categories = args.category or None
+    if categories and "all" in categories:
+        categories = None
+    report = account_metrics.account_fetch_metrics(
+        apply=bool(args.apply), categories=categories)
+    if not args.apply:
+        report["note"] = "dry-run:确认无误后加 --apply 才写库"
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report.get("status") in ("ok", "no_match", "no_data") else 1
+
+
 def _publish_out(path_value: str | None, payload: dict) -> Path | None:
     if not path_value:
         return None
@@ -994,6 +1018,20 @@ def build_parser() -> argparse.ArgumentParser:
                               "默认跳过这些文章,避免反复请求已删除的内容)")
     metrics.add_argument("--no-relabel", action="store_true", help="导入后不刷新爆款标签")
     metrics.set_defaults(func=cmd_metrics)
+
+    account_login = sub.add_parser(
+        "account-login", help="R60:扫码登录头条自有账号(只读后台,profile 不入库)")
+    account_login.add_argument("--timeout", type=int, default=180,
+                               help="等待扫码的秒数(默认 180)")
+    account_login.set_defaults(func=cmd_account_login)
+
+    account_fetch = sub.add_parser(
+        "account-fetch", help="R60:只读自有账号后台指标(含收藏);默认 dry-run")
+    account_fetch.add_argument("--category", action="append", default=None,
+                               help="只处理指定类目,可重复;默认全部")
+    account_fetch.add_argument("--apply", action="store_true",
+                               help="真正写库(不加只报告)")
+    account_fetch.set_defaults(func=cmd_account_fetch)
 
     legacy = sub.add_parser(
         "legacy-migrate",

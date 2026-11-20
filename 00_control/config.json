@@ -106,6 +106,7 @@
   "metrics": {
     "authorized_sources": {
       "toutiao_admin_export": "self_reported",
+      "toutiao_account": "self_reported",
       "manual_verified": "verified",
       "toutiao_public_article": "public_page",
       "legacy_factory_search_ssr": "public_page"
@@ -143,6 +144,9 @@
        "backfill_new_articles": true, "backfill_limit": 200, "gate_hosts": true,
        "_comment": "R58:新文章入队接进调度器(backfill_new_articles,only_missing+唯一键=幂等),白名单校验前置到入队之前(gate_hosts),代理/网络故障冷却 6h 内整轮 skipped_infra_paused。",
        "wait_for_queue_s": 180, "queue_poll_s": 20, "lock_wait_s": 180},
+      {"id": "account_metrics_2h", "kind": "account_metrics", "interval_min": 120, "enabled": false,
+       "apply": true,
+       "_comment": "R60 G1:头条自有账号后台读数(含收藏)。先跑 `python -m ttxt account-login` 扫码;登录成功后把 enabled 改 true。代码内还有 2h 硬下限与独立 profile 锁,未登录时不会写任何数据。"},
       {"id": "metrics_fetch_6h", "kind": "metrics_fetch", "interval_min": 360, "enabled": false,
        "_comment": "R42:取数时点已改为按 due_at 排队,本任务停用(保留代码只用于人工对照/回滚)",
        "limit": 12, "sleep_s": 2.5, "apply": true, "retry_gone": false,

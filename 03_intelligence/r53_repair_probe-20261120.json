@@ -1,0 +1,1282 @@
+{
+ "generated_at": "2026-11-20 12:55:51",
+ "note": "只读探针:不改门禁/阈值/取样规则;template_decheck 显式关闭;正式库零写入;写作链路启用 R53 定点修复并照记其读数",
+ "gate_min_score": 0.6,
+ "fact_checkability_min": 0.8,
+ "model": null,
+ "batch": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了"
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能"
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动"
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康"
+  }
+ ],
+ "rounds": 1,
+ "runs": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "round": 1,
+   "draft_id": null,
+   "status": "insufficient_materials",
+   "passed": false,
+   "versions": null,
+   "revisions": null,
+   "score": null,
+   "truncated": null,
+   "fact_check_rate": null,
+   "facts": null,
+   "checkable": null,
+   "material_stats": {
+    "pool_limit": 1,
+    "candidates": 1,
+    "full_candidates": 1,
+    "distinct_sources": 1,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 1,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     330
+    ],
+    "selected_full": 1,
+    "selected_distinct_sources": 1,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 1,
+     "label_counts": {
+      "normal": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 330,
+      "rank_score": 1.06,
+      "bm25": -47.96858073773243,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "派代说",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "取材前置门禁拦下,未调用模型:取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句);来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)",
+   "critical": [
+    "取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句)",
+    "来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)"
+   ],
+   "rule_hits": {},
+   "primary": "material.insufficient",
+   "primary_detail": "取材前置门禁拦下,未调用模型:取材密度不足:候选里全文文章 1 篇 < 6(短稿撑不起引句);来源独立性不足:候选里独立来源 1 个 < 3(口径 author(缺作者退回 host,缺作者不计数);单源改写风险)",
+   "evidence_brief": [],
+   "targeted_repair": null,
+   "elapsed_s": 0.0
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "round": 1,
+   "draft_id": "technology-20261120130101-4071c0",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 10,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 9,
+     "articles_counted_by_host": 6,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     822,
+     653,
+     491,
+     422,
+     332
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 5,
+     "label_counts": {
+      "low_quality": 1,
+      "potential": 2,
+      "verified_viral": 1,
+      "normal": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 822,
+      "rank_score": 1.0,
+      "bm25": -9.856599329549507,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "ithome.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 653,
+      "rank_score": 0.7318,
+      "bm25": -9.358264214114676,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "扬子晚报",
+      "source_axis": "author"
+     },
+     {
+      "id": 491,
+      "rank_score": 0.7003,
+      "bm25": -8.965277834744429,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "富阳发布",
+      "source_axis": "author"
+     },
+     {
+      "id": 422,
+      "rank_score": 0.6753,
+      "bm25": -9.253271288943335,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "中国通信学会",
+      "source_axis": "author"
+     },
+     {
+      "id": 332,
+      "rank_score": 0.6665,
+      "bm25": -8.679519825473575,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "林伯南",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "全球人工智能支出将在2027年突破四万亿美元关口",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2027",
+      "dates:2027年"
+     ]
+    },
+    {
+     "claim": "市场规模将达到4.05万亿美元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4.05"
+     ]
+    },
+    {
+     "claim": "该金额约合27.06万亿元人民币",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:27.06"
+     ]
+    },
+    {
+     "claim": "江苏省政府办公厅近日印发《数字江苏建设 “十五五” 规划》",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "到2030年，江苏数字经济核心产业增加值占GDP比重达13.5%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2030",
+      "numbers:13.5%",
+      "dates:2030年"
+     ]
+    },
+    {
+     "claim": "数据产业规模目标设定为7000亿元左右",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:7000亿元"
+     ]
+    },
+    {
+     "claim": "江苏计划培育500个“人工智能＋”典型场景",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:500"
+     ]
+    },
+    {
+     "claim": "杭州云知声（杭州）智能科技有限公司自研的“山海智教大模型”正式完成国家互联网信息办公室生成式人工智能服务备案",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:智能科技有限公司"
+     ]
+    },
+    {
+     "claim": "到了2026年11月，这套政策出现了颇具讽刺意味的结果",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:11",
+      "dates:2026年11月"
+     ]
+    },
+    {
+     "claim": "2026首届文化智能国际会议暨第二届文化智能大会在北京召开",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026"
+     ]
+    },
+    {
+     "claim": "大会于11月7日至8日举行",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:7",
+      "numbers:8",
+      "dates:11月7日"
+     ]
+    },
+    {
+     "claim": "大会由北京邮电大学、中国通信学会、中国图学学会、中国图像图形学会联合主办",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:大会由北京邮电大学",
+      "orgs:中国通信学会",
+      "orgs:中国图学学会",
+      "orgs:中国图像图形学会"
+     ]
+    }
+   ],
+   "targeted_repair": {
+    "claims": 12,
+    "facts_failed": 1,
+    "located": 1,
+    "not_located": 0,
+    "attempts": 1,
+    "model_calls": 1,
+    "invalid_outputs": 0,
+    "anchor_erased": 0,
+    "fixed_first": 1,
+    "fixed_second": 0,
+    "unfixed": 0,
+    "rebound": 0,
+    "changed_sentences": 1,
+    "errors": 0,
+    "unfixed_shapes": {},
+    "details": [
+     {
+      "claim": "会议由北京邮电大学、中国通信学会等机构联合主办",
+      "shape": "fabricated(锚点全池找不到·脑补)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 422
+     }
+    ]
+   },
+   "elapsed_s": 390.6
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "round": 1,
+   "draft_id": "finance-20261120130306-50560b",
+   "status": "passed",
+   "passed": true,
+   "versions": 3,
+   "revisions": 1,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 8,
+    "distinct_hosts": 5,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 5,
+     "articles_counted_by_host": 10,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     13202,
+     13441,
+     1134,
+     10454,
+     4423
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 3,
+     "label_counts": {
+      "low_quality": 2,
+      "potential": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 13202,
+      "rank_score": 1.0,
+      "bm25": -15.587855965827746,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "nbd.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13441,
+      "rank_score": 0.7492,
+      "bm25": -14.373245595496563,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "nbd.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 1134,
+      "rank_score": 0.6271,
+      "bm25": -12.910425238241226,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "麦府学堂",
+      "source_axis": "author"
+     },
+     {
+      "id": 10454,
+      "rank_score": 0.6096,
+      "bm25": -13.697179751396725,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "浪迹天涯",
+      "source_axis": "author"
+     },
+     {
+      "id": 4423,
+      "rank_score": 0.5494,
+      "bm25": -13.405945153840822,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "朵拉",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "以ST交昂（SH600530为例，该公司在11月18日盘后发布《股票交易异常波动公告》",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:600530",
+      "numbers:11",
+      "numbers:18",
+      "dates:11月18日"
+     ]
+    },
+    {
+     "claim": "该股票在11月16日、11月17日、11月18日连续三个交易日内收盘价格涨幅偏离值累计超过20%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:16",
+      "numbers:17",
+      "numbers:18",
+      "numbers:20%",
+      "dates:11月16日"
+     ]
+    },
+    {
+     "claim": "公司同时提示前三季度净利下滑1149%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1149%"
+     ]
+    },
+    {
+     "claim": "未来十年，AI将重构信息获取门槛、风险定价模式及服务普惠化等核心环节",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "瑞·达利欧追问当体力和思维都能被AI替代人还剩下什么",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "复旦安联金融保险研究中心发布的年度研究报告指出，如今企业出海的风险更多表现为相互交织的复合形态",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:研究报告"
+     ]
+    },
+    {
+     "claim": "参考海外市场数据，头部家庭占据了市场绝大部分权益资产",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "targeted_repair": {
+    "claims": 14,
+    "facts_failed": 1,
+    "located": 1,
+    "not_located": 0,
+    "attempts": 1,
+    "model_calls": 1,
+    "invalid_outputs": 0,
+    "anchor_erased": 0,
+    "fixed_first": 1,
+    "fixed_second": 0,
+    "unfixed": 0,
+    "rebound": 0,
+    "changed_sentences": 1,
+    "errors": 0,
+    "unfixed_shapes": {},
+    "details": [
+     {
+      "claim": "瑞·达利欧对此提出了深刻追问",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 1134
+     }
+    ]
+   },
+   "elapsed_s": 165.9
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "round": 1,
+   "draft_id": "technology-20261120130555-f6dece",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 14,
+     "articles_counted_by_host": 1,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     465,
+     493,
+     966,
+     146,
+     43
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "normal": 5,
+      "potential": 6,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 465,
+      "rank_score": 1.06,
+      "bm25": -43.37452291024924,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "璀璨科学",
+      "source_axis": "author"
+     },
+     {
+      "id": 493,
+      "rank_score": 1.0015,
+      "bm25": -42.11624136321129,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "中国蓝新闻",
+      "source_axis": "author"
+     },
+     {
+      "id": 966,
+      "rank_score": 0.9727,
+      "bm25": -42.78821819162573,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "三眼观屿社",
+      "source_axis": "author"
+     },
+     {
+      "id": 146,
+      "rank_score": 0.9623,
+      "bm25": -38.69285611336374,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "忆梦说娱",
+      "source_axis": "author"
+     },
+     {
+      "id": 43,
+      "rank_score": 0.8706,
+      "bm25": -36.72188887366754,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "裂谷长河",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "11月17日，神舟二十四号船箭组合体从总装测试厂房出发",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:17",
+      "dates:11月17日"
+     ]
+    },
+    {
+     "claim": "目前已转运至发射塔架",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "天宫空间站将首次迎来6人短期在轨交接",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:6人"
+     ]
+    },
+    {
+     "claim": "首位巴基斯坦航天员将以载荷专家身份搭乘飞船入驻天宫",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这位巴基斯坦航天员在今年4月才完成选拔",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "dates:今年4月"
+     ]
+    },
+    {
+     "claim": "训练时间仅半年左右",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "此次发射采用了载人航天标志性的“三垂模式”，即垂直总装、垂直测试、垂直转运",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "神舟二十三号乘组中将有一名航天员留在太空，再执行半年左右的任务",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在轨时间满一年",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "一年期长期驻留人选至今仍没有最终敲定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "中国载人航天工程办公室发布了神舟二十四号任务标识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "标识最右边点缀着白色小巧的巴基斯坦素馨花",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "targeted_repair": {
+    "claims": 12,
+    "facts_failed": 1,
+    "located": 1,
+    "not_located": 0,
+    "attempts": 1,
+    "model_calls": 1,
+    "invalid_outputs": 0,
+    "anchor_erased": 0,
+    "fixed_first": 1,
+    "fixed_second": 0,
+    "unfixed": 0,
+    "rebound": 0,
+    "changed_sentences": 1,
+    "errors": 0,
+    "unfixed_shapes": {},
+    "details": [
+     {
+      "claim": "目前，这一创纪录连续在轨一年的人选仍未最终敲定",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 966
+     }
+    ]
+   },
+   "elapsed_s": 94.2
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "round": 1,
+   "draft_id": "social-20261120130739-c93d21",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     3747,
+     2603,
+     3978,
+     24425,
+     8741
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 11,
+     "label_counts": {
+      "normal": 5,
+      "potential": 2,
+      "low_quality": 3,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 3747,
+      "rank_score": 1.1769,
+      "bm25": -55.56083310246892,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "泉边静听泉声",
+      "source_axis": "author"
+     },
+     {
+      "id": 2603,
+      "rank_score": 1.06,
+      "bm25": -55.6296223383393,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "岁月静好",
+      "source_axis": "author"
+     },
+     {
+      "id": 3978,
+      "rank_score": 0.5795,
+      "bm25": -39.7238162833638,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天使的眼泪",
+      "source_axis": "author"
+     },
+     {
+      "id": 24425,
+      "rank_score": 0.5512,
+      "bm25": -45.72278346559657,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "阿泽观民生百态",
+      "source_axis": "author"
+     },
+     {
+      "id": 8741,
+      "rank_score": 0.5016,
+      "bm25": -44.62595448605988,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "好事好运来",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "2025年1月1日起，渐进式延迟退休正式落地",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:1",
+      "dates:2025年1月1日"
+     ]
+    },
+    {
+     "claim": "这项政策将用15年时间过渡，到2039年前后全部到位",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:15",
+      "numbers:2039",
+      "dates:2039年"
+     ]
+    },
+    {
+     "claim": "新规则下，男职工最终退休年龄为63岁",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:63岁"
+     ]
+    },
+    {
+     "claim": "女管理技术岗最终退休年龄为58岁",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:58岁"
+     ]
+    },
+    {
+     "claim": "女工人岗最终退休年龄为55岁",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:55岁"
+     ]
+    },
+    {
+     "claim": "政策原则是“小步调整、弹性实施、分类推进”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "按韶关这边的规定，没在单位干过的纯灵活就业女性，55 岁办退休",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:55 岁"
+     ]
+    },
+    {
+     "claim": "她跑了4趟社保局才办完手续",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4"
+     ]
+    },
+    {
+     "claim": "1997年7月16日，国务院发布国发〔1997〕26号文件",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1997",
+      "numbers:7",
+      "numbers:16",
+      "numbers:26",
+      "dates:1997年7月16日"
+     ]
+    },
+    {
+     "claim": "该文件决定建立统一的企业职工基本养老保险制度",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "一位53岁的女性退休后学习AI做图",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:53岁"
+     ]
+    },
+    {
+     "claim": "我姐53岁退休学AI做图，3个月月入4000",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:53岁",
+      "numbers:3",
+      "numbers:4000"
+     ]
+    }
+   ],
+   "targeted_repair": {
+    "claims": 12,
+    "facts_failed": 2,
+    "located": 2,
+    "not_located": 0,
+    "attempts": 2,
+    "model_calls": 2,
+    "invalid_outputs": 0,
+    "anchor_erased": 0,
+    "fixed_first": 2,
+    "fixed_second": 0,
+    "unfixed": 0,
+    "rebound": 0,
+    "changed_sentences": 2,
+    "errors": 0,
+    "unfixed_shapes": {},
+    "details": [
+     {
+      "claim": "有案例显示，一位55岁的女性因中间断缴且换过城市打工，最终只能按55岁办理退休",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 3978
+     },
+     {
+      "claim": "她在3个月内实现了月入4000元",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 8741
+     }
+    ]
+   },
+   "elapsed_s": 116.2
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "round": 1,
+   "draft_id": "health-20261120130934-e4c954",
+   "status": "rejected",
+   "passed": false,
+   "versions": 5,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     97,
+     160,
+     112,
+     164,
+     88
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 7,
+     "label_counts": {
+      "normal": 1,
+      "low_quality": 2,
+      "potential": 4
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 97,
+      "rank_score": 1.0111,
+      "bm25": -3.279788036298225,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "老耿来聊事",
+      "source_axis": "author"
+     },
+     {
+      "id": 160,
+      "rank_score": 1.0,
+      "bm25": -3.351125785775977,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "央视新闻",
+      "source_axis": "author"
+     },
+     {
+      "id": 112,
+      "rank_score": 0.7808,
+      "bm25": -2.7688272932533344,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "富书",
+      "source_axis": "author"
+     },
+     {
+      "id": 164,
+      "rank_score": 0.7702,
+      "bm25": -3.0158995212081274,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "张守小科普",
+      "source_axis": "author"
+     },
+     {
+      "id": 88,
+      "rank_score": 0.733,
+      "bm25": -2.6992080172769612,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "老张健康论",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 致命问题:内容截断/语句不完整。第四段中'饭后“三不急”'后紧接着重复且未闭合的引语'专家建议，平时应做到——睡前“三不宜”、晨起“三不要”、饭后“三不急'，缺少右引号及后续解释，属于明显的编辑错误或内容截断",
+   "critical": [
+    "致命问题:内容截断/语句不完整。第四段中'饭后“三不急”'后紧接着重复且未闭合的引语'专家建议，平时应做到——睡前“三不宜”、晨起“三不要”、饭后“三不急'，缺少右引号及后续解释，属于明显的编辑错误或内容截断"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "致命问题:内容截断/语句不完整。第四段中'饭后“三不急”'后紧接着重复且未闭合的引语'专家建议，平时应做到——睡前“三不宜”、晨起“三不要”、饭后“三不急'，缺少右引号及后续解释，属于明显的编辑错误或内容截断",
+   "evidence_brief": [
+    {
+     "claim": "先说排在前面的长期睡不好",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "实则世卫组织早已调研证实，人类健康与寿命，60%取决于日常生活习惯，先天基因仅占15%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:60%",
+      "numbers:15%",
+      "orgs:实则世卫组织"
+     ]
+    },
+    {
+     "claim": "一般推荐在23点前入睡，进餐时间最好不要迟于晚上8点 [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:23",
+      "numbers:8"
+     ]
+    },
+    {
+     "claim": "此外，睡前4小时内应避免摄入高油高糖、辛辣刺激以及含咖啡因的食物和饮品 [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4"
+     ]
+    },
+    {
+     "claim": "专家建议平时应做到晨起“三不要”、饭后“三不急” [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "专家建议，平时应做到——睡前“三不宜”、晨起“三不要”、饭后“三不急",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "门诊里常能遇到这样一群人：五十岁上下，他们极度关注饮食禁忌，甚至第一句话便询问“肉都不能碰了”，却往往忽略了久坐窝在沙发里等生活习惯对健康的潜在影响 [4]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "targeted_repair": {
+    "claims": 24,
+    "facts_failed": 7,
+    "located": 7,
+    "not_located": 0,
+    "attempts": 7,
+    "model_calls": 7,
+    "invalid_outputs": 0,
+    "anchor_erased": 0,
+    "fixed_first": 7,
+    "fixed_second": 0,
+    "unfixed": 0,
+    "rebound": 1,
+    "changed_sentences": 7,
+    "errors": 0,
+    "unfixed_shapes": {},
+    "details": [
+     {
+      "claim": "根据临床观察，长期睡眠不足是排在首位的伤身行为",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 97
+     },
+     {
+      "claim": "紧随其后的是焦虑情绪与久坐不动",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 97
+     },
+     {
+      "claim": "世界卫生组织的研究早已揭示真相：生活方式对健康和寿命有着重要影响",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 160
+     },
+     {
+      "claim": "在门诊中常遇到血脂异常的患者，他们往往将问题归咎于饮食",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 164
+     },
+     {
+      "claim": "若要对常见的伤身行为进行排名，长期睡眠不足往往位居首位 [1]。",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 97
+     },
+     {
+      "claim": "世界卫生组织的研究表明，生活方式对人们的健康和寿命有着重要影响，人类健康与寿命中60%取决于日常生活习惯，先天基因仅占1",
+      "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 112
+     },
+     {
+      "claim": "具体而言，晨起“三不要”指：不要猛然起床（避免体位性低血压）、不要立即剧烈运动（给心血管缓冲时间）、不要空腹喝浓茶或咖啡",
+      "shape": "quote_unbound(引句未绑定)",
+      "outcome": "fixed_round_1",
+      "attempts": 1,
+      "new_article_id": 160
+     }
+    ]
+   },
+   "elapsed_s": 176.6
+  }
+ ],
+ "summary": {
+  "total_runs": 6,
+  "passed": 4,
+  "pass_rate": 0.6667,
+  "primary_distribution": {
+   "passed": {
+    "n": 4,
+    "share": 0.6667
+   },
+   "material.insufficient": {
+    "n": 1,
+    "share": 0.1667
+   },
+   "other": {
+    "n": 1,
+    "share": 0.1667
+   }
+  },
+  "rule_hit_totals": {},
+  "by_category": {
+   "health": {
+    "runs": 1,
+    "passed": 0,
+    "primary": {
+     "other": 1
+    }
+   },
+   "technology": {
+    "runs": 3,
+    "passed": 2,
+    "primary": {
+     "material.insufficient": 1,
+     "passed": 2
+    }
+   },
+   "finance": {
+    "runs": 1,
+    "passed": 1,
+    "primary": {
+     "passed": 1
+    }
+   },
+   "social": {
+    "runs": 1,
+    "passed": 1,
+    "primary": {
+     "passed": 1
+    }
+   }
+  }
+ }
+}

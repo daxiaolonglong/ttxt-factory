@@ -10,6 +10,9 @@ __pycache__/
 
 # ---- 浏览器 profile 与 Playwright 工件(本机会话数据,绝不入库)----
 02_crawler/.browser/
+# ---- R60 G1:头条自有账号 profile 与取数节流状态(登录态=账号凭据,绝不入库)----
+02_crawler/.account/
+00_control/account_metrics_state.json
 
 # ---- Worker 运行时锁与软停标志(本机进程状态,绝不入库)----
 00_control/worker.lock
