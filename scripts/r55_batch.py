@@ -253,23 +253,46 @@ def per_item_list(pool: list[dict[str, object]], inventory: dict[str, list[str]]
     meta = receipt.get("meta") or {}
     filtered_out = int(meta.get("keyword_filtered_out") or 0)
     article_errors = int(meta.get("article_errors") or 0)
-    # 回执只有聚合的 keyword_hits(词→条数),没有逐 URL 归属;命中词按标题级预检给出,
+    # R56:拒收留痕现在逐条进 meta_json.rejected(url/title/reason/basis),
+    # 被关键词闸/长度闸挡掉的条目在这里能逐 URL 对上 —— R55 的缺陷②(聚合计数无从归属)关闭。
+    rejected_by_url = {
+        clean.normalize_url(str(rec.get("url") or "")): rec
+        for rec in (meta.get("rejected") or [])
+    }
+    # 回执只有聚合的 keyword_hits(词→命中位置明细),没有逐 URL 归属;命中词按标题级预检给出,
     # 正文级命中在逐篇清单里只能由"入库/被卡"的计数反推,故 reason 里注明推断依据。
     actual_hits: dict[str, str] = {}
     rows: list[dict[str, object]] = []
     for index, entry in enumerate(pool[:10]):
         url_normalized = str(entry["url_normalized"])
         hit = entry["keyword_hit_title_only"] or actual_hits.get(url_normalized)
+        keyword_name = hit["keyword"] if isinstance(hit, dict) else hit
         inserted = inserted_by_url.get(url_normalized)
+        trace = rejected_by_url.get(url_normalized)
         if inserted is not None:
             disposition = "inserted"
             reason = (
-                f"关键词命中「{hit}」→ 新行入库"
-                if hit
+                f"关键词命中「{keyword_name}」→ 新行入库"
+                if keyword_name
                 else "关键词命中在正文(回执 keyword_hits 聚合),标题级未命中 → 新行入库"
             )
             article_id = inserted["id"]
             content_len = inserted["content_len"]
+        elif trace is not None:
+            disposition = "rejected"
+            basis = trace.get("basis") or {}
+            if trace.get("reason") == "keyword_no_hit":
+                reason = (
+                    f"keyword_no_hit(标题+正文未命中本轮关键词;闸门计数={filtered_out},"
+                    f"判定范围={basis.get('scope')},正文长={basis.get('body_len')})"
+                )
+            else:
+                reason = (
+                    f"body_below_intake_line(正文 {basis.get('body_len')} 字 < 入库拒收线 "
+                    f"{basis.get('threshold')} 字)"
+                )
+            article_id = None
+            content_len = basis.get("body_len")
         elif url_normalized in today_urls:
             disposition = "rejected"
             reason = "duplicate_url:当日已采 URL(预检名单命中,闸门拒绝,未改动既有行)"
@@ -396,6 +419,7 @@ def main() -> int:
         print(
             f"[job] {receipts[-1]['job_id']} ok={receipts[-1]['ok']} inserted={receipts[-1].get('inserted')} "
             f"duplicates={receipts[-1].get('duplicates')} keyword_filtered_out={receipts[-1].get('keyword_filtered_out')} "
+            f"body_rejected={receipts[-1].get('body_rejected')} rejected_trace={len((receipts[-1].get('meta') or {}).get('rejected') or [])} "
             f"bodies_upgraded={receipts[-1].get('bodies_upgraded')} error={receipts[-1].get('error')}",
             flush=True,
         )
@@ -408,7 +432,7 @@ def main() -> int:
 
     receipt_counts = {
         key: sum(int((r.get("meta") or {}).get(key) or 0) for r in receipts)
-        for key in ("inserted", "duplicates", "keyword_filtered_out", "bodies_upgraded", "bodies_kept_existing", "url_identity_conflict", "url_no_item_link", "article_errors", "pages_fetched")
+        for key in ("inserted", "duplicates", "keyword_filtered_out", "body_rejected", "bodies_upgraded", "bodies_kept_existing", "url_identity_conflict", "url_no_item_link", "article_errors", "pages_fetched")
     }
     _dump("summary.json", {
         "started_at": started_at,

@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 from ttxt import config as cfg
 from ttxt.logging import get_logger
 
-from . import clean, extract, fetcher, pipeline, robots, sources, store
+from . import cleaner, clean, extract, fetcher, pipeline, robots, sources, store
 
 LOG = get_logger("crawler.runner")
 
@@ -177,9 +177,10 @@ def _enrich_item_bodies(
             items=len(items),
             detail=(
                 f"来源 {source.id} 的正文补全预算 {cap} 小于本轮条目数 {len(items)},"
-                f"其余 {len(items) - cap} 条只能以摘要级正文入库(completeness=short)。"
+                f"其余 {len(items) - cap} 条只能以摘要级正文到达入库闸,"
+                "大概率被入库拒收线(REJECT 留痕,见 meta_json.rejected)。"
                 "整改:把 max_item_pages 提到 ≥ max_articles,或降低 max_articles ——"
-                "明知这一轮能补正文却先入库摘要级语料,等于把语料质量问题推给以后"
+                "明知这一轮补不齐正文还去采,等于把抓取的字节与拒收噪声留给入口闸去消化"
             ),
         )
     if attempted and enriched == 0 and errors >= len(attempted) and weak_attempted:
@@ -359,11 +360,14 @@ def _execute_job(
             else:
                 raise RuntimeError(f"unsupported source kind: {source.kind}")
 
-            # P20:配额封顶与关键词闸门必须排在正文补全**之前**(实测 2026-11-15 job 66:
-            # feed 30 条 → 闸门扔掉 19 条,却先为这 30 条抓了 20 个文章页,33 秒网络全部
-            # 花在"本次不入库"的条目上,还占满了补全预算,真正入库的 2 条反而没预算)。
-            # 顺带修回执诚实性:闸门排在配额之后,``feed_total`` 才是订阅源真实条数,
-            # ``items_extracted`` 仍是"进入入库流程的条数"(test_p12:612 的既有口径)。
+            # P20→R56(2026-11-20,负责人指令):关键词闸门改到正文补全**之后**判定。
+            # 旧 P20 顺序(闸门排在补全前)保护的是"抓取预算不无界花在候选条目上"这一
+            # 真实意图,但代价是闸门实际只见到标题+列表摘要,命中率不反映选择性
+            # (R55 job 386 实证:多篇标题党靠"数据/全球"宽词命中,正文喂不了爆款判定)。
+            # 预算保护由三道边界继承,各有测试钉死:①``limit``/``max_articles`` 封顶
+            # 仍排在补全之前;②逐条补全页数 ``max_item_pages`` 封顶不变;③逐页 robots
+            # 与限速不变。代价如实:RSS/HTML 源的补全预算会花在候选条目上(toutiao 系
+            # 来源正文在 collect 内抓取,无此项额外成本)。
             if limit:
                 items = items[:limit]
             elif source.max_articles > 0:
@@ -371,39 +375,93 @@ def _execute_job(
                 summary["feed_total"] = len(items)
                 items = items[: max(1, int(source.max_articles))]
 
-            # P19 关键词闸门(入库侧):计划阶段决定去哪儿采,这里决定采回来的哪些算本轮要的。
-            # 不命中的条目本次不入库,但必须计数 + 记日志,不得静默丢弃。
-            # 代价诚实说明:闸门跑在补正文之前,只按**标题 + 订阅摘要**判定,
-            # 正文里才出现的关键词这一轮抓不到;要精确命中就配 url_template 走检索式来源。
-            keyword_filter = [str(k).strip() for k in (params.get("keyword_filter") or []) if str(k).strip()]
-            if keyword_filter:
-                kept: list[extract.ExtractedItem] = []
-                hits: dict[str, int] = {}
-                for item in items:
-                    hit = extract.keyword_hit(item, keyword_filter)
-                    if hit is None:
-                        continue
-                    kept.append(item)
-                    hits[hit] = hits.get(hit, 0) + 1
-                summary["keyword_filtered_out"] = len(items) - len(kept)
-                summary["keyword_hits"] = hits
-                if len(kept) < len(items):
-                    LOG.info(
-                        "crawl.keyword_filter",
-                        source=source.id,
-                        keywords=keyword_filter,
-                        kept=len(kept),
-                        filtered=summary["keyword_filtered_out"],
-                        detail="闸门只看标题与订阅摘要(补正文之前);需要正文级命中请配 url_template 检索式来源",
-                    )
-                items = kept
-
             # P19:正文补全在浏览器会话**内**执行(render=browser 的来源复用同一个会话,
             # 不会每条新开一个浏览器 —— 实测 Edge 冷启动 2s+/条,任务会失控)
             if source.fetch_item_pages:
                 _enrich_item_bodies(
                     items, source, effective_url, ua, rules_cache, delay, summary, browser_session
                 )
+
+        # ---- R56 入口闸组(正文已到手):关键词闸 → 正文长度拒收线,按序判定。 ----
+        # 两条闸都在 insert_items 之前;每条被拒条目在 ``rejected`` 里逐条留痕
+        # (URL、标题、拒因、判定依据),随执行回执进 crawl_jobs.meta_json ——
+        # 只计数事后无法复查,那是观测缺陷(R55 报告 4.6②),不是设计取舍。
+
+        # P19 关键词闸门(入库侧):计划阶段决定去哪儿采,这里决定采回来的哪些算本轮要的。
+        # 不命中的条目本次不入库,但必须计数 + 记日志 + 逐条留痕,不得静默丢弃。
+        # R56:判定发生在正文补全之后,标题党在"正文也无关"处现形;命中位置
+        # (标题/正文)随 ``keyword_hits`` 留痕,摘要位仅展示、不参与放行。
+        keyword_filter = [str(k).strip() for k in (params.get("keyword_filter") or []) if str(k).strip()]
+        rejected: list[dict[str, object]] = []
+        if keyword_filter:
+            kept: list[extract.ExtractedItem] = []
+            hits: dict[str, dict[str, int]] = {}
+            for item in items:
+                hit = extract.keyword_hit(item, keyword_filter)
+                if hit is None:
+                    rejected.append(
+                        {
+                            "url": item.url,
+                            "title": str(item.title or "")[:120],
+                            "reason": "keyword_no_hit",
+                            "basis": {
+                                "keywords": keyword_filter,
+                                "scope": "title+content",
+                                "body_len": cleaner.usable_length(item.content),
+                            },
+                        }
+                    )
+                    continue
+                kept.append(item)
+                stat = hits.setdefault(hit["keyword"], {"count": 0, "in_title": 0, "in_content": 0})
+                stat["count"] += 1
+                if hit["in_title"]:
+                    stat["in_title"] += 1
+                if hit["in_content"]:
+                    stat["in_content"] += 1
+            summary["keyword_filtered_out"] = len(items) - len(kept)
+            summary["keyword_hits"] = hits
+            if len(kept) < len(items):
+                LOG.info(
+                    "crawl.keyword_filter",
+                    source=source.id,
+                    keywords=keyword_filter,
+                    kept=len(kept),
+                    filtered=summary["keyword_filtered_out"],
+                    detail="闸门在正文补全之后按标题+正文判定;命中位置明细见 meta.keyword_hits(摘要位仅展示)",
+                )
+            items = kept
+
+        # R56 正文长度拒收线:阈值单一来源 ``cleaner.MIN_INTAKE_BODY_CHARS``(规则 63)。
+        # 判定口径与完整度三档一致(strip 后字符数)。低于线的不进正式 articles,逐条
+        # 留痕拒因与依据。本线对**所有**采集任务生效(含调度器例行 job):今后例行
+        # job 的 ``inserted`` 下降、``body_rejected`` 出现,是预期结果,不是故障。
+        passed: list[extract.ExtractedItem] = []
+        for item in items:
+            body_len = cleaner.usable_length(item.content)
+            if body_len < cleaner.MIN_INTAKE_BODY_CHARS:
+                rejected.append(
+                    {
+                        "url": item.url,
+                        "title": str(item.title or "")[:120],
+                        "reason": "body_below_intake_line",
+                        "basis": {"body_len": body_len, "threshold": cleaner.MIN_INTAKE_BODY_CHARS},
+                    }
+                )
+            else:
+                passed.append(item)
+        summary["body_rejected"] = len(items) - len(passed)
+        items = passed
+        if rejected:
+            summary["rejected"] = rejected
+            LOG.info(
+                "crawl.intake_rejected",
+                source=source.id,
+                category=target_category,
+                keyword_filtered=summary.get("keyword_filtered_out", 0),
+                body_rejected=summary["body_rejected"],
+                detail="被拒条目未入库,逐条留痕见 meta_json.rejected(URL/标题/拒因/判定依据)",
+            )
 
         summary["items_extracted"] = len(items)
         # C-2:来源页/订阅地址不是文章身份(html 列表页把它的 URL 赋给每一条),

@@ -685,9 +685,12 @@ def test_rss_source_max_articles_caps_full_feed(tmp_path, monkeypatch, system_db
     未显式传 limit 时必须按来源 max_articles 封顶,并把 feed_total 写进观测,
     防止单个源一次灌满类目库。
     """
+    # R56:feed 正文必须过入库拒收线(cleaner.MIN_INTAKE_BODY_CHARS),
+    # 加宽假语料,断言不变(配额封顶/观测口径才是本测试钉的东西)。
+    feed_body = "这里是用于回归测试的完整正文示例段落。" * 45  # 855 字
     items_xml = "".join(
         f"<item><title>标题{i}</title><link>https://demo.example.com/a/{i}/</link>"
-        f"<description>正文内容{i}</description>"
+        f"<description>{feed_body}{i}</description>"
         f"<pubDate>Wed, 12 Nov 2026 10:00:0{i} +0800</pubDate></item>"
         for i in range(6)
     )
@@ -757,8 +760,11 @@ def test_toutiao_partial_article_errors_still_done(monkeypatch, system_db, fake_
     monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
     monkeypatch.setattr(
         toutiao, "collect",
-        _toutiao_collect_stub(items=[SimpleNamespace(title="t", url="https://demo.example.com/a/1/")],
-                              pages=4, links=5, errors=2),
+        # content 是真实 collect 产物的固有字段(R56 长度闸会读它):补厚到拒收线以上。
+        _toutiao_collect_stub(items=[SimpleNamespace(
+            title="t", url="https://demo.example.com/a/1/",
+            content="这里是用于回归测试的完整正文示例段落。" * 45)],
+            pages=4, links=5, errors=2),
     )
 
     results = runner.run_queued(limit=1)

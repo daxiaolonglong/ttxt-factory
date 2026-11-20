@@ -33,7 +33,7 @@ import pytest
 
 from ttxt import config as cfg
 from ttxt import db
-from ttxt.crawler import extract, keyword_crawl, robots, runner
+from ttxt.crawler import cleaner, extract, keyword_crawl, robots, runner
 from ttxt.crawler import sources as source_loader
 from ttxt.crawler import store
 
@@ -41,6 +41,12 @@ FEED_URL = "https://demo.example.com/feed.xml"
 SEARCH_URL = "https://demo.example.com/search.xml?q=%E6%B0%91%E7%94%9F"
 OTHER_HOST = "https://other.example.com/feed.xml"
 ARTICLE_URL = "https://demo.example.com/a/1/"
+
+# R56 假语料纪律:RSS description/文章正文必须 ≥ cleaner.MIN_INTAKE_BODY_CHARS(800),
+# 否则会被入库拒收线挡下 —— 只许把数据补厚,不许断言放宽,更不许迁就假数据调低阈值。
+# 填充词刻意避开本文件全部测试关键词(民生/养老金/AI 医疗/医保/城市治理),
+# 否则"无关"条目会被填充词自己命中。
+BODY_FILLER = "这里是用于回归测试的完整正文示例段落。" * 45  # 855 字
 
 
 # ---------------------------------------------------------------- 替身基础设施
@@ -150,10 +156,15 @@ def formal_entry(**overrides) -> dict:
     return rss_entry(**overrides)
 
 
-def feed_xml(titles: tuple[str, ...] = ("民生新闻甲", "无关内容乙")) -> str:
+def feed_xml(
+    titles: tuple[str, ...] = ("民生新闻甲", "无关内容乙"),
+    descriptions: tuple[str, ...] | None = None,
+) -> str:
+    """RSS 假 feed。默认 description 用 ≥800 字填充词——过 R56 入库拒收线;
+    只有故意测"摘要级正文"路径(all_failed)时才传 ``descriptions`` 短文本。"""
     items = "".join(
         f"<item><title>{title}</title><link>https://demo.example.com/a/{index}/</link>"
-        f"<description>短摘要{index}</description>"
+        f"<description>{descriptions[index - 1] if descriptions else BODY_FILLER + str(index)}</description>"
         f"<pubDate>Wed, 15 Nov 2026 10:00:0{index} +0800</pubDate></item>"
         for index, title in enumerate(titles, start=1)
     )
@@ -252,7 +263,39 @@ def test_keyword_hit_matches_title_and_content_case_insensitive():
         published_at=None,
         url="https://demo.example.com/a/1/",
     )
-    assert extract.keyword_hit(item, ["AI 医疗"]) == "AI 医疗"
+    hit = extract.keyword_hit(item, ["AI 医疗"])
+    assert hit is not None
+    assert hit == {
+        "keyword": "AI 医疗",
+        "in_title": True,
+        "in_content": True,
+        "in_excerpt": True,
+    }
+    # R56:命中位置必须能区分 —— 标题级命中与正文级命中在回执里可分开归因
+    title_only = extract.ExtractedItem(
+        title="养老金上调方案公布",
+        content="与主题无关的正文段落",
+        excerpt="与主题无关的正文段落",
+        author=None,
+        published_at=None,
+        url="https://demo.example.com/a/2/",
+    )
+    assert extract.keyword_hit(title_only, ["养老金"]) == {
+        "keyword": "养老金",
+        "in_title": True,
+        "in_content": False,
+        "in_excerpt": False,
+    }
+    # 摘要位只留痕、不参与放行:仅摘要含词(标题/正文都不含)仍然不算命中
+    excerpt_only = extract.ExtractedItem(
+        title="无关标题",
+        content="无关正文",
+        excerpt="摘要里出现养老金",
+        author=None,
+        published_at=None,
+        url="https://demo.example.com/a/3/",
+    )
+    assert extract.keyword_hit(excerpt_only, ["养老金"]) is None
     assert extract.keyword_hit(item, ["医保"]) is None
     assert extract.keyword_hit(item, []) is None
 
@@ -301,10 +344,23 @@ def test_keyword_plan_reaches_execution_and_filters(tmp_path, monkeypatch, syste
     assert capture_insert[0]["page_url"] == SEARCH_URL
     assert [item.title for item in capture_insert[0]["items"]] == ["民生新闻甲"]
     assert results[0]["keyword_filtered_out"] == 1
-    assert results[0]["keyword_hits"] == {"民生": 1}
+    assert results[0]["keyword_hits"] == {"民生": {"count": 1, "in_title": 1, "in_content": 0}}
     assert results[0]["plan"]["url_override"] == SEARCH_URL
     meta = json.loads(_job_row(system_db, job)["meta_json"])
     assert meta["plan"]["keywords"] == ["民生"], "meta_json 被回执覆盖,计划必须回显在回执里"
+    # R56 留痕:被关键词闸挡掉的条目必须逐条可查(URL/标题/拒因/判定依据),不许只计数
+    assert meta["rejected"] == [
+        {
+            "url": "https://demo.example.com/a/2/",
+            "title": "无关内容乙",
+            "reason": "keyword_no_hit",
+            "basis": {
+                "keywords": ["民生"],
+                "scope": "title+content",
+                "body_len": len(BODY_FILLER) + 1,
+            },
+        }
+    ]
 
 
 def test_url_override_cross_host_is_rejected(tmp_path, monkeypatch, system_db, capture_insert):
@@ -340,7 +396,7 @@ def test_item_pages_enrich_body_and_count(tmp_path, monkeypatch, system_db, capt
         monkeypatch,
         [rss_entry(fetch_item_pages=True, max_item_pages=2, item_content_selectors=["div.left_zw"])],
     )
-    article_html = "<html><body><div class='left_zw'>" + "中新网完整正文内容。" * 25 + "</div></body></html>"
+    article_html = "<html><body><div class='left_zw'>" + "中新网完整正文内容。" * 100 + "</div></body></html>"
     recorder = FetchRecorder(
         {FEED_URL: SimpleNamespace(text=feed_xml()), ARTICLE_URL: _real_page(article_html)}
     )
@@ -362,7 +418,7 @@ def test_item_page_cap_is_honest(tmp_path, monkeypatch, system_db, capture_inser
         monkeypatch,
         [rss_entry(fetch_item_pages=True, max_item_pages=1, item_content_selectors=["div.left_zw"])],
     )
-    article_html = "<html><body><div class='left_zw'>" + "正文内容一整段。" * 30 + "</div></body></html>"
+    article_html = "<html><body><div class='left_zw'>" + "正文内容一整段。" * 120 + "</div></body></html>"
     recorder = FetchRecorder(
         {FEED_URL: SimpleNamespace(text=feed_xml(("民生甲", "民生乙", "民生丙"))), ARTICLE_URL: _real_page(article_html)}
     )
@@ -376,23 +432,81 @@ def test_item_page_cap_is_honest(tmp_path, monkeypatch, system_db, capture_inser
     assert len([call for call in recorder.calls if call.endswith("/a/1/")]) == 1
 
 
-def test_keyword_gate_runs_before_body_enrichment(tmp_path, monkeypatch, system_db, capture_insert):
-    """P20:关键词闸门必须排在正文补全**之前**(实测 job 66 的浪费 + 错报)。
+def test_keyword_gate_judges_after_body_enrichment(tmp_path, monkeypatch, system_db, capture_insert):
+    """R56(负责人指令):关键词闸门改到正文补全**之后**判定(旧 P20 顺序作废)。
 
-    实测 2026-11-15 15:53(job 66):feed 30 条,闸门扔掉 19 条,但补正文跑在闸门前面,
-    于是为这 30 条抓了 20 个文章页(33 秒真实网络成本),补全预算全花在"本轮不入库"的
-    条目上;回执还把闸门后的数量写进 ``feed_total``,看起来像"订阅源只剩 11 条"。
+    旧 P20 把闸门排在补全前,代价是闸门只见到标题+列表摘要——R55 job 386 实证:
+    宽词命中全部发生在标题/摘要层,标题党进了库、正文喂不了爆款判定。现在正文到手
+    之后判:标题不含主题词、正文含的必须放行;"标题正文都无关"的仍然拒(判定集合
+    不变,不放宽)。预算保护意图由 ``test_body_enrichment_budget_still_capped_after_gate_move``
+    继承,不是删掉旧断言。
     """
     write_sources(
         tmp_path,
         monkeypatch,
         [rss_entry(fetch_item_pages=True, max_item_pages=10, item_content_selectors=["div.left_zw"])],
     )
-    body_html = "<html><body><div class='left_zw'>" + "中新网完整正文内容。" * 25 + "</div></body></html>"
+    body_kw = "<html><body><div class='left_zw'>民生领域深度观察:" + "中新网完整正文内容。" * 100 + "</div></body></html>"
+    body_plain = "<html><body><div class='left_zw'>" + "中新网完整正文内容。" * 100 + "</div></body></html>"
     pages: dict[str, object] = {
-        FEED_URL: SimpleNamespace(text=feed_xml(("民生新闻甲", "无关内容乙", "无关内容丙")))
+        # 甲:标题不含"民生"(旧顺序下会被误杀),正文含
+        FEED_URL: SimpleNamespace(text=feed_xml(("新闻甲", "无关内容乙")))
     }
-    for index in (1, 2, 3):
+    pages["https://demo.example.com/a/1/"] = _real_page(body_kw)
+    pages["https://demo.example.com/a/2/"] = _real_page(body_plain)
+    recorder = FetchRecorder(pages)
+    monkeypatch.setattr("ttxt.crawler.fetcher.fetch_page", recorder)
+    monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
+    job = store.create_crawl_job(
+        "fake_rss", "demo", db_path=system_db, meta={"keyword_filter": ["民生"], "keywords": ["民生"]}
+    )
+
+    results = runner.run_queued(limit=1)
+    assert results and results[0]["ok"] is True
+    assert results[0]["feed_total"] == 2, "feed_total 仍是订阅源真实条数"
+    assert results[0]["keyword_filtered_out"] == 1
+    assert [item.title for item in capture_insert[0]["items"]] == ["新闻甲"], (
+        "正文命中的条目必须放行——这正是闸门后移要救回来的那一类"
+    )
+    assert results[0]["keyword_hits"] == {"民生": {"count": 1, "in_title": 0, "in_content": 1}}, (
+        "命中位置要能区分:这一条是正文级命中,不是标题级"
+    )
+    # 诚实代价:补全发生在闸门前,"无关内容乙"的文章页也被抓了(有 max_item_pages 封顶兜底)
+    assert recorder.calls == [FEED_URL, "https://demo.example.com/a/1/", "https://demo.example.com/a/2/"]
+    meta = json.loads(_job_row(system_db, job)["meta_json"])
+    assert meta["rejected"] == [
+        {
+            "url": "https://demo.example.com/a/2/",
+            "title": "无关内容乙",
+            "reason": "keyword_no_hit",
+            "basis": {
+                "keywords": ["民生"],
+                "scope": "title+content",
+                "body_len": len("中新网完整正文内容。" * 100),
+            },
+        }
+    ], "正文到手后仍未命中 ⇒ 拒收,且留痕必须带上判定时的正文长度"
+
+
+def test_body_enrichment_budget_still_capped_after_gate_move(tmp_path, monkeypatch, system_db, capture_insert):
+    """R56 继承旧 P20 的预算保护意图:闸门后移不得烧穿抓取预算(负责人放行的条件)。
+
+    钉死两道仍然排在补全之前的边界:
+    ①``max_articles`` 封顶排在补全前——feed 4 条,只有前 3 条进入补全环节(a/4 绝不抓);
+    ②``max_item_pages`` 封顶不变——候选 3 条、预算 2,只抓 2 个文章页(a/3 不抓)。
+    旧 P20 的"闸门先于补全"不再承载这个保护,由这两道边界接手,本测试即其回归。
+    """
+    write_sources(
+        tmp_path,
+        monkeypatch,
+        [rss_entry(fetch_item_pages=True, max_item_pages=2, max_articles=3,
+                   item_content_selectors=["div.left_zw"])],
+    )
+    body_html = "<html><body><div class='left_zw'>" + "中新网完整正文内容。" * 100 + "</div></body></html>"
+    pages: dict[str, object] = {
+        FEED_URL: SimpleNamespace(text=feed_xml(("民生甲", "民生乙", "无关丙", "无关丁")))
+    }
+    for index in (1, 2, 3, 4):
         pages[f"https://demo.example.com/a/{index}/"] = _real_page(body_html)
     recorder = FetchRecorder(pages)
     monkeypatch.setattr("ttxt.crawler.fetcher.fetch_page", recorder)
@@ -403,13 +517,54 @@ def test_keyword_gate_runs_before_body_enrichment(tmp_path, monkeypatch, system_
 
     results = runner.run_queued(limit=1)
     assert results and results[0]["ok"] is True
-    assert results[0]["feed_total"] == 3, "feed_total 必须是订阅源真实条数,不是闸门后的剩余"
-    assert results[0]["keyword_filtered_out"] == 2
-    assert recorder.calls == [FEED_URL, "https://demo.example.com/a/1/"], (
-        "闸门没命中的条目不得抓文章页:每一次抓取都是真实网络与时间成本,还占满补全预算"
+    assert results[0]["feed_total"] == 4, "封顶之前的订阅源真实条数必须照实记"
+    assert recorder.calls == [FEED_URL, "https://demo.example.com/a/1/", "https://demo.example.com/a/2/"], (
+        "a/4 被 max_articles 挡在补全之前、a/3 被 max_item_pages 封顶挡下——"
+        "闸门后移后这两道边界仍然不得突破"
     )
-    assert results[0]["item_pages_fetched"] == 1 and results[0]["items_enriched"] == 1
-    assert len(capture_insert[0]["items"]) == 1
+    assert results[0]["item_pages_capped"] == 2, (
+        "候选 3 条、预算 2 ⇒ 封顶观察值记录预算值本身(既有口径,不许改动)"
+    )
+    assert results[0]["keyword_filtered_out"] == 1, "被配额截断的丁不算闸门拒收,丙才是"
+    assert results[0]["keyword_hits"] == {"民生": {"count": 2, "in_title": 2, "in_content": 0}}
+    assert [item.title for item in capture_insert[0]["items"]] == ["民生甲", "民生乙"]
+
+
+def test_intake_length_gate_rejects_and_traces(tmp_path, monkeypatch, system_db, capture_insert):
+    """R56 正文长度拒收线:低于 ``cleaner.MIN_INTAKE_BODY_CHARS`` 不进正式 articles,
+    逐条留痕(URL/标题/拒因/判定依据)。无 keyword_filter 的例行 job 同样生效(规则 63④)。
+    """
+    write_sources(tmp_path, monkeypatch, [rss_entry()])
+    xml = (
+        "<?xml version='1.0'?><rss version='2.0'><channel>"
+        "<item><title>完整报道甲</title><link>https://demo.example.com/a/1/</link>"
+        f"<description>{BODY_FILLER}</description>"
+        "<pubDate>Wed, 15 Nov 2026 10:00:01 +0800</pubDate></item>"
+        "<item><title>残缺短文乙</title><link>https://demo.example.com/a/2/</link>"
+        "<description>只有一句</description>"
+        "<pubDate>Wed, 15 Nov 2026 10:00:02 +0800</pubDate></item>"
+        "</channel></rss>"
+    )
+    recorder = FetchRecorder({FEED_URL: SimpleNamespace(text=xml)})
+    monkeypatch.setattr("ttxt.crawler.fetcher.fetch_page", recorder)
+    monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
+    job = store.create_crawl_job("fake_rss", "demo", db_path=system_db)
+
+    results = runner.run_queued(limit=1)
+    assert results and results[0]["ok"] is True
+    assert results[0]["body_rejected"] == 1
+    assert [item.title for item in capture_insert[0]["items"]] == ["完整报道甲"]
+    meta = json.loads(_job_row(system_db, job)["meta_json"])
+    assert meta["rejected"] == [
+        {
+            "url": "https://demo.example.com/a/2/",
+            "title": "残缺短文乙",
+            "reason": "body_below_intake_line",
+            "basis": {"body_len": len("只有一句"), "threshold": cleaner.MIN_INTAKE_BODY_CHARS},
+        }
+    ], "长度闸拒收必须留痕到可复查:URL、标题、拒因、判定依据一个不能少"
+    assert results[0].get("keyword_filtered_out", 0) == 0
+    assert "keyword_hits" not in results[0], "没配关键词闸就不该出现命中统计"
 
 
 def test_item_page_robots_denial_skips_without_fetch(tmp_path, monkeypatch, system_db, capture_insert):
@@ -427,7 +582,7 @@ def test_item_page_robots_denial_skips_without_fetch(tmp_path, monkeypatch, syst
     results = runner.run_queued(limit=1)
     assert results[0]["item_robots_skipped"] == 2
     assert recorder.calls == [FEED_URL]
-    assert capture_insert[0]["items"][0].content == "短摘要1", "补不到正文必须保留原摘要"
+    assert capture_insert[0]["items"][0].content == BODY_FILLER + "1", "补不到正文必须保留原摘要(填充词级,仍能过拒收线)"
 
 
 def test_item_pages_all_failed_requeues_not_done(tmp_path, monkeypatch, system_db, capture_insert):
@@ -437,7 +592,7 @@ def test_item_pages_all_failed_requeues_not_done(tmp_path, monkeypatch, system_d
         monkeypatch,
         [rss_entry(fetch_item_pages=True, max_item_pages=5, item_content_selectors=["div.left_zw"])],
     )
-    recorder = FetchRecorder({FEED_URL: SimpleNamespace(text=feed_xml()), ARTICLE_URL: RuntimeError("connection reset")})
+    recorder = FetchRecorder({FEED_URL: SimpleNamespace(text=feed_xml(descriptions=("短摘要1", "短摘要2"))), ARTICLE_URL: RuntimeError("connection reset")})
     monkeypatch.setattr("ttxt.crawler.fetcher.fetch_page", recorder)
     monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
     store.create_crawl_job("fake_rss", "demo", db_path=system_db)
@@ -650,6 +805,6 @@ def test_enqueued_params_survive_into_execution(tmp_path, social_category_db, sy
 
     results = runner.run_queued(limit=1)
     assert results and results[0]["ok"] is True
-    assert results[0]["keyword_hits"] == {"民生": 1}
+    assert results[0]["keyword_hits"] == {"民生": {"count": 1, "in_title": 1, "in_content": 0}}
     assert results[0]["keyword_filtered_out"] == 1
     assert [item.title for item in capture_insert[0]["items"]] == ["民生新闻甲"]

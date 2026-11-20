@@ -85,10 +85,11 @@ def one_rss_crawl(tmp_path, monkeypatch, system_db, categories_root):
         fetcher,
         "fetch_page",
         FetchRecorder({
+            # R56 入库拒收线:RSS 正文必须 ≥800 字才会进正式库,假语料加宽,断言不变。
             "https://demo.example.com/feed.xml": _feed(
                 "https://demo.example.com/a/1/",
                 "美股三大指数涨跌不一 英伟达大跌",
-                "英伟达大跌13%,市值蒸发超5000亿美元。",
+                "英伟达大跌13%,市值蒸发超5000亿美元。" + "这里是用于回归测试的完整正文示例段落。" * 45,
             )
         }),
     )

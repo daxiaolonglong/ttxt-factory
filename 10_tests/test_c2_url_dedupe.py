@@ -483,6 +483,11 @@ def _html_entry(**overrides) -> dict:
     return entry
 
 
+# R56 入库拒收线:走 runner 采集链路的正文必须 ≥cleaner.MIN_INTAKE_BODY_CHARS,
+# 假语料加宽到线以上;URL 去重/观测口径的断言一律不变。
+R56_BODY = "这里是用于回归测试的完整正文示例段落。" * 45  # 855 字
+
+
 def _feed(link: str, title: str, body: str) -> SimpleNamespace:
     xml = (
         '<?xml version="1.0"?><rss version="2.0"><channel>'
@@ -509,7 +514,7 @@ def test_repeat_rss_job_records_duplicates_not_inserted(tmp_path, monkeypatch, s
     link = "https://demo.example.com/a/1/"
     monkeypatch.setattr(
         fetcher, "fetch_page",
-        FetchRecorder({"https://demo.example.com/feed.xml": _feed(link, "美股三大指数涨跌不一 英伟达大跌", "英伟达大跌13%,市值蒸发超5000亿美元。")}),
+        FetchRecorder({"https://demo.example.com/feed.xml": _feed(link, "美股三大指数涨跌不一 英伟达大跌", "英伟达大跌13%,市值蒸发超5000亿美元。" + R56_BODY)}),
     )
     store.create_crawl_job("c2_rss", "demo", db_path=system_db)
     first = runner.run_queued(limit=1)
@@ -518,7 +523,7 @@ def test_repeat_rss_job_records_duplicates_not_inserted(tmp_path, monkeypatch, s
 
     monkeypatch.setattr(
         fetcher, "fetch_page",
-        FetchRecorder({"https://demo.example.com/feed.xml": _feed(link, "美股三大指数集体上涨 英伟达跌幅收窄", "费城半导体指数转涨,英伟达跌幅收窄。")}),
+        FetchRecorder({"https://demo.example.com/feed.xml": _feed(link, "美股三大指数集体上涨 英伟达跌幅收窄", "费城半导体指数转涨,英伟达跌幅收窄。" + R56_BODY)}),
     )
     store.create_crawl_job("c2_rss", "demo", db_path=system_db)
     second = runner.run_queued(limit=1)
@@ -543,7 +548,10 @@ def test_html_listing_crawl_keeps_all_items_and_counts_second_crawl_duplicate(tm
     monkeypatch.setattr(robots, "fetch_rules", lambda url, ua, timeout=10.0: FakeRules())
     pages = {
         "https://demo.example.com/page1/": FakePage({
-            ".quote": [FakeElement(text="第一块引文内容甲"), FakeElement(text="第二块引文内容乙")]
+            ".quote": [
+                FakeElement(text="第一块引文内容甲。" + R56_BODY),
+                FakeElement(text="第二块引文内容乙。" + R56_BODY),
+            ]
         })
     }
     monkeypatch.setattr(fetcher, "fetch_page", FetchRecorder(pages))

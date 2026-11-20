@@ -399,6 +399,11 @@ def _write_sources(tmp_path, monkeypatch, entries: list[dict]) -> None:
     monkeypatch.setattr(sources, "SOURCES_PATH", path)
 
 
+# R56 入库拒收线:走 runner 采集链路的正文必须 ≥cleaner.MIN_INTAKE_BODY_CHARS,
+# 假语料加宽到线以上;URL 身份/跨库归属的断言一律不变。
+R56_BODY = "这里是用于回归测试的完整正文示例段落。" * 45  # 855 字
+
+
 def _feed(link: str, title: str, body: str) -> SimpleNamespace:
     xml = (
         '<?xml version="1.0"?><rss version="2.0"><channel>'
@@ -437,7 +442,7 @@ def test_runner_job_meta_records_cross_namespace_attribution(
         fetcher, "fetch_page",
         FetchRecorder({
             "https://finance.example.com/feed.xml": _feed(
-                SSPAI_URL, "程序员的工具链", "少数派原文正文内容甲。"
+                SSPAI_URL, "程序员的工具链", "少数派原文正文内容甲。" + R56_BODY
             )
         }),
     )
@@ -475,7 +480,7 @@ def test_runner_meta_omits_cross_db_key_when_there_is_no_overlap(
         fetcher, "fetch_page",
         FetchRecorder({
             "https://finance.example.com/feed.xml": _feed(
-                "https://finance.example.com/a/1/", "A股三大指数收涨", "沪深两市成交额突破万亿。"
+                "https://finance.example.com/a/1/", "A股三大指数收涨", "沪深两市成交额突破万亿。" + R56_BODY
             )
         }),
     )

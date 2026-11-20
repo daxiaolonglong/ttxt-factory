@@ -409,19 +409,35 @@ def extract_article_body(page: object, source: Source) -> str:
     return best if len(best) >= MIN_BODY_CHARS else ""
 
 
-def keyword_hit(item: ExtractedItem, keywords: list[str]) -> str | None:
-    """这一条是否命中关键词表里的某个词(标题或正文,大小写不敏感);命中返回该词。
+def keyword_hit(item: ExtractedItem, keywords: list[str]) -> dict | None:
+    """这一条是否命中关键词表里的某个词(标题或正文,大小写不敏感)。
+
+    命中返回 ``{"keyword": 该词, "in_title": bool, "in_content": bool, "in_excerpt": bool}``,
+    未命中返回 ``None``。
 
     这是"关键词驱动采集"的**入库侧闸门**:计划阶段决定去哪些地址采,
     这里决定采回来的东西哪些算这一轮要的。不命中不删除数据源,只是本次不入库,
     并计数 ``keyword_filtered_out``(可审计,绝不静默丢弃)。
+
+    R56(2026-11-20):新增位置字段,为"命中在哪"(标题/正文/摘要)留痕,供拒收复查
+    与命中率归因。**判定集合与旧版逐字相同**:放行的仍是 "needle ∈ 标题+正文" 的条目,
+    仍按词表顺序取首个命中词;``in_excerpt`` 只是展示参考位,**不参与放行判定**
+    (把"仅摘要命中"纳入放行＝放宽闸门,红线禁止)。
     """
     if not keywords:
         return None
     haystack = f"{item.title}\n{item.content}".lower()
+    title = str(item.title or "").lower()
+    content = str(item.content or "").lower()
+    excerpt = str(item.excerpt or "").lower()
     for keyword in keywords:
         needle = str(keyword).strip().lower()
         if needle and needle in haystack:
-            return str(keyword).strip()
+            return {
+                "keyword": str(keyword).strip(),
+                "in_title": needle in title,
+                "in_content": needle in content,
+                "in_excerpt": needle in excerpt,
+            }
     return None
 
