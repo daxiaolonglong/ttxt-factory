@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "category": "technology",
+  "generated_at": "2026-11-20",
+  "rule": "R57(2026-11-20):词表准入看区分度,判定标题命中前先做别名归一——纯字面匹配会把类目核心词(人工智能)误判成噪音词。新增关键词必须同时给出别名,不许只填正名。修改本表前必须先把旧版本另存为 keyword_aliases_v<N>_<date>.json,不许原地覆盖。",
+  "evidence_basis": "919 行快照(technology articles, id<=1053, 只读)实测各写法出现次数;不在此表出现的词不计入归一。",
+  "aliases": {
+    "人工智能": [
+      "人工智能",
+      "AI",
+      "大模型",
+      "机器学习",
+      "算法",
+      "智能体",
+      "LLM",
+      "AIGC",
+      "算力",
+      "机器人",
+      "深度学习",
+      "生成式"
+    ]
+  },
+  "alias_evidence_919rows": {
+    "人工智能": {"title": 4, "body": 105},
+    "AI": {"title": 136, "body": 385},
+    "大模型": {"title": 1, "body": 96},
+    "机器学习": {"title": 0, "body": 11},
+    "算法": {"title": 0, "body": 62},
+    "智能体": {"title": 12, "body": 71},
+    "LLM": {"title": 1, "body": 10},
+    "AIGC": {"title": 1, "body": 5},
+    "算力": {"title": 10, "body": 131},
+    "机器人": {"title": 16, "body": 98},
+    "深度学习": {"title": 0, "body": 6},
+    "生成式": {"title": 0, "body": 12}
+  },
+  "rejected_candidates": {
+    "模型": "919 行里标题 25 / 正文 212,泛指词会把非 AI 文章(物理模型、商业模式模型)全部吸进来,区分度不足,不作别名",
+    "智能": "标题 42 / 正文 311,同样过泛(智能家居、智能座舱多为硬件话题),不作别名"
+  },
+  "normalization_effect": {
+    "literal_only": {"union": 105, "title": 4, "body_only": 101, "title_rate_pct": 3.8},
+    "core8_only": {"union": 442, "title": 152, "body_only": 290, "title_rate_pct": 34.4, "len_dist_lt400_400_799_ge800": [28, 39, 375]},
+    "full_11_aliases": {"union": 458, "title": 167, "body_only": 291, "title_rate_pct": 36.5, "len_dist_lt400_400_799_ge800": [29, 40, 389]}
+  },
+  "latin_matching": "AI/LLM/AIGC 按大小写敏感的字面包含匹配(中文语料里大写出现即指 AI 语义);不做英文词边界切分,已核对抽样标题无误伤。"
+}

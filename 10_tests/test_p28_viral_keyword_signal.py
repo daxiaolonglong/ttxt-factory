@@ -34,10 +34,12 @@ def _make_db(tmp_path: Path, category: str, texts: list[str], keywords_list: lis
     con.row_factory = sqlite3.Row
     try:
         for index, text in enumerate(texts):
+            # R57(2026-11-20):计分只认**标题命中** ⇒ 假语料标题必须带上关键词(正文首段即词头)。
+            # 这是把假数据补厚,不是放宽断言:原假标题"标题N"只有正文命中,新口径下必然零贡献。
             con.execute(
                 "INSERT INTO articles(category, source, title, content, cleaned_content, text_length,"
                 " url, url_normalized, content_hash, fetched_at) VALUES(?, 'src', ?, ?, ?, ?, ?, ?, ?, ?)",
-                (category, f"标题{index}", text, text, len(text), f"https://x.test/{category}/{index}",
+                (category, text[:24], text, text, len(text), f"https://x.test/{category}/{index}",
                  f"https://x.test/{category}/{index}", f"h{category}{index}", now),
             )
         for keyword in keywords_list:

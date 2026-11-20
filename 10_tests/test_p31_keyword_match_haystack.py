@@ -102,10 +102,14 @@ def test_title_inside_body_is_counted_exactly_once(tmp_path):
 
 
 def test_body_hit_is_counted(tmp_path):
+    """R57 口径:仅正文命中仍进覆盖(不静默消失)、单列 weak,但**不计贡献**(collected 只数标题命中)。"""
     rows = [{"title": "无关标题", "cleaned": f"{LONG_BODY} 效率工具 {LONG_BODY}"} for _ in range(3)]
     db_path = _db(tmp_path, "technology", rows, ["效率工具"])
-    keywords.score_keywords("technology", db_path=db_path)
-    assert _performance(db_path)["效率工具"]["collected"] == 3
+    stats = keywords.score_keywords("technology", db_path=db_path)
+    detail = stats["viral"]["details"]["效率工具"]
+    assert detail["coverage_articles"] == 3, "正文命中必须进覆盖统计(判定闸/准入判定用这个口径),不得静默消失"
+    assert detail["weak_content_hits"] == 3, "仅正文命中必须单列 weak,可审计"
+    assert _performance(db_path)["效率工具"]["collected"] == 0, "仅正文命中不计贡献(R57:准入看区分度)"
 
 
 def test_no_fuzzy_matching_to_inflate_coverage(tmp_path):

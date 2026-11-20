@@ -659,6 +659,26 @@ def test_category_keywords_missing_db_returns_empty(tmp_path):
     assert keyword_crawl.category_keywords("nope", db_path=tmp_path / "nope.db") == []
 
 
+def test_category_keywords_excludes_weak_status(social_category_db):
+    """R57(2026-11-20):weak 词(仅正文命中的宽词)不得进选词/高分表,哪怕分数最高。
+
+    准入看区分度不看频次:判定闸(runner 入库侧)照旧放行,这里只钉"什么值得再采"的一侧。
+    """
+    con = db.connect(social_category_db)
+    try:
+        con.execute("INSERT INTO keywords(keyword, category, origin, status, created_at)"
+                    " VALUES('数据', 'social', 'seed', 'weak', '2026-11-20T00:00:00+08:00')")
+        con.execute(
+            "INSERT INTO keyword_performance(keyword_id, collected, quality_articles, avg_text_length, score, updated_at)"
+            " VALUES((SELECT id FROM keywords WHERE keyword='数据'), 342, 300, 900, 999.0,"
+            " '2026-11-20T00:00:00+08:00')")
+        con.commit()
+    finally:
+        con.close()
+    picked = [row["keyword"] for row in keyword_crawl.category_keywords("social", db_path=social_category_db, limit=5)]
+    assert picked == ["医保报销", "养老退休金", "校园餐"], "weak 词即便 score 最高也不得进入选词"
+
+
 def _plan_sources(tmp_path: Path, entries: list[dict]) -> Path:
     path = tmp_path / "sources.json"
     path.write_text(json.dumps({"sources": entries}, ensure_ascii=False), encoding="utf-8")

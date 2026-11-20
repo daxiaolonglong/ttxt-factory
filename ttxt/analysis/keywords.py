@@ -14,6 +14,35 @@ from ttxt.db import connect
 
 DEMO_SEEDS = ["人工智能", "开源", "效率工具", "数据"]
 
+# R57(2026-11-20):别名归一表(版本化、可回滚,随类目库存 ``keyword_aliases.json``)。
+# 判定口径:先归一再统计标题命中——纯字面匹配下"人工智能"标题命中 4/105(3.8%),
+# 归一 AI/大模型/智能体/算力/机器人 等写法后 167/458(36.5%):只用字面算标题率
+# 会把类目核心词误判成噪音词(用户 R57 裁决;逐词数字见 08_wiki/reports/r57-keyword-discrimination.md)。
+# 规则 64:新增关键词必须同时给出别名,不能只填正名;改表前先另存 keyword_aliases_v<N>_<date>.json。
+ALIASES_FILENAME = "keyword_aliases.json"
+
+
+def _load_keyword_aliases(category_dir: Path) -> dict[str, list[str]]:
+    """读类目别名归一表;不存在/读不动返回空表(按正名字面匹配,不猜别名)。"""
+    path = Path(category_dir) / ALIASES_FILENAME
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    raw = data.get("aliases") if isinstance(data, dict) else None
+    if not isinstance(raw, dict):
+        return {}
+    out: dict[str, list[str]] = {}
+    for keyword, items in raw.items():
+        if not keyword or not isinstance(items, list):
+            continue
+        terms = [str(term) for term in items if isinstance(term, str) and term and term != keyword]
+        if terms:
+            out[str(keyword)] = terms
+    return out
+
 # P28(2026-11-16):真实爆款表现要喂回关键词评分。实测缺口:``score_keywords()`` 只看
 # "覆盖了几篇文章 + 正文质量",完全不读 ``viral_labels`` ⇒ 同一个词采到 4 篇验证爆款
 # 和采到 4 篇低质文章,评分一模一样(红证据 07_tmp/p28_viral_signal/red_evidence.txt)。
@@ -154,6 +183,8 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         # 所以这次改动对当下覆盖数是 0 影响;它防的是将来某个清洗器把标题从正文里剥掉之后
         # 覆盖统计悄悄掉一半(那种掉法是静默的,和调度停摆同一类问题)。
         articles = con.execute("SELECT id, title, cleaned_content, content FROM articles ORDER BY id").fetchall()
+        # R57:判定前先按类目别名表归一(文件不存在 ⇒ 纯字面匹配,行为与旧版一致)。
+        aliases = _load_keyword_aliases(target.parent)
         article_ids = [int(row["id"]) for row in articles]
         bodies = [(row["cleaned_content"] or row["content"] or "") for row in articles]
         titles = [(row["title"] or "") for row in articles]
@@ -171,14 +202,22 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
             keyword = row["keyword"]
             if not keyword:
                 # 空关键词会让 `keyword in text` 命中全库,把覆盖数与评分整体污染 ⇒ 一律按零覆盖处理
-                hits = []
+                hits: list[int] = []
+                title_hits: list[int] = []
             else:
+                terms = [keyword, *aliases.get(keyword, [])]
                 hits = [index for index in range(len(article_ids))
-                        if keyword in bodies[index] or keyword in titles[index]]
-            collected = len(hits)
-            quality = sum(1 for index in hits if lengths[index] >= 120)
-            average_length = (sum(lengths[index] for index in hits) / collected) if collected else 0.0
-            signal, measured_hits, reason = _keyword_signal([article_ids[index] for index in hits], measured)
+                        if any(term in bodies[index] or term in titles[index] for term in terms)]
+                title_hits = [index for index in range(len(article_ids))
+                              if any(term in titles[index] for term in terms)]
+            # R57(2026-11-20)计分口径:只有**标题命中**计贡献——collected/quality/avg_len/signal
+            # 只用标题命中(归一后)的文章;仅正文命中仍计入覆盖 ``hits``(判定闸照旧放行),
+            # 但单列为 weak、权重为零,不再混进评分(词表准入看区分度,不看频次)。
+            weak_only = [index for index in hits if index not in set(title_hits)]
+            collected = len(title_hits)
+            quality = sum(1 for index in title_hits if lengths[index] >= 120)
+            average_length = (sum(lengths[index] for index in title_hits) / collected) if collected else 0.0
+            signal, measured_hits, reason = _keyword_signal([article_ids[index] for index in title_hits], measured)
             if signal is not None and not category_ready:
                 signal = None
                 reason = (f"类目真实测得样本 {len(measured)} 条 < {viral.MIN_CALIBRATION_SAMPLE} 条,"
@@ -186,7 +225,9 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
             signal_details[keyword] = {
                 "signal": signal,
                 "measured_hits": measured_hits,
-                "matched_articles": collected,
+                "matched_articles": collected,       # 标题命中篇数(计贡献口径,别名归一后)
+                "coverage_articles": len(hits),      # 标题∪正文命中(判定闸/准入判定用这个口径)
+                "weak_content_hits": len(weak_only),  # 仅正文命中:单列 weak,权重零
                 "reason": reason,
             }
             collected_rows.append((row["id"], keyword, collected, quality, average_length, signal))
@@ -253,9 +294,10 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
             # 两者不是同一个指标,不能互相替换,也不能拿一个时间点的 score 去比另一个时间点的 signal。
             "formula": (f"score = {1.0 - VIRAL_WEIGHT:.1f} * base + {VIRAL_WEIGHT:.1f} * signal;"
                         " base = 0.6 * collected_norm + 0.4 * quality_ratio;"
+                        " collected = 标题命中(别名归一后)文章数;仅正文命中记 weak、不计贡献(R57 口径);"
                         " collected_norm = collected / max_collected;"
                         " quality_ratio = quality / collected(正文 >= 120 字);"
-                        " signal = 命中文章里 tier∈{measured, measured_reads} 样本的标签均值"
+                        " signal = 标题命中文章里 tier∈{measured, measured_reads} 样本的标签均值"
                         "(验证爆款 1.0 / 潜力 0.6 / 普通 0.2 / 低质 0.0);无 signal 时 score = base"),
             "score_and_signal_are_different_metrics": True,
             "details": signal_details,

@@ -26,7 +26,8 @@ from ttxt.crawler.extract import ExtractedItem
 def _demo_db(tmp_path, bodies: dict[int, str]):
     db_path = store.init_articles_db("demo", db_path=tmp_path / "demo.db")
     items = [
-        ExtractedItem(title=f"第 {aid} 篇标题", content=body, excerpt="", author=None,
+        # R57(2026-11-20):计分只认标题命中 ⇒ 假标题带上正文词头(关键词),把假语料补厚,不放宽断言。
+        ExtractedItem(title=f"{body[:2]} 第 {aid} 篇标题", content=body, excerpt="", author=None,
                       published_at=None, url=f"https://example.com/a{aid}")
         for aid, body in sorted(bodies.items())
     ]
