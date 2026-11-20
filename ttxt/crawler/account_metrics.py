@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -263,6 +264,16 @@ def _write_evidence(summary: dict) -> str | None:
 # 浏览器层:登录(一次)与取数(低频)
 # ---------------------------------------------------------------------------
 
+def _pin_playwright_tmp() -> None:
+    """Playwright driver 用 os.tmpdir() 建 artifacts;系统 %TEMP% 实测 EPERM,
+    和采集侧 fetcher 一样把 TMP/TEMP/TMPDIR 钉到项目内(顺带复用其陈旧清理)。"""
+    from ttxt.crawler import fetcher
+
+    pw_tmp = str(fetcher._pw_artifacts_dir())
+    for var in ("TMP", "TEMP", "TMPDIR"):
+        os.environ[var] = pw_tmp
+
+
 def _account_browser_kwargs(headless: bool) -> dict[str, Any]:
     from ttxt.crawler import fetcher
 
@@ -298,6 +309,7 @@ def account_login(timeout_s: int = 180) -> dict:
     handle = browser_lock.acquire(ACCOUNT_PROFILE, wait_s=10, tag="account_login")
     pw = None
     try:
+        _pin_playwright_tmp()
         pw = sync_playwright().start()
         context = pw.chromium.launch_persistent_context(
             str(ACCOUNT_PROFILE), **_account_browser_kwargs(headless=False))
@@ -348,6 +360,7 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
     try:
         ACCOUNT_PROFILE.mkdir(parents=True, exist_ok=True)
         handle = browser_lock.acquire(ACCOUNT_PROFILE, wait_s=30, tag="account_metrics")
+        _pin_playwright_tmp()
         pw = sync_playwright().start()
         context = pw.chromium.launch_persistent_context(
             str(ACCOUNT_PROFILE), **_account_browser_kwargs(headless=True))
