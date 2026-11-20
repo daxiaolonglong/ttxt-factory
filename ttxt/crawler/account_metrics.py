@@ -404,6 +404,8 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
         seen_requests: list[str] = []
         raw_bodies: list[dict] = []
         row_texts: dict[str, list[str]] = {}
+        page_texts: dict[str, str] = {}
+        clicks: dict[str, dict] = {}
         diag_path: str | None = None
 
         def on_response(response: Any) -> None:
@@ -459,17 +461,72 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
                              .filter(t => t.trim()).slice(0, 20)""")
                 except Exception:  # noqa: BLE001
                     row_texts[url] = []
+                # 取证 A:整页可见文本。列表表头(展现/阅读/评论/点赞/收藏)与数值列
+                # 只有渲染出来才看得见;行选择器没抓到时这里是兜底证据。
+                try:
+                    page_texts[url] = (page.evaluate("() => document.body.innerText || ''") or "")[:6000]
+                except Exception:  # noqa: BLE001
+                    page_texts[url] = ""
+                # 取证 B:管理页每行的"查看数据"是单篇数据的入口(后台 UI 在那里显示收藏)。
+                # 点前 3 行:捕获随后 8s 内到达的 JSON 响应 + 新开 tab 的正文,结果留证据。
+                # 只读浏览,不改账号任何状态;确认结构后才写生产解析器。
+                try:
+                    stats = page.locator("text=查看数据")
+                    n = min(stats.count(), 4)  # 自有作品仅 4 条:全点一遍,每条都要收藏证据
+                    per_click: list[dict] = []
+                    for i in range(n):
+                        before = len(captured_items)
+                        before_pages = len(context.pages)
+                        try:
+                            stats.nth(i).click(timeout=5000)
+                        except Exception as exc:  # noqa: BLE001
+                            per_click.append({"idx": i, "error": str(exc)[:120]})
+                            continue
+                        page.wait_for_timeout(8000)
+                        entry: dict[str, Any] = {
+                            "idx": i,
+                            "new_items": captured_items[before:],
+                        }
+                        # 数据面板可能在当前页弹出,也可能新开 tab
+                        try:
+                            entry["modal_text"] = page.evaluate(
+                                """() => { const n = document.querySelector(
+                                     '[class*=modal], [class*=dialog], [class*=drawer], [class*=popup]');
+                                     return n ? (n.innerText || '').slice(0, 2500) : ''; }""")
+                        except Exception:  # noqa: BLE001
+                            entry["modal_text"] = ""
+                        for extra in context.pages[before_pages:]:
+                            try:
+                                extra.wait_for_load_state("domcontentloaded", timeout=15000)
+                                extra.wait_for_timeout(4000)
+                                entry["tab_text"] = (
+                                    extra.evaluate("() => document.body.innerText || ''") or "")[:4000]
+                            except Exception as exc:  # noqa: BLE001
+                                entry["tab_text"] = f"ERR {str(exc)[:120]}"
+                            try:
+                                extra.close()
+                            except Exception:  # noqa: BLE001
+                                pass
+                        per_click.append(entry)
+                        try:
+                            page.keyboard.press("Escape")
+                            page.wait_for_timeout(1000)
+                        except Exception:  # noqa: BLE001
+                            pass
+                    clicks[url] = {"found": n, "detail": per_click}
+                except Exception as exc:  # noqa: BLE001
+                    clicks[url] = {"found": 0, "error": str(exc)[:160]}
             except Exception as exc:  # noqa: BLE001 - 单页失败不带走整轮
                 page_final[url] = f"FAILED {str(exc)[:120]}"
                 LOG.warn("account.fetch.page_failed", url=url, error=str(exc)[:160])
 
-        if raw_bodies or not captured_items or any(row_texts.values()):
+        if raw_bodies or not captured_items or any(row_texts.values()) or page_texts or clicks:
             out_dir = cfg.INTELLIGENCE_DIR / "account_metrics"
             out_dir.mkdir(parents=True, exist_ok=True)
             diag = out_dir / f"diag-fetch-{cfg.now_iso().replace(':', '').replace('-', '')}.json"
             diag.write_text(json.dumps(
                 {"pages": page_final, "requests": seen_requests, "unparsed_json": raw_bodies,
-                 "row_texts": row_texts},
+                 "row_texts": row_texts, "page_texts": page_texts, "clicks": clicks},
                 ensure_ascii=False, indent=2), encoding="utf-8")
             diag_path = str(diag)
             LOG.info("account.fetch.diag", path=str(diag), requests=len(seen_requests))
