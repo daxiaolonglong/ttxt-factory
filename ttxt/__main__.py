@@ -656,7 +656,7 @@ def cmd_account_fetch(args: argparse.Namespace) -> int:
     if categories and "all" in categories:
         categories = None
     report = account_metrics.account_fetch_metrics(
-        apply=bool(args.apply), categories=categories)
+        apply=bool(args.apply), categories=categories, force=bool(getattr(args, "force", False)))
     if not args.apply:
         report["note"] = "dry-run:确认无误后加 --apply 才写库"
     print(json.dumps(report, ensure_ascii=False, indent=2))
@@ -1031,6 +1031,8 @@ def build_parser() -> argparse.ArgumentParser:
                                help="只处理指定类目,可重复;默认全部")
     account_fetch.add_argument("--apply", action="store_true",
                                help="真正写库(不加只报告)")
+    account_fetch.add_argument("--force", action="store_true",
+                               help="人工排障:越过 2h 节流(留审计 warn;调度器永不允许)")
     account_fetch.set_defaults(func=cmd_account_fetch)
 
     legacy = sub.add_parser(

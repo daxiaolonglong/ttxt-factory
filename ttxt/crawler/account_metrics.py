@@ -364,15 +364,21 @@ def account_login(timeout_s: int = 180) -> dict:
         handle.release()
 
 
-def account_fetch_metrics(apply: bool = True, categories: list[str] | None = None) -> dict:
-    """用已保存的账号 profile 低频取回自有文章指标(含 favorites)。"""
+def account_fetch_metrics(apply: bool = True, categories: list[str] | None = None,
+                          force: bool = False) -> dict:
+    """用已保存的账号 profile 低频取回自有文章指标(含 favorites)。
+
+    ``force`` 只允许人工排障时越过 2h 节流,且必须留 warn 审计;调度器永远不传。
+    """
     from patchright.sync_api import sync_playwright
 
     from ttxt.crawler import fetcher
 
     state = load_state()
     left = interval_blocked(state)
-    if left is not None:
+    if left is not None and force:
+        LOG.warn("account.fetch.force_override", left_s=left, note="人工排障越过节流,留审计")
+    elif left is not None:
         LOG.warn("account.fetch.throttled", left_s=left)
         return {"status": "throttled", "note": f"距上次成功取数不足 {MIN_FETCH_INTERVAL_S}s,还需 {left:g}s"}
 
