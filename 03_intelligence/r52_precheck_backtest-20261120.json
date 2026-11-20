@@ -1,0 +1,393 @@
+{
+ "note": "R52 预筛回溯:打分基于 R50 探针快照库(材料池与 18 run 当时一致),标签=R50 passed",
+ "primary_metric": "cross_verified_total(先声明,见 precheck.py 文档)",
+ "n_runs": 18,
+ "n_topics": 6,
+ "auc_primary": {
+  "auc": 0.4308,
+  "n_pos": 5,
+  "n_neg": 13
+ },
+ "auc_first_hand_secondary": {
+  "auc": 0.5231,
+  "n_pos": 5,
+  "n_neg": 13
+ },
+ "threshold_sweep": [
+  {
+   "threshold": 0.5,
+   "blocked_would_fail": 3,
+   "blocked_would_pass_漏杀": 0,
+   "released_did_fail_误放": 10,
+   "released_would_pass": 5,
+   "total_runs": 18
+  },
+  {
+   "threshold": 11.5,
+   "blocked_would_fail": 4,
+   "blocked_would_pass_漏杀": 2,
+   "released_did_fail_误放": 9,
+   "released_would_pass": 3,
+   "total_runs": 18
+  },
+  {
+   "threshold": 16.5,
+   "blocked_would_fail": 6,
+   "blocked_would_pass_漏杀": 3,
+   "released_did_fail_误放": 7,
+   "released_would_pass": 2,
+   "total_runs": 18
+  },
+  {
+   "threshold": 24.5,
+   "blocked_would_fail": 8,
+   "blocked_would_pass_漏杀": 4,
+   "released_did_fail_误放": 5,
+   "released_would_pass": 1,
+   "total_runs": 18
+  },
+  {
+   "threshold": 28.5,
+   "blocked_would_fail": 10,
+   "blocked_would_pass_漏杀": 5,
+   "released_did_fail_误放": 3,
+   "released_would_pass": 0,
+   "total_runs": 18
+  },
+  {
+   "threshold": 38.5,
+   "blocked_would_fail": 13,
+   "blocked_would_pass_漏杀": 5,
+   "released_did_fail_误放": 0,
+   "released_would_pass": 0,
+   "total_runs": 18
+  }
+ ],
+ "best_threshold_by_accuracy": {
+  "threshold": 38.5,
+  "blocked_would_fail": 13,
+  "blocked_would_pass_漏杀": 5,
+  "released_did_fail_误放": 0,
+  "released_would_pass": 0,
+  "total_runs": 18
+ },
+ "topics": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "score": 0,
+   "first_hand_total": 52,
+   "cross_by_dim": {
+    "numbers": 0,
+    "dates": 0,
+    "persons": 0,
+    "orgs": 0
+   },
+   "first_hand_by_dim": {
+    "numbers": 38,
+    "dates": 8,
+    "persons": 6,
+    "orgs": 0
+   },
+   "full_bodies_selected": 1,
+   "distinct_source_keys": 1,
+   "runs_passed": 0,
+   "runs_total": 3,
+   "thin_dims": [
+    "numbers 仅 38 个可定位锚点(跨源印证 0)",
+    "dates 仅 8 个可定位锚点(跨源印证 0)",
+    "persons 仅 6 个可定位锚点(跨源印证 0)",
+    "orgs 仅 0 个可定位锚点(跨源印证 0)"
+   ]
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "score": 11,
+   "first_hand_total": 121,
+   "cross_by_dim": {
+    "numbers": 10,
+    "dates": 1,
+    "persons": 0,
+    "orgs": 0
+   },
+   "first_hand_by_dim": {
+    "numbers": 73,
+    "dates": 26,
+    "persons": 6,
+    "orgs": 16
+   },
+   "full_bodies_selected": 5,
+   "distinct_source_keys": 4,
+   "runs_passed": 2,
+   "runs_total": 3,
+   "thin_dims": [
+    "persons 仅 6 个可定位锚点(跨源印证 0)",
+    "orgs 仅 16 个可定位锚点(跨源印证 0)"
+   ]
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "score": 16,
+   "first_hand_total": 127,
+   "cross_by_dim": {
+    "numbers": 12,
+    "dates": 2,
+    "persons": 1,
+    "orgs": 1
+   },
+   "first_hand_by_dim": {
+    "numbers": 61,
+    "dates": 16,
+    "persons": 22,
+    "orgs": 28
+   },
+   "full_bodies_selected": 5,
+   "distinct_source_keys": 5,
+   "runs_passed": 1,
+   "runs_total": 3,
+   "thin_dims": []
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "score": 24,
+   "first_hand_total": 66,
+   "cross_by_dim": {
+    "numbers": 17,
+    "dates": 0,
+    "persons": 7,
+    "orgs": 0
+   },
+   "first_hand_by_dim": {
+    "numbers": 41,
+    "dates": 2,
+    "persons": 16,
+    "orgs": 7
+   },
+   "full_bodies_selected": 5,
+   "distinct_source_keys": 5,
+   "runs_passed": 1,
+   "runs_total": 3,
+   "thin_dims": [
+    "dates 仅 2 个可定位锚点(跨源印证 0)",
+    "orgs 仅 7 个可定位锚点(跨源印证 0)"
+   ]
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "score": 28,
+   "first_hand_total": 87,
+   "cross_by_dim": {
+    "numbers": 19,
+    "dates": 5,
+    "persons": 4,
+    "orgs": 0
+   },
+   "first_hand_by_dim": {
+    "numbers": 52,
+    "dates": 17,
+    "persons": 17,
+    "orgs": 1
+   },
+   "full_bodies_selected": 5,
+   "distinct_source_keys": 5,
+   "runs_passed": 1,
+   "runs_total": 3,
+   "thin_dims": [
+    "orgs 仅 1 个可定位锚点(跨源印证 0)"
+   ]
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "score": 38,
+   "first_hand_total": 168,
+   "cross_by_dim": {
+    "numbers": 29,
+    "dates": 5,
+    "persons": 4,
+    "orgs": 0
+   },
+   "first_hand_by_dim": {
+    "numbers": 102,
+    "dates": 30,
+    "persons": 23,
+    "orgs": 13
+   },
+   "full_bodies_selected": 5,
+   "distinct_source_keys": 5,
+   "runs_passed": 0,
+   "runs_total": 3,
+   "thin_dims": [
+    "orgs 仅 13 个可定位锚点(跨源印证 0)"
+   ]
+  }
+ ],
+ "runs": [
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "round": 1,
+   "score": 0,
+   "first_hand": 52,
+   "passed": false,
+   "primary": "material.insufficient"
+  },
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "round": 2,
+   "score": 0,
+   "first_hand": 52,
+   "passed": false,
+   "primary": "material.insufficient"
+  },
+  {
+   "category": "technology",
+   "topic": "刚刚,各大电商的双11成绩单出来了",
+   "round": 3,
+   "score": 0,
+   "first_hand": 52,
+   "passed": false,
+   "primary": "material.insufficient"
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "round": 1,
+   "score": 16,
+   "first_hand": 127,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "round": 2,
+   "score": 16,
+   "first_hand": 127,
+   "passed": true,
+   "primary": "passed"
+  },
+  {
+   "category": "technology",
+   "topic": "人工智能",
+   "round": 3,
+   "score": 16,
+   "first_hand": 127,
+   "passed": false,
+   "primary": "other"
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "round": 1,
+   "score": 11,
+   "first_hand": 121,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "round": 2,
+   "score": 11,
+   "first_hand": 121,
+   "passed": true,
+   "primary": "passed"
+  },
+  {
+   "category": "finance",
+   "topic": "财报与市场波动",
+   "round": 3,
+   "score": 11,
+   "first_hand": 121,
+   "passed": true,
+   "primary": "passed"
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "round": 1,
+   "score": 28,
+   "first_hand": 87,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "round": 2,
+   "score": 28,
+   "first_hand": 87,
+   "passed": true,
+   "primary": "passed"
+  },
+  {
+   "category": "technology",
+   "topic": "神舟二十四号发射成功",
+   "round": 3,
+   "score": 28,
+   "first_hand": 87,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "round": 1,
+   "score": 38,
+   "first_hand": 168,
+   "passed": false,
+   "primary": "fact.anchor_missing"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "round": 2,
+   "score": 38,
+   "first_hand": 168,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金 弹性退休 怎么执行",
+   "round": 3,
+   "score": 38,
+   "first_hand": 168,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "round": 1,
+   "score": 24,
+   "first_hand": 66,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "round": 2,
+   "score": 24,
+   "first_hand": 66,
+   "passed": false,
+   "primary": "fact.binding"
+  },
+  {
+   "category": "health",
+   "topic": "睡眠 运动 健康",
+   "round": 3,
+   "score": 24,
+   "first_hand": 66,
+   "passed": true,
+   "primary": "passed"
+  }
+ ]
+}
