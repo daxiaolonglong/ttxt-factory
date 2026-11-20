@@ -111,6 +111,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     self._send_json(api.keywords(slug))
                 elif action == "analysis":
                     self._send_json(api.analysis(slug))
+                elif action == "metrics":
+                    self._send_json(api.category_metrics(slug))
+                elif action == "jobs":
+                    self._send_json(api.category_jobs(slug, self._int(query, "limit", 20)))
+                elif action == "writing":
+                    self._send_json(api.category_writing(slug))
                 else:
                     self._send_error_json(404, "not found")
             else:
@@ -119,11 +125,13 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._send_error_json(500, f"{type(exc).__name__}: {exc}")
 
     # ------------------------------------------------------------------
-    # P11 任务下发(仅入队采集/本地分析)。安全护栏:
+    # 任务下发(入队采集 / 本地分析 / 补采 / 写作)。安全护栏:
     # 1) 必须携带自定义头 X-TTXT-Task: 1 —— 跨站表单无法伪造,构成 CSRF 防线;
     # 2) Origin 存在时必须与本机 Host 完全一致 —— 拒绝任何第三方站点页面;
     # 3) Host 只允许回环地址 —— 阻断 DNS rebinding;
-    # 4) 请求体上限 64KB,仅接受 JSON。
+    # 4) 请求体上限 64KB,仅接受 JSON;
+    # 5) R59:补采与写作必须 confirm == 目标类目名(二次确认),且各有按类目的单飞锁,
+    #    已在运行 ⇒ 返回 deduped 不重复起;写作走 CLI 子进程经 model_gate 串行。
 
     # 解析时已剥离 IPv6 方括号,集合内保存裸 "::1" 才能匹配(带括号则永远拒)。
     _LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
@@ -161,6 +169,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
             raise ValueError("请求体必须是 JSON 对象")
         return data
 
+    @staticmethod
+    def _confirmed_category(body: dict) -> str:
+        """R59:补采/写作的二次确认 —— ``confirm`` 必须与目标类目名完全一致,否则 400。"""
+        category = str(body.get("category") or "").strip()
+        confirm = str(body.get("confirm") or "").strip()
+        if not category:
+            raise ValueError("必须指定 category")
+        if confirm != category:
+            raise ValueError(f"二次确认失败:请在 confirm 中输入与目标类目完全一致的名字({category})")
+        return category
+
     def do_POST(self) -> None:  # noqa: N802 - 标准库方法名
         parsed = urlsplit(self.path)
         path = unquote(parsed.path)
@@ -182,9 +201,16 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self._send_json(payload, status=202)
             elif path == "/api/tasks/analyze":
                 self._send_json(api.run_analyze_task(str(body.get("category") or "")))
+            elif path == "/api/tasks/metrics-backfill":
+                # 补采:confirm 二次确认 + 单飞锁;真实执行走 metrics_queue.run_due 全部保护
+                self._send_json(api.run_metrics_backfill(self._confirmed_category(body)))
+            elif path == "/api/tasks/write":
+                # 写作:confirm 二次确认 + 单飞锁;子进程走 ttxt write CLI,模型调用经 model_gate 串行
+                category = self._confirmed_category(body)
+                self._send_json(api.start_write_task(category, str(body.get("topic") or "")), status=202)
             else:
                 self._send_error_json(
-                    404, "未知任务接口;面板支持 crawl 入队与 analyze,写作/发布/模型不可下发"
+                    404, "未知任务接口;面板支持 crawl/analyze/metrics-backfill/write(发布不可下发)"
                 )
         except PermissionError as exc:
             self._send_error_json(403, str(exc))

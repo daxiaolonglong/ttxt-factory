@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 import json
+import os
+import sqlite3
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ttxt import config as cfg
@@ -312,4 +317,374 @@ def run_analyze_task(category: str) -> dict:
         "feedback_job": result["feedback"].get("queued_job_id"),
         "viral_articles": result["viral"].get("articles"),
         "knowledge_assets": result["knowledge"].get("assets"),
+    }
+
+
+# ---------------------------------------------------------------------------
+# R59 类目面板(批 A):只读读数 + 写封装。
+# 面板上所有数字一律现算:代码里不写死任何文章数/队列数,类目切换后每个数字
+# 都来自当次对该类目库的查询。新增读数一律走 SQLite 只读 URI(mode=ro),
+# 物理上不可写;写操作只封装既有入口(采集入队 / 补采 run_due / 写作走 CLI 子进程
+# 经 model_gate 串行),并有按类目+动作的单飞锁,绝不并发跑两次。
+
+
+def _ro_connect(path: Path) -> sqlite3.Connection:
+    """只读连接:URI mode=ro 强制,任何写尝试都会被 SQLite 拒绝。"""
+    con = sqlite3.connect(f"file:{Path(path).resolve().as_posix()}?mode=ro", uri=True)
+    con.row_factory = sqlite3.Row
+    return con
+
+
+def _validated_slug(category: str) -> str:
+    slug = str(category or "").strip()
+    if not slug or not store.SLUG_RE.match(slug):
+        raise ValueError(f"非法类目:{category!r}")
+    return slug
+
+
+def _runs_dir() -> Path:
+    path = cfg.TEMP_DIR / "dashboard_runs"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _lock_path(category: str, action: str) -> Path:
+    return _runs_dir() / f"{category}-{action}.lock"
+
+
+def _pid_alive(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    if os.name == "nt":  # stdlib ctypes,零新依赖
+        import ctypes
+
+        handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, int(pid))  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return False
+        ctypes.windll.kernel32.CloseHandle(handle)
+        return True
+    try:
+        os.kill(int(pid), 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+def _acquire_run_lock(category: str, action: str) -> tuple[Path | None, dict]:
+    """单飞锁:已被活进程持有 ⇒ (None, holder);成功取得 ⇒ (lock_path, {})。
+
+    锁文件记录 {pid, started_at};持有进程已死 ⇒ 陈旧锁自动回收,无需人工清理。
+    """
+    lock = _lock_path(category, action)
+    for stale_pass in (False, True):
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                payload = json.loads(lock.read_text(encoding="utf-8") or "{}")
+            except (OSError, ValueError):
+                payload = {}
+            holder = payload if isinstance(payload, dict) else {}
+            if not stale_pass and _pid_alive(int(holder.get("pid") or -1)):
+                return None, {
+                    "pid": int(holder.get("pid")),
+                    "started_at": str(holder.get("started_at") or ""),
+                }
+            try:
+                lock.unlink()
+            except OSError:
+                pass
+            continue
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(
+                {"pid": os.getpid(), "started_at": cfg.now_iso(), "category": category, "action": action},
+                handle,
+            )
+        return lock, {}
+    return None, {"pid": -1, "started_at": "", "note": "锁文件反复陈旧,未能取得锁"}
+
+
+def _release_run_lock(lock: Path | None) -> None:
+    if lock is None:
+        return
+    try:
+        lock.unlink()
+    except OSError:
+        pass
+
+
+def category_metrics(slug: str) -> dict:
+    """类目指标面板读数(全部现算,只查该类目库,绝不跨类目聚合)。
+
+    口径:
+    - ``articles``:该类目库全部文章;
+    - ``measurable_articles``:URL 主机在公开指标白名单(``metrics_pages.host_allowed``)内的篇数,
+      即补采真正能补到 T+N 读数的那部分;
+    - ``queue``:``metrics_due_queue`` 按 state 计数(该库没跑过 due 队列 ⇒ 空,只读连接不建表);
+    - ``pending_backfill``:scheduled+ready+backlog(未拿到读数、待补采);
+    - ``failure_outcomes``:``last_outcome`` 各类计数(unsupported_host / article_gone / infra_unavailable 等);
+    - ``articles_24h``:``fetched_at`` 落在最近 24 小时(与 ``cfg.now_iso`` 同一时区口径);
+    - ``with_metrics_snapshot``:``article_metrics`` 里已有读数行的文章数。
+    """
+    from ttxt.crawler import metrics_pages
+
+    slug = _validated_slug(slug)
+    path = _category_db(slug)
+    if path is None:
+        return {
+            "category": slug,
+            "exists": False,
+            "articles": 0,
+            "measurable_articles": 0,
+            "articles_24h": 0,
+            "with_metrics_snapshot": 0,
+            "queue": {},
+            "pending_backfill": 0,
+            "failure_outcomes": {},
+        }
+    con = _ro_connect(path)
+    try:
+        total = int(con.execute("SELECT COUNT(*) FROM articles").fetchone()[0])
+        measurable = sum(
+            1
+            for row in con.execute("SELECT url, url_normalized FROM articles")
+            if metrics_pages.host_allowed(str(row["url_normalized"] or row["url"] or ""))
+        )
+        cutoff = (datetime.now(timezone.utc).astimezone() - timedelta(hours=24)).isoformat(timespec="seconds")
+        recent = int(con.execute("SELECT COUNT(*) FROM articles WHERE fetched_at >= ?", (cutoff,)).fetchone()[0])
+        try:
+            snapshots = int(con.execute("SELECT COUNT(DISTINCT article_id) FROM article_metrics").fetchone()[0])
+        except sqlite3.OperationalError:
+            snapshots = 0
+        try:
+            queue = {
+                str(row["state"]): int(row["n"])
+                for row in con.execute(
+                    "SELECT state, COUNT(*) AS n FROM metrics_due_queue WHERE category=? GROUP BY state",
+                    (slug,),
+                )
+            }
+            outcomes = {
+                str(row["outcome"]): int(row["n"])
+                for row in con.execute(
+                    "SELECT last_outcome AS outcome, COUNT(*) AS n FROM metrics_due_queue"
+                    " WHERE category=? AND last_outcome IS NOT NULL AND last_outcome <> '' GROUP BY last_outcome",
+                    (slug,),
+                )
+            }
+        except sqlite3.OperationalError:
+            queue, outcomes = {}, {}
+    finally:
+        con.close()
+    return {
+        "category": slug,
+        "exists": True,
+        "articles": total,
+        "measurable_articles": measurable,
+        "articles_24h": recent,
+        "with_metrics_snapshot": snapshots,
+        "queue": queue,
+        "pending_backfill": sum(queue.get(state, 0) for state in ("scheduled", "ready", "backlog")),
+        "failure_outcomes": outcomes,
+    }
+
+
+def category_jobs(slug: str, limit: int = 20) -> dict:
+    """类目相关任务(采集 job + 模型 job + 该类目 due 队列近期尝试),全部现查。"""
+    slug = _validated_slug(slug)
+    limit = max(1, min(int(limit), 100))
+    system = _ro_connect(system_db_path())
+    try:
+        crawl = [
+            dict(row)
+            for row in system.execute(
+                "SELECT id, source, category, status, attempts, last_error, created_at, finished_at "
+                "FROM crawl_jobs WHERE category=? ORDER BY id DESC LIMIT ?",
+                (slug, limit),
+            )
+        ]
+        model = [
+            dict(row)
+            for row in system.execute(
+                "SELECT id, job_type, category, status, attempts, last_error, created_at, started_at, finished_at "
+                "FROM model_jobs WHERE category=? ORDER BY id DESC LIMIT ?",
+                (slug, limit),
+            )
+        ]
+    finally:
+        system.close()
+    attempts: list[dict] = []
+    path = _category_db(slug)
+    if path is not None:
+        con = _ro_connect(path)
+        try:
+            attempts = [
+                dict(row)
+                for row in con.execute(
+                    "SELECT article_id, state, attempts, last_outcome, last_reason, last_attempt_at, next_attempt_at "
+                    "FROM metrics_due_queue WHERE category=? ORDER BY updated_at DESC LIMIT ?",
+                    (slug, limit),
+                )
+            ]
+        except sqlite3.OperationalError:
+            attempts = []
+        finally:
+            con.close()
+    return {"crawl": crawl, "model": model, "metrics_attempts": attempts}
+
+
+def run_status(category: str, action: str) -> dict:
+    """写操作的运行态:单飞锁在跑 ⇒ running + 已耗时;日志尾部给出真实结束原因。"""
+    slug = _validated_slug(category)
+    out: dict = {
+        "category": slug,
+        "action": action,
+        "running": False,
+        "pid": None,
+        "started_at": None,
+        "elapsed_s": None,
+        "log_tail": "",
+    }
+    try:
+        payload = json.loads(_lock_path(slug, action).read_text(encoding="utf-8") or "{}")
+        holder = payload if isinstance(payload, dict) else {}
+    except (OSError, ValueError):
+        holder = {}
+    pid = int(holder.get("pid") or -1)
+    started = str(holder.get("started_at") or "")
+    if pid > 0 and _pid_alive(pid):
+        out["running"] = True
+        out["pid"] = pid
+        out["started_at"] = started or None
+        try:
+            out["elapsed_s"] = round(
+                max(0.0, (datetime.now(timezone.utc).astimezone() - datetime.fromisoformat(started)).total_seconds()), 1
+            )
+        except ValueError:
+            pass
+    elif started:
+        out["started_at"] = started  # 进程已退出:保留开始时间供面板展示,运行态以日志为准
+    try:
+        text = (_runs_dir() / f"{slug}-{action}.log").read_text(encoding="utf-8", errors="replace")
+        out["log_tail"] = text[-4000:]
+    except OSError:
+        pass
+    return out
+
+
+def category_writing(slug: str) -> dict:
+    """写作页签读数:草稿版本链 + 最近评审结论(通过/驳回的真实原因)+ 生成运行态。"""
+    slug = _validated_slug(slug)
+    status = run_status(slug, "write")
+    path = _category_db(slug)
+    if path is None:
+        return {"category": slug, "drafts": [], "evaluations": [], "status": status}
+    con = _ro_connect(path)
+    try:
+        drafts = [
+            dict(row)
+            for row in con.execute(
+                """
+                SELECT draft_id, MAX(version) AS version, MAX(topic) AS topic,
+                       MAX(created_at) AS created_at, MAX(length(content)) AS chars
+                FROM writing_history GROUP BY draft_id ORDER BY MAX(created_at) DESC LIMIT 20
+                """
+            )
+        ]
+        evaluations = []
+        for row in con.execute(
+            "SELECT draft_id, version, score, evaluator, issues_json, created_at "
+            "FROM evaluation_history ORDER BY id DESC LIMIT 10"
+        ):
+            entry = dict(row)
+            try:
+                entry["issues"] = json.loads(entry.get("issues_json") or "[]")
+            except ValueError:
+                entry["issues"] = [str(entry.get("issues_json") or "")]
+            evaluations.append(entry)
+    finally:
+        con.close()
+    return {"category": slug, "drafts": drafts, "evaluations": evaluations, "status": status}
+
+
+def run_metrics_backfill(category: str, *, limit: int = 24, sleep_s: float = 2.5) -> dict:
+    """补采(默认 24 篇 / 间隔 2.5s):复用 ``metrics_queue.run_due`` 全部保护(白名单前置、
+    下架台账、infra 冷却、attempts 退避),不复制任何口径。单飞锁保证同类目不同时跑两次。"""
+    from ttxt.analysis import metrics_queue
+
+    slug = _validated_slug(category)
+    if _category_db(slug) is None:
+        raise ValueError(f"类目 {slug} 无本地库,拒绝补采")
+    lock, holder = _acquire_run_lock(slug, "metrics-backfill")
+    if lock is None:
+        return {"category": slug, "deduped": True, "running": holder, "note": "该类目的补采已在运行,未重复启动"}
+    try:
+        report = metrics_queue.run_due(
+            slug,
+            limit=limit,
+            apply=True,
+            include_new_articles=True,
+            gate_hosts=True,
+            collect_kwargs={"sleep_s": sleep_s},
+        )
+        return {
+            "category": slug,
+            "deduped": False,
+            "skipped": report.get("skipped"),
+            "queue_sync": report.get("queue_sync"),
+            "infra": report.get("infra"),
+            "claimed": report.get("claimed"),
+            "collection": report.get("collection"),
+            "attempts": report.get("attempts"),
+            "infra_failures": report.get("infra_failures"),
+            "windows_refreshed": report.get("windows_refreshed"),
+            "after": report.get("after"),
+        }
+    finally:
+        _release_run_lock(lock)
+
+
+def start_write_task(category: str, topic: str) -> dict:
+    """写作:起 argv 子进程调 ``python -m ttxt write``(不经 shell、不复制类目注册校验),
+    模型调用走既有 model_gate 串行队列;单飞锁保证同类目同一时刻只有一次生成。
+    结果与真实失败原因从 ``99_temp/dashboard_runs/<slug>-write.log`` 读。"""
+    slug = _validated_slug(category)
+    subject = str(topic or "").strip()
+    if not subject:
+        raise ValueError("topic 不能为空")
+    if len(subject) > 300:
+        raise ValueError("topic 过长(最多 300 字)")
+    lock, holder = _acquire_run_lock(slug, "write")
+    if lock is None:
+        return {"category": slug, "deduped": True, "running": holder, "note": "该类目已有生成在跑,未重复启动"}
+    log_path = _runs_dir() / f"{slug}-write.log"
+    try:
+        with log_path.open("ab") as log_handle:
+            process = subprocess.Popen(  # noqa: S603 - argv 列表、无 shell,参数已校验
+                [sys.executable, "-m", "ttxt", "write", "--category", slug, "--topic", subject],
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                cwd=str(cfg.PROJECT_ROOT),
+            )
+        lock.write_text(
+            json.dumps(
+                {"pid": process.pid, "started_at": cfg.now_iso(), "category": slug, "action": "write"},
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+    except Exception:
+        _release_run_lock(lock)
+        raise
+    return {
+        "category": slug,
+        "started": True,
+        "deduped": False,
+        "pid": process.pid,
+        "log": str(log_path),
+        "note": "生成走 model_gate 串行队列;同类目面板保证同一时刻只有一次生成",
     }
