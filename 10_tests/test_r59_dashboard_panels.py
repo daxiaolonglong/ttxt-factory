@@ -147,6 +147,47 @@ def test_new_routes_ready(dashboard):
         assert status == 200, f"路由未就绪:{path} -> {status} {body[:200]}"
 
 
+def test_panel_queue_columns_exist_in_real_schema(dashboard, isolated_data_root: Path):
+    """面板读数引用的列必须真实存在。
+
+    批 A 实测踩过:``last_reason`` 这个列名写错后被 ``except OperationalError`` 吞掉,
+    队列尝试表永远显示"暂无数据"。现在列名错 ⇒ 路由直接 500,同时这里按真实 schema 核对。
+    """
+    slug = "technology"
+    con = _ro(_copy_db(isolated_data_root, slug))
+    try:
+        cols = {str(row["name"]) for row in con.execute("PRAGMA table_info(metrics_due_queue)")}
+    finally:
+        con.close()
+    assert cols, "裁剪副本缺 metrics_due_queue 表,这条核对失效"
+    referenced = (
+        "article_id", "state", "attempts", "last_outcome", "last_error",
+        "last_attempt_at", "next_attempt_at", "updated_at", "category",
+    )
+    missing = sorted(set(referenced) - cols)
+    assert not missing, f"面板引用了不存在的列:{missing};真实列={sorted(cols)}"
+    status, body = _get(f"{dashboard}/api/category/{slug}/jobs?limit=5")
+    assert status == 200, f"jobs 路由因列名报错:{status} {body[:200]}"
+    rows = json.loads(body)["metrics_attempts"]
+    for row in rows:
+        assert {"article_id", "state", "attempts", "last_outcome", "last_error"} <= set(row)
+
+
+def test_frontend_five_tabs_and_write_guards():
+    """批 B 前端:五个页签齐全、写操作都有确认与进行中/已在跑提示、全部走接口取数。"""
+    web = cfg.DASHBOARD_DIR / "web"
+    html = (web / "index.html").read_text(encoding="utf-8")
+    js = (web / "app.js").read_text(encoding="utf-8")
+    for tab in ("tab-overview", "tab-collect", "tab-metrics", "tab-writing", "tab-logs"):
+        assert f'id="{tab}"' in html, f"缺页签:{tab}"
+    assert 'id="confirm-modal"' in html, "写操作缺确认弹层"
+    for token in ("confirmAction", "confirm: state.category", "已在跑", "正在跑", "/api/category/"):
+        assert token in js, f"app.js 缺关键实现:{token}"
+    for action in ("/api/tasks/metrics-backfill", "/api/tasks/write", "/api/tasks/crawl", "/api/tasks/analyze"):
+        assert action in js, f"app.js 缺写操作:{action}"
+    assert "confirm: state.category" in js, "补采/写作必须带 confirm(与目标类目一致)"
+
+
 def test_write_actions_require_confirm(dashboard):
     """补采与写作缺 confirm(或 confirm 与类目不一致)必 400 —— 400 发生在起活之前。"""
     for path, payload in (

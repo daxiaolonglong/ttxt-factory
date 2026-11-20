@@ -16,84 +16,119 @@
       <label>类目
         <select id="category"><option value="">加载中…</option></select>
       </label>
+      <span id="category-note" class="muted"></span>
       <span id="refreshAt" class="muted"></span>
     </div>
   </header>
 
   <nav id="tabs">
-    <button data-tab="overview" class="active">系统总览</button>
-    <button data-tab="collect">智能采集</button>
-    <button data-tab="analysis">数据分析</button>
-    <button data-tab="writing">智能创作</button>
-    <button data-tab="knowledge">知识进化</button>
-    <button data-tab="system">系统管理</button>
-    <button data-tab="logs">动态日志</button>
+    <button data-tab="overview" class="active">总览</button>
+    <button data-tab="collect">采集</button>
+    <button data-tab="metrics">指标</button>
+    <button data-tab="writing">写作</button>
+    <button data-tab="logs">日志</button>
   </nav>
 
   <main>
+    <!-- 总览:全局只读读数 + 该类目最近任务 + 调度与磁盘 -->
     <section id="tab-overview" class="tab active">
       <div id="overview-cards" class="cards"></div>
-      <h2>最近采集任务</h2>
+      <h2>该类目最近采集任务</h2>
       <div id="crawl-jobs"></div>
-      <h2>最近模型任务</h2>
+      <h2>该类目最近模型任务</h2>
       <div id="model-jobs"></div>
+      <h2>待执行任务与调度计划</h2>
+      <div id="task-queue-table"></div>
+      <h2>磁盘与数据</h2>
+      <div id="disk-table"></div>
     </section>
 
+    <!-- 采集:文章库检索、词表现算状态、入队采集与本地分析 -->
     <section id="tab-collect" class="tab">
+      <h2>任务下发 <span class="muted">(采集只入队,由 ttxt crawl-queue --run 执行;分析为本地计算)</span></h2>
+      <div class="dispatch">
+        <label>来源 <select id="dispatch-source"><option value="">加载中…</option></select></label>
+        <button id="btn-enqueue-crawl" type="button">入队采集</button>
+        <button id="btn-run-analyze" type="button">分析当前类目</button>
+        <span id="collect-status" class="muted"></span>
+      </div>
       <h2>文章库 <span id="articles-summary" class="muted"></span></h2>
       <form id="search-form">
         <input id="search-q" placeholder="按标题或正文搜索">
         <button type="submit">搜索</button>
       </form>
       <div id="articles-table"></div>
-      <h2>关键词与反哺候选</h2>
+      <h2>关键词(词表状态与评分,全部现算)</h2>
       <div id="keywords-table"></div>
-    </section>
-
-    <section id="tab-analysis" class="tab">
-      <div id="analysis-cards" class="cards"></div>
-      <h2>爆款标签分布</h2>
-      <div id="viral-table"></div>
-      <h2>知识资产</h2>
-      <div id="assets-table"></div>
-    </section>
-
-    <section id="tab-writing" class="tab">
-      <h2>草稿版本(仅待人工确认)</h2>
-      <div id="drafts-table"></div>
-      <h2>评审记录</h2>
-      <div id="evaluations-table"></div>
-    </section>
-
-    <section id="tab-knowledge" class="tab">
-      <h2>知识资产</h2>
-      <div id="knowledge-table"></div>
-      <h2>关键词缺口(下一轮采集候选)</h2>
+      <h2>零覆盖关键词(下一轮采集候选)</h2>
       <div id="keyword-gap"></div>
     </section>
 
-    <section id="tab-system" class="tab">
-      <div id="system-cards" class="cards"></div>
-      <h2>任务下发 <span class="muted">(只入队采集/本地分析;写作、发布、模型绝不经面板触发)</span></h2>
-      <div class="dispatch" id="dispatch-bar">
-        <label>来源 <select id="dispatch-source"><option value="">加载中…</option></select></label>
-        <button id="btn-enqueue-crawl" type="button">入队采集</button>
-        <button id="btn-run-analyze" type="button">分析当前类目</button>
-        <span id="dispatch-status" class="muted"></span>
+    <!-- 指标:类目指标现算读数、补采队列健康度、失败归类、补采下发 -->
+    <section id="tab-metrics" class="tab">
+      <h2>类目指标 <span class="muted">(只查该类目库,绝不跨类目聚合)</span></h2>
+      <div id="metrics-cards" class="cards"></div>
+      <div class="dispatch">
+        <button id="btn-backfill" type="button">补采该类目(立即执行一批)</button>
+        <span id="metrics-status" class="muted"></span>
       </div>
-      <h2>任务队列与调度计划</h2>
-      <div id="task-queue-table"></div>
-      <h2>模型队列</h2>
+      <h2>补采队列状态</h2>
       <div id="queue-table"></div>
-      <h2>磁盘与数据</h2>
-      <div id="disk-table"></div>
+      <h2>失败归类</h2>
+      <div id="failure-table"></div>
+      <h2>队列近期尝试</h2>
+      <div id="attempts-table"></div>
+      <h2>内容分析(爆款分层与知识资产)</h2>
+      <div id="analysis-cards" class="cards"></div>
+      <div id="viral-table"></div>
+      <div id="assets-table"></div>
     </section>
 
+    <!-- 写作:生成下发(confirm 二次确认)+ 运行态轮询 + 草稿与评审结论 -->
+    <section id="tab-writing" class="tab">
+      <h2>生成任务 <span class="muted">(模型调用经 model_gate 串行;同类同一时刻只允许一次生成)</span></h2>
+      <div class="dispatch">
+        <label>主题 <input id="write-topic" placeholder="写作主题"></label>
+        <button id="btn-write" type="button">生成草稿</button>
+        <span id="writing-status" class="muted"></span>
+      </div>
+      <div id="write-run" class="run-panel"></div>
+      <h2>草稿版本</h2>
+      <div id="drafts-table"></div>
+      <h2>评审结论(通过/驳回的真实原因)</h2>
+      <div id="evaluations-table"></div>
+      <h2>生成日志尾部</h2>
+      <pre id="write-log" class="logbox"></pre>
+    </section>
+
+    <!-- 日志:该类目最近日志,增量轮询,不一次拉全量 -->
     <section id="tab-logs" class="tab">
-      <h2>结构化日志 <span class="muted">(每 3 秒刷新)</span></h2>
+      <h2>结构化日志 <span class="muted">(增量刷新,不一次拉全量)</span></h2>
+      <div class="dispatch">
+        <label>范围
+          <select id="log-scope">
+            <option value="category">仅当前类目</option>
+            <option value="all">全部类目</option>
+          </select>
+        </label>
+        <button id="btn-logs-reset" type="button">清空重取</button>
+        <span id="logs-count" class="muted"></span>
+      </div>
       <div id="logs-list"></div>
     </section>
   </main>
+
+  <div id="confirm-modal" class="modal" hidden>
+    <div class="modal-box">
+      <h3 id="confirm-title">确认操作</h3>
+      <p class="muted">目标类目:<strong id="confirm-category"></strong></p>
+      <p id="confirm-detail" class="modal-detail"></p>
+      <div class="modal-actions">
+        <button id="confirm-ok" type="button">确认执行</button>
+        <button id="confirm-cancel" type="button">取消</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/static/app.js"></script>
 </body>

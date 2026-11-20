@@ -335,6 +335,11 @@ def _ro_connect(path: Path) -> sqlite3.Connection:
     return con
 
 
+def _has_table(con: sqlite3.Connection, name: str) -> bool:
+    """表是否存在(存在就照实查:列名写错必须报错,不能被 ``except OperationalError`` 吞成空读数)。"""
+    return con.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
+
+
 def _validated_slug(category: str) -> str:
     slug = str(category or "").strip()
     if not slug or not store.SLUG_RE.match(slug):
@@ -456,11 +461,12 @@ def category_metrics(slug: str) -> dict:
         )
         cutoff = (datetime.now(timezone.utc).astimezone() - timedelta(hours=24)).isoformat(timespec="seconds")
         recent = int(con.execute("SELECT COUNT(*) FROM articles WHERE fetched_at >= ?", (cutoff,)).fetchone()[0])
-        try:
-            snapshots = int(con.execute("SELECT COUNT(DISTINCT article_id) FROM article_metrics").fetchone()[0])
-        except sqlite3.OperationalError:
-            snapshots = 0
-        try:
+        snapshots = (
+            int(con.execute("SELECT COUNT(DISTINCT article_id) FROM article_metrics").fetchone()[0])
+            if _has_table(con, "article_metrics")
+            else 0
+        )
+        if _has_table(con, "metrics_due_queue"):
             queue = {
                 str(row["state"]): int(row["n"])
                 for row in con.execute(
@@ -476,7 +482,8 @@ def category_metrics(slug: str) -> dict:
                     (slug,),
                 )
             }
-        except sqlite3.OperationalError:
+        else:
+            # 该库没跑过 due 队列:读数如实为空。列名写错则必须报错,不能被 except 吞成空读数
             queue, outcomes = {}, {}
     finally:
         con.close()
@@ -522,16 +529,17 @@ def category_jobs(slug: str, limit: int = 20) -> dict:
     if path is not None:
         con = _ro_connect(path)
         try:
-            attempts = [
-                dict(row)
-                for row in con.execute(
-                    "SELECT article_id, state, attempts, last_outcome, last_reason, last_attempt_at, next_attempt_at "
-                    "FROM metrics_due_queue WHERE category=? ORDER BY updated_at DESC LIMIT ?",
-                    (slug, limit),
-                )
-            ]
-        except sqlite3.OperationalError:
-            attempts = []
+            if _has_table(con, "metrics_due_queue"):
+                # 列名写错必须报错(500 显示真实错误),不能被吞成空表 —— "暂无数据"必须是真没数据
+                attempts = [
+                    dict(row)
+                    for row in con.execute(
+                        "SELECT article_id, state, attempts, last_outcome, last_error, last_attempt_at,"
+                        " next_attempt_at "
+                        "FROM metrics_due_queue WHERE category=? ORDER BY updated_at DESC LIMIT ?",
+                        (slug, limit),
+                    )
+                ]
         finally:
             con.close()
     return {"crawl": crawl, "model": model, "metrics_attempts": attempts}
