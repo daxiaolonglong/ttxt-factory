@@ -362,6 +362,22 @@ d:\ttxt\.venv\Scripts\python.exe -X utf8 scripts/pass_rate_probe.py --batch 07_t
 
 **产物**:代码 commit 072358c;`03_intelligence/pass_rate_probe-20261119-r50.json`、报告 `08_wiki/reports/r50-passrate-after-fixes.md`、`10_tests/test_r50_review_soft_critical.py`。
 
+## R60：收藏数据打通 + 关键词自增长核对 + 评分区分度（2026-11-21）
+
+**已完成（四步全闭合，详见 `08_wiki/reports/r60-favorites-mining-banding.md`）**：
+G1 自有账号后台读数回流——收藏实测只存在于管理页逐行"查看数据"弹层"互动"区，生产采集
+(`_collect_stat_modals`+`parse_stat_modal`+`merge_modal_items`)已把自有作品全字段落库：social
+11697 `reads=14/favorites=1/impressions=693`、登记行 41128 `source=own_account reads=3/favorites=0`；
+其余四类目 `own_account=0`（早期跨类目注册污染 15 行已清理，根因修复 `d6a17ad`/`edfeb34`：
+登记与匹配解耦 `register_pass` 全库判重只登记一次、跨响应去重、`match_and_write` 补 commit）。
+验收 `select count(*) from article_metrics where favorites is not null`=**2**>0 通过；job
+`account_metrics_2h` 已置 `enabled=true`（2h 硬下限+独立 profile+force 审计不变）。G2 核对结论：
+`mine_keywords` R28 已在生产生效（`analyze.py:42`），库内 `origin='mined'` **35 词全部带真实采集数
+(20–138)**；24h mined 入队 0（挖词走来源轮换采集，非 gap 补采），如实记录。G3 分位档替代绝对
+0.5 阈值（`89c8724`），423 篇 technology 标 `backlog_no_metrics`。G6 运维卫生+supervisor 重启
+(`e1998b6`)。门禁四数字：日进量 **2286**、窗口成功率 **133/175≈76%**、favorites 覆盖 **自有作品
+2/2 全量**、mined **35 词生效/入队 0**。测试 `test_r60_account_metrics.py` **16 passed**。
+
 ## 三、工作顺序(2026-11-17 由项目负责人定,后续轮次照此执行)
 
 1. **项目真实状态对账** —— 本轮已完成,产物就是本文件。

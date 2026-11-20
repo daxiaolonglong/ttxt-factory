@@ -2,31 +2,57 @@
 
 **这个文件的作用是"无损压缩"**：上下文被压缩、或换新窗口时，只相信这里写的事实，不靠对话记忆。
 规则：每完成一个阶段、每次提交推送后、每次产生大输出（全量测试日志、全盘扫描、长报告）之后，必须重写本文件。
-最后更新：2026-11-18 13:35 — 阶段2 已闭合并推送;远端 `main` = `2c1a28d338cf9e02d55116dbf994350724aa12db`(阶段3 第 1 步已落地)
+最后更新：2026-11-21 03:46 — **R60 全部四步已闭合并推送**；远端 `main` = `edfeb34`。
 
 ## 接手三行
 
-1. **不要重做已闭合的事**：阶段0 磁盘止血（T-19）、阶段1 取材接线（**T-20**）、**阶段2 独立评审通道（T-21）**、**scratch 限额补收（T-22）** 已完成、已测、已推送（远端 `main` = `c274cb7`）。评审通道代码：`ttxt/writing/review.py` 与 `ttxt/writing/workflow.py` 的 `_apply_reviewer` / `_review_account` / `_set_draft_status`。回归：`10_tests/test_p40_independent_review.py`（16 项）、`10_tests/test_p38_disk_budget_fixtures.py`（22 项）。磁盘与基线读数见下节。
-2. **Next action = 阶段3 管线增量化（账本 T-17）**: each scheduler tick recomputes clean/analyze/cluster/FTS over the whole corpus; the cost to cut is measured — social full run **47m51s**. Acceptance for T-17: (a) incremental result == full result, proved by a consistency receipt (row counts, cluster ids, FTS hits), (b) one measured social run drops from ~48 min to minutes, (c) full rebuild stays available as the fallback path. Entry points to read first: `ttxt/crawler/` cleaner/store, `ttxt/analysis/` (rag/viral/keywords/cluster), and `00_control/config.json` `scheduler.jobs` kinds (`crawl_enqueue` / `analyze` / `recover` / `metrics_fetch`).
-3. **密钥红线**：DeepSeek 评审密钥只允许待在 `.secrets/deepseek_api_key`，不得进文件/日志/回执/提交/对话回显；127.0.0.1:8080 写作模型（`qwen3.8-flash-next-iq3_s`）的配置/端口/量化一律不动，只许在旁边新增 `review` 段。
+1. **R60 已完成**（计划 `C:\Users\yangl\.qoder\plans\rolling-meadow-owl.md`）：G6 `e1998b6`、
+   G3 `89c8724`、G1 全链 `3ba7697→…→9ce51d6→d6a17ad→edfeb34`、G2 核对确认 R28 已在生产生效。
+   账本见 `08_wiki/PROJECT_STATUS.md` R60 段，细节见 `08_wiki/reports/r60-favorites-mining-banding.md`。
+2. **收藏已打通**：收藏只在管理页逐行"查看数据"弹层"互动"区；生产采集+标题合并+`register_pass`
+   登记（全库判重、只登记一次、只进 `account.own_work_category`=social）已验收：social 11697
+   `favorites=1 reads=14 impressions=693`，登记行 41128 `source=own_account favorites=0 reads=3`，
+   其余四类目零污染；`favorites is not null` 计数=2>0。job `account_metrics_2h` `enabled=true`。
+3. **下一轮是 R61**：G4 写作批次 social+finance 各 ≥20 复验通过率；G5 verified_viral/junk 样本
+   → 写作 few-shot 库（不微调）；黄金集 61 条冲突卡按模板重判。旧账：T-02 第二来源、
+   T-16 展现量/标签覆盖、T-17 管线增量化、health 标定（26<30）。**不要按本文件旧版续跑 R60。**
 
-## 已实测、不需要再确认的事实（2026-11-18 本机读数）
+## 已实测事实（2026-11-21 03:45）
 
-- **写作取材（本轮新增，生产实测 10:08–10:19）**：候选池 `MATERIAL_POOL_LIMIT=15 → 喂 MATERIAL_TOP_K=5`；`ttxt write --category social --topic 养老金` 退出码 0，回执 `04_writing/receipts/write-social-pension-20261118.json`：`pool 15 / candidates 15 / full 15 / distinct_sources 14 / distinct_hosts 1`，`calibrated` 但 **`measured_label_hits 0`**；选中 5 篇（id 19794/12222/1717/15408/11105）全是 full、来自 5 个不同作者。产物 `04_writing/drafts/social/rejected/social-20261118101123-549323.md`（v3、score 0.85、claim 引到 [1]–[5]、无三段式模板），social 首次落 `writing_history` **3 行**（942/977/979 字符，`model_id=qwen3.8-flash-next-iq3_s`）。**仍被事实门禁拒绝**：2 条 `原文引句未绑定` + 1 条 `dates 锚点不在引句窗口但在正文别处出现(移花接木嫌疑):2026年`。
-- **独立来源口径**：实测**每个正式类目只有一个域名**（social/technology/finance/history 全是 toutiao.com，health 全是 who.int）⇒ 按域名计阈值 3 对任何选题都不可达；已改为**作者账号优先、缺作者退回域名、缺作者不计数**（social：40,526 行里 40,205 行有作者、18,949 个作者）。
-- **语料与标定规模**：social 40,526（full 40,520 / short 6，calibrated，measured 80）、finance 12,748（calibrated，measured 46）、technology 330（calibrated，measured 200）、history 160（calibrated，measured 46）、health 26（**未标定**，26 < `viral.MIN_CALIBRATION_SAMPLE=30`，作者字段全空）。**先验在生产取材里目前命中 0**（标签覆盖率 0.2%），把标签做厚是 **T-16** 的活，不在本轮虚报。
-- **测试**: full suite **793 passed / 0 failed (207.84s)** with supervisor paused; writing set 6 files 57 items; new `test_p40_independent_review.py` 16 items, `test_p38_disk_budget_fixtures.py` 22 items (+3 trim-cache prune tests).
-- **磁盘 (2026-11-18 13:00)**: `du -sb .` **11.152 GB / 20 GB**, D: free **139.6 GB**; `07_tmp` **1,832,048,325 B = 1.706 GB / cap 2 GB** (`doctor disk.scratch` PASS; before the T-22 fix it read 3.798 GB and FAILed), `pytest_trim` 55.7 MB (stale generations pruned), `11_backups` growth still monitored, `disk.backup_keep` 6.
-- **运行态**: supervisor re-armed after the guarded suite (`--clear-stop` + `--ensure`): supervisor pid 2036, scheduler 39092, worker 31236; `ops.supervisor` PASS (heartbeat 5 s), **`ops.scheduler_heartbeat` now PASS** (5 enabled jobs inside interval, last_run_at 10:33). `strata.health` served_model now **`qwen3.8-flash-next-coder-iq1_m`** (was `qwen3.8-flash-next-iq3_s`) — Strata is user-managed and the id drifts; independence logic re-probes both sides every run, so never assume a stale id.
-- **T-17 measured baseline (13:44, `07_tmp/t17-baseline-social.log`)**: `ttxt analyze --category social` stage_seconds = `index 236.27s` (FTS rebuild, 40,534 rows) / `score_keywords 16.88s` / `viral 3.58s` / `knowledge 1.08s` / `seed 0` / `auto_feedback 0` => analyze total ~258s. So the 47m51s cost is NOT in analyze; it is the clean+cluster stage (`ttxt/crawler/pipeline.py`, simhash clustering is O(n^2) over 40k rows). Next step of T-17: (1) incremental FTS in `ttxt/analysis/rag.py` (delta insert/delete instead of DROP+CREATE, needs per-row fingerprint bookkeeping - additive new table `pipeline_state(article_id, content_fp, fp_at)`, no change to existing tables), (2) delta clustering, (3) acceptance = incremental output == full output (consistency receipt) + measured time drop.
-- **独立评审通道 (T-21, live 12:0x–13:0x)**: `ttxt/writing/review.py` prompt is the ruled 6 chars 「审评文章」 + body only, not configurable; key only from `DEEPSEEK_API_KEY` or `.secrets/deepseek_api_key` and never in log/receipt/exception; channel unavailable ⇒ independence not established. Live probe receipt `04_writing/receipts/p40-live-review-20261118.json`: reviewer `deepseek-flash` vs writer `qwen3.8-flash-next-iq3_s`, `elapsed_s 33.313`, completion 3918 / reasoning 2235, verdict markers both false, key absent from the blob. Production `writing_history` (social, read-only): 6 `REJECTED` rows (drafts `social-20261118113651-07f453` 11:36–11:40 id `...iq3_s`, `social-20261118121638-99a193` 12:16–12:18 id `...coder-iq1_m`) + 3 legacy lowercase `rejected` rows; **0 `AUTO_PASSED` / 0 `INDEPENDENT_REVIEW_PASSED`** — both writes died at the fact gate before the channel ran, so pass-path evidence is still missing (writing-quality debt, not the channel).
-- **可复用 API（已核对存在）**：`ttxt/analysis/rag.py search(..., db_path=)`、`ttxt/analysis/viral.py load_calibration(con)` / `CALIBRATION_META_KEY` / `MIN_CALIBRATION_SAMPLE` / `TIER_MEASURED`、`ttxt/analysis/keywords.py _measured_label_map` / `LABEL_VALUE` / `VIRAL_WEIGHT=0.30`、`ttxt/crawler/cleaner.py COMPLETENESS_FULL` / `completeness_of`、`ttxt/crawler/store.py read_only_connect`（**不设 row_factory**，要自己 `sqlite3.Row`；且 `mode=ro` 会在生产目录造出 `-wal/-shm` ⇒ 生产探针不要和 pytest 会话同时跑）、`ttxt/model_gate/client.py:chat(base_url=, model_id=)`。
-- `writing_history` 真实列名只有：`draft_id, category, topic, version, content, model_id, created_at, status`（**没有 score/passed**，别按记忆写 SQL）。
+- **G1 落库读数**（SQL 直查）：social `article_metrics` 中 `data_source='toutiao_account'` 共 2 行
+  （11697、41128），`own_account` 文章 1 行；history/health/technology/finance 四类目
+  `own_account=0`、`toutiao_account=0`。污染清理共删 15 行（history 363/364、health 236/237、
+  technology 1235/1236、finance 14186/14187、social 41123/41124-41127 及其 metrics/snapshot）。
+- **三个已修根因**（全有回归测试）：①`match_and_write` 缺 `con.commit()` → 登记回滚循环 +
+  注册行对 `write_metric_rows` 不可见被静默拒收；②登记写在逐类目匹配循环里 → 每个类目库各建
+  一份自有行 + 后台双行(feed 行/弹层行两个 url)同轮再各造一份；③后台 feed 多条响应把 4 篇重复
+  成 24 条 → `dedup_captured_items` 按 host+path 去查询参数判重、字段取先到非 None 并集，
+  无 url 条目不许仅凭标题并库。判重口径：url/item_id/**同名(含目标类目自身)**任一命中即不登记。
+- **G2 核对**：`mine_keywords` R28 已接 `ttxt/analysis/analyze.py:42`；social 库 `origin='mined'`
+  35 词全 `active` 且 `keyword_performance.collected` 20–138 真实非空；24h `crawl_jobs` mined
+  入队 0（mined 词靠来源轮换采集，auto_feedback 只服务零覆盖 gap 词）。
+- **门禁四数字**：日进量 2286（24h `fetched_at`）；窗口成功率 133/175≈76%（`crawl.done`/
+  `crawl.browser_lock.acquired`）；favorites 覆盖=自有作品 2/2 全量；mined 35 词生效。
+- **测试**：`10_tests/test_r60_account_metrics.py` **16 passed**（弹层解析/合并/去重/登记判重/
+  白名单/调度接线全链）。全量 suite 本轮未重跑，不得声称全绿。
+- **CLI**：`account-fetch [--category X] [--apply] [--force]`；`--force` 只供人工排障，
+  日志留 `account.fetch.force_override` 审计，调度器永不传。本轮排障共 6 次 force。
+- **工作区**：提交推送后 `git status` 应仅剩本文件；`03_intelligence/account_metrics/` 证据 JSON
+  按 housekeep 7 天保留。
 
 ## 红线（接手后继续有效）
 
-不删 `01_categories/ 09_logs/ 资产库/ 11_backups/`（历史残留只能挪进 `07_tmp`）；清理临时文件必须走 `ttxt housekeep` 且逐条打日志+回执；`10_tests/conftest.py` 的 `production_state_untouched`、`session_db_opens`、`isolated_log_dir`、`session_categories_dir`、`no_stray_temp_at_repo_root` 守卫不许削弱；**事实与质量门禁只许收紧不许放宽**（规则 55/57）；未标定类目（health）不得当已标定用，缺数据不得当 0（规则 6）；未经批准不发布、不做破坏性操作；每阶段完成即提交并推送，推送失败必须如实报告并用 `git ls-remote` 核验；DeepSeek 评审密钥只允许 `.secrets/deepseek_api_key`；127.0.0.1:8080 写作模型配置/端口/量化不动。
+只读自有头条账号，不碰他人数据；账号 profile / cookie / state 不入 git（`02_crawler/.account/`、
+`00_control/account_metrics_state.json`）；两小时硬下限不得下调；`--force` 不得进调度；
+调度器绝不触发写作/发布/模型；800 字门禁与规则 57/64 不得放宽；127.0.0.1:8080 Strata
+(qwen3.8-flash-next-iq3_s, 147456 ctx) 配置/端口/量化不动；DeepSeek 评审密钥只允许
+`.secrets/deepseek_api_key`；每完成一项独立提交并推送 origin/main（已预授权），推送失败如实报告并用 `git ls-remote` 核验。
 
-## 还欠着的账（不变，别丢）
+## 还欠着的账
 
-T-02 第二来源补到 A+B ≥50%、T-01/T-15 AI 重判分歧裁定、T-08/T-09 数据闭环、T-16 展现量与标签覆盖率（决定先验能否真生效）、T-17 管线增量化（social 全量 47m51s）、T-12 POSIX 锁、面板日志过滤与分页、health 标定（26 行 < 30）、social 20 篇 FTS 覆盖缺口。
+G1/G2/G3/G6 已全部闭合（见上）。R61：写作批次复验、样本回流 few-shot、黄金集重判。
+旧账：T-02 第二来源、T-16 展现量/标签覆盖、T-17 管线增量化、health 标定（26<30）。
+新增小账：自有作品登记类目由 `account.own_work_category` 指定（现 social），若日后发布类目
+变化需改配置；同名多篇的自有作品不自动登记（宁缺毋滥），走后台导出备份通道 c。
+
+DONE

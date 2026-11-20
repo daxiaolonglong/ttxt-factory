@@ -120,7 +120,10 @@
     },
     "public_pages": {
       "source_id": "toutiao_public_article",
-      "hosts": ["www.toutiao.com", "m.toutiao.com"],
+      "hosts": [
+        "www.toutiao.com",
+        "m.toutiao.com"
+      ],
       "limit_per_run": 20,
       "sleep_s": 2.0
     }
@@ -139,22 +142,68 @@
     "enabled": true,
     "_comment": "P35:metrics_fetch 把公开互动指标自动回流接进闭环(采集→重标定爆款标签→关键词评分→反哺关键词)。它直接用浏览器,而 Worker 是另一个进程、共用同一份 02_crawler/.browser/profile,所以 wait_for_queue_s 先让开队列;排在 crawl_enqueue 之前是有意安排的:同一个 tick 里两个任务都到期时先采指标(此时队列必然空闲),再入队采集。apply=false 是干跑开关,核实过数字才改成 true。P36 之后还有第二道保险:浏览器 profile 跨进程锁,lock_wait_s=300 比 Worker 的 600 短,抢不到就整轮记 skipped_browser_busy 明确跳过(不烧浏览器、不发请求),绝不把 Worker 正在用的浏览器抢过来。",
     "jobs": [
-      {"id": "metrics_due_60m", "kind": "metrics_due", "interval_min": 60, "enabled": true,
-       "limit": 12, "sleep_s": 2.5, "apply": true,
-       "backfill_new_articles": true, "backfill_limit": 200, "gate_hosts": true,
-       "_comment": "R58:新文章入队接进调度器(backfill_new_articles,only_missing+唯一键=幂等),白名单校验前置到入队之前(gate_hosts),代理/网络故障冷却 6h 内整轮 skipped_infra_paused。",
-       "wait_for_queue_s": 180, "queue_poll_s": 20, "lock_wait_s": 180},
-      {"id": "account_metrics_2h", "kind": "account_metrics", "interval_min": 120, "enabled": false,
-       "apply": true,
-       "_comment": "R60 G1:头条自有账号后台读数(含收藏)。先跑 `python -m ttxt account-login` 扫码;登录成功后把 enabled 改 true。代码内还有 2h 硬下限与独立 profile 锁,未登录时不会写任何数据。"},
-      {"id": "metrics_fetch_6h", "kind": "metrics_fetch", "interval_min": 360, "enabled": false,
-       "_comment": "R42:取数时点已改为按 due_at 排队,本任务停用(保留代码只用于人工对照/回滚)",
-       "limit": 12, "sleep_s": 2.5, "apply": true, "retry_gone": false,
-       "wait_for_queue_s": 300, "queue_poll_s": 20, "lock_wait_s": 300},
-      {"id": "crawl_enqueue_4h", "kind": "crawl_enqueue", "interval_min": 240, "enabled": true},
-      {"id": "analyze_daily", "kind": "analyze", "interval_min": 1440, "enabled": true},
-      {"id": "recover_daily", "kind": "recover", "interval_min": 1440, "enabled": true},
-      {"id": "housekeep_weekly", "kind": "housekeep", "interval_min": 10080, "enabled": true}
+      {
+        "id": "metrics_due_60m",
+        "kind": "metrics_due",
+        "interval_min": 60,
+        "enabled": true,
+        "limit": 12,
+        "sleep_s": 2.5,
+        "apply": true,
+        "backfill_new_articles": true,
+        "backfill_limit": 200,
+        "gate_hosts": true,
+        "_comment": "R58:新文章入队接进调度器(backfill_new_articles,only_missing+唯一键=幂等),白名单校验前置到入队之前(gate_hosts),代理/网络故障冷却 6h 内整轮 skipped_infra_paused。",
+        "wait_for_queue_s": 180,
+        "queue_poll_s": 20,
+        "lock_wait_s": 180
+      },
+      {
+        "id": "account_metrics_2h",
+        "kind": "account_metrics",
+        "interval_min": 120,
+        "enabled": true,
+        "apply": true,
+        "_comment": "R60 G1:头条自有账号后台读数(含收藏)。先跑 `python -m ttxt account-login` 扫码;登录成功后把 enabled 改 true。代码内还有 2h 硬下限与独立 profile 锁,未登录时不会写任何数据。"
+      },
+      {
+        "id": "metrics_fetch_6h",
+        "kind": "metrics_fetch",
+        "interval_min": 360,
+        "enabled": false,
+        "_comment": "R42:取数时点已改为按 due_at 排队,本任务停用(保留代码只用于人工对照/回滚)",
+        "limit": 12,
+        "sleep_s": 2.5,
+        "apply": true,
+        "retry_gone": false,
+        "wait_for_queue_s": 300,
+        "queue_poll_s": 20,
+        "lock_wait_s": 300
+      },
+      {
+        "id": "crawl_enqueue_4h",
+        "kind": "crawl_enqueue",
+        "interval_min": 240,
+        "enabled": true
+      },
+      {
+        "id": "analyze_daily",
+        "kind": "analyze",
+        "interval_min": 1440,
+        "enabled": true
+      },
+      {
+        "id": "recover_daily",
+        "kind": "recover",
+        "interval_min": 1440,
+        "enabled": true
+      },
+      {
+        "id": "housekeep_weekly",
+        "kind": "housekeep",
+        "interval_min": 10080,
+        "enabled": true
+      }
     ]
   },
   "supervisor": {
@@ -167,5 +216,8 @@
     "poll_s": 1.0,
     "heartbeat_s": 10.0,
     "heartbeat_fresh_s": 900.0
+  },
+  "account": {
+    "own_work_category": "social"
   }
 }
