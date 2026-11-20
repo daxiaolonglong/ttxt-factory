@@ -21,8 +21,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -201,6 +203,146 @@ def extract_metric_items(payload: Any) -> list[dict]:
     return found
 
 
+def parse_stat_modal(text: str) -> dict | None:
+    """解析单篇"查看数据"弹层文本(R60 实测:互动区含**收藏**,公开页永远拿不到)。
+
+    实测样例行:`展现量73`、`阅读量0`、`评论0`、`点赞0`、`收藏1`。
+    保守口径:只认这些明确标签;认不出返回 None,绝不猜、不把缺失当 0。
+    """
+    if not text:
+        return None
+    title = ""
+    for line in text.splitlines():
+        line = line.strip()
+        if line and line not in {"微头条", "部分数据更新有延迟"}:
+            title = line
+            break
+    if not title:
+        return None
+
+    def grab(pattern: str, scope: str) -> int | None:
+        m = re.search(pattern, scope)
+        return _as_int(m.group(1)) if m else None
+
+    idx = text.find("互动")
+    has_actions = "查看" in text  # 现代列表 UI:行内有"查看评论/查看数据"操作链接
+    if idx >= 0:
+        # 互动四项只认"互动"分区标题之后的窗口:"查看评论"链接+紧邻数字会让
+        # 全文匹配把无关数字当成评论数(实测出现过 评论1 ← 其实是操作链接)。
+        scope = text[idx:idx + 160]
+        flow_scope = text[:idx]
+    elif has_actions:
+        # 没有"互动"分区却有操作链接 ⇒ 互动数字不可信,宁缺毋滥;流量区仍可读。
+        scope = ""
+        flow_scope = text
+    else:
+        scope = flow_scope = text
+    item = {
+        "title": title,
+        "item_id": None,
+        "url": None,
+        "reads": grab(r"阅读量\s*([0-9][0-9,]*)", flow_scope),
+        "favorites": grab(r"收藏\s*([0-9][0-9,]*)", scope),
+        "likes": grab(r"点赞\s*([0-9][0-9,]*)", scope),
+        "comments": grab(r"评论\s*([0-9][0-9,]*)", scope),
+        "impressions": grab(r"展现量\s*([0-9][0-9,]*)", flow_scope),
+    }
+    if not any(item[k] is not None for k in
+               ("reads", "favorites", "likes", "comments", "impressions")):
+        return None
+    return item
+
+
+def merge_modal_items(feed_items: list[dict], modal_items: list[dict]) -> list[dict]:
+    """把"查看数据"弹层解析出的指标(含收藏)并回 feed 条目(同标题才并)。
+
+    feed 有 url/item_id 但没有收藏;弹层有收藏但没有 url。按规范化标题配对:
+    - 配对成功:来值非 None 才回填,已有非 None 值不覆盖(feed 与弹层本就同源);
+    - 配不上:弹层条目原样保留(后面走唯一标题匹配,匹配不上只落证据,不乱挂)。
+    """
+    by_title: dict[str, dict] = {}
+    for item in feed_items:
+        key = str(item.get("title") or "").strip()
+        if key:
+            by_title.setdefault(key, item)
+    out = list(feed_items)
+    for modal in modal_items:
+        key = str(modal.get("title") or "").strip()
+        target = by_title.get(key)
+        if target is None:
+            out.append(modal)
+            continue
+        for field in ("reads", "favorites", "likes", "comments", "impressions"):
+            if target.get(field) is None and modal.get(field) is not None:
+                target[field] = modal[field]
+    return out
+
+
+def _read_open_stat_modal(page: Any) -> str:
+    """读当前打开的"查看数据"弹层文本,轮询到指标出现(或 12s 超时)。"""
+    deadline = time.monotonic() + 12.0
+    last = ""
+    while time.monotonic() < deadline:
+        try:
+            text = page.evaluate(
+                """() => { const nodes = document.querySelectorAll(
+                     '[class*=modal], [class*=dialog], [class*=drawer], [class*=popup]');
+                         let best = '';
+                         for (const n of nodes) {
+                           const t = (n.innerText || '').trim();
+                           if (t.length > best.length) best = t;
+                         }
+                         return best.slice(0, 4000); }""") or ""
+        except Exception:  # noqa: BLE001
+            text = ""
+        if text:
+            last = text
+            if "收藏" in text or ("互动" in text and "展现量" in text):
+                return text
+        page.wait_for_timeout(1200)
+    return last
+
+
+def _collect_stat_modals(page: Any, context: Any, manage_url: str, max_rows: int = 8) -> list[str]:
+    """生产采集:管理页逐行打开"查看数据"弹层读文本(自有作品低频、有限)。
+
+    点击可能触发行内导航 ⇒ 每行处理完重新回管理页再点下一行;只读浏览,
+    不改账号任何状态。返回每行弹层原文(解析失败也留证据)。
+    """
+    texts: list[str] = []
+    for idx in range(max_rows):
+        try:
+            page.goto(manage_url, wait_until="domcontentloaded", timeout=60_000)
+            stats = page.locator("text=查看数据")
+            for _ in range(6):
+                if stats.count() > idx:
+                    break
+                page.wait_for_timeout(1500)
+            if stats.count() <= idx:
+                break  # 没有更多行:正常结束
+            try:
+                stats.nth(idx).click(timeout=5000)
+            except Exception:  # noqa: BLE001 - 行内控件遮挡/导航残留
+                texts.append("")
+                continue
+            modal = _read_open_stat_modal(page)
+            texts.append(modal)
+            for extra in list(context.pages):
+                if extra is not page:
+                    try:
+                        extra.close()
+                    except Exception:  # noqa: BLE001
+                        pass
+            try:
+                page.keyboard.press("Escape")
+            except Exception:  # noqa: BLE001
+                pass
+        except Exception as exc:  # noqa: BLE001 - 单行失败不带走整轮
+            texts.append("")
+            LOG.warn("account.fetch.modal_row_failed", idx=idx, error=str(exc)[:120])
+    return texts
+
+
 def _article_by_url(con, category: str, url: str) -> int | None:
     hit = con.execute(
         "SELECT id FROM articles WHERE url_normalized=? AND category=?",
@@ -217,6 +359,76 @@ def _article_by_title(con, category: str, title: str) -> int | None:
     return int(rows[0]["id"]) if len(rows) == 1 else None
 
 
+#: 注册进库的自有文章统一用这个 source 标记(溯源清楚,不会被当成竞品语料混淆)。
+OWN_SOURCE = "own_account"
+
+
+def register_own_work(con, category: str, item: dict, now: str) -> dict | None:
+    """把"我方已发布但库内没有"的作品登记进类目库(R60 计划:发布↔库内映射)。
+
+    只登记有 URL 的已发布作品;正文不在后台 feed 里,正文列以标题占位并注明
+    (自有文章的取数在自有通道完成,不依赖正文;绝不伪造正文)。
+    幂等:同 url_normalized 已存在就不重复插。
+    """
+    url = str(item.get("url") or "").strip()
+    title = str(item.get("title") or "").strip()
+    if not url or not title:
+        return None
+    normalized = normalize_url(url)
+    hit = con.execute(
+        "SELECT id FROM articles WHERE url_normalized=? AND category=?", (normalized, category)
+    ).fetchone()
+    if hit:
+        return {"article_id": int(hit["id"]), "created": False}
+    body = f"[自有账号已发布作品,正文未随后台 feed 返回,不做伪造] {title}"
+    cur = con.execute(
+        "INSERT INTO articles(category, source, source_item_id, title, content, excerpt,"
+        " author, published_at, url, url_normalized, fetched_at, content_hash,"
+        " completeness, credibility, processor_version)"
+        " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (
+            category, OWN_SOURCE, str(item.get("item_id") or ""), title, body,
+            "自有账号发布作品(账号读数通道登记)", None, now, url, normalized, now,
+            "own:" + hashlib.sha1(normalized.encode("utf-8")).hexdigest(),
+            "own_work", "self_reported", "r60-account",
+        ),
+    )
+    return {"article_id": int(cur.lastrowid), "created": True}
+
+
+def _ensure_metrics_tables(con) -> None:
+    """article_metrics/metric_snapshots 在建库脚本切片里常被跳过;写入前幂等补齐,
+    与 store 现有表结构逐列一致(IF NOT EXISTS,不动已有数据)。"""
+    con.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS article_metrics (
+          article_id INTEGER PRIMARY KEY,
+          reads INTEGER,
+          likes INTEGER,
+          favorites INTEGER,
+          comments INTEGER,
+          impressions INTEGER,
+          account_baseline TEXT,
+          data_source TEXT NOT NULL,
+          credibility TEXT NOT NULL DEFAULT 'unverified',
+          captured_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS metric_snapshots (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          article_id INTEGER NOT NULL,
+          captured_at TEXT NOT NULL,
+          reads INTEGER,
+          likes INTEGER,
+          favorites INTEGER,
+          comments INTEGER,
+          impressions INTEGER,
+          data_source TEXT
+        );
+        """
+    )
+    con.commit()
+
+
 def match_and_write(category: str, items: list[dict], *, db_path: Path | None = None,
                     apply: bool = True) -> dict:
     """把账号取回的条目按高置信匹配写进该类目库;返回 matched/unmatched/写入回执。"""
@@ -225,7 +437,9 @@ def match_and_write(category: str, items: list[dict], *, db_path: Path | None = 
     target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
     matched_rows: list[dict] = []
     unmatched: list[dict] = []
+    registered = 0
     con = connect(target)
+    _ensure_metrics_tables(con)
     try:
         for item in items:
             article_id = None
@@ -242,6 +456,17 @@ def match_and_write(category: str, items: list[dict], *, db_path: Path | None = 
                 article_id = _article_by_title(con, category, item["title"])
                 if article_id is not None:
                     how = "title_unique"
+            if article_id is None and apply and item.get("url") and item.get("title"):
+                # R60 映射:我方已发布作品不在库 → 先登记(source=own_account)再挂指标。
+                # 只在 --apply 时登记:dry-run 不动库;非自有数据到不了这里(入口仅自有后台)。
+                reg = register_own_work(con, category, item, cfg.now_iso())
+                if reg is not None:
+                    if reg["created"]:
+                        registered += 1
+                        LOG.info("account.fetch.own_registered", category=category,
+                                 article_id=reg["article_id"])
+                    article_id = _article_by_url(con, category, item["url"])
+                    how = "own_registered"
             if article_id is None:
                 unmatched.append(item)
                 continue
@@ -251,21 +476,22 @@ def match_and_write(category: str, items: list[dict], *, db_path: Path | None = 
                     row[field] = item[field]
             row["_matched_by"] = how
             matched_rows.append(row)
+        con.commit()  # 登记自有作品必须落库:回滚会让下轮重复登记并丢映射
     finally:
         con.close()
 
     if not matched_rows:
         return {"category": category, "items": len(items), "matched": 0,
-                "unmatched": len(unmatched), "applied": False,
+                "unmatched": len(unmatched), "registered": registered, "applied": False,
                 "write": None, "unmatched_items": unmatched}
     if not apply:
         return {"category": category, "items": len(items), "matched": len(matched_rows),
-                "unmatched": len(unmatched), "applied": False,
+                "unmatched": len(unmatched), "registered": registered, "applied": False,
                 "write": None, "unmatched_items": unmatched}
     write = metrics_import.write_metric_rows(
         category, matched_rows, SOURCE_ID, db_path=target)
     return {"category": category, "items": len(items), "matched": len(matched_rows),
-            "unmatched": len(unmatched), "applied": True,
+            "unmatched": len(unmatched), "registered": registered, "applied": True,
             "write": {k: write.get(k) for k in
                       ("written", "updated", "snapshots", "filled_from_null",
                        "protected_by_credibility", "row_errors")},
@@ -467,58 +693,28 @@ def account_fetch_metrics(apply: bool = True, categories: list[str] | None = Non
                     page_texts[url] = (page.evaluate("() => document.body.innerText || ''") or "")[:6000]
                 except Exception:  # noqa: BLE001
                     page_texts[url] = ""
-                # 取证 B:管理页每行的"查看数据"是单篇数据的入口(后台 UI 在那里显示收藏)。
-                # 点前 3 行:捕获随后 8s 内到达的 JSON 响应 + 新开 tab 的正文,结果留证据。
-                # 只读浏览,不改账号任何状态;确认结构后才写生产解析器。
-                try:
-                    stats = page.locator("text=查看数据")
-                    n = min(stats.count(), 4)  # 自有作品仅 4 条:全点一遍,每条都要收藏证据
-                    per_click: list[dict] = []
-                    for i in range(n):
-                        before = len(captured_items)
-                        before_pages = len(context.pages)
-                        try:
-                            stats.nth(i).click(timeout=5000)
-                        except Exception as exc:  # noqa: BLE001
-                            per_click.append({"idx": i, "error": str(exc)[:120]})
-                            continue
-                        page.wait_for_timeout(8000)
-                        entry: dict[str, Any] = {
-                            "idx": i,
-                            "new_items": captured_items[before:],
-                        }
-                        # 数据面板可能在当前页弹出,也可能新开 tab
-                        try:
-                            entry["modal_text"] = page.evaluate(
-                                """() => { const n = document.querySelector(
-                                     '[class*=modal], [class*=dialog], [class*=drawer], [class*=popup]');
-                                     return n ? (n.innerText || '').slice(0, 2500) : ''; }""")
-                        except Exception:  # noqa: BLE001
-                            entry["modal_text"] = ""
-                        for extra in context.pages[before_pages:]:
-                            try:
-                                extra.wait_for_load_state("domcontentloaded", timeout=15000)
-                                extra.wait_for_timeout(4000)
-                                entry["tab_text"] = (
-                                    extra.evaluate("() => document.body.innerText || ''") or "")[:4000]
-                            except Exception as exc:  # noqa: BLE001
-                                entry["tab_text"] = f"ERR {str(exc)[:120]}"
-                            try:
-                                extra.close()
-                            except Exception:  # noqa: BLE001
-                                pass
-                        per_click.append(entry)
-                        try:
-                            page.keyboard.press("Escape")
-                            page.wait_for_timeout(1000)
-                        except Exception:  # noqa: BLE001
-                            pass
-                    clicks[url] = {"found": n, "detail": per_click}
-                except Exception as exc:  # noqa: BLE001
-                    clicks[url] = {"found": 0, "error": str(exc)[:160]}
+                # 取证 B 由下面的生产采集覆盖(逐行"查看数据"弹层),这里不再单独点击。
             except Exception as exc:  # noqa: BLE001 - 单页失败不带走整轮
                 page_final[url] = f"FAILED {str(exc)[:120]}"
                 LOG.warn("account.fetch.page_failed", url=url, error=str(exc)[:160])
+
+        # 生产采集:管理页逐行打开"查看数据"弹层 → 解析含**收藏**的单篇指标。
+        # feed(无收藏)+ 弹层(有收藏)按标题合并后才进入匹配写库。
+        manage_url = DATA_PAGES[0]
+        modal_texts = _collect_stat_modals(page, context, manage_url)
+        clicks[manage_url] = {"modals": modal_texts}  # 证据:原文全留
+        modal_items = []
+        for text in modal_texts:
+            parsed = parse_stat_modal(text) if text else None
+            if parsed is not None:
+                modal_items.append(parsed)
+        if modal_items:
+            before = len(captured_items)
+            captured_items = merge_modal_items(captured_items, modal_items)
+            LOG.info("account.fetch.modal_metrics", modals=len(modal_texts),
+                     parsed=len(modal_items), merged_items=len(captured_items) - before)
+            page_texts[manage_url] = page_texts.get(manage_url, "") or (
+                modal_texts[0][:2000] if modal_texts else "")
 
         if raw_bodies or not captured_items or any(row_texts.values()) or page_texts or clicks:
             out_dir = cfg.INTELLIGENCE_DIR / "account_metrics"

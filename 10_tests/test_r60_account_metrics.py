@@ -179,3 +179,111 @@ def test_scheduler_maps_account_status_without_faking_ok(monkeypatch):
                                 "category": "demo"})
     assert result["scheduler_status"] == "ok"
     assert result["total_matched"] == 2
+
+
+REAL_MODAL_TEXT = """张顺复盘AI视频创业：200万元烧完后，转向开源工具与精简团队
+微头条
+10-11 16:57
+部分数据更新有延迟
+流量
+展现量73
+粉丝展现量0
+阅读量0
+粉丝阅读量0
+点击率0%
+平均阅读时长--
+收益
+创作收益0 元
+粉丝
+粉丝变化0
+涨粉0掉粉0
+阅读转粉率0% 
+互动
+评论0
+点赞0
+转发0
+分享0
+收藏1
+~
+消费分析收益分析用户画像
+"""
+
+MODAL_WITH_ACTIONS = """AI改简历做副业，先看清门槛和风险
+09-13 17:58
+流量
+展现量21
+阅读量0
+查看评论
+修改
+更多
+消费分析
+"""
+
+LEGACY_MODAL = """老版样式作品
+展现量500
+阅读量60
+评论3
+点赞8
+收藏12
+"""
+
+
+def test_parse_stat_modal_reads_favorites_from_interaction_block():
+    item = account_metrics.parse_stat_modal(REAL_MODAL_TEXT)
+    assert item is not None
+    assert item["title"].startswith("张顺复盘AI视频创业")
+    assert item["favorites"] == 1, "收藏是本轮要打通的关键字段"
+    assert item["comments"] == 0 and item["likes"] == 0
+    assert item["impressions"] == 73 and item["reads"] == 0
+
+
+def test_parse_stat_modal_refuses_interaction_guessing_without_block():
+    item = account_metrics.parse_stat_modal(MODAL_WITH_ACTIONS)
+    assert item is not None
+    assert item["impressions"] == 21 and item["reads"] == 0
+    # 有"查看评论"操作链接但没有"互动"分区 ⇒ 互动数字宁缺毋滥
+    assert item["favorites"] is None and item["comments"] is None and item["likes"] is None
+
+
+def test_parse_stat_modal_legacy_fulltext_shape_still_parsed():
+    item = account_metrics.parse_stat_modal(LEGACY_MODAL)
+    assert item is not None
+    assert (item["impressions"], item["reads"], item["comments"], item["likes"],
+            item["favorites"]) == (500, 60, 3, 8, 12)
+
+
+def test_merge_modal_items_backfills_favorites_into_feed_item():
+    feed = [{"title": "甲", "url": "https://www.toutiao.com/article/1/", "item_id": "1",
+             "reads": 14, "favorites": None, "likes": 0, "comments": 0, "impressions": 688}]
+    modal = [{"title": "甲", "url": None, "item_id": None,
+              "reads": 14, "favorites": 1, "likes": 0, "comments": 0, "impressions": 688},
+             {"title": "乙", "url": None, "item_id": None,
+              "reads": None, "favorites": 5, "likes": None, "comments": None,
+              "impressions": None}]
+    merged = account_metrics.merge_modal_items(feed, modal)
+    assert merged[0]["favorites"] == 1
+    assert merged[0]["reads"] == 14 and merged[0]["url"]
+    assert len(merged) == 2 and merged[1]["title"] == "乙"
+
+
+def test_register_own_work_is_idempotent_and_metrics_attach(tmp_path):
+    db_path = store.init_articles_db("demo", db_path=tmp_path / "demo.db")
+    item = {"title": "我方已发布作品", "url": "https://www.toutiao.com/item/7000000000000000001/",
+            "item_id": "7000000000000000001", "reads": 3, "favorites": 2,
+            "likes": 1, "comments": 0, "impressions": 995}
+    # 第一轮:库内没有 → match_and_write 自己登记 + 挂指标
+    first = account_metrics.match_and_write("demo", [dict(item)], db_path=db_path, apply=True)
+    assert first["matched"] == 1 and first["registered"] == 1
+    # 第二轮:已登记 → 直接 url 命中,不重复登记
+    second = account_metrics.match_and_write("demo", [dict(item)], db_path=db_path, apply=True)
+    assert second["matched"] == 1 and second["registered"] == 0
+    con = account_metrics.connect(db_path)
+    rows = con.execute(
+        "SELECT m.favorites, m.reads, m.data_source, a.source FROM article_metrics m"
+        " JOIN articles a ON a.id=m.article_id").fetchall()
+    own_count = con.execute("select count(*) from articles where source='own_account'").fetchone()[0]
+    con.close()
+    assert own_count == 1, "同一作品重复取数不得重复登记"
+    assert rows and rows[0]["favorites"] == 2, "自有作品收藏必须能落库(验收口径 favorites 非空 >0)"
+    assert rows[0]["data_source"] == account_metrics.SOURCE_ID
+    assert rows[0]["source"] == account_metrics.OWN_SOURCE
