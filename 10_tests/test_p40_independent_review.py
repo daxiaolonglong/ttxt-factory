@@ -6,6 +6,9 @@
 3. **评审模型与写作模型同源 ⇒ 不得算 L4 通过**(`same_model_review` 仍为 True,版本账目不得给
    INDEPENDENT_REVIEW_PASSED),独立性只按两侧真实 id 比较;
 4. 独立评审只能收紧门禁:判阻断就拒绝,通道不可用就按"未解除同源"处理,不得当成通过。
+5. R51 端点策略拆分:写作侧(strata)仍强制本地回环,配云端一律显式失败;评审侧允许配置里的
+   云端 https 端点,但缺 key / 不可达 / 明文 http 都显式失败,回执如实记 reviewer_endpoint,
+   绝不静默降级回本地、绝不悄悄换模型。
 """
 
 import json
@@ -241,27 +244,106 @@ def test_http_client_threads_the_review_key_not_the_writing_one(monkeypatch):
     assert model_client._headers(SENTINEL)["Authorization"] == f"Bearer {SENTINEL}"
 
 
-def test_cloud_endpoint_is_rejected_without_network(monkeypatch):
-    """R44:非回环端点必须显式失败,且不得发起任何网络请求(不静默兜底)。"""
+CLOUDY = {
+    "enabled": True,
+    "base_url": "https://api.deepseek.com",
+    "model_id": "deepseek-chat",
+    "api_key_env": "DEEPSEEK_API_KEY",
+}
+
+
+def test_writer_side_non_loopback_endpoint_is_refused(monkeypatch):
+    """R51 红线一:写作侧仍强制回环,strata 配置指到云端时一律显式失败,不发请求。"""
+    monkeypatch.setattr(cfg, "load_config", lambda: {"strata": {"base_url": "https://api.deepseek.com"}})
+    with pytest.raises(model_client.ModelError) as exc:
+        model_client._base_url()
+    assert "写作侧" in str(exc.value) and "回环" in str(exc.value)
+    with pytest.raises(model_client.ModelError):
+        model_client.models()  # 探测也不许发出去
+    with pytest.raises(model_client.ModelError):
+        model_client.chat([{"role": "user", "content": "hi"}], model_id="anything")
+    # 评审通道显式传端点,不受写作侧策略牵连
+    assert model_client._base_url("http://127.0.0.1:8080") == "http://127.0.0.1:8080"
+    assert model_client.require_loopback("http://localhost:8080") == "http://localhost:8080"
+
+
+def test_review_side_allows_configured_cloud_endpoint(monkeypatch):
+    """R51 红线二:评审侧允许配置里的云端端点,回执与请求的端点都是云端,绝不写成本地。"""
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SENTINEL)
+    captured: dict = {}
+
+    def fake_models(**kwargs):
+        captured["probe_base_url"] = kwargs.get("base_url")
+        captured["probe_api_key"] = kwargs.get("api_key")
+        return ["deepseek-chat", "deepseek-reasoner"]
+
+    def fake_chat(messages, **kwargs):
+        captured.update(kwargs)
+        return {"model": kwargs.get("model_id"), "text": "论证尚可,可以发布。",
+                "finish_reason": "stop", "usage": {"completion_tokens": 7}, "elapsed_s": 0.2}
+
+    monkeypatch.setattr(model_client, "models", fake_models)
+    monkeypatch.setattr(model_client, "chat", fake_chat)
+
+    outcome = review_channel.review("正文第一行\n正文第二行", section=CLOUDY)
+
+    assert captured["probe_base_url"] == "https://api.deepseek.com"
+    assert captured["base_url"] == "https://api.deepseek.com", "评审请求绝不被改写回回环地址"
+    assert captured["api_key"] == SENTINEL, "云端评审必须带配置的 key,不无凭据发请求"
+    assert captured["model_id"] == "deepseek-chat", "端点多模型时按配置 id 请求,不悄悄换模型"
+    assert outcome["reviewer_endpoint"] == "https://api.deepseek.com"
+    assert outcome["reviewer_is_local"] is False
+    assert outcome["reviewer_model"] == "deepseek-chat"
+    blob = json.dumps(outcome, ensure_ascii=False)
+    assert SENTINEL not in blob, "密钥不得进回执"
+    assert "127.0.0.1" not in blob and "localhost" not in blob, "云端评审不得被记成本地端点"
+
+
+def test_review_side_cloud_without_key_fails_without_network(monkeypatch):
+    """缺 key 时显式抛错:不静默降级回本地,也不发起任何请求。"""
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+
     def no_network(**kwargs):  # pragma: no cover - 被调用即失败
-        raise AssertionError("禁止向云端发起请求")
+        raise AssertionError("缺 key 不得向云端发起请求")
 
     monkeypatch.setattr(model_client, "models", no_network)
     monkeypatch.setattr(model_client, "chat", no_network)
-    cloudy = {
-        "enabled": True,
-        "base_url": "https://api.deepseek.com",
-        "model_id": "deepseek-flash",
-        "api_key_env": "DEEPSEEK_API_KEY",
-    }
     with pytest.raises(review_channel.ReviewUnavailable) as exc:
-        review_channel.served_model(cloudy)
-    assert "云端模型已禁用" in str(exc.value)
-    with pytest.raises(review_channel.ReviewUnavailable) as exc2:
-        review_channel.review("正文", section=cloudy)
-    assert "云端模型已禁用" in str(exc2.value)
-    assert review_channel._require_local("http://127.0.0.1:8080") == "http://127.0.0.1:8080"
-    assert review_channel._require_local("http://localhost:8080") == "http://localhost:8080"
+        review_channel.review("正文", section=CLOUDY)
+    assert "DEEPSEEK_API_KEY" in str(exc.value)
+    assert SENTINEL not in str(exc.value)
+
+
+def test_review_side_cloud_endpoint_must_be_https_and_well_formed(monkeypatch):
+    def no_network(**kwargs):  # pragma: no cover - 被调用即失败
+        raise AssertionError("不合规端点不得发起请求")
+
+    monkeypatch.setattr(model_client, "models", no_network)
+    monkeypatch.setattr(model_client, "chat", no_network)
+    with pytest.raises(review_channel.ReviewUnavailable) as exc:
+        review_channel.review("正文", section={**CLOUDY, "base_url": "http://api.deepseek.com"})
+    assert "https" in str(exc.value), "云端评审走明文 http 必须被拒(密钥不经明文传输)"
+    with pytest.raises(review_channel.ReviewUnavailable):
+        review_channel.review("正文", section={**CLOUDY, "base_url": ""})
+    with pytest.raises(review_channel.ReviewUnavailable):
+        review_channel.review("正文", section={**CLOUDY, "base_url": "not-a-url"})
+    # 回环端点仍然直接放行(本地评审不受云端策略影响)
+    base_url, is_local = review_channel._review_endpoint({"base_url": "http://127.0.0.1:8080"})
+    assert base_url == "http://127.0.0.1:8080" and is_local is True
+
+
+def test_review_side_unreachable_cloud_fails_not_silent_downgrade(monkeypatch):
+    """端点不可达 ⇒ 显式 ReviewUnavailable,不降级回本地、不悄悄换模型。"""
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SENTINEL)
+
+    def boom(**kwargs):
+        raise OSError("connection refused")
+
+    monkeypatch.setattr(model_client, "models", boom)
+    with pytest.raises(review_channel.ReviewUnavailable) as exc:
+        review_channel.served_model(CLOUDY)
+    assert "探测失败" in str(exc.value)
+    assert SENTINEL not in str(exc.value)
 
 
 # --------------------------------------------------------------------------- 写作链路:独立性判定
@@ -277,10 +359,10 @@ def test_different_reviewer_id_establishes_independence(tmp_path, monkeypatch):
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["model_meta"]["same_model_review"] is False
     assert result["model_meta"]["reviewer_model"] == "deepseek-flash"
-    assert result["review_account"] == "INDEPENDENT_REVIEW_PASSED"
+    assert result["review_account"] == "independent_review_passed"
     assert result["review_account_basis"] == "independent_review_approved"
     rows, evals = _history(db_path)
-    assert rows[-1][1] == "INDEPENDENT_REVIEW_PASSED"
+    assert rows[-1][1] == "independent_review_passed"
     assert len(seen) == 1
     independent = [row for row in evals if "independent_review" in row[2]]
     assert len(independent) == 1
@@ -299,10 +381,10 @@ def test_same_id_reviewer_cannot_claim_l4_pass(tmp_path, monkeypatch):
 
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["model_meta"]["same_model_review"] is True
-    assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account"] == "auto_passed"
     assert result["review_account_basis"] == "same_model_review"
     rows, _ = _history(db_path)
-    assert rows[-1][1] == "AUTO_PASSED"
+    assert rows[-1][1] == "auto_passed"
     assert "独立性受限" in result["model_meta"]["reviewer_limitation"]
 
 
@@ -312,7 +394,7 @@ def test_missing_writer_id_keeps_independence_unproven(tmp_path, monkeypatch):
 
     _, result = _run(tmp_path, monkeypatch, review_call=review_call, served_model=None)
     assert result["model_meta"]["same_model_review"] is True, "拿不到写作侧 id 就不许宣称独立"
-    assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account"] == "auto_passed"
 
 
 def test_blocking_verdict_adds_critical_and_rejects(tmp_path, monkeypatch):
@@ -321,11 +403,11 @@ def test_blocking_verdict_adds_critical_and_rejects(tmp_path, monkeypatch):
 
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["passed"] is False and result["status"] == "rejected"
-    assert result["review_account"] == "REJECTED"
+    assert result["review_account"] == "rejected"
     assert result["review_account_basis"] == "independent_review_blocked"
     assert any("独立评审判定不通过" in item for item in result["critical"]), result["critical"]
     rows, _ = _history(db_path)
-    assert rows[-1][1] == "REJECTED"
+    assert rows[-1][1] == "rejected"
 
 
 def test_revision_required_wording_rejects_draft(tmp_path, monkeypatch):
@@ -340,10 +422,10 @@ def test_revision_required_wording_rejects_draft(tmp_path, monkeypatch):
 
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["passed"] is False and result["status"] == "rejected"
-    assert result["review_account"] == "REJECTED"
+    assert result["review_account"] == "rejected"
     assert result["review_account_basis"] == "independent_review_blocked"
     rows, _ = _history(db_path)
-    assert rows[-1][1] == "REJECTED"
+    assert rows[-1][1] == "rejected"
 
 
 def test_verdict_without_publishable_wording_gives_no_independent_label(tmp_path, monkeypatch):
@@ -353,10 +435,10 @@ def test_verdict_without_publishable_wording_gives_no_independent_label(tmp_path
     db_path, result = _run(tmp_path, monkeypatch, review_call=review_call)
     assert result["passed"] is True
     assert result["model_meta"]["same_model_review"] is False
-    assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account"] == "auto_passed"
     assert result["review_account_basis"] == "independent_review_not_approved"
     rows, _ = _history(db_path)
-    assert rows[-1][1] == "AUTO_PASSED"
+    assert rows[-1][1] == "auto_passed"
 
 
 def test_rejected_draft_never_costs_a_review(tmp_path, monkeypatch):
@@ -374,7 +456,7 @@ def test_rejected_draft_never_costs_a_review(tmp_path, monkeypatch):
     )
     assert result["passed"] is False
     assert called == [], "门禁已拦下的稿子不再花评审配额"
-    assert result["review_account"] == "REJECTED"
+    assert result["review_account"] == "rejected"
 
 
 def test_unavailable_channel_leaves_auto_pass_and_records_error(tmp_path, monkeypatch):
@@ -385,10 +467,10 @@ def test_unavailable_channel_leaves_auto_pass_and_records_error(tmp_path, monkey
     assert result["passed"] is True
     assert result["model_meta"]["same_model_review"] is True
     assert "独立评审通道不可用" in result["model_meta"]["reviewer_limitation"]
-    assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account"] == "auto_passed"
     assert result["review_account_basis"] == "independent_review_unavailable"
     rows, evals = _history(db_path)
-    assert rows[-1][1] == "AUTO_PASSED"
+    assert rows[-1][1] == "auto_passed"
     assert not [row for row in evals if "independent_review" in row[2]], "通道不可用不得留评审行"
 
 
@@ -396,16 +478,21 @@ def test_channel_off_by_default_for_offline_callers(tmp_path, monkeypatch):
     _, result = _run(tmp_path, monkeypatch, independent_review=False)
     assert result["model_meta"]["same_model_review"] is True
     assert result["independent_review"]["attempted"] is False
-    assert result["review_account"] == "AUTO_PASSED"
+    assert result["review_account"] == "auto_passed"
     assert result["review_account_basis"] == "independent_review_not_attempted"
 
 
-def test_production_config_points_at_a_local_endpoint():
-    """R44:线上配置必须是本地回环端点,云端地址不得再出现在 review 段。"""
+def test_production_writer_endpoint_is_loopback():
+    """R51:写作侧(strata)线上配置必须是本地回环端点,云端地址不得出现在 strata 段。"""
+    section = cfg.load_config().get("strata", {})
+    host = urlparse(str(section.get("base_url") or "")).hostname
+    assert host in model_client.LOCAL_HOSTS, f"写作端点必须是本地回环地址,实际 {section.get('base_url')}"
+    model_client.require_loopback(str(section.get("base_url") or ""))
+
+
+def test_production_review_endpoint_is_policy_compliant():
+    """R51:评审端点允许回环或 https 云端;不得是明文 http 云端,且不得做成提示词配置。"""
     section = review_channel.review_config()
     assert section.get("enabled") is True
-    host = urlparse(str(section.get("base_url") or "")).hostname
-    assert host in review_channel.LOCAL_HOSTS, f"评审端点必须是本地回环地址,实际 {section.get('base_url')}"
-    for key in ("base_url", "model_id", "api_key_env", "api_key_file"):
-        assert "deepseek" not in str(section.get(key) or "").lower(), f"review.{key} 不得残留云端配置"
+    review_channel._review_endpoint(section)  # 不合规直接抛
     assert "prompt" not in section

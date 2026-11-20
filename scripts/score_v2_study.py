@@ -15,6 +15,7 @@ from datetime import datetime
 from pathlib import Path
 
 from ttxt.analysis import prediction, score_v2, viral
+from scripts.score_v2_production_compare import actual_percentiles
 
 ROOT = Path(__file__).resolve().parents[1]
 CATEGORIES = ("technology", "finance", "health", "history", "social")
@@ -104,76 +105,77 @@ def fisher_ci(rho: float, n: int, z: float = 1.96) -> tuple[float, float] | None
     return math.tanh(transformed - half), math.tanh(transformed + half)
 
 
-def lift_with_ci(scores: list[float], hits: list[int], n_boot: int = BOOTSTRAP, seed: int = SEED) -> dict:
-    pairs = [(s, h) for s, h in zip(scores, hits) if not math.isnan(s)]
+def lift_with_ci(scores: list[float], pcts: list[float], n_boot: int = BOOTSTRAP, seed: int = SEED) -> dict:
+    """top-decile lift(R51 统一口径)= 按分数选类目前 10%,其实测名次分位均值 / 0.5。
+
+    与 ``score_v2_production_compare.top_decile`` 同一数学口径(1.0 = 无 lift);
+    R45 旧口径是"pct≥0.9 命中率 / 全库命中率"(precision/base),与 production_compare
+    不同名同义冲突,R51 起废弃,只保留这一种。
+    """
+    pairs = [(s, p) for s, p in zip(scores, pcts) if not math.isnan(s)]
     n = len(pairs)
     if n < 30:
         return {"n": n, "status": "insufficient_sample"}
-    scores = [p[0] for p in pairs]
-    hits = [p[1] for p in pairs]
-    cut = max(1, int(round(n * 0.1)))
-    order = heapq.nlargest(cut, range(n), key=lambda i: scores[i])
-    precision = sum(hits[i] for i in order) / cut
-    base = sum(hits) / n
-    lift = precision / base if base else float("nan")
+
+    def _lift(items: list[tuple[float, float]]) -> float:
+        cut = max(1, int(len(items) * 0.1))
+        chosen = heapq.nlargest(cut, items, key=lambda item: item[0])
+        return statistics.fmean(pct for _s, pct in chosen) / 0.5
+
+    value = _lift(pairs)
     rng = random.Random(seed)
     values = []
     for _ in range(n_boot):
-        idx = [rng.randrange(n) for _ in range(n)]
-        sample_scores = [scores[i] for i in idx]
-        sample_hits = [hits[i] for i in idx]
-        chosen = heapq.nlargest(cut, range(n), key=lambda i: sample_scores[i])
-        p = sum(sample_hits[i] for i in chosen) / cut
-        b = sum(sample_hits) / n
-        values.append(p / b if b else 0.0)
+        sample = [pairs[rng.randrange(n)] for _ in range(n)]
+        values.append(_lift(sample))
     values.sort()
+    cut = max(1, int(n * 0.1))
+    mean_pct = statistics.fmean(
+        pct for _s, pct in heapq.nlargest(cut, pairs, key=lambda item: item[0])
+    )
     return {
         "n": n,
-        "base_rate": round(base, 6),
-        "precision_top10pct": round(precision, 6),
-        "lift": round(lift, 4),
+        "mean_actual_percentile_top10pct": round(mean_pct, 6),
+        "lift": round(value, 4),
         "lift_ci95": [round(values[int(0.025 * len(values))], 4), round(values[int(0.975 * len(values)) - 1], 4)],
     }
 
 
-def _combined_lift(score_groups: list[list[float]], hit_groups: list[list[int]]) -> tuple[float, float, int]:
-    """合并多个类目的类目内 top-decile lift(按样本量加权),返回 (lift, precision, n)。"""
-    total_n = total_cut = hit_in_cut = total_hits = 0
-    for scores, hits in zip(score_groups, hit_groups):
+def _combined_lift(score_groups: list[list[float]], pct_groups: list[list[float]]) -> tuple[float, int]:
+    """多个类目各自取类内 top-decile 后 micro 平均(按入选条数加权),返回 (lift, n)。"""
+    total_n = total_cut = 0
+    pct_sum = 0.0
+    for scores, pcts in zip(score_groups, pct_groups):
         n = len(scores)
-        cut = max(1, int(round(n * 0.1)))
-        chosen = heapq.nlargest(cut, range(n), key=lambda i: scores[i])
+        cut = max(1, int(n * 0.1))
+        chosen = heapq.nlargest(cut, zip(scores, pcts), key=lambda item: item[0])
         total_n += n
         total_cut += cut
-        hit_in_cut += sum(hits[i] for i in chosen)
-        total_hits += sum(hits)
-    if not total_cut or not total_n or not total_hits:
-        return float("nan"), 0.0, total_n
-    precision = hit_in_cut / total_cut
-    base = total_hits / total_n
-    return (precision / base if base else float("nan")), precision, total_n
+        pct_sum += sum(pct for _s, pct in chosen)
+    if not total_cut:
+        return float("nan"), total_n
+    return (pct_sum / total_cut) / 0.5, total_n
 
 
-def lift_micro_with_ci(score_groups: list[list[float]], hit_groups: list[list[int]],
+def lift_micro_with_ci(score_groups: list[list[float]], pct_groups: list[list[float]],
                        n_boot: int = BOOTSTRAP, seed: int = SEED) -> dict:
-    lift, precision, n = _combined_lift(score_groups, hit_groups)
+    lift, n = _combined_lift(score_groups, pct_groups)
     if n < 30:
         return {"n": n, "status": "insufficient_sample"}
     rng = random.Random(seed)
     values = []
     for _ in range(n_boot):
-        sampled_scores, sampled_hits = [], []
-        for scores, hits in zip(score_groups, hit_groups):
+        sampled_scores, sampled_pcts = [], []
+        for scores, pcts in zip(score_groups, pct_groups):
             size = len(scores)
             idx = [rng.randrange(size) for _ in range(size)]
             sampled_scores.append([scores[i] for i in idx])
-            sampled_hits.append([hits[i] for i in idx])
-        value, _p, _n = _combined_lift(sampled_scores, sampled_hits)
+            sampled_pcts.append([pcts[i] for i in idx])
+        value, _n = _combined_lift(sampled_scores, sampled_pcts)
         values.append(0.0 if math.isnan(value) else value)
     values.sort()
     return {
         "n": n,
-        "precision_top10pct": round(precision, 6),
         "lift": round(lift, 4),
         "lift_ci95": [round(values[int(0.025 * len(values))], 4), round(values[int(0.975 * len(values)) - 1], 4)],
         "scope": "pooled over categories with n_test>=200, within-category deciles",
@@ -202,17 +204,18 @@ def main() -> None:
     test_features = [score_v2.extract_features(row["title"], row["content"], row["category"]) for row in test]
     v2_scores = [score_v2.predict(model, features) for features in test_features]
 
-    # 类目内阅读分位(评估口径,不是特征)
+    # 类目内实测名次分位 (rank−0.5)/n(R51 统一口径,与 production_compare.actual_percentiles
+    # 同一实现:并列取平均名次,全体均值恰 0.5;旧 position/(n−1) min-max 口径已废弃)
     by_category: dict[str, list[dict]] = {}
     for row in test:
         by_category.setdefault(row["category"], []).append(row)
-    percentiles: dict[int, float] = {}
+    percentiles: dict[tuple[str, int], float] = {}
     for category, members in by_category.items():
-        ordered = sorted(members, key=lambda r: r["reads"])
-        n = len(ordered)
-        for position, member in enumerate(ordered):
-            percentiles[member["id"]] = position / max(n - 1, 1)
-    pct = [percentiles[row["id"]] for row in test]
+        values = actual_percentiles([float(member["reads"]) for member in members])
+        for member, value in zip(members, values):
+            # id 只在类目库内唯一,键必须带类目防跨库碰撞
+            percentiles[(category, member["id"])] = value
+    pct = [percentiles[(row["category"], row["id"])] for row in test]
 
     old_reads_scores = [row["reads"] / (row["reads"] + 1000.0) for row in test]
     baselines = measured_baselines()
@@ -226,8 +229,6 @@ def main() -> None:
             value = (baselines.get(row["category"]) or {}).get("all")
         old_bucket_scores.append(float(value) if value is not None else float("nan"))
         bucket_covered += 0 if value is None else 1
-
-    hits = [1 if value >= 0.9 else 0 for value in pct]
 
     def spearman_block(scores: list[float], subset: list[int]) -> dict:
         idx = [i for i in subset if not math.isnan(scores[i])]
@@ -247,11 +248,11 @@ def main() -> None:
         idx = [i for i, row in enumerate(test) if row["category"] == category]
         per_category[category] = {
             "v2": {**spearman_block(v2_scores, idx), "top_decile": lift_with_ci(
-                [v2_scores[i] for i in idx], [hits[i] for i in idx])},
+                [v2_scores[i] for i in idx], [pct[i] for i in idx])},
             "old_bucket": {**spearman_block(old_bucket_scores, idx), "top_decile": lift_with_ci(
-                [old_bucket_scores[i] for i in idx], [hits[i] for i in idx])},
+                [old_bucket_scores[i] for i in idx], [pct[i] for i in idx])},
             "old_reads_score": {**spearman_block(old_reads_scores, idx), "top_decile": lift_with_ci(
-                [old_reads_scores[i] for i in idx], [hits[i] for i in idx])},
+                [old_reads_scores[i] for i in idx], [pct[i] for i in idx])},
         }
 
     # 类目内 top-decile:池化只合并测试样本 ≥200 的类目(小类目按不足报)
@@ -264,7 +265,7 @@ def main() -> None:
             **spearman_block(scores, all_idx),
             "top_decile": lift_micro_with_ci(
                 [[scores[i] for i in big_idx[c]] for c in big_categories],
-                [[hits[i] for i in big_idx[c]] for c in big_categories],
+                [[pct[i] for i in big_idx[c]] for c in big_categories],
             ),
             "distinct_values": len({round(s, 6) for s in scores if not math.isnan(s)}),
         }
@@ -293,7 +294,9 @@ def main() -> None:
         "notes": [
             "old_reads_score = reads/(reads+1000),是按读取数定义的单调映射;其 Spearman≈1 是构造使然,不是预测力证据(泄漏)。",
             "old_bucket 仅覆盖有 measured 基线的桶;样本不足按不足报,不凑样本。",
-            "v2 的 Spearman 与 top-decile lift 都按类目内阅读分位计算,消除类目量级差。",
+            "v2 的 Spearman 与 top-decile lift 都按类目内实测名次分位 (rank−0.5)/n 计算"
+            "(并列平均名次,均值恰 0.5),消除类目量级差;lift = 类内 top-decile 实测分位均值/0.5,"
+            "与 R47 production_compare 同一口径(R51 统一;旧 precision/base 口径已废弃)。",
         ],
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

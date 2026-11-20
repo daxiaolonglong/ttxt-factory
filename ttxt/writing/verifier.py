@@ -49,6 +49,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter
+from datetime import datetime
 
 from ttxt.crawler.simhash import tokenize
 
@@ -507,6 +508,127 @@ def _date_in(anchor: str, haystack: str) -> bool:
     return bool(year_only) and year_only.group(1) in haystack
 
 
+# ------------------------------------------------------------------ 相对日期折算(R51)
+# 「明年2月」这类锚点的绝对含义取决于参照时间:claim 侧参照核验时刻(≈写稿时刻),
+# 来源侧参照该文 published_at。纯字面匹配两头都误判——来源写绝对日期(2027年2月)时
+# 误判缺失(假 critical);claim 与来源各写「明年2月」但不同年发表时,所指月份不同却
+# 被字面相等放行(假 verified)。折算不出(来源缺 published_at、窗口里只有相对表达或
+# 无年份月日)⇒ 记 unverifiable:不算命中也不算捏造,credibility 不得为 verified。
+_REL_YEAR_DELTA = {
+    "明年": 1, "来年": 1, "次年": 1,
+    "今年": 0, "本年": 0, "当年": 0, "同年": 0,
+    "去年": -1,
+}
+_REL_YEAR_ALT = "|".join(sorted(_REL_YEAR_DELTA, key=len, reverse=True))
+_REL_YEAR_RE = re.compile(rf"(?:{_REL_YEAR_ALT})\d{{1,2}}月(?:\d{{1,2}}日)?")
+
+
+def _rel_anchor_parts(token: str) -> tuple[int, int, int | None] | None:
+    """「明年2月10日」→ (年偏移, 月, 日|None);无年份前缀(纯绝对日期)返回 None。"""
+    m = re.fullmatch(rf"({_REL_YEAR_ALT})(\d{{1,2}})月(?:(\d{{1,2}})日)?", token)
+    if not m:
+        return None
+    return _REL_YEAR_DELTA[m.group(1)], int(m.group(2)), int(m.group(3)) if m.group(3) else None
+
+
+def _abs_date_parts(token: str) -> tuple[int | None, int | None, int | None]:
+    """把绝对日期 token 拆成 (年|None, 月|None, 日|None)。"""
+    m = re.fullmatch(r"(\d{4})[-/年](\d{1,2})月(?:(\d{1,2})日)?", token)
+    if m:
+        return int(m.group(1)), int(m.group(2)), int(m.group(3)) if m.group(3) else None
+    m = re.fullmatch(r"(\d{4})[-/](\d{1,2})[-/](\d{1,2})", token)
+    if m:
+        return int(m.group(1)), int(m.group(2)), int(m.group(3))
+    m = re.fullmatch(r"(\d{1,2})月(?:(\d{1,2})日)?", token)
+    if m:
+        return None, int(m.group(1)), int(m.group(2)) if m.group(2) else None
+    m = re.fullmatch(r"(\d{4})年", token)
+    if m:
+        return int(m.group(1)), None, None
+    return None, None, None
+
+
+def _parse_pub_dt(value: object) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip().replace("Z", "+00:00")
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        m = re.match(r"(\d{4})-(\d{2})-(\d{2})", text)
+        if m:
+            return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    return None
+
+
+def _abs_match(y: int | None, mo: int | None, d: int | None,
+               target: tuple[int, int, int | None], hay: str) -> bool:
+    ty, tm, td = target
+    if mo is None:  # 只有「YYYY年」:沿用旧组分规则(年+「M月」都出现在窗口)
+        return y == ty and f"{tm}月" in hay and (not td or f"{td}日" in hay)
+    if mo != tm:
+        return False
+    if y is not None and y != ty:
+        return False
+    if td is not None and d is not None and td != d:
+        return False
+    if td is not None and d is None and f"{td}日" not in hay:
+        return False
+    return True
+
+
+def _relative_date_status(
+    target: tuple[int, int, int | None], clean: str,
+    window_norm: str, full_norm: str, pub_dt: datetime | None,
+) -> tuple[str, bool]:
+    """返回 (status, full_hit)。status∈found/missing/unverifiable。
+
+    窗口里把绝对 token 与「明年X月」token(按 published_at 折算)都与 target 比对;
+    窗口没有但全文有 ⇒ missing + full_hit(移花接木留痕,同绝对日期路径);
+    折算不出(来源缺 published_at,窗口只剩相对/无年份表达)⇒ unverifiable。
+    """
+    unresolved = False
+
+    def scan(hay: str) -> bool:
+        nonlocal unresolved
+        rel_spans = [m.span() for m in _REL_YEAR_RE.finditer(hay)]
+        for m in _REL_YEAR_RE.finditer(hay):
+            parts = _rel_anchor_parts(m.group(0))
+            if parts is None:
+                continue
+            if pub_dt is None:
+                unresolved = True
+                continue
+            if _abs_match(pub_dt.year + parts[0], parts[1], parts[2], target, hay):
+                return True
+        for m in DATE_RE.finditer(hay):
+            if any(a <= m.start() < b for a, b in rel_spans):
+                continue  # 落在相对 token 内部(如「明年2月10日」的「2月10日」),按相对处理
+            y, mo, d = _abs_date_parts(m.group(0))
+            if mo is None and y is None:
+                continue
+            if y is None:
+                # 无年份月日:有 published_at 按来源发表年定年;没有 ⇒ 年份不明,记不可核
+                if pub_dt is not None:
+                    if _abs_match(pub_dt.year, mo, d, target, hay):
+                        return True
+                elif mo == target[1] and (not target[2] or d is None or d == target[2]):
+                    unresolved = True
+                continue
+            if _abs_match(y, mo, d, target, hay):
+                return True
+        return False
+
+    if scan(window_norm):
+        return "found", False
+    full_hit = scan(full_norm)
+    if full_hit:
+        return "missing", True
+    if unresolved:
+        return "unverifiable", False
+    return "missing", False
+
+
 def anchor_window(source_text: str, quote: str, quote_offset: int) -> tuple[str, int]:
     """数字/日期的核验窗口:绑定引句所在句 ±1 句的**连续原文**窗口。
 
@@ -600,8 +722,11 @@ def bind_supplied_quote(claim: str, source_text: str, quote: str | None) -> tupl
     return candidate, idx, round(overlap, 3)
 
 
-def verify_claim(claim: str, article: dict | None, quote: str | None = None) -> dict:
-    """核验单条事实。article 需含 id/title/url/text;quote 为调用方提供的候选引句(可选)。"""
+def verify_claim(
+    claim: str, article: dict | None, quote: str | None = None, *, now: datetime | None = None
+) -> dict:
+    """核验单条事实。article 需含 id/title/url/text(有 published_at 才能折算相对日期);
+    quote 为调用方提供的候选引句(可选);now 仅供测试注入相对日期 claim 侧参照时刻。"""
     markers = is_opinion(claim)
     text = (article or {}).get("text") or ""
     supplied = bind_supplied_quote(claim, text, quote) if text else None
@@ -640,6 +765,10 @@ def verify_claim(claim: str, article: dict | None, quote: str | None = None) -> 
     anchors = extract_anchors(claim)
     norm_text = norm(text)
     norm_window = norm(window)
+    # R51:相对日期折算参照 —— claim 侧=核验时刻(≈写稿时刻,测试可注入 now),
+    # 来源侧=该文 published_at;published_at 缺失 ⇒ 相对锚点标 unverifiable,不假核不误杀。
+    pub_dt = _parse_pub_dt(article.get("published_at"))
+    ref_now = now or datetime.now()
     checks: dict = {}
     if supplied:
         checks["quote_source"] = "model_supplied"
@@ -653,7 +782,7 @@ def verify_claim(claim: str, article: dict | None, quote: str | None = None) -> 
         # 根因②修复:数字/日期必须在「绑定引句 ±1 句」窗口内出现;
         # 人物/机构仍按全文锚定(不顺手加严),但引句外的命中会留痕。
         scoped = dim in ("numbers", "dates")
-        found, missing, displaced, advisory = [], [], [], []
+        found, missing, displaced, advisory, unverifiable = [], [], [], [], []
         for item in anchors[dim]:
             clean = norm(item)
             has_ascii_digit = any(ch.isdigit() and ch.isascii() for ch in clean)
@@ -668,17 +797,49 @@ def verify_claim(claim: str, article: dict | None, quote: str | None = None) -> 
                 advisory.append({"anchor": item, "in_source": _anchor_in(clean, norm_text), "note": "泛指机构锚点不参与硬判定"})
                 continue
             windowed = scoped
-            matcher = _date_in if dim == "dates" else (lambda a, h: _anchor_in(a, h))
+            if dim == "dates":
+                rel = _rel_anchor_parts(clean)
+                if rel is not None:
+                    target = (ref_now.year + rel[0], rel[1], rel[2])
+                    status, full_hit = _relative_date_status(
+                        target, clean, norm_window, norm_text, pub_dt
+                    )
+                    if status == "found":
+                        found.append(item)
+                        continue
+                    if status == "unverifiable":
+                        unverifiable.append(
+                            {
+                                "anchor": item,
+                                "resolved_as": f"{target[0]}年{target[1]}月"
+                                + (f"{target[2]}日" if target[2] else ""),
+                                "reason": "来源缺 published_at 或窗口内只有相对/无年份表达,"
+                                          "无法折算绝对日期,不判命中也不判捏造",
+                            }
+                        )
+                        continue
+                    missing.append(item)
+                    if full_hit:
+                        displaced.append(item)
+                    continue
+                hit = _date_in(clean, norm_window)
+                (found if hit else missing).append(item)
+                if not hit and _date_in(clean, norm_text):
+                    displaced.append(item)
+                continue
+            matcher = lambda a, h: _anchor_in(a, h)
             hit = matcher(clean, norm_window if windowed else norm_text)
             (found if hit else missing).append(item)
             if not hit and windowed and matcher(clean, norm_text):
                 displaced.append(item)
         checks[dim] = {"found": found, "missing": missing}
+        if unverifiable:
+            checks[dim]["unverifiable"] = unverifiable
         if displaced:
             checks[f"{dim}_outside_quote"] = displaced
         if advisory:
             checks[f"{dim}_advisory"] = advisory
-        all_ok = all_ok and not missing
+        all_ok = all_ok and not missing and not unverifiable
     hedge = hedge_markers(claim)
     if hedge:
         checks["opinion_markers"] = hedge
@@ -792,6 +953,13 @@ def deterministic_findings(evidence: list[dict], title: str, body: str) -> tuple
                     f"{dim}锚点不在引句窗口但在正文别处出现(移花接木嫌疑):{','.join(vals)}"
                     for dim, vals in displaced.items()
                 )
+            rel_unver = (checks.get("dates") or {}).get("unverifiable") or []
+            if rel_unver:
+                rel_detail = ";".join(
+                    f"相对日期无法折算(unverifiable):{x['anchor']}→{x['resolved_as']}({x['reason']})"
+                    for x in rel_unver
+                )
+                detail = f"{detail};{rel_detail}" if detail else rel_detail
             critical.append(
                 f"事实未通过来源核验:{item['claim'][:50]}" + (f"({detail})" if detail else "(原文引句未绑定)")
             )

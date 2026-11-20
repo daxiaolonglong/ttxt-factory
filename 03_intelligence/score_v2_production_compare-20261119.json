@@ -1,16 +1,25 @@
 {
   "schema": "r47-score-v2-production-compare-v2",
+  "generated_at": "2026-11-20T10:27:53",
+  "model_saved_at": "2026-11-19T12:24:16",
   "model_version": "score_v2",
   "model_n_train": 23294,
   "train_ratio": 0.7,
   "time_split": {
     "mode": "global",
-    "rows_all": 33603,
-    "dated": 33286,
-    "train": 23300,
-    "holdout": 9986,
-    "train_published_max": "2026-10-06T17:38:05+08:00",
-    "holdout_published_min": "2026-10-06T17:38:59+08:00"
+    "rows_all": 33631,
+    "dated": 33314,
+    "train": 23319,
+    "holdout": 9995,
+    "train_published_max": "2026-10-06T19:07:14+08:00",
+    "holdout_published_min": "2026-10-06T19:09:31+08:00",
+    "train_holdout_disjoint_proof": {
+      "key": "(category, id)",
+      "train_unique": 23319,
+      "holdout_unique": 9995,
+      "intersection": 0,
+      "disjoint": true
+    }
   },
   "metric_semantics": {
     "actual": "文章实测 log10(reads) 在类目全局-holdout 内的**名次分位 (rank−0.5)/n**(均值恰为 0.5,随机选择期望 0.5;旧口径 rank/n 期望 0.5+1/(2n),已弃用)",
@@ -20,83 +29,83 @@
   },
   "categories": {
     "technology": {
-      "rows_with_reads": 239,
-      "dated": 239,
-      "holdout_in_global": 230,
-      "holdout_scored": 230,
+      "rows_with_reads": 242,
+      "dated": 242,
+      "holdout_in_global": 233,
+      "holdout_scored": 233,
       "full_table_distinct": {
-        "old_distinct_full": 196,
-        "old_rows_full": 236
+        "old_distinct_full": 187,
+        "old_rows_full": 243
       },
       "holdout_metrics": {
-        "n": 230,
-        "actual_log10_reads_p90": 4.539,
+        "n": 233,
+        "actual_log10_reads_p90": 4.526,
         "v2": {
-          "distinct_score_values": 230,
-          "spearman_vs_actual_pct": 0.128,
+          "distinct_score_values": 233,
+          "spearman_vs_actual_pct": 0.1274,
           "spearman_ci95": [
-            0.0029,
-            0.266
+            -0.0105,
+            0.2467
           ],
           "top_decile": {
             "selected": 23,
-            "mean_actual_percentile": 0.5233,
-            "lift": 1.047
+            "mean_actual_percentile": 0.5217,
+            "lift": 1.043
           }
         },
         "old": {
-          "n_with_label": 226,
-          "distinct_score_values": 188,
-          "spearman_vs_actual_pct": 0.5062,
+          "n_with_label": 233,
+          "distinct_score_values": 181,
+          "spearman_vs_actual_pct": 0.5077,
           "spearman_ci95": [
-            0.3947,
-            0.6114
+            0.387,
+            0.6161
           ],
           "top_decile": {
-            "selected": 22,
-            "mean_actual_percentile": 0.6305,
-            "lift": 1.261
+            "selected": 23,
+            "mean_actual_percentile": 0.6889,
+            "lift": 1.378
           }
         }
       }
     },
     "finance": {
-      "rows_with_reads": 7684,
-      "dated": 7642,
-      "holdout_in_global": 2010,
-      "holdout_scored": 2010,
+      "rows_with_reads": 7693,
+      "dated": 7651,
+      "holdout_in_global": 2014,
+      "holdout_scored": 2014,
       "full_table_distinct": {
-        "old_distinct_full": 1014,
-        "old_rows_full": 7678
+        "old_distinct_full": 1020,
+        "old_rows_full": 7698
       },
       "holdout_metrics": {
-        "n": 2010,
-        "actual_log10_reads_p90": 2.391,
+        "n": 2014,
+        "actual_log10_reads_p90": 2.403,
         "v2": {
-          "distinct_score_values": 2008,
-          "spearman_vs_actual_pct": 0.2183,
+          "distinct_score_values": 2012,
+          "spearman_vs_actual_pct": 0.2193,
           "spearman_ci95": [
-            0.1761,
-            0.2584
+            0.1736,
+            0.2608
           ],
           "top_decile": {
             "selected": 201,
-            "mean_actual_percentile": 0.6757,
-            "lift": 1.351
+            "mean_actual_percentile": 0.676,
+            "lift": 1.352
           }
         },
         "old": {
-          "n_with_label": 2004,
-          "distinct_score_values": 380,
-          "spearman_vs_actual_pct": 0.9849,
+          "n_with_label": 2014,
+          "distinct_score_values": 385,
+          "spearman_vs_actual_pct": 0.9812,
           "spearman_ci95": [
-            0.9806,
-            0.9892
+            0.9761,
+            0.9864
           ],
           "top_decile": {
-            "selected": 200,
-            "mean_actual_percentile": 0.9246,
-            "lift": 1.849
+            "selected": 201,
+            "mean_actual_percentile": 0.9222,
+            "lift": 1.844
           }
         }
       }
@@ -107,18 +116,18 @@
       "holdout_in_global": 34,
       "holdout_scored": 34,
       "full_table_distinct": {
-        "old_distinct_full": 39,
+        "old_distinct_full": 37,
         "old_rows_full": 40
       },
       "holdout_metrics": {
         "n": 34,
-        "actual_log10_reads_p90": 4.219,
+        "actual_log10_reads_p90": 4.22,
         "v2": {
           "distinct_score_values": 34,
-          "spearman_vs_actual_pct": 0.1682,
+          "spearman_vs_actual_pct": 0.1636,
           "spearman_ci95": [
-            -0.1284,
-            0.4976
+            -0.1423,
+            0.4975
           ],
           "top_decile": {
             "selected": 3,
@@ -128,11 +137,11 @@
         },
         "old": {
           "n_with_label": 34,
-          "distinct_score_values": 32,
-          "spearman_vs_actual_pct": 0.4644,
+          "distinct_score_values": 31,
+          "spearman_vs_actual_pct": 0.4605,
           "spearman_ci95": [
-            0.0838,
-            0.8056
+            0.0829,
+            0.8091
           ],
           "top_decile": {
             "selected": 3,
@@ -143,106 +152,106 @@
       }
     },
     "history": {
-      "rows_with_reads": 103,
-      "dated": 103,
-      "holdout_in_global": 86,
-      "holdout_scored": 86,
+      "rows_with_reads": 107,
+      "dated": 107,
+      "holdout_in_global": 90,
+      "holdout_scored": 90,
       "full_table_distinct": {
-        "old_distinct_full": 75,
-        "old_rows_full": 81
+        "old_distinct_full": 96,
+        "old_rows_full": 107
       },
       "holdout_metrics": {
-        "n": 86,
-        "actual_log10_reads_p90": 4.455,
+        "n": 90,
+        "actual_log10_reads_p90": 4.451,
         "v2": {
-          "distinct_score_values": 86,
-          "spearman_vs_actual_pct": 0.2185,
+          "distinct_score_values": 90,
+          "spearman_vs_actual_pct": 0.2258,
           "spearman_ci95": [
-            -0.0137,
-            0.4176
+            -0.0366,
+            0.401
           ],
           "top_decile": {
-            "selected": 8,
-            "mean_actual_percentile": 0.4709,
-            "lift": 0.942
+            "selected": 9,
+            "mean_actual_percentile": 0.5142,
+            "lift": 1.028
           }
         },
         "old": {
-          "n_with_label": 69,
-          "distinct_score_values": 66,
-          "spearman_vs_actual_pct": 0.5274,
+          "n_with_label": 90,
+          "distinct_score_values": 82,
+          "spearman_vs_actual_pct": 0.5553,
           "spearman_ci95": [
-            0.2743,
-            0.683
+            0.3929,
+            0.7374
           ],
           "top_decile": {
-            "selected": 6,
-            "mean_actual_percentile": 0.7074,
-            "lift": 1.415
+            "selected": 9,
+            "mean_actual_percentile": 0.6796,
+            "lift": 1.359
           }
         }
       }
     },
     "social": {
-      "rows_with_reads": 25538,
-      "dated": 25263,
-      "holdout_in_global": 7626,
-      "holdout_scored": 7626,
+      "rows_with_reads": 25550,
+      "dated": 25275,
+      "holdout_in_global": 7624,
+      "holdout_scored": 7624,
       "full_table_distinct": {
-        "old_distinct_full": 2151,
-        "old_rows_full": 25524
+        "old_distinct_full": 2175,
+        "old_rows_full": 25604
       },
       "holdout_metrics": {
-        "n": 7626,
+        "n": 7624,
         "actual_log10_reads_p90": 2.248,
         "v2": {
-          "distinct_score_values": 7581,
-          "spearman_vs_actual_pct": 0.1501,
+          "distinct_score_values": 7579,
+          "spearman_vs_actual_pct": 0.1504,
           "spearman_ci95": [
-            0.1287,
-            0.1684
+            0.1294,
+            0.1704
           ],
           "top_decile": {
             "selected": 762,
-            "mean_actual_percentile": 0.557,
-            "lift": 1.114
+            "mean_actual_percentile": 0.5573,
+            "lift": 1.115
           }
         },
         "old": {
-          "n_with_label": 7590,
-          "distinct_score_values": 745,
-          "spearman_vs_actual_pct": 1.0,
+          "n_with_label": 7624,
+          "distinct_score_values": 781,
+          "spearman_vs_actual_pct": 0.9985,
           "spearman_ci95": [
-            1.0,
-            1.0
+            0.9971,
+            0.9994
           ],
           "top_decile": {
-            "selected": 759,
-            "mean_actual_percentile": 0.9502,
-            "lift": 1.9
+            "selected": 762,
+            "mean_actual_percentile": 0.949,
+            "lift": 1.898
           }
         }
       }
     }
   },
   "pooled": {
-    "n": 9986,
+    "n": 9995,
     "v2": {
-      "spearman": 0.1627,
+      "spearman": 0.1632,
       "ci95": [
-        0.1434,
-        0.1845
+        0.1461,
+        0.1806
       ],
-      "distinct": 9915
+      "distinct": 9923
     },
     "old": {
-      "n": 9923,
-      "spearman": 0.9775,
+      "n": 9995,
+      "spearman": 0.9748,
       "ci95": [
-        0.9731,
-        0.9807
+        0.9707,
+        0.9783
       ],
-      "distinct": 1107
+      "distinct": 1130
     }
   }
 }

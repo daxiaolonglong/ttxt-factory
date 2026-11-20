@@ -24,6 +24,7 @@ import math
 import random
 import sqlite3
 import statistics
+from datetime import datetime
 from pathlib import Path
 
 from ttxt.analysis import score_v2
@@ -188,7 +189,10 @@ def metrics_for(items: list[dict]) -> dict:
 
 
 def main() -> None:
-    model = score_v2.load_model(ROOT / "03_intelligence" / "score_v2_model.json")
+    model_path = ROOT / "03_intelligence" / "score_v2_model.json"
+    model = score_v2.load_model(model_path)
+    # R51:产物必须能对上"哪次运行、哪一版模型"——生成时间与模型落盘时间都记账
+    model_saved_at = json.loads(model_path.read_text(encoding="utf-8")).get("saved_at")
     # 先把五类目样本合并,做一次**全局** time_split —— 与拟合脚本完全相同的口径
     all_rows: list[dict] = []
     metas: dict[str, dict] = {}
@@ -201,6 +205,10 @@ def main() -> None:
         all_rows.extend(rows)
 
     train, test = score_v2.time_split(all_rows, train_ratio=TRAIN_RATIO)
+    # id 只在类目库内唯一,互斥证明必须按 (类目, id) 对,不能只按 id
+    train_keys = {(row["category"], row["id"]) for row in train}
+    holdout_keys = {(row["category"], row["id"]) for row in test}
+    overlap = train_keys & holdout_keys
     split_report = {
         "mode": "global",  # 五类目合并后一次切分,与拟合一致;类目内独立切分会让 holdout 混入训练见过文章
         "rows_all": len(all_rows),
@@ -209,10 +217,19 @@ def main() -> None:
         "holdout": len(test),
         "train_published_max": max(row["published_at"] for row in train),
         "holdout_published_min": min(row["published_at"] for row in test),
+        "train_holdout_disjoint_proof": {
+            "key": "(category, id)",
+            "train_unique": len(train_keys),
+            "holdout_unique": len(holdout_keys),
+            "intersection": len(overlap),
+            "disjoint": not overlap,
+        },
     }
 
     report: dict = {
         "schema": "r47-score-v2-production-compare-v2",
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "model_saved_at": model_saved_at,
         "model_version": model["version"],
         "model_n_train": model["n_train"],
         "train_ratio": TRAIN_RATIO,

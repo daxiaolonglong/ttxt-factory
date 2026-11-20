@@ -7,6 +7,7 @@ import os
 import time
 import urllib.request
 from typing import Any
+from urllib.parse import urlparse
 
 from ttxt import config as cfg
 
@@ -17,6 +18,23 @@ class ModelError(RuntimeError):
     pass
 
 
+# R51 策略拆分(项目负责人 2026-11-20 定):写作侧模型调用只允许本地回环端点;
+# 评审侧的云端策略在 ttxt/writing/review.py,那条通道永远显式传 base_url,
+# 不经过这里的默认端点解析。strata 配置被误指向云端时显式失败,绝不静默发出去。
+LOCAL_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
+
+
+def require_loopback(url: str) -> str:
+    """写作侧端点必须是回环地址,否则抛 ModelError(不降级、不重试、不回退)。"""
+    host = (urlparse(url or "").hostname or "").lower()
+    if host not in LOCAL_HOSTS:
+        raise ModelError(
+            f"写作侧模型端点必须是本地回环地址(127.0.0.1/localhost/::1),"
+            f"当前 strata.base_url={url or '(空)'};写作不得走云端"
+        )
+    return url
+
+
 def _config() -> dict:
     return cfg.load_config().get("strata", {})
 
@@ -24,7 +42,7 @@ def _config() -> dict:
 def _base_url(base_url: str | None = None) -> str:
     if base_url:
         return base_url.rstrip("/")
-    return str(_config().get("base_url", "http://127.0.0.1:8080")).rstrip("/")
+    return require_loopback(str(_config().get("base_url", "http://127.0.0.1:8080"))).rstrip("/")
 
 
 def _headers(api_key: str | None = None) -> dict[str, str]:

@@ -276,14 +276,14 @@ def _set_draft_status(db_path: Path, draft_id: str, version: int, status: str) -
     全表 0 行 rejected,版本账目失真)。循环语义本身就说明:比当前版本更早的版本
     都在门禁上失败过,因此它们的状态是 rejected。
 
-    状态口径(账本 T-05)是 ``REJECTED / AUTO_PASSED / INDEPENDENT_REVIEW_PASSED``;
-    导出目录与 CLI 回执仍用 ``passed/rejected``(落盘目录名不变)。2026-11-18 之前的
-    旧行是小写口径,不回刷——历史行只描述当时写下的事实。
+    状态口径(R51 P2-4 起统一小写):``rejected / auto_passed / independent_review_passed``
+    (语义仍是账本 T-05 的三态口径,只是大小写在 2026-11-20 归一,历史行已用幂等脚本归一,
+    判定逻辑与标签语义不变);导出目录与 CLI 回执仍用 ``passed/rejected``(落盘目录名不变)。
     """
     con = connect(db_path)
     try:
         con.execute(
-            "UPDATE writing_history SET status = CASE WHEN version < ? THEN 'REJECTED' ELSE ? END "
+            "UPDATE writing_history SET status = CASE WHEN version < ? THEN 'rejected' ELSE ? END "
             "WHERE draft_id = ?",
             (version, status, draft_id),
         )
@@ -479,7 +479,10 @@ def _model_meta(model_call) -> dict:
     独立评审跑完后由 ``_apply_reviewer`` 按**真实 id 比较**改判(不许为了过门禁写死 false)。"""
     meta = {
         "same_model_review": True,
+        "review_independence": "self_review",
+        "independent_review": False,
         "reviewer_model": None,
+        "reviewer_endpoint": None,
         "reviewer_limitation": (
             "写作与模型评审由同一服务模型完成,评审独立性受限;"
             "事实门禁另由 verifier 确定性规则独立判定"
@@ -498,12 +501,21 @@ def _model_meta(model_call) -> dict:
 
 
 def _apply_reviewer(meta: dict, outcome: dict | None, error: str | None) -> None:
-    """按写作侧与评审侧**真实提供的模型 id** 判定独立性;拿不到证据就继续算同源。"""
+    """按写作侧与评审侧**真实提供的模型 id** 判定独立性;拿不到证据就继续算同源。
+
+    R51:评审走云端时端点照实记账(``reviewer_endpoint``),独立性只按真实 id 比较,
+    不许因为"换了个端点"就宣称独立,也不许把云端端点写成回环地址。
+    """
     reviewer = (outcome or {}).get("reviewer_model")
     writer = meta.get("served_model")
     independent = bool(reviewer and writer and reviewer != writer)
     meta["reviewer_model"] = reviewer
+    meta["reviewer_endpoint"] = (outcome or {}).get("reviewer_endpoint")
     meta["same_model_review"] = not independent
+    # R51:把"当前评审是自评还是独立评审"钉死成显式字段(随 criteria_json 入库),
+    # 不靠读者从 same_model_review 反推。判定逻辑零改动,只是把结论写明白。
+    meta["review_independence"] = "independent" if independent else "self_review"
+    meta["independent_review"] = independent
     meta["reviewer_limitation"] = (
         f"评审由独立服务模型 {reviewer} 完成,与写作模型 {writer} 不同源"
         if independent
@@ -516,14 +528,14 @@ def _apply_reviewer(meta: dict, outcome: dict | None, error: str | None) -> None
 
 
 def _review_account(passed: bool, meta: dict, outcome: dict | None) -> str:
-    """T-05 的版本级状态口径:只有独立评审者真实存在(与写作模型不同 id)且评审自己说可发布,
-    才给 INDEPENDENT_REVIEW_PASSED;拿不到许可措辞就不给标签(fail-closed,不猜语义)。"""
+    """T-05 的版本级状态口径(小写,R51 P2-4):只有独立评审者真实存在(与写作模型不同 id)且评审自己说可发布,
+    才给 independent_review_passed;拿不到许可措辞就不给标签(fail-closed,不猜语义)。"""
     if not passed:
-        return "REJECTED"
+        return "rejected"
     verdict = (outcome or {}).get("verdict") or {}
     if outcome and not meta.get("same_model_review") and verdict.get("publishable"):
-        return "INDEPENDENT_REVIEW_PASSED"
-    return "AUTO_PASSED"
+        return "independent_review_passed"
+    return "auto_passed"
 
 
 def _review_account_basis(
@@ -557,6 +569,7 @@ def _review_summary(outcome: dict | None, error: str | None) -> dict:
         "attempted": True,
         "available": True,
         "reviewer_model": outcome["reviewer_model"],
+        "reviewer_endpoint": outcome.get("reviewer_endpoint"),
         "prompt": outcome["prompt"].split("\n\n", 1)[0],
         "verdict_markers": outcome["verdict"],
         "verdict_excerpt": outcome["verdict_text"][:600],
@@ -611,7 +624,8 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
         pool: list[dict] = []
         for index, match in enumerate(matches):
             row = con.execute(
-                "SELECT id, title, url, author, completeness, coalesce(cleaned_content, content) AS text "
+                "SELECT id, title, url, author, completeness, published_at, "
+                "coalesce(cleaned_content, content) AS text "
                 "FROM articles WHERE id = ?",
                 (match["article_id"],),
             ).fetchone()
@@ -626,6 +640,7 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
                     "url": row["url"],
                     "text": row["text"] or "",
                     "completeness": row["completeness"],
+                    "published_at": row["published_at"],
                     "host": host,
                     "author": (row["author"] or "").strip(),
                     "source_key": key,
@@ -710,8 +725,15 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
             for item in selected
         ],
     }
+    # published_at 随材料带给核验层:相对日期(「明年2月」)只有按来源发表时刻折算才能比对(R51)
     materials = [
-        {"id": item["id"], "title": item["title"], "url": item["url"], "text": item["text"]}
+        {
+            "id": item["id"],
+            "title": item["title"],
+            "url": item["url"],
+            "text": item["text"],
+            "published_at": item.get("published_at"),
+        }
         for item in selected
     ]
     return materials, stats
@@ -950,7 +972,7 @@ def write_article(
             )
             passed = False
 
-    # status 决定导出目录与回执口径;writing_history.status 用 T-05 的三态口径(独立复核成立才给独立标签)
+    # status 决定导出目录与回执口径;writing_history.status 用 T-05 的三态口径小写归一版(独立复核成立才给独立标签)
     status = "passed" if passed else "rejected"
     account = _review_account(passed, model_meta, review_outcome)
     _set_draft_status(db_path, draft_id, version, account)

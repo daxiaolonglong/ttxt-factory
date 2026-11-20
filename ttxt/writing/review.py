@@ -5,6 +5,13 @@
    给了细则就会被写作侧的口径诱导,独立评审就失去意义。所以提示词不做成配置项。
 2. 密钥只从环境变量或 `.secrets/` 里的文件取,任何日志/回执/异常文本都不得带上密钥值。
 3. 通道不可用 ⇒ 独立评审**不成立**,调用方必须按「未解除同源」处理,不得当成通过。
+
+R51 端点策略拆分(项目负责人 2026-11-20 定「DeepSeek 留着审核我们模型写作的文章质量」):
+- **评审侧**允许配置里的云端端点,但必须 https、必须配 key;缺 key 或端点不可达显式抛错,
+  不静默降级回本地、不悄悄换模型。
+- **写作侧**仍强制本地回环,守卫在 ``ttxt.model_gate.client.require_loopback``,本模块不放宽它。
+- 评审走云端必须如实记录 ``reviewer_endpoint`` / ``reviewer_model``,``same_model_review``
+  照实按两侧真实 id 比较,不许伪装独立评审。
 """
 
 from __future__ import annotations
@@ -47,20 +54,26 @@ class ReviewUnavailable(RuntimeError):
     """通道缺密钥、缺配置或端点不通:独立评审不成立。"""
 
 
-# R44 合规约束:项目只允许本地模型。评审通道历史上指向云端 https://api.deepseek.com,
-# 现在在代码层强制拒绝任何非回环端点 —— 配错就显式失败,绝不静默兜底到云端。
-LOCAL_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
+LOCAL_HOSTS = model_client.LOCAL_HOSTS
 
 
-def _require_local(base_url: str) -> str:
-    """端点必须是回环地址,否则显式抛错(不降级、不重试、不回退)。"""
-    host = (urlparse(base_url or "").hostname or "").lower()
-    if host not in LOCAL_HOSTS:
-        raise ReviewUnavailable(
-            f"云端模型已禁用:评审端点必须是本地回环地址(127.0.0.1/localhost),"
-            f"当前配置为 {base_url or '(空)'}"
-        )
-    return base_url
+def _review_endpoint(section: dict) -> tuple[str, bool]:
+    """评审侧端点策略(R51 拆分):回环直接放行;云端必须 https 且是完整地址。
+
+    返回 ``(base_url, is_local)``。任何不合规配置显式抛 ReviewUnavailable ——
+    评审「走了哪儿」必须记在明面上,绝不静默换端点、绝不回退到别的通道。
+    """
+    base_url = str(section.get("base_url") or "").strip()
+    if not base_url:
+        raise ReviewUnavailable("缺独立评审端点:config.review.base_url 未配置")
+    parsed = urlparse(base_url)
+    host = (parsed.hostname or "").lower()
+    if parsed.scheme not in ("http", "https") or not host:
+        raise ReviewUnavailable(f"独立评审端点必须是完整的 http(s) 地址:{base_url!r}")
+    is_local = host in LOCAL_HOSTS
+    if not is_local and parsed.scheme != "https":
+        raise ReviewUnavailable(f"云端评审端点必须走 https,密钥不经明文传输:{base_url!r}")
+    return base_url, is_local
 
 
 def review_config() -> dict:
@@ -71,7 +84,8 @@ def review_config() -> dict:
 def api_key(section: dict | None = None, *, required: bool = True) -> str:
     """按 `api_key_env` → `api_key_file` 的顺序取密钥;取不到就抛,不返回空串。
 
-    本地端点通常不校验密钥,调用方传 ``required=False`` 时允许返回空串(即不带 Authorization)。
+    本地端点通常不校验密钥,调用方传 ``required=False`` 时允许返回空串(即不带 Authorization);
+    云端端点(R51)调用方必须传 ``required=True``,取不到 key 就抛,绝不无凭据发请求。
     """
     section = review_config() if section is None else section
     env_name = str(section.get("api_key_env") or "STRATA_API_KEY")
@@ -89,22 +103,27 @@ def api_key(section: dict | None = None, *, required: bool = True) -> str:
 
 
 def served_model(section: dict | None = None) -> str:
-    """评审侧真实提供模型 id(``/v1/models`` 优先,拿不到才退回配置值)。"""
+    """评审侧真实提供的模型 id。
+
+    探测 ``/v1/models`` 只为**验证配置模型确实在端点可用列表里**;通过后按配置值返回,
+    绝不拿列表里"别的那个模型"顶上(云端端点往往一次报好几个 id)。探测不通即抛错。
+    """
     section = review_config() if section is None else section
-    base_url = str(section.get("base_url") or "")
-    if not base_url:
-        raise ReviewUnavailable("缺独立评审端点:config.review.base_url 未配置")
-    _require_local(base_url)
+    base_url, is_local = _review_endpoint(section)
     try:
-        ids = model_client.models(base_url=base_url, api_key=api_key(section, required=False), timeout=15.0)
+        ids = model_client.models(base_url=base_url, api_key=api_key(section, required=not is_local), timeout=15.0)
     except ReviewUnavailable:
         raise
     except Exception as exc:  # noqa: BLE001 - 端点不通要如实上报,不猜模型名
         raise ReviewUnavailable(f"独立评审端点探测失败:{type(exc).__name__}") from exc
     configured = str(section.get("model_id") or "")
-    if ids and configured and configured not in ids:
-        raise ReviewUnavailable(f"独立评审模型不在端点可用列表里:{configured} ∉ {','.join(ids)}")
-    return ids[0] if ids else configured
+    if configured:
+        if ids and configured not in ids:
+            raise ReviewUnavailable(f"独立评审模型不在端点可用列表里:{configured} ∉ {','.join(ids)}")
+        return configured
+    if ids:
+        return ids[0]
+    raise ReviewUnavailable("缺独立评审模型:config.review.model_id 未配置,端点也未报告可用模型")
 
 
 def verdict_markers(text: str) -> dict[str, bool]:
@@ -122,9 +141,12 @@ def verdict_markers(text: str) -> dict[str, bool]:
 
 
 def review(draft: str, section: dict | None = None) -> dict[str, Any]:
-    """让评审模型只看「审评这篇文章 + 正文」;返回判定、模型 id 与原文,不含密钥。"""
+    """让评审模型只看「审评这篇文章 + 正文」;返回判定、模型 id、端点与原文,不含密钥。
+
+    走云端时 ``reviewer_endpoint`` 如实记云端地址(绝不写成本地),密钥缺失直接抛错。
+    """
     section = review_config() if section is None else section
-    base_url = _require_local(str(section.get("base_url") or ""))
+    base_url, is_local = _review_endpoint(section)
     reviewer_id = served_model(section)
     prompt = f"{REVIEW_PROMPT}\n\n{(draft or '').strip()}"
     try:
@@ -134,7 +156,7 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
             temperature=float(section.get("temperature", 0.0)),
             base_url=base_url,
             model_id=reviewer_id,
-            api_key=api_key(section, required=False),
+            api_key=api_key(section, required=not is_local),
             timeout_s=float(section.get("request_timeout_s", 300)),
             enable_thinking=bool(section.get("enable_thinking", False)),
         )
@@ -145,6 +167,7 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
     LOG.info(
         "writing.review.done",
         reviewer_model=outcome.get("model") or reviewer_id,
+        reviewer_endpoint=base_url,
         prompt_chars=len(prompt),
         verdict_chars=len(text),
         finish_reason=outcome.get("finish_reason"),
@@ -154,6 +177,8 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
     )
     return {
         "reviewer_model": outcome.get("model") or reviewer_id,
+        "reviewer_endpoint": base_url,
+        "reviewer_is_local": is_local,
         "verdict_text": text,
         "verdict": verdict,
         "prompt": REVIEW_PROMPT,

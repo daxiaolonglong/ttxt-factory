@@ -7,16 +7,21 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import sys
 from pathlib import Path
 
-sys.path.insert(0, r"D:\ttxt")
+# R51(P2-2):仓库根从 __file__ 推导(本脚本在 <root>/scripts/ 下),可用 TTXT_ROOT 覆盖,
+# 不再写死 D:\ttxt——换机器/换盘符也能定位。
+ROOT = Path(os.environ.get("TTXT_ROOT") or Path(__file__).resolve().parent.parent)
+
+sys.path.insert(0, str(ROOT))
 
 from ttxt.analysis import keywords  # noqa: E402
 
-PROD = Path(r"D:\ttxt\01_categories\technology\articles.db")
-COPY = Path(r"D:\ttxt\07_tmp\p28_viral_signal\technology_copy.db")
+PROD = ROOT / "01_categories" / "technology" / "articles.db"
+COPY = ROOT / "07_tmp" / "p28_viral_signal" / "technology_copy.db"
 
 
 def snapshot(con, label: str) -> dict[str, dict]:

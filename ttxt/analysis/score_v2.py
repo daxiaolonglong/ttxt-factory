@@ -143,6 +143,26 @@ def _weighted_least_squares(design: list[list[float]], y: list[float], weights: 
 _STD_FLOOR = 1e-9
 
 
+def _pinball_weights(residual: list[float], tau: float) -> list[float]:
+    """分位数(pinball)损失的 IRLS 权重 ``|ρ'_τ(r)| / |r|``,R51 修复"tau 是假参数"。
+
+    - ``r > 0 ⇒ 2τ/|r|``;``r < 0 ⇒ 2(1−τ)/|r|``;``r = 0 ⇒ 1/|r|``(符号无定义,取两侧均值);
+    - ``|r|`` 一律下限 1e-3(与 R45 拟合实现一致);
+    - 因子 2 是归一化约定:使 **τ=0.5 时权重逐项等于 R45 的 ``1/max(|r|,1e-3)``,
+      生产模型 ``03_intelligence/score_v2_model.json`` 的系数因此逐位不变**(1:1 复现由测试锁死)。
+    """
+    out = []
+    for r in residual:
+        denom = max(abs(r), 1e-3)
+        if r > 0:
+            out.append(2.0 * tau / denom)
+        elif r < 0:
+            out.append(2.0 * (1.0 - tau) / denom)
+        else:
+            out.append(1.0 / denom)
+    return out
+
+
 def _standardize(rows: list[list[float]]) -> tuple[list[list[float]], list[float], list[float]]:
     """列标准化。
 
@@ -184,7 +204,7 @@ def fit(rows: list[dict], y: list[float], *, tau: float = DEFAULT_TAU,
     beta[0] = _median(y)
     for _ in range(iterations):
         residual = [target - sum(b * v for b, v in zip(beta, row)) for row, target in zip(design, y)]
-        weights = [1.0 / max(abs(r), 1e-3) for r in residual]
+        weights = _pinball_weights(residual, tau)
         beta_next = _weighted_least_squares(design, y, weights, ridge)
         delta = max(abs(a - b) for a, b in zip(beta_next, beta))
         beta = beta_next

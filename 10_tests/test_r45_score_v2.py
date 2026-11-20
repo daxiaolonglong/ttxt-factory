@@ -94,3 +94,33 @@ def test_v2_is_continuous_while_old_paths_are_bucketed_and_blind():
     left = viral.score_with_metrics(viral.compute_features("2026年三大变化", "正文", 6), metrics)
     right = viral.score_with_metrics(viral.compute_features("为什么这件事重要", "正文", 9), metrics)
     assert left == right, "旧实现跳过文本特征(这是 R43 的错位事实,只并列记录,不改)"
+
+
+def test_tau_default_weights_match_r45_bit_for_bit():
+    """R51:τ=0.5 的 IRLS 权重必须与 R45 生产拟合逐项等值(逐位),锁死已发布模型不变。
+
+    R45 用 ``1/max(|r|,1e-3)`` 拟合出 ``03_intelligence/score_v2_model.json``;本测试证明
+    修 tau 后的 ``_pinball_weights(·, 0.5)`` 与旧式逐项相同 ⇒ 后续确定性求解链不动,
+    生产模型系数逐位不变。
+    """
+    residuals = [0.0, -0.0, 1e-9, -1e-9, 0.5, -0.5, 123.456, -123.456,
+                 1e-3, -1e-3, 2e-4, -2e-4, 0.25, -0.75]
+    legacy = [1.0 / max(abs(r), 1e-3) for r in residuals]
+    assert score_v2._pinball_weights(residuals, 0.5) == legacy
+
+
+def test_tau_is_a_real_parameter_and_moves_the_quantile():
+    """R51:tau 不再是假参数 —— τ≠0.5 必须真实改变拟合结果,且分位数次序正确。"""
+    rng = random.Random(11)
+    rows = [score_v2.extract_features("某个标题", "正文\n\n第二段", "social") for _ in range(400)]
+    targets = [rng.random() for _ in range(400)]
+    half = score_v2.fit(rows, targets, tau=0.5)
+    high = score_v2.fit(rows, targets, tau=0.75)
+    low = score_v2.fit(rows, targets, tau=0.25)
+    assert (half["tau"], high["tau"], low["tau"]) == (0.5, 0.75, 0.25)
+    # 特征列全常数 ⇒ 预测只剩截距,即拟合分位数本身:次序必须 low < median < high
+    p_low = score_v2.predict(low, rows[0])
+    p_half = score_v2.predict(half, rows[0])
+    p_high = score_v2.predict(high, rows[0])
+    assert p_low < p_half < p_high, "τ 改变拟合分位数:R51 前 tau 从不进权重,三条预测会全等"
+    assert half["coefficients_raw"] != high["coefficients_raw"] or p_half != p_high

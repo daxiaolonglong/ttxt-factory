@@ -20,7 +20,7 @@
     "temperature": 0.0,
     "request_timeout_s": 300,
     "enable_thinking": false,
-    "note": "P40 独立评审通道(账本 T-04):只做只读盲评,不参与写作。R44 合规纠正(2026-11-19):原配置指向云端 https://api.deepseek.com + deepseek-flash,违反「只用本地模型」约束,已改为本地端点 http://127.0.0.1:8080 + 本地模型;ttxt/writing/review.py::_require_local 在代码层强制拒绝任何非回环端点并显式抛错,不静默兜底到云端。提示词固定 6 字「审评这篇文章」写在代码里,不做配置项,避免被写作侧口径诱导。本地端点不要求密钥(STRATA_API_KEY 可选,配置为空即不带 Authorization)。评审与写作共用同一台本地模型 ⇒ same_model_review 恒为 true,不得宣称 L4 独立评审通过"
+    "note": "P40 独立评审通道(账本 T-04):只做只读盲评,不参与写作。R51 策略拆分(2026-11-20,项目负责人定「DeepSeek 留着审核模型写作的文章质量」):评审侧允许配置里的云端 https 端点(ttxt/writing/review.py::_review_endpoint 校验:云端必须 https、必须配 key、不可达或缺 key 显式抛 ReviewUnavailable,不静默降级回本地、不换模型;回执如实记 reviewer_endpoint/reviewer_model,same_model_review 按两侧真实 id 比较);写作侧仍强制本地回环(ttxt/model_gate/client.py::require_loopback)。本段当前仍指本地端点:云端 key 已于 2026-11-20 在服务商后台注销,切回云端需先在 .secrets/ 放新 key 再改本段 base_url/model_id/api_key_env。评审与写作共用同一台本地模型期间 same_model_review 恒为 true,不得宣称 L4 独立评审通过。提示词固定 6 字「审评这篇文章」写在代码里,不做配置项,避免被写作侧口径诱导"
   },
   "dashboard": {
     "host": "127.0.0.1",

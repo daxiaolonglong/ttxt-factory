@@ -1,13 +1,19 @@
-"""Download a portable GitHub CLI release into D:\\ttxt\\tools\\gh (no PATH, no registry)."""
+"""Download a portable GitHub CLI release into <repo root>/tools/gh (no PATH, no registry).
+
+R51(P2-2):仓库根从 __file__ 推导(本脚本在 <root>/scripts/ 下),也可用环境变量
+TTXT_ROOT 覆盖——不再写死 D:\\ttxt,换机器/换盘符也能定位。
+"""
 import json
 import os
 import sys
 import urllib.request
 import zipfile
+from pathlib import Path
 
-TOKEN_FILE = r"D:\ttxt\.secrets\github_token"
-TOOLS = r"D:\ttxt\tools"
-DL = os.path.join(TOOLS, "_dl")
+ROOT = Path(os.environ.get("TTXT_ROOT") or Path(__file__).resolve().parent.parent)
+TOKEN_FILE = ROOT / ".secrets" / "github_token"
+TOOLS = ROOT / "tools"
+DL = TOOLS / "_dl"
 
 
 def token():

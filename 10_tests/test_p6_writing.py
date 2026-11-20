@@ -116,7 +116,7 @@ def test_write_workflow(tmp_path):
         assert con.execute("SELECT COUNT(*) FROM evaluation_history").fetchone()[0] == 1
         assert con.execute("SELECT COUNT(*) FROM evidence_links").fetchone()[0] == 1
         status = con.execute("SELECT status FROM writing_history").fetchone()[0]
-        assert status == "AUTO_PASSED", "无独立评审者时版本账目只能记 AUTO_PASSED"
+        assert status == "auto_passed", "无独立评审者时版本账目只能记 auto_passed"
     finally:
         con.close()
 

@@ -93,7 +93,7 @@ def _assert_rejected_in_db(db_path, draft_id):
         status = con.execute(
             "SELECT status FROM writing_history WHERE draft_id=?", (draft_id,)
         ).fetchone()[0]
-        assert status == "REJECTED"
+        assert status == "rejected"
     finally:
         con.close()
 
@@ -172,7 +172,7 @@ def test_pass_flow_exports_quote_and_status(tmp_path):
     con = sqlite3.connect(db_path)
     try:
         status = con.execute("SELECT status FROM writing_history").fetchone()[0]
-        assert status == "AUTO_PASSED"
+        assert status == "auto_passed"
         quote = con.execute("SELECT quote FROM evidence_links").fetchone()[0]
         assert quote
     finally:
