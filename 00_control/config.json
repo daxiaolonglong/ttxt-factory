@@ -140,6 +140,8 @@
     "jobs": [
       {"id": "metrics_due_60m", "kind": "metrics_due", "interval_min": 60, "enabled": true,
        "limit": 12, "sleep_s": 2.5, "apply": true,
+       "backfill_new_articles": true, "backfill_limit": 200, "gate_hosts": true,
+       "_comment": "R58:新文章入队接进调度器(backfill_new_articles,only_missing+唯一键=幂等),白名单校验前置到入队之前(gate_hosts),代理/网络故障冷却 6h 内整轮 skipped_infra_paused。",
        "wait_for_queue_s": 180, "queue_poll_s": 20, "lock_wait_s": 180},
       {"id": "metrics_fetch_6h", "kind": "metrics_fetch", "interval_min": 360, "enabled": false,
        "_comment": "R42:取数时点已改为按 due_at 排队,本任务停用(保留代码只用于人工对照/回滚)",

@@ -424,9 +424,20 @@ def _job_metrics_due(job: dict) -> dict:
     stamp = datetime.now().astimezone().strftime("%Y%m%dT%H%M%S")
     per: dict[str, dict] = {}
     errors: list[str] = []
+    # R58:新文章入队接进调度器 —— 窗口行原先只有 `ttxt publish backfill` 会写,调度器不写,
+    # 实测 technology 1014 篇里 546 篇从未进过队列。这里在 apply(真跑)时才补窗口行,
+    # 并按 only_missing + 唯一键保证幂等(跑两次候选集为空)。
+    backfill_new = bool(job.get("backfill_new_articles", True)) and apply
+    backfill_limit = job.get("backfill_limit")
+    gate_hosts = bool(job.get("gate_hosts", True))
     for category in categories:
         try:
-            sync = metrics_queue.sync_queue(category)
+            sync = metrics_queue.sync_queue(
+                category,
+                include_new_articles=backfill_new,
+                gate_hosts=gate_hosts,
+                backfill_limit=backfill_limit,
+            )
             batch = metrics_queue.claim_batch(category, limit=limit)
             if not batch["article_ids"]:
                 per[category] = {
@@ -441,6 +452,9 @@ def _job_metrics_due(job: dict) -> dict:
                 limit=limit,
                 apply=apply,
                 collect_kwargs={"sleep_s": sleep_s, "lock_wait_s": lock_wait_s},
+                include_new_articles=backfill_new,
+                gate_hosts=gate_hosts,
+                backfill_limit=backfill_limit,
             )
             _write_metrics_evidence(
                 evidence_dir, category, stamp,
@@ -449,6 +463,22 @@ def _job_metrics_due(job: dict) -> dict:
             )
             collection = report.get("collection") or {}
             after = report.get("after") or {}
+            sync_report = report.get("queue_sync") or {}
+            window_backfill = sync_report.get("window_backfill") or {}
+            infra = report.get("infra") or {}
+            if report.get("skipped") == "infra_paused":
+                per[category] = {
+                    "status": "skipped_infra_paused",
+                    "reason": (
+                        f"最近一次回执为基础设施故障({infra.get('last_infra_at')}),"
+                        f"冷却 {infra.get('cooldown_hours')}h 到 {infra.get('next_retry_at')} 才重试;"
+                        "本轮不开浏览器、不发请求(代理/网络修好后下一轮自动恢复)"
+                    ),
+                    "infra": infra,
+                    "queue_states": sync_report.get("states"),
+                    "enqueued_windows": int(window_backfill.get("windows_inserted") or 0),
+                }
+                continue
             per[category] = {
                 "status": "ok" if apply else "dry_run",
                 "claimed": int(report.get("claimed") or 0),
@@ -458,6 +488,11 @@ def _job_metrics_due(job: dict) -> dict:
                 "snapshots": int(collection.get("snapshots") or 0),
                 "would_write": int(collection.get("would_write") or 0),
                 "unsupported_host_skipped": int(report.get("unsupported_host_skipped") or 0),
+                "enqueued_windows": int(window_backfill.get("windows_inserted") or 0),
+                "host_skipped": int(sync_report.get("host_skipped") or 0),
+                "archived_unsupported": sync_report.get("archived_unsupported") or {},
+                "infra_failures": int(report.get("infra_failures") or 0),
+                "infra_paused": bool(infra.get("paused")),
                 "windows_refreshed": int(report.get("windows_refreshed") or 0),
                 "queue_states": (report.get("queue_sync") or {}).get("states"),
                 "outcome_counts": collection.get("outcome_counts"),

@@ -527,11 +527,24 @@ def backfill_articles(
     apply: bool = False,
     limit: int | None = None,
     db_path: Path | None = None,
+    only_missing: bool = False,
+    host_gate: bool = False,
 ) -> dict:
     """按文章已有 ``published_at`` + ``metric_snapshots`` 回填 T+N 读数。
 
     只使用可得信息:发布时间不可解析 ⇒ ``bad_published_at``;无快照 ⇒ ``unavailable``;
     快照时点不在窗口内 ⇒ ``early/late/overdue``。一条都不编。
+
+    ``only_missing``(R58,2026-11-20,项目负责人裁决):只为**还没有窗口行**的文章补行。
+    窗口行是 ``metrics_due_queue`` 的唯一来源,调度器不补这一步,新文章就永远排不进队列
+    (实测 technology 1014 篇里 546 篇从未入队)。窗口行按 ``(subject_type, subject_key,
+    window_days)`` 唯一键 upsert,而 ``only_missing`` 让第二次运行时候选集为空 ⇒ 跑两次结果
+    一致、不产生重复行,这是"接进调度器必须幂等"的前提。``limit`` 限制单轮补行数,
+    按 ``id`` 倒序 ⇒ 先补最近入库的(时效性还在)。
+
+    ``host_gate``(R58 第 2 条裁决):域名不在公开指标白名单的文章**连窗口行都不补** ——
+    采集器对它们永远不发请求,补了也只会变成"排队但必然采不到"的额度黑洞(实测 176 条
+    非白名单域排队、77 条记 done 却零快照)。校验前置到这里,队列根本看不到它们。
     """
     span = int(days if days is not None else window_days())
     target = Path(db_path) if db_path is not None else cfg.category_db_path(category)
@@ -539,19 +552,50 @@ def backfill_articles(
     status_counts = {status: 0 for status in ALL_STATUSES}
     missing_counts = {field: 0 for field in METRIC_FIELDS}
     written = 0
+    missing_windows_total = 0
+    host_skipped = 0
     try:
         ensure_schema(con)
-        article_rows = con.execute(
-            "SELECT id, published_at FROM articles WHERE published_at IS NOT NULL AND published_at<>''"
-        ).fetchall()
+        if only_missing:
+            candidates = con.execute(
+                "SELECT a.id, a.published_at, COALESCE(a.url_normalized, a.url, '') AS url"
+                " FROM articles a WHERE a.published_at IS NOT NULL AND a.published_at<>''"
+                " AND NOT EXISTS (SELECT 1 FROM performance_windows w WHERE w.subject_type='article'"
+                " AND w.window_days=? AND w.subject_key=CAST(a.id AS TEXT))"
+                " ORDER BY a.id DESC",
+                (span,),
+            ).fetchall()
+            if host_gate:
+                from ttxt.crawler import metrics_pages
+
+                allowed = [
+                    row for row in candidates if metrics_pages.host_allowed(str(row["url"] or ""))
+                ]
+                host_skipped = len(candidates) - len(allowed)
+                candidates = allowed
+            missing_windows_total = len(candidates)
+            article_rows = candidates
+        else:
+            article_rows = con.execute(
+                "SELECT id, published_at FROM articles WHERE published_at IS NOT NULL AND published_at<>''"
+            ).fetchall()
         if limit:
             article_rows = article_rows[: int(limit)]
         published = {int(row["id"]): row["published_at"] for row in article_rows}
         total_articles = int(con.execute("SELECT COUNT(*) FROM articles").fetchone()[0])
-        snapshot_rows = con.execute(
-            "SELECT article_id, captured_at, reads, likes, favorites, comments, impressions, data_source"
-            " FROM metric_snapshots ORDER BY article_id, captured_at"
-        ).fetchall()
+        if only_missing and published:
+            marks = ",".join("?" for _ in published)
+            snapshot_rows = con.execute(
+                "SELECT article_id, captured_at, reads, likes, favorites, comments, impressions, data_source"
+                f" FROM metric_snapshots WHERE article_id IN ({marks})"
+                " ORDER BY article_id, captured_at",
+                tuple(published),
+            ).fetchall()
+        else:
+            snapshot_rows = con.execute(
+                "SELECT article_id, captured_at, reads, likes, favorites, comments, impressions, data_source"
+                " FROM metric_snapshots ORDER BY article_id, captured_at"
+            ).fetchall()
         grouped: dict[int, list[dict]] = {}
         for row in snapshot_rows:
             article_id = int(row["article_id"])
@@ -561,6 +605,7 @@ def backfill_articles(
 
         bad_time = 0
         now = cfg.now_iso()
+        changes_before = int(con.total_changes)
         for article_id, published_at in published.items():
             try:
                 bounds = window_bounds(published_at, span)
@@ -591,6 +636,7 @@ def backfill_articles(
                 written += 1
         if apply:
             con.commit()
+        windows_inserted = int(con.total_changes) - changes_before
     finally:
         con.close()
     return {
@@ -602,10 +648,13 @@ def backfill_articles(
         "articles_with_published_at": len(published),
         "articles_without_published_at": total_articles - len(published),
         "bad_published_at": bad_time,
+        "missing_windows_total": missing_windows_total if only_missing else None,
+        "host_gate_skipped": host_skipped if only_missing else None,
         "with_snapshots": sum(1 for article_id in published if grouped.get(article_id)),
         "status_counts": status_counts,
         "missing_counts": missing_counts,
         "windows_written": written,
+        "windows_inserted": windows_inserted,
     }
 
 

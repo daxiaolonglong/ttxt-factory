@@ -559,9 +559,14 @@ def cmd_metrics(args: argparse.Namespace) -> int:
                     limit=args.limit if args.limit is not None else 20,
                     apply=bool(args.apply),
                     collect_kwargs={"sleep_s": args.sleep} if args.sleep is not None else None,
+                    include_new_articles=bool(args.apply),
                 )
             elif due_enqueue:
-                payload[category] = metrics_queue.sync_queue(category)
+                payload[category] = metrics_queue.sync_queue(
+                    category,
+                    include_new_articles=bool(args.apply),
+                    backfill_limit=args.limit if args.limit is not None else None,
+                )
             else:
                 payload[category] = metrics_queue.timing_report(category)
         report = {"action": action, "categories": payload}
