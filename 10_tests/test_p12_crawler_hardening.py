@@ -444,6 +444,89 @@ def test_toutiao_collect_reuses_rules_and_session(monkeypatch):
     assert collected["pages"] == 2  # 列表页 + 1 篇文章:观测字段不虚报
 
 
+# ---------------------------------------------------------------- R55:频道页首帧空列表重取
+
+class SequenceRecorder:
+    """同一 URL 按次序返回不同页面:用于验证"首帧空列表 ⇒ 重取"的包装。"""
+
+    def __init__(self, sequence: list[FakePage], article: FakePage | None = None):
+        self.sequence = sequence
+        self.article = article
+        self.calls: list[str] = []
+
+    def __call__(self, url, timeout=None, render=False, session=None):
+        self.calls.append(url)
+        if url.endswith("/article/111/"):
+            page = self.article
+        else:
+            listing_index = sum(1 for u in self.calls if not u.endswith("/article/111/"))
+            page = self.sequence[min(listing_index, len(self.sequence)) - 1]
+        return SimpleNamespace(page=page, status=200, url=url, elapsed_s=0.0)
+
+
+def _listing_page() -> FakePage:
+    return FakePage({
+        "a[href*='/article/']": [
+            FakeElement(attrib={"href": "/article/111/"}, text="人工智能制造业报道标题"),
+        ]
+    })
+
+
+def _empty_listing_page() -> FakePage:
+    return FakePage({})
+
+
+def _toutiao_source(rate_limit_s: float = 0.0):
+    return SimpleNamespace(url="https://www.toutiao.com/ch/news_tech/", rate_limit_s=rate_limit_s, max_articles=5)
+
+
+def test_toutiao_collect_retries_empty_first_frame_listing(monkeypatch):
+    """R55 包装:首帧没挂载(0 链接)时重取,≤3 次、间隔 3s;有链接时行为零变化。"""
+    sleeps: list[float] = []
+    monkeypatch.setattr(toutiao.time, "sleep", lambda s: sleeps.append(s))
+    monkeypatch.setattr(robots, "fetch_robots", lambda *a, **k: FakeRules())
+
+    article = FakePage({
+        "title::text": ["人工智能制造业报道 - 今日头条"],
+        "body ::text": ["正文段落,讲述人工智能在制造业落地的进展与数据。"],
+    })
+    recorder = SequenceRecorder(
+        [_empty_listing_page(), _empty_listing_page(), _listing_page()], article=article
+    )
+    monkeypatch.setattr(fetcher, "fetch_page", recorder)
+
+    collected = toutiao.collect(_toutiao_source(), limit=2, rules=FakeRules(), session=FakeSession())
+
+    listing_calls = [u for u in recorder.calls if u.endswith("news_tech/")]
+    assert len(listing_calls) == 3, recorder.calls  # 前两次空,第三次拿到链接
+    assert sleeps[-1] == 2.0  # 既有逐篇限速不变:兜底 rate_limit=2.0
+    assert collected["links"] == 1
+    assert collected["listing_attempts"] == 3
+    assert collected["pages"] == 4  # 3 次列表页 + 1 篇文章页:观测字段与实际抓取次数一致
+    assert collected["items"], "重取成功后必须照常抓到正文"
+
+
+def test_toutiao_collect_listing_retry_capped_at_three(monkeypatch):
+    """连续空列表:重取封顶 3 次即停,不硬刷;pages 计数如实反映 3 次列表页。"""
+    sleeps: list[float] = []
+    monkeypatch.setattr(toutiao.time, "sleep", lambda s: sleeps.append(s))
+    monkeypatch.setattr(robots, "fetch_robots", lambda *a, **k: FakeRules())
+
+    recorder = SequenceRecorder([_empty_listing_page()] * 5)
+    monkeypatch.setattr(fetcher, "fetch_page", recorder)
+
+    collected = toutiao.collect(_toutiao_source(), limit=2, rules=FakeRules(), session=FakeSession())
+
+    assert [u for u in recorder.calls if u.endswith("news_tech/")] == [
+        "https://www.toutiao.com/ch/news_tech/"
+    ] * 3
+    assert sleeps == [3.0, 3.0]
+    assert collected["links"] == 0
+    assert collected["items"] == []
+    assert collected["listing_attempts"] == 3
+    assert collected["pages"] == 3  # 三次列表页,一篇正文都没抓过 → 不虚报
+
+
 # ---------------------------------------------------------------- 任务生命周期
 
 def test_run_queued_source_missing_aborts_not_requeued(monkeypatch, system_db):

@@ -116,10 +116,21 @@ def collect(
         raise RuntimeError(f"robots.txt disallows listing path: {listing_path}")
 
     delay = max(float(source.rate_limit_s or 2.0), float(rules.crawl_delay_s or 0))
-    listing = fetcher.fetch_page(source.url, render=True, session=session)
-    pages = 1  # 真实抓页数:观测字段必须与实际抓取次数一致,不虚报 0
-    links = extract_listing(listing.page)
     max_articles = max(1, int(limit or source.max_articles or 10))
+
+    # R55:频道页是客户端渲染,偶发首帧未挂载会提不到链接(R54 探针实测:一次 0 链接,
+    # 隔一分钟重试即 16/15 条)。空列表按≤3 次重取,间隔 3s;已有链接时行为零变化。
+    listing_attempts = 0
+    links: list[tuple[str, str]] = []
+    while listing_attempts < 3:
+        listing_attempts += 1
+        listing = fetcher.fetch_page(source.url, render=True, session=session)
+        links = extract_listing(listing.page)
+        if links:
+            break
+        if listing_attempts < 3:
+            time.sleep(3.0)
+    pages = listing_attempts  # 真实抓页数:观测字段必须与实际抓取次数一致,不虚报 0
 
     items: list[ExtractedItem] = []
     robots_skipped = 0
@@ -141,6 +152,7 @@ def collect(
         "items": items,
         "links": len(links),
         "pages": pages,
+        "listing_attempts": listing_attempts,
         "robots_skipped": robots_skipped,
         "errors": errors,
     }
