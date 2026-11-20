@@ -44,6 +44,10 @@ pytest-of-*/
 # ---- 本地工具（便携版 git 等）----
 tools/
 
+# ---- R51:一次性模型修复调试工件(含 IDE 状态库 .vscdb,本机调试用,绝不入库)----
+_model_fix/
+_probe_write.txt
+
 # ---- 密钥与私密配置 ----
 .env
 .env.*
