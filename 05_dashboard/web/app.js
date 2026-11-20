@@ -247,9 +247,26 @@ async function runBackfill() {
       const who = res.running && res.running.started_at ? `起始 ${res.running.started_at}` : "";
       setStatus(statusId, `已在跑,未重复启动${who ? `:${who}` : ""}`, "notice");
     } else {
-      const claimed = res.claimed === undefined ? "—" : fmt(res.claimed);
-      const collected = res.collection && res.collection.collected !== undefined ? fmt(res.collection.collected) : "—";
-      setStatus(statusId, `补采完成:认领 ${claimed} · 取回 ${collected} · 队列 ${fmt(res.skipped)} 项跳过`);
+      // 只渲染接口真实回传的字段:run_due 的回执里 collection 是 {candidates, fetched, written, ...},
+      // skipped 只可能是 None 或 "infra_paused"(整条链路冷却),绝不能当计数用。
+      const parts = [`认领 ${fmt(res.claimed ?? 0)}`];
+      const col = res.collection || null;
+      if (col) {
+        parts.push(`取回 ${fmt(col.fetched ?? 0)}/${fmt(col.candidates ?? 0)}`);
+        parts.push(`写入 ${fmt(col.written ?? 0)}`);
+        if (col.fetch_errors) parts.push(`抓取失败 ${fmt(col.fetch_errors)}`);
+        if (col.robots_refused) parts.push(`robots 拒访 ${fmt(col.robots_refused)}`);
+        if (col.known_gone_skipped) parts.push(`下架跳过 ${fmt(col.known_gone_skipped)}`);
+      }
+      if (res.unsupported_host_skipped) parts.push(`白名单外跳过 ${fmt(res.unsupported_host_skipped)}`);
+      if (res.windows_refreshed) parts.push(`窗口刷新 ${fmt(res.windows_refreshed)}`);
+      if (res.skipped === "infra_paused") {
+        setStatus(statusId, "补采未执行:指标链路在 infra 冷却窗口内(上一条回执是基础设施故障),一个请求都不发", "notice");
+      } else if (res.infra_failures) {
+        setStatus(statusId, `补采完成:${parts.join(" · ")};本批 ${fmt(res.infra_failures)} 次基础设施故障,链路进入冷却窗口`, "notice");
+      } else {
+        setStatus(statusId, `补采完成:${parts.join(" · ")}`);
+      }
     }
   } catch (err) {
     setStatus(statusId, `补采失败:${err.message}`, "error");
