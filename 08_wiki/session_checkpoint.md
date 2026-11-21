@@ -2,7 +2,7 @@
 
 **这个文件的作用是"无损压缩"**：上下文被压缩、或换新窗口时，只相信这里写的事实，不靠对话记忆。
 规则：每完成一个阶段、每次提交推送后、每次产生大输出（全量测试日志、全盘扫描、长报告）之后，必须重写本文件。
-最后更新：2026-11-21 11:05 — **R61 在途**。远端 `main` = `302cff0`。
+最后更新：2026-11-21 11:18 — **R61 在途**。远端 `main` = `54ecb6b`。
 
 ## 接手清单（R61 现在到哪了）
 
@@ -37,6 +37,12 @@
    blocking/publishable 标记（且「修改后可发布」会误命中「可发布」），直接切换会让独立评审门
    失效或误放行 —— 决定不切，先做 verdict 契约（自由评审后做标签抽取）并在样本上校准+测试，
    列入 R62 首项。空 key 文件已按缺失处理（`review.api_key` 修复 + 新增测试，待释锁后跑）。
+6. **DeepSeek verdict 契约 labels_v1 已实现（2026-11-21 11:18）**：6 字盲评 prompt 一字不动；
+   审评完再调一次，只从「可以发布/修改后再评/不建议发布」抽一个标签；可以发布=放行，其余
+   （含解析失败）=拦截。`review.py` 加契约常量/解析/映射，`workflow.py` 回执记 `verdict_label`；
+   `test_p40` 新增 2 组测试（待释锁跑）。真实校准 2 篇：本地过稿 07d6d2 与本地驳稿 bd2bf4
+   都被判「修改后再评」→ 拦截（抽取输出干净，无解析错误）。结论：DeepSeek 比本地同源评审严；
+   「修改后再评」是拦截还是修订警告，要扩样本后再定。生产 config 仍未切。探针 20/40（12 过）。
 
 ## 已实测事实（2026-11-21 10:40）
 
@@ -49,6 +55,8 @@
   云端 DeepSeek key 已注销（`00_control/config.json` review.note），切回需新 key + 改配置。
 - DeepSeek 端点实测模型列表 = `deepseek-flash`,`deepseek-v4-pro`；reasoning_tokens 会占
   max_tokens，评审调用需 ≥8000；12 张第二来源 = 12/12 与本地一致。
+- verdict 契约实测：过稿 07d6d2、驳稿 bd2bf4 均抽取为「修改后再评」，无解析错误，按当前
+  映射均拦截；说明独立评审更严，映射需扩样本校准。
 - 进程：supervisor/schedule/worker/probe 各 1 个逻辑实例（venv 启动器+基解释器成对 = 一个进程，非重复）。
 - 工作区提交后应仅剩：scheduler_state.json（运行时状态，不入库）、08_wiki/session_checkpoint.md、
   未跟踪证据件（03_intelligence/account_metrics/、03_intelligence/pass_rate_probe-20261121-r61.json）。
@@ -74,10 +82,11 @@ G4 探针跑完前不杀不重启（PID 12548）；few-shot 样本只来自实�
    R61 报告 `08_wiki/reports/r61-writing-batch-fewshot-golden.md` + 提交推送 + V3.0 第十五部分 8 项报告。
    报告须如实写：DeepSeek 第二来源 §6 重判仍阻塞（密钥缺失），12 张重裁实际执行者是本地模型。
 
-5. R62 首项：DeepSeek verdict 契约（自由评审后做标签抽取：可以发布/修改后再评/不建议发布），
-   先在一批 passed/rejected 草稿上校准并测试，再切 config；不改 6 字 prompt、不猜语义、不伪造。
+5. R62 首项：DeepSeek verdict 契约 —— **labels_v1 已实现**（review.py + workflow 回执 + 2 组测试，
+   待释锁跑）；已在 2 篇真实草稿上校准（均「修改后再评」→ 拦截），需扩样本后决定「修改后再评」
+   是拦截还是修订警告，再切 config；不改 6 字 prompt、不猜语义、不伪造。
 
 旧账（本轮不做）：T-02 第二来源（DeepSeek 交叉验证已留证）、T-16 展现量/标签覆盖、
 T-17 管线增量化、health 标定（26<30）。
 
-NEXT: 探针（PID 12548）跑完 → 三组测试 → 建 few-shot 库 → snapshot 烟测 → 账本/报告收尾；生产评审切换留到 verdict 契约修复后。
+NEXT: 先 /compact（80% warn）；探针（20/40）结束 → 跑 p40 新增两组 + 批3/批4 + G5 测试 → 扩样本校准 verdict 契约、决定映射后再切评审 → 建库/烟测/账本/报告收尾。

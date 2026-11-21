@@ -232,6 +232,68 @@ def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch)
     assert captured["max_tokens"] >= 4000, "推理模型 max_tokens 含推理链,给小了正文会是空的"
 
 
+def _contract_section(**over):
+    sec = {
+        "base_url": "https://api.deepseek.com",
+        "model_id": REVIEW_MODEL,
+        "api_key_env": "STRATA_API_KEY",
+        "verdict_contract": "labels_v1",
+    }
+    sec.update(over)
+    return sec
+
+
+def test_verdict_contract_only_publishable_releases(monkeypatch):
+    """6 字盲评不变;第二次调用只抽标签;只有「可以发布」放行。"""
+    monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
+    calls: list[str] = []
+
+    def fake_chat(messages, **kwargs):
+        calls.append(messages[0]["content"])
+        if len(calls) == 1:
+            return {"model": REVIEW_MODEL, "text": "长审评:文章有硬伤,需要修。", "finish_reason": "stop",
+                    "usage": {"completion_tokens": 10}, "elapsed_s": 0.2}
+        return {"model": REVIEW_MODEL, "text": "结论:可以发布", "finish_reason": "stop",
+                "usage": {"completion_tokens": 3}, "elapsed_s": 0.1}
+
+    monkeypatch.setattr(model_client, "models", lambda **kw: [REVIEW_MODEL])
+    monkeypatch.setattr(model_client, "chat", fake_chat)
+
+    outcome = review_channel.review("正文", section=_contract_section())
+
+    assert outcome["verdict_label"] == "可以发布"
+    assert outcome["verdict"]["publishable"] is True and outcome["verdict"]["blocking"] is False
+    assert len(calls) == 2
+    assert calls[0] == review_channel.REVIEW_PROMPT + "\n\n正文"
+    assert calls[1].startswith(review_channel.VERDICT_CONTRACT_PROMPT)
+    assert SENTINEL not in json.dumps(outcome, ensure_ascii=False)
+
+
+@pytest.mark.parametrize("label", ["修改后再评", "不建议发布", "看不出来"])
+def test_verdict_contract_non_publishable_blocks(monkeypatch, label):
+    monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
+    calls: list[str] = []
+
+    def fake_chat(messages, **kwargs):
+        calls.append(messages[0]["content"])
+        if len(calls) == 1:
+            return {"model": REVIEW_MODEL, "text": "审评正文", "finish_reason": "stop",
+                    "usage": {}, "elapsed_s": 0.2}
+        return {"model": REVIEW_MODEL, "text": f"结论:{label}", "finish_reason": "stop",
+                "usage": {}, "elapsed_s": 0.1}
+
+    monkeypatch.setattr(model_client, "models", lambda **kw: [REVIEW_MODEL])
+    monkeypatch.setattr(model_client, "chat", fake_chat)
+
+    outcome = review_channel.review("正文", section=_contract_section())
+    assert outcome["verdict"]["blocking"] is True
+    assert outcome["verdict"]["publishable"] is False
+    if label in review_channel.VERDICT_CONTRACT_LABELS:
+        assert label in outcome["verdict"]["blocking_markers"]
+    else:
+        assert "无法解析" in outcome["verdict"]["blocking_markers"][0]
+
+
 def test_unlisted_model_and_dead_endpoint_both_mean_unavailable(monkeypatch):
     monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
     monkeypatch.setattr(model_client, "models", lambda **kw: ["some-other-model"])

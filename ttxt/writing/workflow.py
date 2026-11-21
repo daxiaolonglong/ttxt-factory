@@ -984,6 +984,8 @@ def write_article(
                 "criteria": "independent_review",
                 "prompt": review_outcome["prompt"],
                 "verdict": review_outcome["verdict_text"][:6000],
+                "verdict_contract": review_outcome.get("verdict_contract"),
+                "verdict_label": review_outcome.get("verdict_label"),
                 "usage": review_outcome.get("usage"),
             },
             evaluator=review_outcome["reviewer_model"],

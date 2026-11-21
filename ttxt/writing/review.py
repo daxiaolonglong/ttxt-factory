@@ -49,6 +49,48 @@ PUBLISHABLE_MARKERS = (
     "建议发表",
 )
 
+# R61:长文评审模型(DeepSeek 等)的结论契约 labels_v1。
+# 6 字盲评 prompt 一字不动;等模型写完审评后,再让它只从三个标签里选一个,
+# 不靠猜语义,也不把「修改后可发布」误当成「可以发布」。
+# 规则:可以发布=独立放行;修改后再评/不建议发布=拦截;解析失败=保守拦截。
+VERDICT_CONTRACT_LABELS = ("可以发布", "修改后再评", "不建议发布")
+VERDICT_CONTRACT_PROMPT = (
+    "下面是一篇审评意见。只根据这篇审评意见,在最后一行给出结论,"
+    "只能从以下三个标签里选一个:可以发布 / 修改后再评 / 不建议发布。不要写其他内容。"
+)
+
+
+def _contract_label(text: str) -> str | None:
+    """从抽取调用的最后几行里找唯一标签;多标签/无标签都返回 None(不猜)。"""
+    for raw in reversed((text or "").splitlines()):
+        line = re.sub(r"[`*#>\s:：]", "", raw)
+        hits = [label for label in VERDICT_CONTRACT_LABELS if label in line]
+        if len(hits) == 1:
+            return hits[0]
+        if len(hits) > 1:
+            return None
+    return None
+
+
+def _contract_verdict(label: str | None, error: str | None = None) -> dict:
+    """标签→门禁口径。只有「可以发布」放行;其余(含解析失败)一律拦截。"""
+    if label == "可以发布":
+        return {
+            "blocking": False,
+            "publishable": True,
+            "blocking_markers": [],
+            "publishable_markers": [label],
+        }
+    marker = label if label in ("修改后再评", "不建议发布") else "评审结论无法解析"
+    if error:
+        marker = f"{marker}({error[:120]})"
+    return {
+        "blocking": True,
+        "publishable": False,
+        "blocking_markers": [marker],
+        "publishable_markers": [],
+    }
+
 
 class ReviewUnavailable(RuntimeError):
     """通道缺密钥、缺配置或端点不通:独立评审不成立。"""
@@ -165,13 +207,37 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
     except model_client.ModelError as exc:
         raise ReviewUnavailable(f"独立评审调用失败:{exc}") from exc
     text = outcome.get("text") or ""
-    verdict = verdict_markers(text)
+    contract = str(section.get("verdict_contract") or "").strip()
+    verdict_label: str | None = None
+    extraction_text: str | None = None
+    extraction_error: str | None = None
+    if contract == "labels_v1":
+        try:
+            extracted = model_client.chat(
+                [{"role": "user", "content": VERDICT_CONTRACT_PROMPT + "\n\n" + text[:6000]}],
+                max_tokens=int(section.get("verdict_max_tokens", 4096)),
+                temperature=0.0,
+                base_url=base_url,
+                model_id=reviewer_id,
+                api_key=api_key(section, required=not is_local),
+                timeout_s=float(section.get("request_timeout_s", 300)),
+                enable_thinking=False,
+            )
+            extraction_text = extracted.get("text") or ""
+            verdict_label = _contract_label(extraction_text)
+        except model_client.ModelError as exc:
+            extraction_error = str(exc)[:200]
+        verdict = _contract_verdict(verdict_label, extraction_error)
+    else:
+        verdict = verdict_markers(text)
     LOG.info(
         "writing.review.done",
         reviewer_model=outcome.get("model") or reviewer_id,
         reviewer_endpoint=base_url,
         prompt_chars=len(prompt),
         verdict_chars=len(text),
+        verdict_contract=contract or None,
+        verdict_label=verdict_label,
         finish_reason=outcome.get("finish_reason"),
         blocking=verdict["blocking"],
         publishable=verdict["publishable"],
@@ -183,6 +249,10 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
         "reviewer_is_local": is_local,
         "verdict_text": text,
         "verdict": verdict,
+        "verdict_contract": contract or None,
+        "verdict_label": verdict_label,
+        "verdict_extraction": (extraction_text or "")[:1000],
+        "verdict_extraction_error": extraction_error,
         "prompt": REVIEW_PROMPT,
         "finish_reason": outcome.get("finish_reason"),
         "usage": outcome.get("usage"),
