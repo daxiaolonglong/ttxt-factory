@@ -15,6 +15,7 @@
     "enabled": true,
     "base_url": "https://api.deepseek.com",
     "model_id": "deepseek-v4-pro",
+    "round_models": ["deepseek-flash", "deepseek-v4-pro", "deepseek-flash"],
     "api_key_env": "DEEPSEEK_API_KEY",
     "api_key_file": ".secrets/deepseek_api_key",
     "max_tokens": 8000,
@@ -23,7 +24,7 @@
     "enable_thinking": false,
     "verdict_contract": "labels_v1",
     "verdict_max_tokens": 4096,
-    "note": "R61 用户令(2026-11-21):生产评审必须是 DeepSeek。端点 https://api.deepseek.com、模型 deepseek-v4-pro(reasoning 模型,max_tokens 需 ≥8000,2000 会被 reasoning 吃光);密钥只放 .secrets/deepseek_api_key(gitignore)。评审 prompt 仍固定 6 字「审评这篇文章」+ 正文,不看写作侧任何口径;verdict_contract=labels_v1 二次抽取「可以发布/修改后再评/不建议发布」,只有「可以发布」放行。写作侧仍强制本地回环(ttxt/model_gate/client.py::require_loopback),评审侧云端为 R51 允许的配置。同一篇稿独立评审总次数 ≤3(workflow.writing.independent_review_max),「修改后再评」把评审原文回流给修订后复审,超限或不建议发布即拒。"
+    "note": "R61 用户令(2026-11-21):生产评审必须是 DeepSeek。端点 https://api.deepseek.com;密钥只放 .secrets/deepseek_api_key(gitignore)。评审 prompt 仍固定 6 字「审评这篇文章」+ 正文,不看写作侧任何口径;verdict_contract=labels_v1 二次抽取「可以发布/修改后再评/不建议发布」,只有「可以发布」放行。R62 用户令:按轮次选模型 round_models=[第1次 deepseek-flash, 第2次 deepseek-v4-pro, 第3次 deepseek-flash](model_id 作为未配置轮次表时的默认);reasoning 模型 max_tokens 需 ≥8000,2000 会被 reasoning 吃光。写作侧仍强制本地回环(ttxt/model_gate/client.py::require_loopback),评审侧云端为 R51 允许的配置。同一篇稿独立评审总次数 ≤3(workflow.writing.independent_review_max),「修改后再评」把评审原文回流给修订后复审,超限或不建议发布即拒。"
   },
   "dashboard": {
     "host": "127.0.0.1",

@@ -146,11 +146,31 @@ def api_key(section: dict | None = None, *, required: bool = True) -> str:
     raise ReviewUnavailable(f"缺独立评审密钥:环境变量 {env_name} 未设,文件 {file_name or '(未配置)'} 不存在或为空")
 
 
-def served_model(section: dict | None = None) -> str:
+def model_for_round(round_no: int, section: dict | None = None) -> str:
+    """R62 用户新规:按评审轮次选模型——第 1/3 次用 deepseek-flash,第 2 次用 deepseek-v4-pro。
+
+    轮次模型表由 ``review.round_models`` 配置(顺序即轮次);未配置时退回 ``model_id``。
+    评审总次数上限由上层 ≤3 控制,这里超长轮次取表尾,绝不静默换到未列出的模型。
+    """
+    section = review_config() if section is None else section
+    configured = section.get("round_models")
+    models = (
+        [str(m).strip() for m in configured if str(m).strip()]
+        if isinstance(configured, list)
+        else []
+    )
+    if models:
+        index = max(1, int(round_no)) - 1
+        return models[min(index, len(models) - 1)]
+    return str(section.get("model_id") or "")
+
+
+def served_model(section: dict | None = None, model_id: str | None = None) -> str:
     """评审侧真实提供的模型 id。
 
     探测 ``/v1/models`` 只为**验证配置模型确实在端点可用列表里**;通过后按配置值返回,
     绝不拿列表里"别的那个模型"顶上(云端端点往往一次报好几个 id)。探测不通即抛错。
+    ``model_id`` 用于按轮次指定模型(见 ``model_for_round``),未传时读 ``model_id`` 配置。
     """
     section = review_config() if section is None else section
     base_url, is_local = _review_endpoint(section)
@@ -160,7 +180,7 @@ def served_model(section: dict | None = None) -> str:
         raise
     except Exception as exc:  # noqa: BLE001 - 端点不通要如实上报,不猜模型名
         raise ReviewUnavailable(f"独立评审端点探测失败:{type(exc).__name__}") from exc
-    configured = str(section.get("model_id") or "")
+    configured = str(model_id or section.get("model_id") or "")
     if configured:
         if ids and configured not in ids:
             raise ReviewUnavailable(f"独立评审模型不在端点可用列表里:{configured} ∉ {','.join(ids)}")
@@ -184,14 +204,15 @@ def verdict_markers(text: str) -> dict[str, bool]:
     }
 
 
-def review(draft: str, section: dict | None = None) -> dict[str, Any]:
+def review(draft: str, section: dict | None = None, *, round_no: int = 1) -> dict[str, Any]:
     """让评审模型只看「审评这篇文章 + 正文」;返回判定、模型 id、端点与原文,不含密钥。
 
     走云端时 ``reviewer_endpoint`` 如实记云端地址(绝不写成本地),密钥缺失直接抛错。
+    ``round_no`` 按轮次选模型(R62:第 1/3 次 flash、第 2 次 v4-pro),标签抽取与正文评审同模型。
     """
     section = review_config() if section is None else section
     base_url, is_local = _review_endpoint(section)
-    reviewer_id = served_model(section)
+    reviewer_id = served_model(section, model_for_round(round_no, section))
     prompt = f"{REVIEW_PROMPT}\n\n{(draft or '').strip()}"
     try:
         outcome = model_client.chat(
@@ -234,6 +255,7 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
         "writing.review.done",
         reviewer_model=outcome.get("model") or reviewer_id,
         reviewer_endpoint=base_url,
+        review_round=round_no,
         prompt_chars=len(prompt),
         verdict_chars=len(text),
         verdict_contract=contract or None,
@@ -247,6 +269,7 @@ def review(draft: str, section: dict | None = None) -> dict[str, Any]:
         "reviewer_model": outcome.get("model") or reviewer_id,
         "reviewer_endpoint": base_url,
         "reviewer_is_local": is_local,
+        "review_round": round_no,
         "verdict_text": text,
         "verdict": verdict,
         "verdict_contract": contract or None,

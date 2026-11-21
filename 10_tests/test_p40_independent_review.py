@@ -644,3 +644,68 @@ def test_production_review_endpoint_is_policy_compliant():
     assert section.get("enabled") is True
     review_channel._review_endpoint(section)  # 不合规直接抛
     assert "prompt" not in section
+
+
+# --------------------------------------------------------------------------- R62 按轮次选模型
+
+
+def test_round_models_are_flash_pro_flash(monkeypatch):
+    """用户令(2026-11-21):第 1/3 次评审用 deepseek-flash,第 2 次用 deepseek-v4-pro。"""
+    monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
+    section = _contract_section(
+        round_models=["deepseek-flash", "deepseek-v4-pro", "deepseek-flash"]
+    )
+    used: list[str] = []
+
+    def fake_chat(messages, **kwargs):
+        used.append(kwargs["model_id"])
+        if len(used) % 2 == 1:  # 每轮第一次调用 = 正文盲评
+            return {"model": kwargs["model_id"], "text": "审评正文", "finish_reason": "stop",
+                    "usage": {}, "elapsed_s": 0.1}
+        return {"model": kwargs["model_id"], "text": "结论:修改后再评", "finish_reason": "stop",
+                "usage": {}, "elapsed_s": 0.1}
+
+    monkeypatch.setattr(model_client, "models", lambda **kw: ["deepseek-flash", "deepseek-v4-pro"])
+    monkeypatch.setattr(model_client, "chat", fake_chat)
+
+    outcomes = [review_channel.review("正文", section=section, round_no=n) for n in (1, 2, 3)]
+
+    assert [o["reviewer_model"] for o in outcomes] == [
+        "deepseek-flash", "deepseek-v4-pro", "deepseek-flash"
+    ]
+    assert [o["review_round"] for o in outcomes] == [1, 2, 3]
+    assert used == [
+        "deepseek-flash", "deepseek-flash",
+        "deepseek-v4-pro", "deepseek-v4-pro",
+        "deepseek-flash", "deepseek-flash",
+    ], "标签抽取必须与被评正文使用同一轮次模型"
+
+
+def test_round_models_absent_falls_back_to_model_id():
+    section = {"model_id": "deepseek-v4-pro"}
+    assert review_channel.model_for_round(1, section) == "deepseek-v4-pro"
+    assert review_channel.model_for_round(2, section) == "deepseek-v4-pro"
+
+
+def test_production_review_config_pins_flash_pro_flash():
+    section = review_channel.review_config()
+    assert section.get("round_models") == [
+        "deepseek-flash", "deepseek-v4-pro", "deepseek-flash"
+    ]
+
+
+def test_workflow_passes_review_round_numbers(tmp_path, monkeypatch):
+    """写作回路必须把第 1/2/3 次评审的轮次传进通道,回执记每轮真实模型。"""
+    rounds: list[int] = []
+    models = ["deepseek-flash", "deepseek-v4-pro", "deepseek-flash"]
+
+    def fake_review(draft, round_no=1, **kwargs):
+        rounds.append(round_no)
+        return _contract_outcome(models[round_no - 1], "修改后再评", "按意见修订。")
+
+    monkeypatch.setattr(review_channel, "review", fake_review)
+    _, result = _run(tmp_path, monkeypatch, independent_review=True)
+
+    assert rounds == [1, 2, 3], "每轮评审必须带轮次,不许三轮都用同一模型"
+    assert [r["reviewer_model"] for r in result["independent_review_rounds"]] == models
+    assert result["independent_reviews_used"] == 3

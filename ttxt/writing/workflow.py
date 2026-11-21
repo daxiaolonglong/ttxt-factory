@@ -1027,7 +1027,11 @@ def write_article(
         if len(independent_rounds) >= max_independent_reviews:
             break
         try:
-            review_outcome = review_call(draft) if review_call is not None else review_channel.review(draft)
+            review_outcome = (
+                review_call(draft)
+                if review_call is not None
+                else review_channel.review(draft, round_no=len(independent_rounds) + 1)
+            )
         except review_channel.ReviewUnavailable as exc:
             review_error = str(exc)
             # 通道不可用必须如实写进回执(独立性按不成立处理);若前一轮已评过,保留其评审者身份。

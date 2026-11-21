@@ -408,6 +408,23 @@ G1 自有账号后台读数回流——收藏实测只存在于管理页逐行"�
 few-shot 正例仅本地门禁通过、未获 DeepSeek 认证；DeepSeek 单轮 35–58s，3 轮上限下评审侧 2–3 分钟/篇，
 批次化需评估预算；finance 事实绑定若长期为主拦截项，R62 专项优化「一句一锚点 + 整句引用」，不放宽门禁。
 
+## R62：评审按轮次选模型（2026-11-21，用户新规）
+
+**用户令**：第 1 次评审用 `deepseek-flash`，第 2 次用 `deepseek-v4-pro`，第 3 次用 `deepseek-flash`。
+
+**已落地**：
+- `review.round_models = ["deepseek-flash","deepseek-v4-pro","deepseek-flash"]`（顺序即轮次；
+  未配置时退回 `model_id`）；`review.model_for_round(round_no)` 选模型，
+  `review(draft, round_no=N)` 正文评审与标签抽取同用该轮模型，回执/日志记 `review_round`。
+- 写作回路把第 1/2/3 次评审轮次真实传入通道；回执 `independent_review_rounds[].reviewer_model`
+  即每轮实际模型。
+- 运行时核验：round1/3 = `deepseek-flash`、round2 = `deepseek-v4-pro`，两模型均在端点可用列表。
+- 回归：`test_p40_independent_review.py` 新增 4 项（轮次模型序列、缺省回退、生产配置钉、
+  回路传轮次），连同 few-shot/copyedit **54 passed / 0 error**。
+
+**下一步（R62）**：按新轮次模型跑真实烟测与批次复验，继续攻「可发布产出 0」的论证/概念质量与
+素材组织问题；门禁阈值不动。
+
 ## 三、工作顺序(2026-11-17 由项目负责人定,后续轮次照此执行)
 
 1. **项目真实状态对账** —— 本轮已完成,产物就是本文件。
