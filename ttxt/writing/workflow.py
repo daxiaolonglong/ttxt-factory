@@ -26,7 +26,7 @@ from ttxt.logging import get_logger
 from ttxt.model_gate import client as model_client
 from ttxt.model_gate import gate
 
-from . import export, prompts, repair, review as review_channel, style, verifier
+from . import export, fewshot, prompts, repair, review as review_channel, style, verifier
 
 LOG = get_logger("writing")
 MAX_CLAIMS = 12
@@ -825,11 +825,16 @@ def write_article(
             "issues": gate_critical,
             "materials": len(materials),
             "material_stats": material_stats,
+            "fewshot_status": "not_applied_material_gate",
+            "fewshot_count": 0,
             "notes": "取材前置门禁拦下,未调用模型:" + ";".join(gate_critical),
             "published": False,
         }
 
     materials_text = build_materials(materials)
+    # G5:few-shot 样本(只用实测;库空/缺失自动降级为无示例,回执如实记状态)
+    fewshot_samples, fewshot_status = fewshot.load_samples(category)
+    fewshot_text = fewshot.format_samples(fewshot_samples) if fewshot_samples else ""
     outline = model_call(
         prompts.outline_prompt(topic, materials_text),
         # 400 每次都被截断(生产日志 2026-11-18 三个版本各触发一次 400→600 重试),
@@ -839,7 +844,7 @@ def write_article(
         enable_thinking=enable_thinking,
     )
     draft = model_call(
-        prompts.draft_prompt(topic, outline, materials_text),
+        prompts.draft_prompt(topic, outline, materials_text, fewshot_text),
         max_tokens=max_tokens,
         temperature=0.4,
         enable_thinking=enable_thinking,
@@ -849,7 +854,7 @@ def write_article(
     if not complete and retry_cap > max_tokens:
         LOG.warn("writing.incomplete_retry", topic=topic, max_tokens=max_tokens)
         draft = model_call(
-            prompts.draft_prompt(topic, outline, materials_text),
+            prompts.draft_prompt(topic, outline, materials_text, fewshot_text),
             max_tokens=min(max_tokens * 2, retry_cap),
             temperature=0.4,
             enable_thinking=enable_thinking,
@@ -1051,6 +1056,8 @@ def write_article(
         "path": str(path),
         "materials": len(materials),
         "material_stats": material_stats,
+        "fewshot_status": fewshot_status,
+        "fewshot_count": len(fewshot_samples),
         "notes": notes,
         "model_meta": model_meta,
         "review_account": account,

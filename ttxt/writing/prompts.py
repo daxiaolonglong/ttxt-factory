@@ -11,13 +11,14 @@ def outline_prompt(topic: str, materials: str) -> str:
 要求:输出 4-6 条中文大纲,每行一条,以 - 开头;不要输出解释。"""
 
 
-def draft_prompt(topic: str, outline: str, materials: str) -> str:
+def draft_prompt(topic: str, outline: str, materials: str, fewshot_text: str = "") -> str:
+    fewshot_block = f"\n{fewshot_text}" if fewshot_text else ""
     return f"""你是中文头条图文作者。请根据主题与大纲写一篇 500-800 字的中文文章。
 主题:{topic}
 大纲:
 {outline}
 参考材料:
-{materials}
+{materials}{fewshot_block}
 要求:
 1. 第一行是文章标题(不要加 # 号);
 2. 正文分 3-5 段;

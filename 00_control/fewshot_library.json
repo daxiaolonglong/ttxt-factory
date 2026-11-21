@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "note": "G5 写作 few-shot 样本库。只放实测通过的样本(verified=true,kind=verified_viral/verified_junk);库为空或缺失时写作链路自动降级为无示例(与 R59 viral 先验同一降级纪律)。样本只由 scripts 从探针/烟测回执生成,手工不填。",
+  "updated_at": null,
+  "samples": []
+}
