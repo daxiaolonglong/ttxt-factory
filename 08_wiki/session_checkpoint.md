@@ -142,5 +142,32 @@ AI 裁定≠人工裁定；生产类目库零写入（探针/烟测走 snapshot�
 - 下一个缺口（候选广度）：active keyword 每类目仅 5–14，`mined` 稳定卡 10（=`MINE_TOP_N`，
   每轮只出 10 个且不跨轮累积）⇒ 主题池上不去。
 
-NEXT: 挖词候选广度（`MINE_TOP_N`/跨轮去重累积与 `analyze` 频率）→ 让 9 个被拦主题走 crawl-plan 干跑补采集后复检；
-"可写主题→写作"的一键衔接需用户拍板（红线：调度器绝不触发写作）。
+## R65 关键词 harvested 闭环 + 采不动的词认账退场（2026-11-21 21:13，全程零模型调用）
+
+- **断点（只读生产实测，`D:/ttxt/07_tmp/r65_harvest/harvest.json`）**：5 类目 56,685 篇、38 个
+  `origin='mined'` 挖词里 **29 个自被提出起一篇新文章都没采回**（social 10/10 零带回，`闷声发财`
+  标题命中 399 却 0 带回；finance 9/10、history 5/7、health 1/1；对照组 technology `中国` 107→45、
+  history `毛主席` 32→16 说明"带回"真会发生）。根因：挖词天生有覆盖 ⇒ 永远进不了零覆盖 `gap`
+  ⇒ `auto_feedback` 从未为它入过定向任务；`collected` 是全库覆盖，证明不了词表扩张。
+- **新口径**：`keyword_performance.harvested` = 标题命中（别名归一）且 `articles.fetched_at >
+  keywords.created_at` 的篇数；时间读不动 ⇒ `NULL`（unknown，不进退场判定）。只加列加指标，
+  `collected/score/权重/阈值/冷却` 一律未改；迁移幂等只加列、不动既有评分行。
+- **闭环**：`auto_feedback` 的 `keyword_filter` = gap 词 ∪ `harvested=0` 的挖词；逐词台账
+  `dispatch_state.keyword_feedback.per_keyword.directed_attempts`（只有真实入队才 +1）；
+  复审轮仍 0 且满 `MINE_FEEDBACK_MAX_ATTEMPTS=3` ⇒ `status='exhausted'`（留关键词行留评分行）；
+  复活凭证只有 `harvested>0`。退场只关采集侧：`keyword_crawl` 选词排除，`topics.keyword_candidates`
+  仍收它（采不到新文章 ≠ 写不出来）；`mine_keywords` 的 prune 保护 `harvested>0` 的旧挖词。
+- **真实库验证（生产零写入）**：`07_tmp/_r65_prod_verify.py` 把 5 个类目库 `mode=ro`+`backup()`
+  到副本跑 `migrate→score_keywords→auto_feedback`（`D:/ttxt/07_tmp/r65_verify/verify.json`）：
+  实现代码读数与探针**完全一致**（38 挖词 / 29 零带回 / 9 有带回），且 social `gap=0`
+  也能定向 10 个词（旧逻辑这里一条任务都不入）、finance 9、history 5、health 1、
+  technology gap 1 + 定向 4。生产 5 库当前仍无 `harvested` 列（实测 PRAGMA 7 列）
+  ⇒ `run_analysis` 首步 `migrate_articles_db`（`analyze.py:32`）会在下一次调度自动加列回填，无需人工改库。
+- 报告：`08_wiki/reports/r65-keyword-harvest-loop.md`（含 §7 未覆盖项）。
+- 测试基线：全量 `10_tests` **1101 passed（291.63s，exit 0）** = R64 基线 1092 + R65 新增 9，零回归。
+- 已钉死的新事实：`harvested` 是"词表有没有真的把语料撑大"的唯一凭证；`collected` 不是。
+  判定发生在能看到上一次补采回执之后的复审轮，不在入队当轮判死。
+
+NEXT: ①生产拉代码重启 supervisor，等一次 analyze 回填 `harvested`，读回执确认 `filter_keywords`
+出现挖词与逐词 `directed_attempts`；②挖词闸门补"边界证据"（量词/姓氏邻字），把 `位女/钱小/女款/神器`
+在入表前拒掉（现在它们要先烧 3 轮定向预算才退场）；③候选广度 `MINE_TOP_N=10` 跨轮累积。
