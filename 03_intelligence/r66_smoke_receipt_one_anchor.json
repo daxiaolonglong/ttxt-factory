@@ -1,0 +1,1353 @@
+{
+  "receipt": {
+    "generated_at": "2026-11-21T22:42:40",
+    "topic": "延迟退休 养老金",
+    "category": "social",
+    "elapsed_s": 712.4,
+    "draft_id": "social-20261121223312-735dbf",
+    "status": "rejected",
+    "passed": false,
+    "versions": 8,
+    "revisions": 4,
+    "score": 0.95,
+    "fact_checkability": 1.0,
+    "fact_checkable_over_total": "9/9",
+    "fewshot_status": "ok:5",
+    "fewshot_count": 5,
+    "copyedit_count": 1,
+    "copyedit_kinds": {
+      "multi_anchor_split": 1
+    },
+    "multi_anchor_splits": [
+      {
+        "kind": "multi_anchor_split",
+        "before": "同样是灵活就业身份，有人50岁顺利办退休领养老金，有人却被告知要等到55岁才能办[3]。",
+        "after": "同样是灵活就业身份，有人50岁顺利办退休领养老金[3]。有人却被告知要等到55岁才能办[3]。"
+      }
+    ],
+    "promise_issues": [],
+    "targeted_repair": {
+      "claims": 43,
+      "facts_failed": 12,
+      "located": 12,
+      "not_located": 0,
+      "attempts": 14,
+      "model_calls": 14,
+      "invalid_outputs": 0,
+      "anchor_erased": 4,
+      "fixed_first": 10,
+      "fixed_second": 0,
+      "unfixed": 2,
+      "rebound": 2,
+      "changed_sentences": 10,
+      "errors": 0,
+      "unfixed_shapes": {
+        "grafted(锚点在引句窗口外·移花接木)": 2
+      },
+      "details": [
+        {
+          "claim": "进入2026年，这一政策将持续平稳落地",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性按55岁办理退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "早年如果在企业上过班、离开时不是管理岗，也可以争取50岁退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "2025年1月1日，《全国人民代表大会常务委员会关于实施渐进式延迟法定退休年龄的决定》及《国务院关于渐进式延迟法定退休年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "男职工和原法定退休年龄为五十五周岁的女职工，每四个月延迟一个月",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "原法定退休年龄为五十周岁的女职工，每二个月延迟一个月",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "自2030年1月1日起，最低缴费年限由十五年逐步提高至二十年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "职工达到最低缴费年限，可以自愿选择弹性提前退休，提前时间最长不超过三年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "职工达到法定退休年龄，所在单位与职工协商一致的，可以弹性延迟退休，延迟时间最长不超过三年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "男职工逐步延迟至63周岁",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        }
+      ]
+    },
+    "independent_reviews_used": 3,
+    "independent_review_max": 3,
+    "independent_review_rounds": [
+      {
+        "round": 1,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-flash",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "## 审评结论\n\n这是一篇面向普通劳动者的政策科普/养老规划类稿件，选题有现实价值，结构也比较清晰：从延迟退休政策背景，到认知误区，再到灵活就业女性难点，最后落到行动建议。语言通俗，适合新媒体传播。\n\n但若按正式媒体或政务科普标准，稿件目前**不宜直接发布**。主要问题不在文字可读性，而在**政策表述不够准确、引用不规范、部分结论以偏概全、关键政策信息缺失**。建议定位为“初稿/待核稿”，进行事实核查和结构补强后再发布。\n\n---\n\n## 一、主要优点\n\n1. **选题贴近读者**：延迟退休与普通打工人、灵活就业者关系密切，实用性强。\n2. **结构有递进**：政策背景—认知误区—特殊群体—行动建议，逻辑基本完整。\n3. **有服务意识**：最后落到社保缴费年限、个人养老储备、档案和异地参保等事项，能提供行动方向。\n4. **表达通俗**：使用“打工人”“收入断档”等表达，利于传播，但需注意正式场合的语体分寸。\n\n---\n\n## 二、主要问题\n\n### 1. 引用不规范，影响可信度\n\n文中多处出现[1]—[5]，但没有参考文献或来源说明。读者无法判断依据是官方文件、新闻报道还是自媒体文章。尤其[1]被反复用于支撑“政策启动时间”“核心原则”“弹性选择”“政策目的”等不同事实，显得机械。\n\n**建议**：\n- 统一改为规范注释：文件名称、发布机关、发布日期、条款或链接。\n- 优先引用",
+        "elapsed_s": 25.406
+      },
+      {
+        "round": 2,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-v4-pro",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "本文选题紧扣2025年延迟退休政策落地，目标读者明确，有一定实用性，但作为一篇面向“打工人”的解释性文章，整体严谨性不足，关键政策表述存在明显重复和不够准确的地方，实际指导性也偏弱，建议修改后再发布。\n\n### 一、主要问题\n\n1. **弹性退休表述有明显硬伤**  \n原文写道：\n> “符合条件可最多提前3年，且退休年龄不得低于原法定退休年龄；符合条件可最多提前3年，和单位协商一致也可最多延后3年退休。”\n\n后半句明显重复、错位。规范表达应为：\n> 达到最低缴费年限且自愿的，可最多提前3年退休，但退休年龄不得低于原法定退休年龄；达到法定退休年龄后，经与单位协商一致，可最多延后3年退休。\n\n这种关键政策信息一旦出错，容易误导读者。\n\n2. **部分术语不够严谨**  \n如“原55岁女干部”的表述容易被理解为身份、干部身份，政策上更准确的表述应是“原法定退休年龄为55周岁的女职工”。  \n另外，“男、原55岁女干部每4个月延1个月；原50岁女职工每2个月延1个月，逐步延迟至六十三周岁和五十八周岁、五十五周岁”对应关系不够清晰，可改为：\n> 男职工逐步延迟至63周岁；原55周岁退休的女职工逐步延迟至58周岁；原50周岁退休的女职工逐步延迟至55周岁。\n\n3. **标题与内容不匹配**  \n标题强调“准确理解弹性退休并提前规划养老”，但正文对弹性退休的条件、年龄下限、办理程序、不同群体差异",
+        "elapsed_s": 70.828
+      },
+      {
+        "round": 3,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-flash",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "## 总体评价\n\n这是一篇面向普通劳动者的延迟退休政策科普初稿，政策主干基本准确，结构上从“政策要点—观念转变—灵活就业女性认定—养老规划建议”展开，实用性较强。但文章仍存在**引用不规范、弹性退休操作细节不足、部分表述笼统或绝对化、灵活就业女性部分需谨慎处理**等问题。总体判断：**可作为科普初稿或修改后发布，不宜直接作为权威政策解读发布**。\n\n---\n\n## 一、主要优点\n\n1. **政策核心事实基本准确**  \n   延迟退休自2025年1月1日起实施，男职工逐步延至63岁，原55岁女职工延至58岁，原50岁女职工延至55岁；最低缴费年限自2030年起逐步提高至20年，每年提高6个月；弹性提前最长3年且不低于原法定退休年龄；弹性延迟经协商最长3年。这些与现行政策方向一致。\n\n2. **提醒了个案差异，避免“一刀切”**  \n   文章指出灵活就业女性退休年龄认定与工作经历、岗位性质、参保身份和地方口径有关，并强调以当地社保部门认定为准，这一提醒是必要的，能降低误导风险。\n\n3. **有现实规划意识**  \n   文章没有停留在政策复述，而是提出查清退休年龄、关注缴费年限、测算养老金替代率、配置个人养老金/商业养老保险/储蓄等建议，具有实操导向。\n\n---\n\n## 二、主要问题与不足\n\n### 1. 引用不规范，来源缺失\n文中出现[1]—[5]的编号，但没有文末参考文献或链接",
+        "elapsed_s": 28.64
+      }
+    ],
+    "review_account": "rejected",
+    "review_account_basis": "independent_review_blocked",
+    "model_meta": {
+      "same_model_review": false,
+      "review_independence": "independent",
+      "independent_review": true,
+      "reviewer_model": "deepseek-flash",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "reviewer_limitation": "评审由独立服务模型 deepseek-flash 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+      "served_model": "qwen3.8-flash-next-iq3_s"
+    },
+    "template_check_status": "not_available",
+    "template_flags": [
+      "类目预算不可用,去模板化检查未执行:预算文件不存在:00_control\\template_budgets.json"
+    ],
+    "critical": [
+      "独立评审判定不通过:修改后再评"
+    ],
+    "issues": [
+      "标题-正文一致性(标题兑现):标题词面正文覆盖 44%",
+      "标题中‘打工人’一词略显口语化，虽贴合受众但稍欠专业感",
+      "部分段落（如第二段）对旧预期的描述略显冗长，可进一步精简以突出核心观点"
+    ],
+    "materials": 5,
+    "material_gate": {
+      "full": "15/15",
+      "sources": 15,
+      "calibration": "calibrated"
+    },
+    "path": "D:\\ttxt\\07_tmp\\r66_smoke\\04_writing\\social\\rejected\\social-20261121223312-735dbf.md",
+    "notes": "门禁致命问题: 独立评审判定不通过:修改后再评",
+    "draft_fragment_checks": {
+      "has_raw_repeat": false,
+      "has_split_50": false,
+      "has_split_55": false
+    },
+    "critical_has_r63_fragment": false,
+    "production_guard": {
+      "before": {
+        "system_db": {
+          "exists": true,
+          "size": 18649088,
+          "mtime_ns": 1795270731689770000
+        },
+        "social_db": {
+          "exists": true,
+          "size": 1818845184,
+          "mtime_ns": 1795270704119500600
+        },
+        "logs": {
+          "dashboard-8765.err.log": {
+            "exists": true,
+            "size": 0,
+            "mtime_ns": 1794616857556826200
+          },
+          "dashboard-8765.out.log": {
+            "exists": true,
+            "size": 0,
+            "mtime_ns": 1794616857555826700
+          },
+          "p13-weekly-dbprobe-20261116.log": {
+            "exists": true,
+            "size": 29382,
+            "mtime_ns": 1794792729158712500
+          },
+          "p13-weekly-dbprobe2-20261116.log": {
+            "exists": true,
+            "size": 39730,
+            "mtime_ns": 1794792753918036000
+          },
+          "p13-weekly-golden-harness-20261116.log": {
+            "exists": true,
+            "size": 3002,
+            "mtime_ns": 1794792656365552400
+          },
+          "p13-weekly-pytest-20261116.log": {
+            "exists": true,
+            "size": 10502,
+            "mtime_ns": 1794792751538300400
+          },
+          "supervisor.err.log": {
+            "exists": true,
+            "size": 248205,
+            "mtime_ns": 1795270753783382000
+          },
+          "supervisor.out.log": {
+            "exists": true,
+            "size": 246871,
+            "mtime_ns": 1795270831026398100
+          },
+          "ttxt-20261112.jsonl": {
+            "exists": true,
+            "size": 171555,
+            "mtime_ns": 1794499149573747600
+          },
+          "ttxt-20261113.jsonl": {
+            "exists": true,
+            "size": 169026,
+            "mtime_ns": 1794570327265338700
+          },
+          "ttxt-20261114.jsonl": {
+            "exists": true,
+            "size": 53706,
+            "mtime_ns": 1794649862031409500
+          },
+          "ttxt-20261115.jsonl": {
+            "exists": true,
+            "size": 31415,
+            "mtime_ns": 1794736598667932300
+          },
+          "ttxt-20261116.jsonl": {
+            "exists": true,
+            "size": 115118,
+            "mtime_ns": 1794841411291866400
+          },
+          "ttxt-20261117.jsonl": {
+            "exists": true,
+            "size": 273395,
+            "mtime_ns": 1794930269401546600
+          },
+          "ttxt-20261118.jsonl": {
+            "exists": true,
+            "size": 371488,
+            "mtime_ns": 1795016131858608200
+          },
+          "ttxt-20261119.jsonl": {
+            "exists": true,
+            "size": 1196931,
+            "mtime_ns": 1795103885281461000
+          },
+          "ttxt-20261120.jsonl": {
+            "exists": true,
+            "size": 1787307,
+            "mtime_ns": 1795188104092184000
+          },
+          "ttxt-20261121.jsonl": {
+            "exists": true,
+            "size": 1633862,
+            "mtime_ns": 1795270758805799900
+          }
+        }
+      },
+      "after": {
+        "system_db": {
+          "exists": true,
+          "size": 18649088,
+          "mtime_ns": 1795270731689770000
+        },
+        "social_db": {
+          "exists": true,
+          "size": 1818845184,
+          "mtime_ns": 1795270704119500600
+        },
+        "logs": {
+          "dashboard-8765.err.log": {
+            "exists": true,
+            "size": 0,
+            "mtime_ns": 1794616857556826200
+          },
+          "dashboard-8765.out.log": {
+            "exists": true,
+            "size": 0,
+            "mtime_ns": 1794616857555826700
+          },
+          "p13-weekly-dbprobe-20261116.log": {
+            "exists": true,
+            "size": 29382,
+            "mtime_ns": 1794792729158712500
+          },
+          "p13-weekly-dbprobe2-20261116.log": {
+            "exists": true,
+            "size": 39730,
+            "mtime_ns": 1794792753918036000
+          },
+          "p13-weekly-golden-harness-20261116.log": {
+            "exists": true,
+            "size": 3002,
+            "mtime_ns": 1794792656365552400
+          },
+          "p13-weekly-pytest-20261116.log": {
+            "exists": true,
+            "size": 10502,
+            "mtime_ns": 1794792751538300400
+          },
+          "supervisor.err.log": {
+            "exists": true,
+            "size": 248205,
+            "mtime_ns": 1795270753783382000
+          },
+          "supervisor.out.log": {
+            "exists": true,
+            "size": 246871,
+            "mtime_ns": 1795270831026398100
+          },
+          "ttxt-20261112.jsonl": {
+            "exists": true,
+            "size": 171555,
+            "mtime_ns": 1794499149573747600
+          },
+          "ttxt-20261113.jsonl": {
+            "exists": true,
+            "size": 169026,
+            "mtime_ns": 1794570327265338700
+          },
+          "ttxt-20261114.jsonl": {
+            "exists": true,
+            "size": 53706,
+            "mtime_ns": 1794649862031409500
+          },
+          "ttxt-20261115.jsonl": {
+            "exists": true,
+            "size": 31415,
+            "mtime_ns": 1794736598667932300
+          },
+          "ttxt-20261116.jsonl": {
+            "exists": true,
+            "size": 115118,
+            "mtime_ns": 1794841411291866400
+          },
+          "ttxt-20261117.jsonl": {
+            "exists": true,
+            "size": 273395,
+            "mtime_ns": 1794930269401546600
+          },
+          "ttxt-20261118.jsonl": {
+            "exists": true,
+            "size": 371488,
+            "mtime_ns": 1795016131858608200
+          },
+          "ttxt-20261119.jsonl": {
+            "exists": true,
+            "size": 1196931,
+            "mtime_ns": 1795103885281461000
+          },
+          "ttxt-20261120.jsonl": {
+            "exists": true,
+            "size": 1787307,
+            "mtime_ns": 1795188104092184000
+          },
+          "ttxt-20261121.jsonl": {
+            "exists": true,
+            "size": 1633862,
+            "mtime_ns": 1795270758805799900
+          }
+        }
+      },
+      "unchanged": true
+    }
+  },
+  "raw": {
+    "draft_id": "social-20261121223312-735dbf",
+    "title": "延迟退休渐进实施：打工人如何准确理解弹性退休并提前规划养老",
+    "versions": 8,
+    "revisions": 4,
+    "status": "rejected",
+    "passed": false,
+    "truncated": false,
+    "score": 0.95,
+    "issues": [
+      "标题-正文一致性(标题兑现):标题词面正文覆盖 44%",
+      "标题中‘打工人’一词略显口语化，虽贴合受众但稍欠专业感",
+      "部分段落（如第二段）对旧预期的描述略显冗长，可进一步精简以突出核心观点"
+    ],
+    "critical": [
+      "独立评审判定不通过:修改后再评"
+    ],
+    "evidence": [
+      {
+        "claim": "延迟退休政策2025年1月1日正式启动",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "延迟退休政策2025年1月1日正式启动",
+        "quote_offset": 161,
+        "overlap": 1.0,
+        "anchors": {
+          "numbers": [
+            "2025",
+            "1"
+          ],
+          "dates": [
+            "2025年1月1日"
+          ],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "model_supplied",
+          "numbers": {
+            "found": [
+              "2025",
+              "1"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [
+              "2025年1月1日"
+            ],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 136,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "男职工逐步延迟至63岁",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "原50岁女职工每2个月延1个月，逐步过渡到男63岁、女工人55岁、女干部58岁。",
+        "quote_offset": 286,
+        "overlap": 0.444,
+        "anchors": {
+          "numbers": [
+            "63岁"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "63岁"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 263,
+            "chars": 91
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "原55周岁退休的女职工逐步延迟至58周岁",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "原50岁女职工每2个月延1个月，逐步过渡到男63岁、女工人55岁、女干部58岁。",
+        "quote_offset": 286,
+        "overlap": 0.4,
+        "anchors": {
+          "numbers": [
+            "55",
+            "58"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "55",
+              "58"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 263,
+            "chars": 91
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "原50周岁退休的女职工逐步延迟至55周岁",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "原50岁女职工每2个月延1个月，逐步过渡到男63岁、女工人55岁、女干部58岁。",
+        "quote_offset": 286,
+        "overlap": 0.4,
+        "anchors": {
+          "numbers": [
+            "50",
+            "55"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "50",
+              "55"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 263,
+            "chars": 91
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "最低缴费年限在2030年后逐年涨到20年",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "注意：最低缴费年限提高到20年是2030年才启动，2026暂不执行 。",
+        "quote_offset": 371,
+        "overlap": 0.5,
+        "anchors": {
+          "numbers": [
+            "2030",
+            "20"
+          ],
+          "dates": [
+            "2030年"
+          ],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "2030",
+              "20"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [
+              "2030年"
+            ],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 354,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "最低缴费年限每年提高六个月",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "注意：最低缴费年限提高到20年是2030年才启动，2026暂不执行 。",
+        "quote_offset": 371,
+        "overlap": 0.5,
+        "anchors": {
+          "numbers": [
+            "六"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "六",
+              "in_source": false
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 354,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "达到最低缴费年限且自愿的，可最多提前3年退休",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "不是一刀切强制延后，支持弹性选择：符合条件可最多提前3年，和单位协商一致也可最多延后3年退休 。",
+        "quote_offset": 214,
+        "overlap": 0.353,
+        "anchors": {
+          "numbers": [
+            "3"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "3"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 194,
+            "chars": 92
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "达到法定退休年龄后，经与单位协商一致，可最多延后3年退休",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "不是一刀切强制延后，支持弹性选择：符合条件可最多提前3年，和单位协商一致也可最多延后3年退休 。",
+        "quote_offset": 214,
+        "overlap": 0.55,
+        "anchors": {
+          "numbers": [
+            "3",
+            "一"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "3"
+            ],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "一",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 194,
+            "chars": 92
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "很多自媒体简单概括“灵活就业女性统一55岁退休”",
+        "kind": "fact",
+        "article_id": 18622,
+        "source_url": "https://www.toutiao.com/article/7688934034642076204/",
+        "quote": "很多自媒体简单一句话概括：灵活就业女性统一55岁退休。",
+        "quote_offset": 186,
+        "overlap": 0.944,
+        "anchors": {
+          "numbers": [
+            "55岁",
+            "一"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "55岁"
+            ],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "一",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 137,
+            "chars": 98
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      }
+    ],
+    "fact_checkability": {
+      "definition": "关键事实中有一手出处(绑定来源原文引句)或至少一个客观可核锚点(数字/日期/人物/机构在来源中找到)的比例",
+      "denominator": "非观点类关键事实(opinion 不计入分母)",
+      "facts": 9,
+      "checkable": 9,
+      "rate": 1.0,
+      "release_threshold": 0.8,
+      "release_condition_met": true,
+      "not_a_substitute_for": "原有事实门禁与 A+B 证据级门禁;两套指标分别记账",
+      "rows": [
+        {
+          "claim": "延迟退休政策2025年1月1日正式启动",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:2025",
+            "numbers:1",
+            "dates:2025年1月1日"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "男职工逐步延迟至63岁",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:63岁"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "原55周岁退休的女职工逐步延迟至58周岁",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:55",
+            "numbers:58"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "原50周岁退休的女职工逐步延迟至55周岁",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:50",
+            "numbers:55"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "最低缴费年限在2030年后逐年涨到20年",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:2030",
+            "numbers:20",
+            "dates:2030年"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "最低缴费年限每年提高六个月",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [],
+          "checkable": true
+        },
+        {
+          "claim": "达到最低缴费年限且自愿的，可最多提前3年退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:3"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "达到法定退休年龄后，经与单位协商一致，可最多延后3年退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:3"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "很多自媒体简单概括“灵活就业女性统一55岁退休”",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:55岁"
+          ],
+          "checkable": true
+        }
+      ]
+    },
+    "targeted_repair": {
+      "claims": 43,
+      "facts_failed": 12,
+      "located": 12,
+      "not_located": 0,
+      "attempts": 14,
+      "model_calls": 14,
+      "invalid_outputs": 0,
+      "anchor_erased": 4,
+      "fixed_first": 10,
+      "fixed_second": 0,
+      "unfixed": 2,
+      "rebound": 2,
+      "changed_sentences": 10,
+      "errors": 0,
+      "unfixed_shapes": {
+        "grafted(锚点在引句窗口外·移花接木)": 2
+      },
+      "details": [
+        {
+          "claim": "进入2026年，这一政策将持续平稳落地",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性按55岁办理退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "早年如果在企业上过班、离开时不是管理岗，也可以争取50岁退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "2025年1月1日，《全国人民代表大会常务委员会关于实施渐进式延迟法定退休年龄的决定》及《国务院关于渐进式延迟法定退休年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "男职工和原法定退休年龄为五十五周岁的女职工，每四个月延迟一个月",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "原法定退休年龄为五十周岁的女职工，每二个月延迟一个月",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "自2030年1月1日起，最低缴费年限由十五年逐步提高至二十年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "职工达到最低缴费年限，可以自愿选择弹性提前退休，提前时间最长不超过三年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "职工达到法定退休年龄，所在单位与职工协商一致的，可以弹性延迟退休，延迟时间最长不超过三年",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "男职工逐步延迟至63周岁",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        }
+      ]
+    },
+    "release_conditions": {
+      "existing_gate": false,
+      "fact_checkability": true,
+      "note": "两套条件分别记账、取「与」放行;事实可核率不替代原有门禁"
+    },
+    "template_check": {
+      "category": "social",
+      "budget_status": "not_available",
+      "before": {
+        "status": "not_available",
+        "reason": "预算文件不存在:00_control\\template_budgets.json"
+      },
+      "before_signals": {
+        "sentences": 24,
+        "marker_hits": 0,
+        "parallel_pattern_hits": 0,
+        "sentence_length_cv": 0.2934
+      },
+      "rewrite_count": 0,
+      "over_budget_paragraphs": 0,
+      "draft": "延迟退休新政落地：打工人需提前规划养老\n\n2025年1月1日，延迟退休政策正式启动[1]。2026继续小步推进[1]。当前的核心原则是“小步调整、弹性实施、分类推进”[1]。这意味着告别了过去那种让人焦虑的“一刀切”强制延后模式[1]。政策支持符合条件的劳动者与单位协商一致后进行弹性选择，可提前退休[1]。这种渐进式的方式旨在缓解社会对延迟退休的恐慌情绪[1]。对于普通打工人而言，理解这一政策导向是应对养老变化的第一步[1]。\n\n80后、90后最大的认知误区在于以为能像父母一样干到退休领养老金[4]。过去几十年的人生路径似乎早已写好：找一份工作，一直干到法定退休年龄，社保交满年限，退休后按月领养老金[4]。但步入中年后，不少人发现时代环境与父母那一代完全不同[4]。依赖单位养老的范式正在发生转变，从依赖单位到自主规划养老成为新趋势[4]。盲目恐慌或心存侥幸摆烂躺平都不可取，核心差距在于是否提前布局[2]。\n\n灵活就业女性的退休年龄规则复杂，并非统一标准[3]。同样是灵活就业身份，有人能较早顺利办退休领养老金[3]。有人却被告知需等待更长时间才能办[3]。很多自媒体简单概括“灵活就业女性统一55岁退休”，这是最容易误导大家的误区[3]。核心关键点在于过往工作经历与岗位性质。\n\n普通打工人需提前布局两件核心大事，以避免临近退休收入断档[2]。一是确保社保缴费年限足够，避免因断缴导致无法按时领取养老金[2]。二是做好个人养老储备，弥补延迟退休带来的收入空窗期[2]。灵活就业者还需注意隐形门槛，如档案缺失或异地参保记录不全等问题[5]。有亲历者跑了4趟社保局才办完退休，揭示了灵活就业办理过程中的复杂性与潜在坑点[5]。提前咨询当地社保政策，核实个人参保状态与退休年龄认定标准，是避免被动陷入困境的关键[3][5]。",
+      "check_status": "not_available"
+    },
+    "template_flags": [
+      "类目预算不可用,去模板化检查未执行:预算文件不存在:00_control\\template_budgets.json"
+    ],
+    "path": "D:\\ttxt\\07_tmp\\r66_smoke\\04_writing\\social\\rejected\\social-20261121223312-735dbf.md",
+    "materials": 5,
+    "material_stats": {
+      "pool_limit": 15,
+      "searched_candidates": 15,
+      "candidates": 15,
+      "full_candidates": 15,
+      "distinct_sources": 15,
+      "distinct_hosts": 1,
+      "relevance": {
+        "rule": "title_hits>=1 且 per_1k>=2.0,或 per_1k>=8.0",
+        "tokens": 5,
+        "skipped": false,
+        "searched": 15,
+        "kept": 15,
+        "dropped": 0,
+        "kept_full": 15,
+        "dropped_full": 0,
+        "off_topic_samples": []
+      },
+      "independence_axis": {
+        "unit": "author(缺作者退回 host,缺作者不计数)",
+        "articles_counted_by_author": 15,
+        "articles_counted_by_host": 0,
+        "articles_without_any_source_key": 0
+      },
+      "selected_ids": [
+        3747,
+        12004,
+        18622,
+        22884,
+        3978
+      ],
+      "selected_full": 5,
+      "selected_distinct_sources": 5,
+      "selected_distinct_hosts": 1,
+      "calibration_status": "calibrated",
+      "priors": {
+        "applied": true,
+        "weight": 0.3,
+        "measured_label_hits": 10,
+        "label_counts": {
+          "normal": 4,
+          "potential": 2,
+          "verified_viral": 2,
+          "low_quality": 2
+        },
+        "reason": ""
+      },
+      "scores": [
+        {
+          "id": 3747,
+          "rank_score": 1.0853,
+          "bm25": -37.33135486718994,
+          "viral_prior": 0.6,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "泉边静听泉声",
+          "source_axis": "author",
+          "title_hits": 2,
+          "per_1k": 41.0,
+          "coverage": 0.6
+        },
+        {
+          "id": 12004,
+          "rank_score": 1.06,
+          "bm25": -38.02239857078594,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "家有娃的日常",
+          "source_axis": "author",
+          "title_hits": 2,
+          "per_1k": 21.51,
+          "coverage": 0.6
+        },
+        {
+          "id": 18622,
+          "rank_score": 0.9097,
+          "bm25": -36.92557677989167,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "平安喜乐",
+          "source_axis": "author",
+          "title_hits": 0,
+          "per_1k": 28.22,
+          "coverage": 0.6
+        },
+        {
+          "id": 22884,
+          "rank_score": 0.8519,
+          "bm25": -36.503645430888824,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "桃桃育儿",
+          "source_axis": "author",
+          "title_hits": 2,
+          "per_1k": 28.08,
+          "coverage": 0.6
+        },
+        {
+          "id": 3978,
+          "rank_score": 0.8294,
+          "bm25": -34.58829416583318,
+          "viral_prior": 1.0,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "天使的眼泪",
+          "source_axis": "author",
+          "title_hits": 1,
+          "per_1k": 13.69,
+          "coverage": 0.6
+        }
+      ]
+    },
+    "fewshot_status": "ok:5",
+    "fewshot_count": 5,
+    "copyedit_count": 1,
+    "copyedit_fixes": [
+      {
+        "kind": "multi_anchor_split",
+        "before": "同样是灵活就业身份，有人50岁顺利办退休领养老金，有人却被告知要等到55岁才能办[3]。",
+        "after": "同样是灵活就业身份，有人50岁顺利办退休领养老金[3]。有人却被告知要等到55岁才能办[3]。"
+      }
+    ],
+    "promise_issues": [],
+    "notes": "门禁致命问题: 独立评审判定不通过:修改后再评",
+    "model_meta": {
+      "same_model_review": false,
+      "review_independence": "independent",
+      "independent_review": true,
+      "reviewer_model": "deepseek-flash",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "reviewer_limitation": "评审由独立服务模型 deepseek-flash 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+      "served_model": "qwen3.8-flash-next-iq3_s"
+    },
+    "review_account": "rejected",
+    "review_account_basis": "independent_review_blocked",
+    "independent_review": {
+      "attempted": true,
+      "available": true,
+      "reviewer_model": "deepseek-flash",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "prompt": "审评这篇文章",
+      "verdict_markers": {
+        "blocking": true,
+        "publishable": false,
+        "blocking_markers": [
+          "修改后再评"
+        ],
+        "publishable_markers": []
+      },
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "verdict_excerpt": "## 总体评价\n\n这是一篇面向普通劳动者的延迟退休政策科普初稿，政策主干基本准确，结构上从“政策要点—观念转变—灵活就业女性认定—养老规划建议”展开，实用性较强。但文章仍存在**引用不规范、弹性退休操作细节不足、部分表述笼统或绝对化、灵活就业女性部分需谨慎处理**等问题。总体判断：**可作为科普初稿或修改后发布，不宜直接作为权威政策解读发布**。\n\n---\n\n## 一、主要优点\n\n1. **政策核心事实基本准确**  \n   延迟退休自2025年1月1日起实施，男职工逐步延至63岁，原55岁女职工延至58岁，原50岁女职工延至55岁；最低缴费年限自2030年起逐步提高至20年，每年提高6个月；弹性提前最长3年且不低于原法定退休年龄；弹性延迟经协商最长3年。这些与现行政策方向一致。\n\n2. **提醒了个案差异，避免“一刀切”**  \n   文章指出灵活就业女性退休年龄认定与工作经历、岗位性质、参保身份和地方口径有关，并强调以当地社保部门认定为准，这一提醒是必要的，能降低误导风险。\n\n3. **有现实规划意识**  \n   文章没有停留在政策复述，而是提出查清退休年龄、关注缴费年限、测算养老金替代率、配置个人养老金/商业养老保险/储蓄等建议，具有实操导向。\n\n---\n\n## 二、主要问题与不足\n\n### 1. 引用不规范，来源缺失\n文中出现[1]—[5]的编号，但没有文末参考文献或链接",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 602,
+        "completion_tokens": 4050,
+        "total_tokens": 4652,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2645
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 602
+      },
+      "elapsed_s": 28.64
+    },
+    "independent_reviews_used": 3,
+    "independent_review_max": 3,
+    "independent_review_rounds": [
+      {
+        "round": 1,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-flash",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "## 审评结论\n\n这是一篇面向普通劳动者的政策科普/养老规划类稿件，选题有现实价值，结构也比较清晰：从延迟退休政策背景，到认知误区，再到灵活就业女性难点，最后落到行动建议。语言通俗，适合新媒体传播。\n\n但若按正式媒体或政务科普标准，稿件目前**不宜直接发布**。主要问题不在文字可读性，而在**政策表述不够准确、引用不规范、部分结论以偏概全、关键政策信息缺失**。建议定位为“初稿/待核稿”，进行事实核查和结构补强后再发布。\n\n---\n\n## 一、主要优点\n\n1. **选题贴近读者**：延迟退休与普通打工人、灵活就业者关系密切，实用性强。\n2. **结构有递进**：政策背景—认知误区—特殊群体—行动建议，逻辑基本完整。\n3. **有服务意识**：最后落到社保缴费年限、个人养老储备、档案和异地参保等事项，能提供行动方向。\n4. **表达通俗**：使用“打工人”“收入断档”等表达，利于传播，但需注意正式场合的语体分寸。\n\n---\n\n## 二、主要问题\n\n### 1. 引用不规范，影响可信度\n\n文中多处出现[1]—[5]，但没有参考文献或来源说明。读者无法判断依据是官方文件、新闻报道还是自媒体文章。尤其[1]被反复用于支撑“政策启动时间”“核心原则”“弹性选择”“政策目的”等不同事实，显得机械。\n\n**建议**：\n- 统一改为规范注释：文件名称、发布机关、发布日期、条款或链接。\n- 优先引用",
+        "elapsed_s": 25.406
+      },
+      {
+        "round": 2,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-v4-pro",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "本文选题紧扣2025年延迟退休政策落地，目标读者明确，有一定实用性，但作为一篇面向“打工人”的解释性文章，整体严谨性不足，关键政策表述存在明显重复和不够准确的地方，实际指导性也偏弱，建议修改后再发布。\n\n### 一、主要问题\n\n1. **弹性退休表述有明显硬伤**  \n原文写道：\n> “符合条件可最多提前3年，且退休年龄不得低于原法定退休年龄；符合条件可最多提前3年，和单位协商一致也可最多延后3年退休。”\n\n后半句明显重复、错位。规范表达应为：\n> 达到最低缴费年限且自愿的，可最多提前3年退休，但退休年龄不得低于原法定退休年龄；达到法定退休年龄后，经与单位协商一致，可最多延后3年退休。\n\n这种关键政策信息一旦出错，容易误导读者。\n\n2. **部分术语不够严谨**  \n如“原55岁女干部”的表述容易被理解为身份、干部身份，政策上更准确的表述应是“原法定退休年龄为55周岁的女职工”。  \n另外，“男、原55岁女干部每4个月延1个月；原50岁女职工每2个月延1个月，逐步延迟至六十三周岁和五十八周岁、五十五周岁”对应关系不够清晰，可改为：\n> 男职工逐步延迟至63周岁；原55周岁退休的女职工逐步延迟至58周岁；原50周岁退休的女职工逐步延迟至55周岁。\n\n3. **标题与内容不匹配**  \n标题强调“准确理解弹性退休并提前规划养老”，但正文对弹性退休的条件、年龄下限、办理程序、不同群体差异",
+        "elapsed_s": 70.828
+      },
+      {
+        "round": 3,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-flash",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "## 总体评价\n\n这是一篇面向普通劳动者的延迟退休政策科普初稿，政策主干基本准确，结构上从“政策要点—观念转变—灵活就业女性认定—养老规划建议”展开，实用性较强。但文章仍存在**引用不规范、弹性退休操作细节不足、部分表述笼统或绝对化、灵活就业女性部分需谨慎处理**等问题。总体判断：**可作为科普初稿或修改后发布，不宜直接作为权威政策解读发布**。\n\n---\n\n## 一、主要优点\n\n1. **政策核心事实基本准确**  \n   延迟退休自2025年1月1日起实施，男职工逐步延至63岁，原55岁女职工延至58岁，原50岁女职工延至55岁；最低缴费年限自2030年起逐步提高至20年，每年提高6个月；弹性提前最长3年且不低于原法定退休年龄；弹性延迟经协商最长3年。这些与现行政策方向一致。\n\n2. **提醒了个案差异，避免“一刀切”**  \n   文章指出灵活就业女性退休年龄认定与工作经历、岗位性质、参保身份和地方口径有关，并强调以当地社保部门认定为准，这一提醒是必要的，能降低误导风险。\n\n3. **有现实规划意识**  \n   文章没有停留在政策复述，而是提出查清退休年龄、关注缴费年限、测算养老金替代率、配置个人养老金/商业养老保险/储蓄等建议，具有实操导向。\n\n---\n\n## 二、主要问题与不足\n\n### 1. 引用不规范，来源缺失\n文中出现[1]—[5]的编号，但没有文末参考文献或链接",
+        "elapsed_s": 28.64
+      }
+    ],
+    "published": false
+  }
+}
