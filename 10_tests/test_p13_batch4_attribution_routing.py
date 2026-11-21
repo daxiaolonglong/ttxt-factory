@@ -77,9 +77,12 @@ ANSWER_KEY = {
 # 2026-11-17 T-15 修复**之前**从 git HEAD 取的完整性指纹。
 # 卡片:61 行逐行 json.loads 后去掉 expected_by_construction 再 json.dumps(ensure_ascii=False) 拼接;
 # 这两个文件必须一个字节都不许变。
+# SIDECAR_SHA256 于 R61(2026-11-21)重新锚定:12 张分歧卡第二轮重裁只改 ai_recheck_*/machine_now
+# 等裁定字段(证据 10_tests/golden/adjudications/r61_recheck_local_round2.json),
+# 卡片文件与纸面标签证据的哈希钉未动;sidecar 的 hash 重新锚定后继续执行「不许悄悄改」职责。
 CARDS_FIELDS_EXCEPT_ANSWER_KEY_SHA256 = (
     "8dceea47f847a5e3a4c0f3989c187b6140e61136679f91414e45a9f6e29b9d29")
-SIDECAR_SHA256 = "0238ec9883fdca9ed2f0abb9cbe58ffdb239745ee0cee1e0a8421654a149dbf2"
+SIDECAR_SHA256 = "dedb6bad2dde7d14b896e9591a66b2b0418137d465ffc4d37b31f6b34f1c7682"
 PRINTED_TOKENS_SHA256 = "2574ce220ae0db350519a578857b84e57bea4f3b1c075e34df5ab9594ca9d531"
 
 HUMAN_FIELDS = ("human_adjudicated", "human_verdict", "human_fact_support", "human_confirms_tier")
