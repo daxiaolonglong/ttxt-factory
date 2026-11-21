@@ -1,0 +1,1832 @@
+{
+ "generated_at": "2026-11-21 16:19:27",
+ "note": "只读探针:不改门禁/阈值/取样规则;template_decheck 显式关闭;正式库零写入",
+ "gate_min_score": 0.6,
+ "fact_checkability_min": 0.8,
+ "model": null,
+ "batch": [
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金"
+  },
+  {
+   "category": "social",
+   "topic": "彩礼"
+  },
+  {
+   "category": "social",
+   "topic": "催婚"
+  },
+  {
+   "category": "social",
+   "topic": "邻里纠纷"
+  },
+  {
+   "category": "social",
+   "topic": "高空抛物"
+  },
+  {
+   "category": "social",
+   "topic": "网恋 诈骗"
+  },
+  {
+   "category": "social",
+   "topic": "家暴 离婚"
+  },
+  {
+   "category": "social",
+   "topic": "装修 噪音"
+  },
+  {
+   "category": "social",
+   "topic": "就业 35岁"
+  },
+  {
+   "category": "social",
+   "topic": "退休 返聘"
+  }
+ ],
+ "rounds": 1,
+ "runs": [
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金",
+   "round": 1,
+   "draft_id": "social-20261121162016-d99b8a",
+   "status": "rejected",
+   "passed": false,
+   "versions": 8,
+   "revisions": 4,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     3747,
+     12004,
+     18622,
+     22884,
+     3978
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "normal": 4,
+      "potential": 2,
+      "verified_viral": 2,
+      "low_quality": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 3747,
+      "rank_score": 1.0853,
+      "bm25": -37.327164636160035,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "泉边静听泉声",
+      "source_axis": "author"
+     },
+     {
+      "id": 12004,
+      "rank_score": 1.06,
+      "bm25": -38.01835921258807,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "家有娃的日常",
+      "source_axis": "author"
+     },
+     {
+      "id": 18622,
+      "rank_score": 0.9097,
+      "bm25": -36.92178583567766,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "平安喜乐",
+      "source_axis": "author"
+     },
+     {
+      "id": 22884,
+      "rank_score": 0.8519,
+      "bm25": -36.49991409664919,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "桃桃育儿",
+      "source_axis": "author"
+     },
+     {
+      "id": 3978,
+      "rank_score": 0.8294,
+      "bm25": -34.58495035203054,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天使的眼泪",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 独立评审判定不通过:修改后再评",
+   "critical": [
+    "独立评审判定不通过:修改后再评"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "独立评审判定不通过:修改后再评",
+   "evidence_brief": [
+    {
+     "claim": "延迟退休政策已于2025年1月1日正式启动",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:1",
+      "dates:2025年1月1日"
+     ]
+    },
+    {
+     "claim": "当前的核心原则是“小步调整、弹性实施、分类推进、统筹兼顾”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "男职工和原55岁女职工每4个月延迟1个月",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:55岁",
+      "numbers:4",
+      "numbers:1"
+     ]
+    },
+    {
+     "claim": "原50岁女职工每2个月延迟1个月",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50岁",
+      "numbers:2",
+      "numbers:1"
+     ]
+    },
+    {
+     "claim": "符合条件可最多提前3年，但提前时间最长不超过3年",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3"
+     ]
+    },
+    {
+     "claim": "最低缴费年限自2030年起逐步提高",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2030",
+      "dates:2030年"
+     ]
+    },
+    {
+     "claim": "最低缴费年限提高到20年是2030年才启动",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20",
+      "numbers:2030",
+      "dates:2030年"
+     ]
+    },
+    {
+     "claim": "对于80后、90后而言，最大的认知误区在于以为能像父母一样干到退休领养老金",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:80",
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "过去几十年的人生路径看似写好了：找一份工作上班，交满社保年限，退休后按月领取养老金",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "核心差距根本不在于政策，而在于你有没有提前布局两件核心大事",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "核心差距根本不在于政策，而在于你有没有提前布局两件核心大事",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "核心差距根本不在于政策，而在于你有没有提前布局两件核心大事",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 450.4
+  },
+  {
+   "category": "social",
+   "topic": "彩礼",
+   "round": 1,
+   "draft_id": "social-20261121162749-5628f9",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "revisions": 2,
+   "score": 0.6,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 10,
+   "checkable": 10,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     12886,
+     12201,
+     4286,
+     24262,
+     23145
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "normal": 3,
+      "verified_viral": 4,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 12886,
+      "rank_score": 1.0,
+      "bm25": -11.471351760853453,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "北京丰台法院",
+      "source_axis": "author"
+     },
+     {
+      "id": 12201,
+      "rank_score": 0.891,
+      "bm25": -11.245058507445043,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "晴空万里",
+      "source_axis": "author"
+     },
+     {
+      "id": 4286,
+      "rank_score": 0.8257,
+      "bm25": -10.98501994742844,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "相信头条创作者",
+      "source_axis": "author"
+     },
+     {
+      "id": 24262,
+      "rank_score": 0.6061,
+      "bm25": -10.653661307545253,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "安静、",
+      "source_axis": "author"
+     },
+     {
+      "id": 23145,
+      "rank_score": 0.5693,
+      "bm25": -9.954603760854761,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "大皖新闻",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:上海男子刘辉曾以为邂逅了完美缘分，与一名自称90后清秀医生的女子网恋五年(persons:一名自);内容截断:文章末尾出现'手里从双...'及括号内解释，明显为原文截断或生成不完整，导致语义中断。;事实错误/无来源断言:文中称网恋时长为'五年'，但证据链[5]的标题及正文片段明确显示为'网恋5个月'（'和男子网恋5个月骗走17万'），存在严重的事实矛盾。",
+   "critical": [
+    "事实未通过来源核验:上海男子刘辉曾以为邂逅了完美缘分，与一名自称90后清秀医生的女子网恋五年(persons:一名自)",
+    "内容截断:文章末尾出现'手里从双...'及括号内解释，明显为原文截断或生成不完整，导致语义中断。",
+    "事实错误/无来源断言:文中称网恋时长为'五年'，但证据链[5]的标题及正文片段明确显示为'网恋5个月'（'和男子网恋5个月骗走17万'），存在严重的事实矛盾。"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1,
+    "无来源断言": 1
+   },
+   "primary": "fact.binding",
+   "primary_detail": "事实未通过来源核验:上海男子刘辉曾以为邂逅了完美缘分，与一名自称90后清秀医生的女子网恋五年(persons:一名自);内容截断:文章末尾出现'手里从双...'及括号内解释，明显为原文截断或生成不完整，导致语义中断。;事实错误/无来源断言:文中称网恋时长为'五年'，但证据链[5]的标题及正文片段明确显示为'网恋5个月'（'和男子网恋5个月骗走17万'），存在严重的事实矛盾。",
+   "evidence_brief": [
+    {
+     "claim": "2026年中央一号文件明确提出：持续整治农村高额彩礼",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "dates:2026年"
+     ]
+    },
+    {
+     "claim": "该文件强调加强省际毗邻地区联动治理",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:文件"
+     ]
+    },
+    {
+     "claim": "浙江一位39岁女士在媒人安排下，一天内进行了三场相亲",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:39岁"
+     ]
+    },
+    {
+     "claim": "她提出的条件包括58万彩礼、杭州一套150平米的全款婚房、婚后房产过户至其名下以及男方婚后工资全额上交",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:58",
+      "numbers:150"
+     ]
+    },
+    {
+     "claim": "一位40岁的表哥花了30万彩礼终于找到了真爱",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:40岁",
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "上海男子刘辉曾以为邂逅了完美缘分，与一名自称90后清秀医生的女子网恋五年",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "对方通过全网近七千条高颜值日常视频维持人设",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "所谓的90后医生女友，竟是一名65岁女子靠AI技术凭空捏造的虚假人设",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90",
+      "numbers:65岁"
+     ]
+    },
+    {
+     "claim": "该嫌疑人还一人分饰两角，扮演早已离世的母亲要求30万彩礼",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "第一批到达法定婚龄的00后陆续领证结婚",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00"
+     ]
+    }
+   ],
+   "elapsed_s": 160.6
+  },
+  {
+   "category": "social",
+   "topic": "催婚",
+   "round": 1,
+   "draft_id": "social-20261121163023-9a4ff2",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "revisions": 2,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 5,
+   "checkable": 5,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     19214,
+     19181,
+     40459,
+     2151,
+     18529
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "normal": 1,
+      "potential": 5,
+      "verified_viral": 1,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 19214,
+      "rank_score": 1.0,
+      "bm25": -12.67935449578405,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "悦读诗意篇章",
+      "source_axis": "author"
+     },
+     {
+      "id": 19181,
+      "rank_score": 0.378,
+      "bm25": -9.191218032867265,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "王晴",
+      "source_axis": "author"
+     },
+     {
+      "id": 40459,
+      "rank_score": 0.3651,
+      "bm25": -7.437078032744107,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "光明网",
+      "source_axis": "author"
+     },
+     {
+      "id": 2151,
+      "rank_score": 0.3389,
+      "bm25": -7.962614852899596,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "丽丝百货店",
+      "source_axis": "author"
+     },
+     {
+      "id": 18529,
+      "rank_score": 0.3318,
+      "bm25": -8.932262869100835,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "yang",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 第二段关于年轻人不结婚原因的分析（房贷、彩礼等）属于普遍社会共识，未标注具体来源引用，虽无事实错误但在严谨性上略逊于其他段落",
+   "critical": [
+    "第二段关于年轻人不结婚原因的分析（房贷、彩礼等）属于普遍社会共识，未标注具体来源引用，虽无事实错误但在严谨性上略逊于其他段落"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "第二段关于年轻人不结婚原因的分析（房贷、彩礼等）属于普遍社会共识，未标注具体来源引用，虽无事实错误但在严谨性上略逊于其他段落",
+   "evidence_brief": [
+    {
+     "claim": "第一批90后已经跨过三十五岁门槛",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "福建省福鼎市检察院对一“杀猪盘”诈骗犯罪集团18名犯罪嫌疑人提起公诉",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:18名",
+      "orgs:诈骗犯罪集团"
+     ]
+    },
+    {
+     "claim": "被害人王女士通过“伊对”相亲网站匹配到了一位独自带娃的离异中年男子",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "不少县城一到晚上九点，街上就安静下来",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "自助棋牌品牌“四个朋友”单单在湖南就开了1400多家",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1400"
+     ]
+    }
+   ],
+   "elapsed_s": 115.8
+  },
+  {
+   "category": "social",
+   "topic": "邻里纠纷",
+   "round": 1,
+   "draft_id": "social-20261121163221-a5b346",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "revisions": 2,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 0.8,
+   "facts": 5,
+   "checkable": 4,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 13,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 12,
+     "articles_counted_by_host": 3,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     39261,
+     41121,
+     41135,
+     19593,
+     14641
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "potential": 6,
+      "normal": 1,
+      "low_quality": 1,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 39261,
+      "rank_score": 1.18,
+      "bm25": -17.58343148644334,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "生意经",
+      "source_axis": "author"
+     },
+     {
+      "id": 41121,
+      "rank_score": 0.7855,
+      "bm25": -16.473310877048924,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 41135,
+      "rank_score": 0.7827,
+      "bm25": -16.458379958200286,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 19593,
+      "rank_score": 0.71,
+      "bm25": -15.771407083114529,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "铭铭",
+      "source_axis": "author"
+     },
+     {
+      "id": 14641,
+      "rank_score": 0.5329,
+      "bm25": -15.16534943277728,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:安徽淮北临涣镇提供了另一种温情解法(原文引句未绑定)",
+   "critical": [
+    "事实未通过来源核验:安徽淮北临涣镇提供了另一种温情解法(原文引句未绑定)"
+   ],
+   "rule_hits": {
+    "引句未绑定(quote未过0.34)": 1
+   },
+   "primary": "fact.binding",
+   "primary_detail": "事实未通过来源核验:安徽淮北临涣镇提供了另一种温情解法(原文引句未绑定)",
+   "evidence_brief": [
+    {
+     "claim": "有95后小伙专门帮人“吵架”，不用露面，不用骂人，靠一部手机加AI，月入稳稳3万",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:95",
+      "numbers:3"
+     ]
+    },
+    {
+     "claim": "浙江义乌佛堂派出所尝试将警务工作向前延伸，推动警务工作从事后处置向源头预防转变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "安徽淮北临涣镇提供了另一种温情解法",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "当地六百余年的饮茶习俗早已融进古镇肌理",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "掌握高频法律常识，如《民法典》相关规定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 138.8
+  },
+  {
+   "category": "social",
+   "topic": "高空抛物",
+   "round": 1,
+   "draft_id": "social-20261121163449-02fcd1",
+   "status": "rejected",
+   "passed": false,
+   "versions": 11,
+   "revisions": 5,
+   "score": 0.3,
+   "truncated": false,
+   "fact_check_rate": 0.5,
+   "facts": 6,
+   "checkable": 3,
+   "material_stats": {
+    "pool_limit": 8,
+    "candidates": 8,
+    "full_candidates": 8,
+    "distinct_sources": 8,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 8,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     14641,
+     20975,
+     21338,
+     15250,
+     38633
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 3,
+     "label_counts": {
+      "low_quality": 1,
+      "normal": 1,
+      "potential": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 14641,
+      "rank_score": 1.0,
+      "bm25": -30.503180296525848,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     },
+     {
+      "id": 20975,
+      "rank_score": 0.9359,
+      "bm25": -29.51958573842908,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "坡谷看秋",
+      "source_axis": "author"
+     },
+     {
+      "id": 21338,
+      "rank_score": 0.9195,
+      "bm25": -29.267012443483708,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "苔阶待月来",
+      "source_axis": "author"
+     },
+     {
+      "id": 15250,
+      "rank_score": 0.7354,
+      "bm25": -26.440705382707144,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "风轻云淡",
+      "source_axis": "author"
+     },
+     {
+      "id": 38633,
+      "rank_score": 0.3643,
+      "bm25": -19.822408271633545,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "国启未来AI",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "评审得分 0.3 低于门禁 0.6",
+   "critical": [
+    "事实未通过来源核验:根据《刑法》第二百九十一条之二，从建筑物或者其他高空抛掷物品，情节严重的，处一年以下有期徒刑、拘役或(原文引句未绑定)",
+    "事实未通过来源核验:在无法确定具体侵权人的情形下，《民法典》第一千二百五十四条规定，除能够证明自己不是侵权人的外，由可能(原文引句未绑定)",
+    "事实未通过来源核验:物业服务企业作为安全保障义务人，若未采取必要的安全保障措施（如安装监控、定期巡查），需承担相应的侵权(原文引句未绑定)",
+    "致命问题:无来源断言/事实错误 - 文中多次出现'根据《民法典》等权威法规，履行告知义务'这一表述，但证据链显示该引句实际来自一篇无关的普法文章开头（'不用背诵复杂法条...'），且该短语在正文中语法残缺、逻辑不通，属于典型的AI幻觉或拼接错误，并非真实的法律条文引用。",
+    "致命问题:内容截断/逻辑混乱 - 第三段文字出现明显的生成故障，同一句话重复插入三次，破坏了文章的连贯性和可读性，属于严重的内容质量缺陷。"
+   ],
+   "rule_hits": {
+    "引句未绑定(quote未过0.34)": 3
+   },
+   "primary": "fact.binding",
+   "primary_detail": "事实未通过来源核验:根据《刑法》第二百九十一条之二，从建筑物或者其他高空抛掷物品，情节严重的，处一年以下有期徒刑、拘役或(原文引句未绑定);事实未通过来源核验:在无法确定具体侵权人的情形下，《民法典》第一千二百五十四条规定，除能够证明自己不是侵权人的外，由可能(原文引句未绑定);事实未通过来源核验:物业服务企业作为安全保障义务人，若未采取必要的安全保障措施（如安装监控、定期巡查），需承担相应的侵权(原文引句未绑定);致命问题:无来源断言/事实错误 - 文中多次出现'根据《民法典》等权威法规，履行告知义务'这一表述，但证据链显示该引句实际来自一篇无关的普法文章开头（'不用背诵复杂法条...'），",
+   "evidence_brief": [
+    {
+     "claim": "根据《刑法》第二百九十一条之二，从建筑物或者其他高空抛掷物品，情节严重的，处一年以下有期徒刑、拘役或者管制，并处或者单处罚金。",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "在无法确定具体侵权人的情形下，《民法典》第一千二百五十四条规定，除能够证明自己不是侵权人的外，由可能加害的建筑物使用人给予补偿",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "物业服务企业作为安全保障义务人，若未采取必要的安全保障措施（如安装监控、定期巡查），需承担相应的侵权责任",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "根据《民法典》等权威法规，履行告知义务",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "根据《民法典》等权威法规，履行告知义务",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "根据《民法典》等权威法规，履行告知义务",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 409.1
+  },
+  {
+   "category": "social",
+   "topic": "网恋 诈骗",
+   "round": 1,
+   "draft_id": "social-20261121164133-26c1c6",
+   "status": "rejected",
+   "passed": false,
+   "versions": 4,
+   "revisions": 2,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     31442,
+     19731,
+     20062,
+     20088,
+     20009
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 14,
+     "label_counts": {
+      "verified_viral": 6,
+      "normal": 5,
+      "low_quality": 1,
+      "potential": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 31442,
+      "rank_score": 1.3,
+      "bm25": -17.68342624429494,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "盈徳律法",
+      "source_axis": "author"
+     },
+     {
+      "id": 19731,
+      "rank_score": 0.6264,
+      "bm25": -17.28012503960024,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "领潮新闻",
+      "source_axis": "author"
+     },
+     {
+      "id": 20062,
+      "rank_score": 0.6029,
+      "bm25": -17.25824561914813,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "深圳新闻网",
+      "source_axis": "author"
+     },
+     {
+      "id": 20088,
+      "rank_score": 0.6,
+      "bm25": -17.03232236281935,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "大河报",
+      "source_axis": "author"
+     },
+     {
+      "id": 20009,
+      "rank_score": 0.5654,
+      "bm25": -17.000080941567738,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "德州晚报",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 文章结尾处‘记住4点远离钱财损失’后未列出具体4点，存在内容截断或逻辑缺失嫌疑（虽非全文截断，但影响阅读完整性）;部分段落过渡略显生硬，如从案件事实直接跳转到警方数据再回到案件细节，结构可更紧凑",
+   "critical": [
+    "文章结尾处‘记住4点远离钱财损失’后未列出具体4点，存在内容截断或逻辑缺失嫌疑（虽非全文截断，但影响阅读完整性）",
+    "部分段落过渡略显生硬，如从案件事实直接跳转到警方数据再回到案件细节，结构可更紧凑"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "文章结尾处‘记住4点远离钱财损失’后未列出具体4点，存在内容截断或逻辑缺失嫌疑（虽非全文截断，但影响阅读完整性）;部分段落过渡略显生硬，如从案件事实直接跳转到警方数据再回到案件细节，结构可更紧凑",
+   "evidence_brief": [
+    {
+     "claim": "被告人孙某芳在现实中生活拮据、早已结婚并育有两子",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她利用AI换脸、录音合成技术加持，精心打造了一套完美“白富美”人设",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "孙某芳与被害人李某6年前在网络游戏中相识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:6"
+     ]
+    },
+    {
+     "claim": "警方数据显示，网恋杀猪盘的受害者80%以上是30—55岁中年人",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:80%",
+      "numbers:30",
+      "numbers:55岁"
+     ]
+    },
+    {
+     "claim": "孙某芳以给父亲交社保金、偿还外债、买苹果手机等为由向网恋男友索取钱财",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "最终，孙某芳诈骗网恋男友13万余元的事实被揭穿",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:13"
+     ]
+    },
+    {
+     "claim": "泰安市宁阳县人民法院对被告人孙某芳进行了判决",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 133.6
+  },
+  {
+   "category": "social",
+   "topic": "家暴 离婚",
+   "round": 1,
+   "draft_id": "social-20261121164345-51ea3c",
+   "status": "rejected",
+   "passed": false,
+   "versions": 5,
+   "revisions": 2,
+   "score": 0.4,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     23658,
+     22297,
+     15250,
+     14641,
+     21802
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "potential": 2,
+      "low_quality": 1,
+      "normal": 4,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 23658,
+      "rank_score": 1.0353,
+      "bm25": -20.02775729825877,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "朝朝暮语",
+      "source_axis": "author"
+     },
+     {
+      "id": 22297,
+      "rank_score": 1.0,
+      "bm25": -21.289091506193454,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "陶家二小姐",
+      "source_axis": "author"
+     },
+     {
+      "id": 15250,
+      "rank_score": 0.859,
+      "bm25": -20.060161052433493,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "风轻云淡",
+      "source_axis": "author"
+     },
+     {
+      "id": 14641,
+      "rank_score": 0.8045,
+      "bm25": -19.585169807084363,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     },
+     {
+      "id": 21802,
+      "rank_score": 0.7562,
+      "bm25": -18.641097316255838,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "我是事事通",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "评审得分 0.4 低于门禁 0.6",
+   "critical": [
+    "内容截断: 文章在列举完法律常识的引言后戛然而止，未提供标题及正文中承诺的核心内容（即具体的20条法律常识），导致读者无法获取实质信息"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "内容截断: 文章在列举完法律常识的引言后戛然而止，未提供标题及正文中承诺的核心内容（即具体的20条法律常识），导致读者无法获取实质信息",
+   "evidence_brief": [
+    {
+     "claim": "提起离婚，大众的第一反应往往联想到出轨、家暴或婆媳矛盾等激烈冲突",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "最近民政部门的相关统计和基层婚姻登记处的反馈显示越来越多刚步入婚姻的00后选择结束婚姻",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00",
+      "orgs:最近民政部门"
+     ]
+    },
+    {
+     "claim": "这些年轻夫妻分开的原因很少涉及原则性伤害，不少案例的核心导火索竟是“钱花光了”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在消费观念与家庭收支规划上持续爆发的矛盾，成为了压垮骆驼的最后一根稻草",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这并非年轻人任性或对待婚姻不够慎重那么简单，其背后藏着当代年轻人真实的生活困境",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "许多00后夫妻既无出轨背叛，也无家暴争吵，不存在原则性大矛盾，日子却过不下去",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00"
+     ]
+    },
+    {
+     "claim": "最后一拍两散根源十分现实——婚后积蓄慢慢被消耗一空柴米油盐的压力压得两个人喘不过气",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "懂法不吃亏！普通人必看的20条法律常识，关键时刻能止损护己",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20"
+     ]
+    },
+    {
+     "claim": "很多人一辈子遵纪守法却屡屡吃亏，根源在于不懂法、不会用法",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "生活里90%的纠纷看似复杂，其实都有明确的法律依据",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90%"
+     ]
+    },
+    {
+     "claim": "不用精通所有条文，但需懂保命、保钱、保权益的基础常识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "普通人最高频、最实用、百分百能用得上的法律常识，全部基于《民法典》《劳动合同法》等权威法规",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 187.4
+  },
+  {
+   "category": "social",
+   "topic": "装修 噪音",
+   "round": 1,
+   "draft_id": "social-20261121164704-51f79d",
+   "status": "rejected",
+   "passed": false,
+   "versions": 4,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 6,
+   "checkable": 6,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     5394,
+     8720,
+     17326,
+     31339,
+     38570
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "low_quality": 3,
+      "normal": 3,
+      "potential": 3,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 5394,
+      "rank_score": 1.0,
+      "bm25": -12.062250291561568,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "kiku酱",
+      "source_axis": "author"
+     },
+     {
+      "id": 8720,
+      "rank_score": 0.694,
+      "bm25": -10.963350597222043,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "铭铭",
+      "source_axis": "author"
+     },
+     {
+      "id": 17326,
+      "rank_score": 0.6395,
+      "bm25": -9.689767275365424,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "三联生活周刊",
+      "source_axis": "author"
+     },
+     {
+      "id": 31339,
+      "rank_score": 0.5818,
+      "bm25": -10.560083737755317,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "纷响时光",
+      "source_axis": "author"
+     },
+     {
+      "id": 38570,
+      "rank_score": 0.5713,
+      "bm25": -9.875970338061585,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "创业好青年",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:参考材料指出，很多农村夫妻想在家找点活干，不想外出打工，又怕项目噪音大被邻居投诉[2]。(persons:参考材料);事实未通过来源核验:参考材料强调，农村夫妻在家搞副业需选择投入低、能长期做且安静的项目[2]。(persons:参考材料);事实引用存在瑕疵：证据链中两条关键事实（关于农村夫妻想在家干活怕投诉、需选择投入低安静项目）标记为 'unverified' 且指出维度缺失 persons，文章直接将其作为既定事实陈述，未做适当模糊处理或标注不确定性。",
+   "critical": [
+    "事实未通过来源核验:参考材料指出，很多农村夫妻想在家找点活干，不想外出打工，又怕项目噪音大被邻居投诉[2]。(persons:参考材料)",
+    "事实未通过来源核验:参考材料强调，农村夫妻在家搞副业需选择投入低、能长期做且安静的项目[2]。(persons:参考材料)",
+    "事实引用存在瑕疵：证据链中两条关键事实（关于农村夫妻想在家干活怕投诉、需选择投入低安静项目）标记为 'unverified' 且指出维度缺失 persons，文章直接将其作为既定事实陈述，未做适当模糊处理或标注不确定性。"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 2
+   },
+   "primary": "fact.anchor_missing",
+   "primary_detail": "事实未通过来源核验:参考材料指出，很多农村夫妻想在家找点活干，不想外出打工，又怕项目噪音大被邻居投诉[2]。(persons:参考材料);事实未通过来源核验:参考材料强调，农村夫妻在家搞副业需选择投入低、能长期做且安静的项目[2]。(persons:参考材料);事实引用存在瑕疵：证据链中两条关键事实（关于农村夫妻想在家干活怕投诉、需选择投入低安静项目）标记为 'unverified' 且指出维度缺失 persons，文章直接将其作为既定事实陈述，未做适当模糊处理或标注不确定性。",
+   "evidence_brief": [
+    {
+     "claim": "参考材料中提到，不少加工类项目机器轰鸣，容易引发邻里矛盾[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "参考材料指出，很多农村夫妻想在家找点活干，不想外出打工，又怕项目噪音大被邻居投诉[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "参考材料列举了适合农村夫妻在家做的安静副业，如手工礼品/布艺配件分装[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "参考材料强调，农村夫妻在家搞副业需选择投入低、能长期做且安静的项目[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "参考材料提到，农村夫妻在家搞副业，几千元投资，安静不扰民，长久能干[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "另一批失业的人悄悄钻进了大多数人“看不上、嫌丢人、觉得不体面”的缝隙里[1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 199.3
+  },
+  {
+   "category": "social",
+   "topic": "就业 35岁",
+   "round": 1,
+   "draft_id": "social-20261121165023-acf711",
+   "status": "rejected",
+   "passed": false,
+   "versions": 11,
+   "revisions": 5,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     6535,
+     23756,
+     4921,
+     11439,
+     29188
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 6,
+     "label_counts": {
+      "normal": 3,
+      "potential": 2,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 6535,
+      "rank_score": 1.06,
+      "bm25": -13.217595476059538,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人生百态",
+      "source_axis": "author"
+     },
+     {
+      "id": 23756,
+      "rank_score": 0.4896,
+      "bm25": -12.501871360544355,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "非常人物志",
+      "source_axis": "author"
+     },
+     {
+      "id": 4921,
+      "rank_score": 0.4407,
+      "bm25": -12.433381333712388,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "深空之音",
+      "source_axis": "author"
+     },
+     {
+      "id": 11439,
+      "rank_score": 0.4045,
+      "bm25": -12.298492793099719,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "郝好摆烂",
+      "source_axis": "author"
+     },
+     {
+      "id": 29188,
+      "rank_score": 0.3428,
+      "bm25": -12.043680654643737,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "凤凰涅槃",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 致命问题:事实错误/无来源断言 - 文中称‘2024年人社部专项调查显示，35—44岁求职者平均获得面试机会的比例是12.4%’，但证据链显示该数据（38.7% vs 12.4%）实际来源于‘智联招聘《2024中年职场生态报告》’（来源ID:4921），而非人社部调查。将企业报告数据错误归因为政府官方调查数据，属于严重的事实归属错误。",
+   "critical": [
+    "致命问题:事实错误/无来源断言 - 文中称‘2024年人社部专项调查显示，35—44岁求职者平均获得面试机会的比例是12.4%’，但证据链显示该数据（38.7% vs 12.4%）实际来源于‘智联招聘《2024中年职场生态报告》’（来源ID:4921），而非人社部调查。将企业报告数据错误归因为政府官方调查数据，属于严重的事实归属错误。"
+   ],
+   "rule_hits": {},
+   "primary": "fact.binding",
+   "primary_detail": "致命问题:事实错误/无来源断言 - 文中称‘2024年人社部专项调查显示，35—44岁求职者平均获得面试机会的比例是12.4%’，但证据链显示该数据（38.7% vs 12.4%）实际来源于‘智联招聘《2024中年职场生态报告》’（来源ID:4921），而非人社部调查。将企业报告数据错误归因为政府官方调查数据，属于严重的事实归属错误。",
+   "evidence_brief": [
+    {
+     "claim": "斯坦福追踪460万人：AI抢走的不是35岁的饭碗，是22岁的",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:460",
+      "numbers:35岁",
+      "numbers:22岁"
+     ]
+    },
+    {
+     "claim": "智联招聘《2024中年职场生态报告》显示，35—45岁群体中，互联网行业从业者遭遇职业断崖的比例高达41%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024",
+      "numbers:35",
+      "numbers:45岁",
+      "numbers:41%"
+     ]
+    },
+    {
+     "claim": "25—34岁求职者平均获得面试机会的比例是38.7%，35—44岁却只有12.4%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:25",
+      "numbers:34岁",
+      "numbers:38.7%",
+      "numbers:35",
+      "numbers:44岁",
+      "numbers:12.4%"
+     ]
+    },
+    {
+     "claim": "2024年，人社部做了一次专项调查",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024",
+      "dates:2024年"
+     ]
+    },
+    {
+     "claim": "以律所合伙人王欣桐为例，她做了14年知识产权工作[5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:14"
+     ]
+    },
+    {
+     "claim": "以前她最多带5个律师——不是不想多带，是审年轻律师的文书太耗精力；现在AI包揽了基础检索和初稿，她能带10个了，还有时间接更多高价值案子[5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5",
+      "numbers:10"
+     ]
+    },
+    {
+     "claim": "王欣桐表示：“AI绝对是给35岁+的律师带来了新机会”[5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:35岁",
+      "persons:王欣桐"
+     ]
+    },
+    {
+     "claim": "2024年人社部专项调查显示，35—44岁求职者平均获得面试机会的比例是12.4%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024",
+      "numbers:35",
+      "numbers:44岁",
+      "numbers:12.4%",
+      "dates:2024年"
+     ]
+    }
+   ],
+   "elapsed_s": 585.0
+  },
+  {
+   "category": "social",
+   "topic": "退休 返聘",
+   "round": 1,
+   "draft_id": "social-20261121165954-292c7d",
+   "status": "rejected",
+   "passed": false,
+   "versions": 8,
+   "revisions": 4,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 0.9,
+   "facts": 10,
+   "checkable": 9,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     25456,
+     21168,
+     23562,
+     12647,
+     33354
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "low_quality": 2,
+      "potential": 6,
+      "normal": 3,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 25456,
+      "rank_score": 1.0412,
+      "bm25": -17.53556767626619,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "好奇费伊9Q2",
+      "source_axis": "author"
+     },
+     {
+      "id": 21168,
+      "rank_score": 1.0332,
+      "bm25": -17.45187710235281,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "星光点缀夜晚",
+      "source_axis": "author"
+     },
+     {
+      "id": 23562,
+      "rank_score": 1.0,
+      "bm25": -18.975206303469896,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天上驾白云的神仙",
+      "source_axis": "author"
+     },
+     {
+      "id": 12647,
+      "rank_score": 0.9948,
+      "bm25": -17.054119890703728,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "青衫烟雨",
+      "source_axis": "author"
+     },
+     {
+      "id": 33354,
+      "rank_score": 0.9821,
+      "bm25": -16.921477055242743,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "zg4045",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:在医生、教师、工程技术等经验密集型领域，部分具备高级职称的退休人员仍能获得较高的再就业收入(persons:备高级职)",
+   "critical": [
+    "事实未通过来源核验:在医生、教师、工程技术等经验密集型领域，部分具备高级职称的退休人员仍能获得较高的再就业收入(persons:备高级职)"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1
+   },
+   "primary": "fact.anchor_missing",
+   "primary_detail": "事实未通过来源核验:在医生、教师、工程技术等经验密集型领域，部分具备高级职称的退休人员仍能获得较高的再就业收入(persons:备高级职)",
+   "evidence_brief": [
+    {
+     "claim": "在医生、教师、工程技术等经验密集型领域，部分具备高级职称的退休人员仍能获得较高的再就业收入",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "不少退休人员拿着两千出头的退休金",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "单位返聘又拿到三千多工资",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "工厂寻找退休老技工解决技术难题",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "医院返聘退休医生",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "学校邀请退休教师代课",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "很多人把这个现象解读为第二次人口红利",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "39岁的大厂员工老刘收到裁员通知后自述以为自己是骨干，原来只是可替换的干骨头",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:39岁"
+     ]
+    },
+    {
+     "claim": "他投了200多份简历",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:200"
+     ]
+    },
+    {
+     "claim": "HR上来就问：“35岁以上的不考虑。”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:35岁"
+     ]
+    }
+   ],
+   "elapsed_s": 305.3
+  }
+ ],
+ "summary": {
+  "total_runs": 10,
+  "passed": 0,
+  "pass_rate": 0.0,
+  "primary_distribution": {
+   "other": {
+    "n": 4,
+    "share": 0.4
+   },
+   "fact.binding": {
+    "n": 4,
+    "share": 0.4
+   },
+   "fact.anchor_missing": {
+    "n": 2,
+    "share": 0.2
+   }
+  },
+  "rule_hit_totals": {
+   "事实锚点缺失(数字/日期/人物/机构/因果)": 4,
+   "引句未绑定(quote未过0.34)": 4,
+   "无来源断言": 1
+  },
+  "by_category": {
+   "social": {
+    "runs": 10,
+    "passed": 0,
+    "primary": {
+     "other": 4,
+     "fact.binding": 4,
+     "fact.anchor_missing": 2
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,986 @@
+{
+  "receipt": {
+    "generated_at": "2026-11-21T15:20:24",
+    "topic": "延迟退休 养老金",
+    "category": "social",
+    "elapsed_s": 551.1,
+    "draft_id": "social-20261121151525-13cb57",
+    "status": "rejected",
+    "passed": false,
+    "versions": 6,
+    "revisions": 2,
+    "score": 0.85,
+    "fact_checkability": 1.0,
+    "fact_checkable_over_total": "10/10",
+    "fewshot_status": "ok:5",
+    "fewshot_count": 5,
+    "copyedit_count": 0,
+    "copyedit_kinds": {},
+    "promise_issues": [],
+    "targeted_repair": {
+      "claims": 31,
+      "facts_failed": 9,
+      "located": 9,
+      "not_located": 0,
+      "attempts": 12,
+      "model_calls": 12,
+      "invalid_outputs": 0,
+      "anchor_erased": 6,
+      "fixed_first": 6,
+      "fixed_second": 0,
+      "unfixed": 3,
+      "rebound": 3,
+      "changed_sentences": 6,
+      "errors": 0,
+      "unfixed_shapes": {
+        "grafted(锚点在引句窗口外·移花接木)": 3
+      },
+      "details": [
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "在韶关地区，没在单位干过的纯灵活就业女性需55岁办退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "早年如果在企业上过班、离开时不是管理岗，也可以争取50岁退",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "但若中间断过几年或换过好几座城市打工，最后可能仍需按55岁办理",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "进入2026年，这一政策将持续平稳落地",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性55岁办退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性按55岁办退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        }
+      ]
+    },
+    "independent_reviews_used": 0,
+    "independent_review_max": 3,
+    "independent_review_rounds": [],
+    "review_account": "rejected",
+    "review_account_basis": "gate_rejected",
+    "model_meta": {
+      "same_model_review": true,
+      "review_independence": "self_review",
+      "independent_review": false,
+      "reviewer_model": null,
+      "reviewer_endpoint": null,
+      "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+      "served_model": "qwen3.8-flash-next-iq3_s"
+    },
+    "template_check_status": null,
+    "template_flags": [],
+    "critical": [
+      "事实未通过来源核验:灵活就业女性的退休年龄规则复杂，并非统一为55岁(numbers:55岁;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):55岁)"
+    ],
+    "issues": [
+      "标题-正文一致性(标题兑现):dates:2026年;标题词面正文覆盖 77%",
+      "标题中'2026年延迟退休小步推进'表述略显模糊，虽符合政策渐进逻辑，但未明确具体年份的法定退休年龄变化数值，易造成读者对具体执行节奏的误解。",
+      "第三段关于韶关地区灵活就业女性退休年龄的描述（55岁）与证据链[18622]中的原文引句（'原本就要55岁退休...未来退休年龄会慢慢往58岁过渡'）存在细微偏差，文章未提及向58岁过渡的长期趋势，仅陈述当前状态，信息完整性稍欠。",
+      "部分段落逻辑衔接略显跳跃，如从宏观政策直接跳转到个人资产储备建议，缺乏中间推导过程。"
+    ],
+    "materials": 5,
+    "material_gate": {
+      "full": "15/15",
+      "sources": 15,
+      "calibration": "calibrated"
+    },
+    "path": "D:\\ttxt\\04_writing\\drafts\\social\\rejected\\social-20261121151525-13cb57.md",
+    "notes": "门禁致命问题: 事实未通过来源核验:灵活就业女性的退休年龄规则复杂，并非统一为55岁(numbers:55岁;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):55岁)"
+  },
+  "raw": {
+    "draft_id": "social-20261121151525-13cb57",
+    "title": "告别“单位养老”幻想：2026年延迟退休小步推进，普通人需提前布局社保与资产",
+    "versions": 6,
+    "revisions": 2,
+    "status": "rejected",
+    "passed": false,
+    "truncated": false,
+    "score": 0.85,
+    "issues": [
+      "标题-正文一致性(标题兑现):dates:2026年;标题词面正文覆盖 77%",
+      "标题中'2026年延迟退休小步推进'表述略显模糊，虽符合政策渐进逻辑，但未明确具体年份的法定退休年龄变化数值，易造成读者对具体执行节奏的误解。",
+      "第三段关于韶关地区灵活就业女性退休年龄的描述（55岁）与证据链[18622]中的原文引句（'原本就要55岁退休...未来退休年龄会慢慢往58岁过渡'）存在细微偏差，文章未提及向58岁过渡的长期趋势，仅陈述当前状态，信息完整性稍欠。",
+      "部分段落逻辑衔接略显跳跃，如从宏观政策直接跳转到个人资产储备建议，缺乏中间推导过程。"
+    ],
+    "critical": [
+      "事实未通过来源核验:灵活就业女性的退休年龄规则复杂，并非统一为55岁(numbers:55岁;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):55岁)"
+    ],
+    "evidence": [
+      {
+        "claim": "延迟退休政策已于2025年1月1日正式启动",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "延迟退休政策2025年1月1日正式启动，2026继续小步推进 。",
+        "quote_offset": 161,
+        "overlap": 0.857,
+        "anchors": {
+          "numbers": [
+            "2025",
+            "1"
+          ],
+          "dates": [
+            "2025年1月1日"
+          ],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "2025",
+              "1"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [
+              "2025年1月1日"
+            ],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 136,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "延迟退休政策2026继续小步推进",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "延迟退休政策2025年1月1日正式启动，2026继续小步推进 。",
+        "quote_offset": 161,
+        "overlap": 1.0,
+        "anchors": {
+          "numbers": [
+            "2026"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "2026"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 136,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "当前的核心原则是“小步调整、弹性实施、分类推进”",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "- 原则：小步调整、弹性实施、分类推进。",
+        "quote_offset": 194,
+        "overlap": 0.625,
+        "anchors": {
+          "numbers": [],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 161,
+            "chars": 101
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "政策支持符合条件的劳动者进行弹性选择，符合条件可最多提前3年退休",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "不是一刀切强制延后，支持弹性选择：符合条件可最多提前3年，和单位协商一致也可最多延后3年退休 。",
+        "quote_offset": 214,
+        "overlap": 0.583,
+        "anchors": {
+          "numbers": [
+            "3"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "3"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 194,
+            "chars": 92
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "对于80后、90后而言，最大的认知误区在于以为能像父母一样干到退休领养老金",
+        "kind": "fact",
+        "article_id": 22884,
+        "source_url": "https://www.toutiao.com/article/7686028159191466525/",
+        "quote": "80 90后最大的认知误区：以为能像爸妈一样，干到退休领养老金",
+        "quote_offset": 0,
+        "overlap": 0.633,
+        "anchors": {
+          "numbers": [
+            "80",
+            "90",
+            "一"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "80",
+              "90"
+            ],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "一",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 0,
+            "chars": 64
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+        "kind": "fact",
+        "article_id": 18622,
+        "source_url": "https://www.toutiao.com/article/7688934034642076204/",
+        "quote": "五、渐进式延迟退休，对灵活就业女性的退休年龄有什么影响",
+        "quote_offset": 3202,
+        "overlap": 0.5,
+        "anchors": {
+          "numbers": [
+            "55岁",
+            "一"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [],
+            "missing": [
+              "55岁"
+            ]
+          },
+          "numbers_outside_quote": [
+            "55岁"
+          ],
+          "numbers_advisory": [
+            {
+              "anchor": "一",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 3165,
+            "chars": 96
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "unverified"
+      },
+      {
+        "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性按55岁办退休",
+        "kind": "fact",
+        "article_id": 18622,
+        "source_url": "https://www.toutiao.com/article/7688934034642076204/",
+        "quote": "原本就要55岁退休的纯灵活就业女性，未来退休年龄会慢慢往58岁过渡。",
+        "quote_offset": 3449,
+        "overlap": 0.375,
+        "anchors": {
+          "numbers": [
+            "55岁"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "55岁"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 3395,
+            "chars": 160
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "早年如果在企业上过班、离开时不是管理岗，也可以争取 50 岁退",
+        "kind": "fact",
+        "article_id": 3978,
+        "source_url": "https://www.toutiao.com/article/7701629341389685276/",
+        "quote": "早年如果在企业上过班、离开时不是管理岗，也可以争取 50 岁退",
+        "quote_offset": 100,
+        "overlap": 1.0,
+        "anchors": {
+          "numbers": [
+            "50 岁"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "model_supplied",
+          "numbers": {
+            "found": [
+              "50 岁"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 68,
+            "chars": 134
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "亲历者曾跑四趟社保局才办完退休",
+        "kind": "fact",
+        "article_id": 3978,
+        "source_url": "https://www.toutiao.com/article/7701629341389685276/",
+        "quote": "跑了4趟社保局才办完退休，灵活就业的坑，我替所有人踩完了",
+        "quote_offset": 0,
+        "overlap": 0.571,
+        "anchors": {
+          "numbers": [
+            "四"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "四",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 0,
+            "chars": 58
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "退休前三个月若仅凭口头询问或简单准备身份证去社保局，往往难以顺利办结",
+        "kind": "fact",
+        "article_id": 3978,
+        "source_url": "https://www.toutiao.com/article/7701629341389685276/",
+        "quote": "退休前三个月，我在业主群里随口问了一句：“办退休是不是带身份证去社保局就行？",
+        "quote_offset": 164,
+        "overlap": 0.355,
+        "anchors": {
+          "numbers": [
+            "三"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "三",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 100,
+            "chars": 104
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      }
+    ],
+    "fact_checkability": {
+      "definition": "关键事实中有一手出处(绑定来源原文引句)或至少一个客观可核锚点(数字/日期/人物/机构在来源中找到)的比例",
+      "denominator": "非观点类关键事实(opinion 不计入分母)",
+      "facts": 10,
+      "checkable": 10,
+      "rate": 1.0,
+      "release_threshold": 0.8,
+      "release_condition_met": true,
+      "not_a_substitute_for": "原有事实门禁与 A+B 证据级门禁;两套指标分别记账",
+      "rows": [
+        {
+          "claim": "延迟退休政策已于2025年1月1日正式启动",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:2025",
+            "numbers:1",
+            "dates:2025年1月1日"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "延迟退休政策2026继续小步推进",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:2026"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "当前的核心原则是“小步调整、弹性实施、分类推进”",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [],
+          "checkable": true
+        },
+        {
+          "claim": "政策支持符合条件的劳动者进行弹性选择，符合条件可最多提前3年退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:3"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "对于80后、90后而言，最大的认知误区在于以为能像父母一样干到退休领养老金",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:80",
+            "numbers:90"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "credibility": "unverified",
+          "first_hand": true,
+          "hits": [],
+          "checkable": true
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性按55岁办退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:55岁"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "早年如果在企业上过班、离开时不是管理岗，也可以争取 50 岁退",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:50 岁"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "亲历者曾跑四趟社保局才办完退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [],
+          "checkable": true
+        },
+        {
+          "claim": "退休前三个月若仅凭口头询问或简单准备身份证去社保局，往往难以顺利办结",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [],
+          "checkable": true
+        }
+      ]
+    },
+    "targeted_repair": {
+      "claims": 31,
+      "facts_failed": 9,
+      "located": 9,
+      "not_located": 0,
+      "attempts": 12,
+      "model_calls": 12,
+      "invalid_outputs": 0,
+      "anchor_erased": 6,
+      "fixed_first": 6,
+      "fixed_second": 0,
+      "unfixed": 3,
+      "rebound": 3,
+      "changed_sentences": 6,
+      "errors": 0,
+      "unfixed_shapes": {
+        "grafted(锚点在引句窗口外·移花接木)": 3
+      },
+      "details": [
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "在韶关地区，没在单位干过的纯灵活就业女性需55岁办退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "早年如果在企业上过班、离开时不是管理岗，也可以争取50岁退",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "但若中间断过几年或换过好几座城市打工，最后可能仍需按55岁办理",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "进入2026年，这一政策将持续平稳落地",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性55岁办退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        },
+        {
+          "claim": "灵活就业女性的退休年龄规则复杂，并非统一为55岁",
+          "shape": "grafted(锚点在引句窗口外·移花接木)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "例如在韶关地区，没在单位干过的纯灵活就业女性按55岁办退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 18622
+        }
+      ]
+    },
+    "release_conditions": {
+      "existing_gate": false,
+      "fact_checkability": true,
+      "note": "两套条件分别记账、取「与」放行;事实可核率不替代原有门禁"
+    },
+    "template_check": null,
+    "template_flags": [],
+    "path": "D:\\ttxt\\04_writing\\drafts\\social\\rejected\\social-20261121151525-13cb57.md",
+    "materials": 5,
+    "material_stats": {
+      "pool_limit": 15,
+      "candidates": 15,
+      "full_candidates": 15,
+      "distinct_sources": 15,
+      "distinct_hosts": 1,
+      "independence_axis": {
+        "unit": "author(缺作者退回 host,缺作者不计数)",
+        "articles_counted_by_author": 15,
+        "articles_counted_by_host": 0,
+        "articles_without_any_source_key": 0
+      },
+      "selected_ids": [
+        3747,
+        12004,
+        18622,
+        22884,
+        3978
+      ],
+      "selected_full": 5,
+      "selected_distinct_sources": 5,
+      "selected_distinct_hosts": 1,
+      "calibration_status": "calibrated",
+      "priors": {
+        "applied": true,
+        "weight": 0.3,
+        "measured_label_hits": 10,
+        "label_counts": {
+          "normal": 4,
+          "potential": 2,
+          "verified_viral": 2,
+          "low_quality": 2
+        },
+        "reason": ""
+      },
+      "scores": [
+        {
+          "id": 3747,
+          "rank_score": 1.0853,
+          "bm25": -37.327164636160035,
+          "viral_prior": 0.6,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "泉边静听泉声",
+          "source_axis": "author"
+        },
+        {
+          "id": 12004,
+          "rank_score": 1.06,
+          "bm25": -38.01835921258807,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "家有娃的日常",
+          "source_axis": "author"
+        },
+        {
+          "id": 18622,
+          "rank_score": 0.9097,
+          "bm25": -36.92178583567766,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "平安喜乐",
+          "source_axis": "author"
+        },
+        {
+          "id": 22884,
+          "rank_score": 0.8519,
+          "bm25": -36.49991409664919,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "桃桃育儿",
+          "source_axis": "author"
+        },
+        {
+          "id": 3978,
+          "rank_score": 0.8294,
+          "bm25": -34.58495035203054,
+          "viral_prior": 1.0,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "天使的眼泪",
+          "source_axis": "author"
+        }
+      ]
+    },
+    "fewshot_status": "ok:5",
+    "fewshot_count": 5,
+    "copyedit_count": 0,
+    "copyedit_fixes": [],
+    "promise_issues": [],
+    "notes": "门禁致命问题: 事实未通过来源核验:灵活就业女性的退休年龄规则复杂，并非统一为55岁(numbers:55岁;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):55岁)",
+    "model_meta": {
+      "same_model_review": true,
+      "review_independence": "self_review",
+      "independent_review": false,
+      "reviewer_model": null,
+      "reviewer_endpoint": null,
+      "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+      "served_model": "qwen3.8-flash-next-iq3_s"
+    },
+    "review_account": "rejected",
+    "review_account_basis": "gate_rejected",
+    "independent_review": {
+      "attempted": false,
+      "available": false,
+      "error": null
+    },
+    "independent_reviews_used": 0,
+    "independent_review_max": 3,
+    "independent_review_rounds": [],
+    "published": false
+  }
+}

@@ -1,0 +1,863 @@
+{
+  "receipt": {
+    "generated_at": "2026-11-21T15:26:47",
+    "topic": "延迟退休 养老金",
+    "category": "social",
+    "elapsed_s": 326.8,
+    "draft_id": "social-20261121152207-215b9d",
+    "status": "rejected",
+    "passed": false,
+    "versions": 8,
+    "revisions": 4,
+    "score": 0.6,
+    "fact_checkability": 1.0,
+    "fact_checkable_over_total": "6/6",
+    "fewshot_status": "ok:5",
+    "fewshot_count": 5,
+    "copyedit_count": 0,
+    "copyedit_kinds": {},
+    "promise_issues": [],
+    "targeted_repair": {
+      "claims": 44,
+      "facts_failed": 11,
+      "located": 11,
+      "not_located": 0,
+      "attempts": 14,
+      "model_calls": 14,
+      "invalid_outputs": 0,
+      "anchor_erased": 4,
+      "fixed_first": 8,
+      "fixed_second": 0,
+      "unfixed": 3,
+      "rebound": 0,
+      "changed_sentences": 8,
+      "errors": 0,
+      "unfixed_shapes": {
+        "quote_unbound(引句未绑定)": 3
+      },
+      "details": [
+        {
+          "claim": "若早年曾在企业上班且离开时不是管理岗，可争取50岁退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "但若中间断缴或换过城市，可能需按55岁办理",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "进入2026年，这一政策将持续平稳落地",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "政策支持符合条件的劳动者进行弹性选择，但需满足最低缴费年限等条件，提前时间最长不超过3年且不得低于原法定退休年龄",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "对于80后、90后而言，需要关注的是养老路径的变化",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 22884
+        },
+        {
+          "claim": "政策支持符合条件的劳动者进行弹性选择，但需达到最低缴费年限，且提前后不得低于原法定退休年龄",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "实际上，有人50岁退、有人55岁退，受地方政策、历史参保身份等因素影响",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "但各地执行口径不同，具体认定需结合地方政策及档案记录，不能一概而论，建议以当地社保经办机构答复为准",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "灵活就业人员还需警惕档案缺失、断缴及异地转移等隐形陷阱",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "退休手续并非仅带身份证即可办理",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "实际上，有人50岁退、有人55岁退，受地方政策、历史参保身份等因素影响",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "unfixed",
+          "attempts": 2
+        }
+      ]
+    },
+    "independent_reviews_used": 2,
+    "independent_review_max": 3,
+    "independent_review_rounds": [
+      {
+        "round": 1,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-flash",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "## 审评意见\n\n### 一、总体评价\n这是一篇面向普通打工人的养老政策科普/焦虑疏导型文章，选题有现实性，结构大致清楚，能抓住“延迟退休”“弹性退休”“灵活就业女性退休年龄”“档案与社保手续”等关注点。但文章存在较明显的问题：**政策表述不完整、引用不规范、部分结论绝对化、逻辑跳跃、可操作性不足**。目前更像新媒体初稿，不建议直接发布，需做事实核查和改写。\n\n总体评分：**6/10**。  \n- 选题价值：8/10  \n- 事实准确性：5.5/10  \n- 结构与逻辑：6.5/10  \n- 语言表达：6/10  \n- 可操作性：6/10  \n\n---\n\n### 二、主要优点\n1. **选题贴近现实**：延迟退休、灵活就业女性退休年龄、档案缺失、异地转移等，都是实际痛点。\n2. **有“反焦虑”意识**：强调“小步调整、弹性实施、分类推进”，比单纯渲染延迟退休恐慌更可取。\n3. **结尾给出行动方向**：提醒确认参保身份、岗位性质、社保记录和档案，方向是对的。\n4. **语言通俗**：适合新媒体传播，读者门槛较低。\n\n---\n\n### 三、主要问题\n\n#### 1. 政策表述不完整，容易误导\n文章说“政策支持符合条件的劳动者进行弹性选择，最多可提前退休[1]”，但没有说明关键条件：  \n- 需达到最低缴费年限；  \n- 提前时间最长不超过3年；  \n- 不得低于原法定退休年龄；  ",
+        "elapsed_s": 19.281
+      },
+      {
+        "round": 2,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-v4-pro",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "这篇文章属于政策提醒类短文，有一定公共价值，但作为“审评”对象来看，在准确性、严谨性、结构和引用规范方面都存在较明显问题。以下从优点、不足和改进建议三方面进行审评。\n\n---\n\n## 一、文章优点\n\n1. **选题有现实意义**  \n   延迟退休政策自2025年正式实施，灵活就业人员、女性参保人员等群体确实容易对退休年龄、手续办理等问题产生误解。文章提醒“核对参保身份、档案完整性”，切中了不少打工人的实际焦虑。\n\n2. **核心原则表述基本正确**  \n   开篇提到“小步调整、弹性实施、分类推进”，并指出“符合条件的劳动者可最多提前3年”，这与渐进式延迟退休政策的总体方向一致。\n\n3. **语言通俗，易于传播**  \n   文章没有使用过多专业术语，普通读者能大致理解其想表达的意思，适合在自媒体或大众科普场景下传播。\n\n---\n\n## 二、主要不足\n\n### 1. 政策表述不够严谨，容易产生误导\n\n- **“符合条件可最多提前3年”表述不完整**  \n  弹性提前退休有前置条件：必须达到最低缴费年限，且提前后不得低于原法定退休年龄。原文只说“符合条件可最多提前3年”，容易让读者误以为任何人都可以无门槛提前3年退休。\n\n- **灵活就业女性退休年龄的归因过于简化**  \n  文章称“核心在于过往参保身份与岗位性质”，但灵活就业人员本身通常没有明确的“岗位性质”一说。更准确地说，灵",
+        "elapsed_s": 43.687
+      }
+    ],
+    "review_account": "rejected",
+    "review_account_basis": "independent_review_blocked",
+    "model_meta": {
+      "same_model_review": false,
+      "review_independence": "independent",
+      "independent_review": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "reviewer_limitation": "评审由独立服务模型 deepseek-v4-pro 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+      "served_model": "qwen3.8-flash-next-iq3_s"
+    },
+    "template_check_status": "within_budget",
+    "template_flags": [],
+    "critical": [
+      "致命问题:事实错误/编造/无来源断言/内容截断 - 文章中出现'有人退、有人退'这种明显残缺或错误的表述，属于内容截断或生成错误，导致关键信息（灵活就业女性具体退休年龄规则）缺失且不可读。"
+    ],
+    "issues": [
+      "标题-正文一致性(标题兑现):标题词面正文覆盖 47%",
+      "第二段存在严重语病和逻辑缺失：'有人退、有人退'语句不通，且未说明具体退休年龄差异（如50岁或55岁），导致信息模糊。",
+      "'跑完4趟社保局才办完退休'作为独立句子出现，缺乏主语和上下文连接，属于碎片化引用，影响阅读流畅性。",
+      "标题吸引力一般，内容虽实用但表述略显松散，部分段落（如第二段）过渡生硬。"
+    ],
+    "materials": 5,
+    "material_gate": {
+      "full": "15/15",
+      "sources": 15,
+      "calibration": "calibrated"
+    },
+    "path": "C:\\Users\\yangl\\.qoder\\worktrees\\app\\207d2f\\ttxt\\04_writing\\social\\rejected\\social-20261121152207-215b9d.md",
+    "notes": "门禁致命问题: 致命问题:事实错误/编造/无来源断言/内容截断 - 文章中出现'有人退、有人退'这种明显残缺或错误的表述，属于内容截断或生成错误，导致关键信息（灵活就业女性具体退休年龄规则）缺失且不可读。"
+  },
+  "raw": {
+    "draft_id": "social-20261121152207-215b9d",
+    "title": "延迟退休落地后，劳动者应重点核对的两件事",
+    "versions": 8,
+    "revisions": 4,
+    "status": "rejected",
+    "passed": false,
+    "truncated": false,
+    "score": 0.6,
+    "issues": [
+      "标题-正文一致性(标题兑现):标题词面正文覆盖 47%",
+      "第二段存在严重语病和逻辑缺失：'有人退、有人退'语句不通，且未说明具体退休年龄差异（如50岁或55岁），导致信息模糊。",
+      "'跑完4趟社保局才办完退休'作为独立句子出现，缺乏主语和上下文连接，属于碎片化引用，影响阅读流畅性。",
+      "标题吸引力一般，内容虽实用但表述略显松散，部分段落（如第二段）过渡生硬。"
+    ],
+    "critical": [
+      "致命问题:事实错误/编造/无来源断言/内容截断 - 文章中出现'有人退、有人退'这种明显残缺或错误的表述，属于内容截断或生成错误，导致关键信息（灵活就业女性具体退休年龄规则）缺失且不可读。"
+    ],
+    "evidence": [
+      {
+        "claim": "延迟退休政策已于2025年1月1日正式启动",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "延迟退休政策2025年1月1日正式启动，2026继续小步推进 。",
+        "quote_offset": 161,
+        "overlap": 0.857,
+        "anchors": {
+          "numbers": [
+            "2025",
+            "1"
+          ],
+          "dates": [
+            "2025年1月1日"
+          ],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "2025",
+              "1"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [
+              "2025年1月1日"
+            ],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 136,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "2026年将继续推进",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "延迟退休政策2025年1月1日正式启动，2026继续小步推进 。",
+        "quote_offset": 161,
+        "overlap": 0.5,
+        "anchors": {
+          "numbers": [
+            "2026"
+          ],
+          "dates": [
+            "2026年"
+          ],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "2026"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [
+              "2026年"
+            ],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 136,
+            "chars": 78
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "当前的核心原则是“小步调整、弹性实施、分类推进”",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "- 原则：小步调整、弹性实施、分类推进。",
+        "quote_offset": 194,
+        "overlap": 0.625,
+        "anchors": {
+          "numbers": [],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 161,
+            "chars": 101
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "延迟退休政策支持弹性选择，符合条件可最多提前3年",
+        "kind": "fact",
+        "article_id": 3747,
+        "source_url": "https://www.toutiao.com/article/7701734970963919423/",
+        "quote": "不是一刀切强制延后，支持弹性选择：符合条件可最多提前3年，和单位协商一致也可最多延后3年退休 。",
+        "quote_offset": 214,
+        "overlap": 0.75,
+        "anchors": {
+          "numbers": [
+            "3"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "3"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 194,
+            "chars": 92
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "很多人误以为灵活就业女性统一55岁退休",
+        "kind": "fact",
+        "article_id": 18622,
+        "source_url": "https://www.toutiao.com/article/7688934034642076204/",
+        "quote": "很多自媒体简单一句话概括：灵活就业女性统一55岁退休。",
+        "quote_offset": 186,
+        "overlap": 0.688,
+        "anchors": {
+          "numbers": [
+            "55岁",
+            "一"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "55岁"
+            ],
+            "missing": []
+          },
+          "numbers_advisory": [
+            {
+              "anchor": "一",
+              "in_source": true
+            }
+          ],
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 137,
+            "chars": 98
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      },
+      {
+        "claim": "跑完4趟社保局才办完退休",
+        "kind": "fact",
+        "article_id": 3978,
+        "source_url": "https://www.toutiao.com/article/7701629341389685276/",
+        "quote": "跑了4趟社保局才办完退休，灵活就业的坑，我替所有人踩完了",
+        "quote_offset": 0,
+        "overlap": 0.889,
+        "anchors": {
+          "numbers": [
+            "4"
+          ],
+          "dates": [],
+          "persons": [],
+          "orgs": [],
+          "brands": [],
+          "causal": []
+        },
+        "checks": {
+          "quote_source": "auto_bound",
+          "numbers": {
+            "found": [
+              "4"
+            ],
+            "missing": []
+          },
+          "dates": {
+            "found": [],
+            "missing": []
+          },
+          "persons": {
+            "found": [],
+            "missing": []
+          },
+          "orgs": {
+            "found": [],
+            "missing": []
+          },
+          "anchor_window": {
+            "offset": 0,
+            "chars": 58
+          },
+          "causal": {
+            "found": [],
+            "missing": [],
+            "note": "claim 无因果连接词"
+          }
+        },
+        "credibility": "verified"
+      }
+    ],
+    "fact_checkability": {
+      "definition": "关键事实中有一手出处(绑定来源原文引句)或至少一个客观可核锚点(数字/日期/人物/机构在来源中找到)的比例",
+      "denominator": "非观点类关键事实(opinion 不计入分母)",
+      "facts": 6,
+      "checkable": 6,
+      "rate": 1.0,
+      "release_threshold": 0.8,
+      "release_condition_met": true,
+      "not_a_substitute_for": "原有事实门禁与 A+B 证据级门禁;两套指标分别记账",
+      "rows": [
+        {
+          "claim": "延迟退休政策已于2025年1月1日正式启动",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:2025",
+            "numbers:1",
+            "dates:2025年1月1日"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "2026年将继续推进",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:2026",
+            "dates:2026年"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "当前的核心原则是“小步调整、弹性实施、分类推进”",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [],
+          "checkable": true
+        },
+        {
+          "claim": "延迟退休政策支持弹性选择，符合条件可最多提前3年",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:3"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "很多人误以为灵活就业女性统一55岁退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:55岁"
+          ],
+          "checkable": true
+        },
+        {
+          "claim": "跑完4趟社保局才办完退休",
+          "credibility": "verified",
+          "first_hand": true,
+          "hits": [
+            "numbers:4"
+          ],
+          "checkable": true
+        }
+      ]
+    },
+    "targeted_repair": {
+      "claims": 44,
+      "facts_failed": 11,
+      "located": 11,
+      "not_located": 0,
+      "attempts": 14,
+      "model_calls": 14,
+      "invalid_outputs": 0,
+      "anchor_erased": 4,
+      "fixed_first": 8,
+      "fixed_second": 0,
+      "unfixed": 3,
+      "rebound": 0,
+      "changed_sentences": 8,
+      "errors": 0,
+      "unfixed_shapes": {
+        "quote_unbound(引句未绑定)": 3
+      },
+      "details": [
+        {
+          "claim": "若早年曾在企业上班且离开时不是管理岗，可争取50岁退休",
+          "shape": "wrong_binding(绑错文章·锚点在池内别处)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "但若中间断缴或换过城市，可能需按55岁办理",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "进入2026年，这一政策将持续平稳落地",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "政策支持符合条件的劳动者进行弹性选择，但需满足最低缴费年限等条件，提前时间最长不超过3年且不得低于原法定退休年龄",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "对于80后、90后而言，需要关注的是养老路径的变化",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 22884
+        },
+        {
+          "claim": "政策支持符合条件的劳动者进行弹性选择，但需达到最低缴费年限，且提前后不得低于原法定退休年龄",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3747
+        },
+        {
+          "claim": "实际上，有人50岁退、有人55岁退，受地方政策、历史参保身份等因素影响",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "但各地执行口径不同，具体认定需结合地方政策及档案记录，不能一概而论，建议以当地社保经办机构答复为准",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "灵活就业人员还需警惕档案缺失、断缴及异地转移等隐形陷阱",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "unfixed",
+          "attempts": 2
+        },
+        {
+          "claim": "退休手续并非仅带身份证即可办理",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "fixed_round_1",
+          "attempts": 1,
+          "new_article_id": 3978
+        },
+        {
+          "claim": "实际上，有人50岁退、有人55岁退，受地方政策、历史参保身份等因素影响",
+          "shape": "quote_unbound(引句未绑定)",
+          "outcome": "unfixed",
+          "attempts": 2
+        }
+      ]
+    },
+    "release_conditions": {
+      "existing_gate": false,
+      "fact_checkability": true,
+      "note": "两套条件分别记账、取「与」放行;事实可核率不替代原有门禁"
+    },
+    "template_check": {
+      "category": "social",
+      "budget_status": "ok",
+      "before": {
+        "status": "within_budget",
+        "reasons": [],
+        "marker_per_100_sent": 4.35,
+        "parallel_per_100_sent": 0.0,
+        "budget": {
+          "marker": 13.64,
+          "parallel": 4.35
+        },
+        "basis_drafts": 9,
+        "sentences": 23
+      },
+      "before_signals": {
+        "sentences": 23,
+        "marker_hits": 1,
+        "parallel_pattern_hits": 0,
+        "sentence_length_cv": 0.2593
+      },
+      "rewrite_count": 0,
+      "over_budget_paragraphs": 0,
+      "draft": "告别一刀切焦虑：2026年养老政策持续落地，打工人需提前布局\n\n延迟退休政策已于2025年1月1日正式启动[1]。进入2026年，这一政策将持续平稳落地[1]。当前的核心原则是“小步调整、弹性实施、分类推进”[1]。这意味着告别了过去那种让人焦虑的“一刀切”强制延后模式[1]。政策支持符合条件的劳动者进行弹性选择，最多可提前退休[1]。这种渐进式的方式旨在缓解社会对延迟退休的恐慌情绪[1]。\n\n对于80后、90后而言，最大的认知误区在于以为能像父母一样，干到退休领养老金[4]。过去几十年里，人生路径似乎早已写好：找一份工作，踏实上班，交满社保年限，退休后按月领取养老金[4]。然而，时代环境早已和父母那一代完全不同[4]。单纯依赖单位社保已无法复刻父辈的安稳养老路径[4]。面对延迟退休大势，普通打工人需提前布局两件核心大事才能避免晚年收入断档[2]。\n\n灵活就业女性的退休年龄规则常被误解。很多人误以为灵活就业女性统一55岁退休[3]。实际上，有人50岁退、有人55岁退，核心在于过往参保身份与岗位性质[3]。早年如果在企业上过班、离开时不是管理岗，也可以争取 50 岁退[5]。但若中间断过几年又换过好几座城市打工最后还是按55走[5]。灵活就业人员还需警惕档案缺失、断缴及异地转移等隐形陷阱[5]。\n\n亲历者曾跑4趟社保局才办完退休[5]。这警示我们，退休手续并非仅带身份证即可办理[5]。对于普通打工人，一是需确认自身参保身份与岗位性质对退休年龄的影响[3][5]；二是需确保社保连续缴纳及档案完整，避免隐形陷阱导致收入断档[2][5]。提前规划这两件事，才能在政策深化阶段从容应对[2]。",
+      "check_status": "within_budget"
+    },
+    "template_flags": [],
+    "path": "C:\\Users\\yangl\\.qoder\\worktrees\\app\\207d2f\\ttxt\\04_writing\\social\\rejected\\social-20261121152207-215b9d.md",
+    "materials": 5,
+    "material_stats": {
+      "pool_limit": 15,
+      "candidates": 15,
+      "full_candidates": 15,
+      "distinct_sources": 15,
+      "distinct_hosts": 1,
+      "independence_axis": {
+        "unit": "author(缺作者退回 host,缺作者不计数)",
+        "articles_counted_by_author": 15,
+        "articles_counted_by_host": 0,
+        "articles_without_any_source_key": 0
+      },
+      "selected_ids": [
+        3747,
+        12004,
+        18622,
+        22884,
+        3978
+      ],
+      "selected_full": 5,
+      "selected_distinct_sources": 5,
+      "selected_distinct_hosts": 1,
+      "calibration_status": "calibrated",
+      "priors": {
+        "applied": true,
+        "weight": 0.3,
+        "measured_label_hits": 10,
+        "label_counts": {
+          "normal": 4,
+          "potential": 2,
+          "verified_viral": 2,
+          "low_quality": 2
+        },
+        "reason": ""
+      },
+      "scores": [
+        {
+          "id": 3747,
+          "rank_score": 1.0853,
+          "bm25": -37.327164636160035,
+          "viral_prior": 0.6,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "泉边静听泉声",
+          "source_axis": "author"
+        },
+        {
+          "id": 12004,
+          "rank_score": 1.06,
+          "bm25": -38.01835921258807,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "家有娃的日常",
+          "source_axis": "author"
+        },
+        {
+          "id": 18622,
+          "rank_score": 0.9097,
+          "bm25": -36.92178583567766,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "平安喜乐",
+          "source_axis": "author"
+        },
+        {
+          "id": 22884,
+          "rank_score": 0.8519,
+          "bm25": -36.49991409664919,
+          "viral_prior": 0.2,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "桃桃育儿",
+          "source_axis": "author"
+        },
+        {
+          "id": 3978,
+          "rank_score": 0.8294,
+          "bm25": -34.58495035203054,
+          "viral_prior": 1.0,
+          "completeness": "full",
+          "host": "toutiao.com",
+          "author": "天使的眼泪",
+          "source_axis": "author"
+        }
+      ]
+    },
+    "fewshot_status": "ok:5",
+    "fewshot_count": 5,
+    "copyedit_count": 0,
+    "copyedit_fixes": [],
+    "promise_issues": [],
+    "notes": "门禁致命问题: 致命问题:事实错误/编造/无来源断言/内容截断 - 文章中出现'有人退、有人退'这种明显残缺或错误的表述，属于内容截断或生成错误，导致关键信息（灵活就业女性具体退休年龄规则）缺失且不可读。",
+    "model_meta": {
+      "same_model_review": false,
+      "review_independence": "independent",
+      "independent_review": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "reviewer_limitation": "评审由独立服务模型 deepseek-v4-pro 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+      "served_model": "qwen3.8-flash-next-iq3_s"
+    },
+    "review_account": "rejected",
+    "review_account_basis": "independent_review_blocked",
+    "independent_review": {
+      "attempted": true,
+      "available": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "prompt": "审评这篇文章",
+      "verdict_markers": {
+        "blocking": true,
+        "publishable": false,
+        "blocking_markers": [
+          "修改后再评"
+        ],
+        "publishable_markers": []
+      },
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "verdict_excerpt": "这篇文章属于政策提醒类短文，有一定公共价值，但作为“审评”对象来看，在准确性、严谨性、结构和引用规范方面都存在较明显问题。以下从优点、不足和改进建议三方面进行审评。\n\n---\n\n## 一、文章优点\n\n1. **选题有现实意义**  \n   延迟退休政策自2025年正式实施，灵活就业人员、女性参保人员等群体确实容易对退休年龄、手续办理等问题产生误解。文章提醒“核对参保身份、档案完整性”，切中了不少打工人的实际焦虑。\n\n2. **核心原则表述基本正确**  \n   开篇提到“小步调整、弹性实施、分类推进”，并指出“符合条件的劳动者可最多提前3年”，这与渐进式延迟退休政策的总体方向一致。\n\n3. **语言通俗，易于传播**  \n   文章没有使用过多专业术语，普通读者能大致理解其想表达的意思，适合在自媒体或大众科普场景下传播。\n\n---\n\n## 二、主要不足\n\n### 1. 政策表述不够严谨，容易产生误导\n\n- **“符合条件可最多提前3年”表述不完整**  \n  弹性提前退休有前置条件：必须达到最低缴费年限，且提前后不得低于原法定退休年龄。原文只说“符合条件可最多提前3年”，容易让读者误以为任何人都可以无门槛提前3年退休。\n\n- **灵活就业女性退休年龄的归因过于简化**  \n  文章称“核心在于过往参保身份与岗位性质”，但灵活就业人员本身通常没有明确的“岗位性质”一说。更准确地说，灵",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 492,
+        "completion_tokens": 2836,
+        "total_tokens": 3328,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1722
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 492
+      },
+      "elapsed_s": 43.687
+    },
+    "independent_reviews_used": 2,
+    "independent_review_max": 3,
+    "independent_review_rounds": [
+      {
+        "round": 1,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-flash",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "## 审评意见\n\n### 一、总体评价\n这是一篇面向普通打工人的养老政策科普/焦虑疏导型文章，选题有现实性，结构大致清楚，能抓住“延迟退休”“弹性退休”“灵活就业女性退休年龄”“档案与社保手续”等关注点。但文章存在较明显的问题：**政策表述不完整、引用不规范、部分结论绝对化、逻辑跳跃、可操作性不足**。目前更像新媒体初稿，不建议直接发布，需做事实核查和改写。\n\n总体评分：**6/10**。  \n- 选题价值：8/10  \n- 事实准确性：5.5/10  \n- 结构与逻辑：6.5/10  \n- 语言表达：6/10  \n- 可操作性：6/10  \n\n---\n\n### 二、主要优点\n1. **选题贴近现实**：延迟退休、灵活就业女性退休年龄、档案缺失、异地转移等，都是实际痛点。\n2. **有“反焦虑”意识**：强调“小步调整、弹性实施、分类推进”，比单纯渲染延迟退休恐慌更可取。\n3. **结尾给出行动方向**：提醒确认参保身份、岗位性质、社保记录和档案，方向是对的。\n4. **语言通俗**：适合新媒体传播，读者门槛较低。\n\n---\n\n### 三、主要问题\n\n#### 1. 政策表述不完整，容易误导\n文章说“政策支持符合条件的劳动者进行弹性选择，最多可提前退休[1]”，但没有说明关键条件：  \n- 需达到最低缴费年限；  \n- 提前时间最长不超过3年；  \n- 不得低于原法定退休年龄；  ",
+        "elapsed_s": 19.281
+      },
+      {
+        "round": 2,
+        "verdict_label": "修改后再评",
+        "blocking": true,
+        "publishable": false,
+        "reviewer_model": "deepseek-v4-pro",
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_excerpt": "这篇文章属于政策提醒类短文，有一定公共价值，但作为“审评”对象来看，在准确性、严谨性、结构和引用规范方面都存在较明显问题。以下从优点、不足和改进建议三方面进行审评。\n\n---\n\n## 一、文章优点\n\n1. **选题有现实意义**  \n   延迟退休政策自2025年正式实施，灵活就业人员、女性参保人员等群体确实容易对退休年龄、手续办理等问题产生误解。文章提醒“核对参保身份、档案完整性”，切中了不少打工人的实际焦虑。\n\n2. **核心原则表述基本正确**  \n   开篇提到“小步调整、弹性实施、分类推进”，并指出“符合条件的劳动者可最多提前3年”，这与渐进式延迟退休政策的总体方向一致。\n\n3. **语言通俗，易于传播**  \n   文章没有使用过多专业术语，普通读者能大致理解其想表达的意思，适合在自媒体或大众科普场景下传播。\n\n---\n\n## 二、主要不足\n\n### 1. 政策表述不够严谨，容易产生误导\n\n- **“符合条件可最多提前3年”表述不完整**  \n  弹性提前退休有前置条件：必须达到最低缴费年限，且提前后不得低于原法定退休年龄。原文只说“符合条件可最多提前3年”，容易让读者误以为任何人都可以无门槛提前3年退休。\n\n- **灵活就业女性退休年龄的归因过于简化**  \n  文章称“核心在于过往参保身份与岗位性质”，但灵活就业人员本身通常没有明确的“岗位性质”一说。更准确地说，灵",
+        "elapsed_s": 43.687
+      }
+    ],
+    "published": false
+  }
+}

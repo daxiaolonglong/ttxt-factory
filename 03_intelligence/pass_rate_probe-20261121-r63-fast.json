@@ -1,0 +1,998 @@
+{
+ "generated_at": "2026-11-21 17:06:42",
+ "note": "只读探针:不改门禁/阈值/取样规则;template_decheck 显式关闭;正式库零写入",
+ "gate_min_score": 0.6,
+ "fact_checkability_min": 0.8,
+ "model": null,
+ "batch": [
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金"
+  },
+  {
+   "category": "social",
+   "topic": "邻里纠纷"
+  },
+  {
+   "category": "social",
+   "topic": "家暴 离婚"
+  },
+  {
+   "category": "social",
+   "topic": "就业 35岁"
+  },
+  {
+   "category": "social",
+   "topic": "退休 返聘"
+  }
+ ],
+ "rounds": 1,
+ "runs": [
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金",
+   "round": 1,
+   "draft_id": "social-20261121170744-d0cb9b",
+   "status": "rejected",
+   "passed": false,
+   "versions": 10,
+   "revisions": 5,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     3747,
+     12004,
+     18622,
+     22884,
+     3978
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "normal": 4,
+      "potential": 2,
+      "verified_viral": 2,
+      "low_quality": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 3747,
+      "rank_score": 1.0853,
+      "bm25": -37.327164636160035,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "泉边静听泉声",
+      "source_axis": "author"
+     },
+     {
+      "id": 12004,
+      "rank_score": 1.06,
+      "bm25": -38.01835921258807,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "家有娃的日常",
+      "source_axis": "author"
+     },
+     {
+      "id": 18622,
+      "rank_score": 0.9097,
+      "bm25": -36.92178583567766,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "平安喜乐",
+      "source_axis": "author"
+     },
+     {
+      "id": 22884,
+      "rank_score": 0.8519,
+      "bm25": -36.49991409664919,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "桃桃育儿",
+      "source_axis": "author"
+     },
+     {
+      "id": 3978,
+      "rank_score": 0.8294,
+      "bm25": -34.58495035203054,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天使的眼泪",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:具体退休年龄以参保地人社部门认定为准(orgs:年龄以参保地人社部门);部分引用来源为自媒体文章（如头条号），权威性一般，虽经核验但作为政策类内容建议优先引用官方文件或权威媒体",
+   "critical": [
+    "事实未通过来源核验:具体退休年龄以参保地人社部门认定为准(orgs:年龄以参保地人社部门)",
+    "部分引用来源为自媒体文章（如头条号），权威性一般，虽经核验但作为政策类内容建议优先引用官方文件或权威媒体"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1
+   },
+   "primary": "fact.anchor_missing",
+   "primary_detail": "事实未通过来源核验:具体退休年龄以参保地人社部门认定为准(orgs:年龄以参保地人社部门);部分引用来源为自媒体文章（如头条号），权威性一般，虽经核验但作为政策类内容建议优先引用官方文件或权威媒体",
+   "evidence_brief": [
+    {
+     "claim": "渐进式延迟法定退休年龄自2025年1月1日正式启动",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:1",
+      "dates:2025年1月1日"
+     ]
+    },
+    {
+     "claim": "当前的核心原则是“小步调整、弹性实施、分类推进、统筹兼顾”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "政策支持符合条件的劳动者进行弹性选择，符合条件可最多提前3年，且不得低于原法定退休年龄",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3"
+     ]
+    },
+    {
+     "claim": "80后、90后最大的认知误区是以为能像爸妈一样干到退休领养老金",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:80",
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "很多人误以为灵活就业女性统一55岁退休，这一说法并不完整且容易误导",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:55岁"
+     ]
+    },
+    {
+     "claim": "同样是灵活就业，有人50岁顺利办退休领养老金，有人却被告知要等到55岁才能办",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50岁",
+      "numbers:55岁"
+     ]
+    },
+    {
+     "claim": "按参保地规定，早年如果在企业上过班、离开时不是管理岗，也可以争取 50 岁退",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50 岁"
+     ]
+    },
+    {
+     "claim": "具体退休年龄以参保地人社部门认定为准",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 374.2
+  },
+  {
+   "category": "social",
+   "topic": "邻里纠纷",
+   "round": 1,
+   "draft_id": "social-20261121171353-e7b49c",
+   "status": "rejected",
+   "passed": false,
+   "versions": 9,
+   "revisions": 4,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 13,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 12,
+     "articles_counted_by_host": 3,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     39261,
+     41121,
+     41135,
+     19593,
+     14641
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "potential": 6,
+      "normal": 1,
+      "low_quality": 1,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 39261,
+      "rank_score": 1.18,
+      "bm25": -17.58343148644334,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "生意经",
+      "source_axis": "author"
+     },
+     {
+      "id": 41121,
+      "rank_score": 0.7855,
+      "bm25": -16.473310877048924,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 41135,
+      "rank_score": 0.7827,
+      "bm25": -16.458379958200286,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 19593,
+      "rank_score": 0.71,
+      "bm25": -15.771407083114529,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "铭铭",
+      "source_axis": "author"
+     },
+     {
+      "id": 14641,
+      "rank_score": 0.5329,
+      "bm25": -15.16534943277728,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 独立评审判定不通过:修改后再评",
+   "critical": [
+    "独立评审判定不通过:修改后再评"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "独立评审判定不通过:修改后再评",
+   "evidence_brief": [
+    {
+     "claim": "95后小伙小周专门帮人写“吵架文案”，不用露面，不用骂人，靠一部手机+AI",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:95"
+     ]
+    },
+    {
+     "claim": "小周靠一部手机加AI帮人写吵架文案月入3万[1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3"
+     ]
+    },
+    {
+     "claim": "浙江义乌佛堂古镇的警务工作便体现了这一趋势。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "当地派出所尝试将警务工作向前延伸[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这种“向前一步”的策略旨在推动警务工作从事后处置向源头预防转变[2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "近年来，佛堂派出所从警情闭环、矛盾调解到出租房治理，推动警务工作从事后处置向源头预防转变。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在“十月十”盛会期间，民警穿梭在街巷之中巡逻、疏导、回应游客求助",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "初冬时节，濉溪县临涣镇的老茶馆热气氤氲，淮北大鼓的腔调伴着茶香漫过街巷[3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这里拥有六百余年的饮茶习俗，早已融进古镇肌理[3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "当地以茶为媒、以礼为先、以和为贵，通过一杯“棒棒茶”串联人情、化解心结[3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这种模式不仅在线下茶馆中处理家长里短，还延伸至线上直播间进行政策答疑，实现了线上线下结合[3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这些常识基于《民法典》《劳动合同法》等权威法规，用大白话讲清楚，能帮助人们在面对纠纷时不盲目、不慌乱，从而有效维护自身权益[5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 408.1
+  },
+  {
+   "category": "social",
+   "topic": "家暴 离婚",
+   "round": 1,
+   "draft_id": "social-20261121172035-f173a4",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 11,
+   "checkable": 11,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     23658,
+     22297,
+     15250,
+     14641,
+     21802
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "potential": 2,
+      "low_quality": 1,
+      "normal": 4,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 23658,
+      "rank_score": 1.0353,
+      "bm25": -20.02775729825877,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "朝朝暮语",
+      "source_axis": "author"
+     },
+     {
+      "id": 22297,
+      "rank_score": 1.0,
+      "bm25": -21.289091506193454,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "陶家二小姐",
+      "source_axis": "author"
+     },
+     {
+      "id": 15250,
+      "rank_score": 0.859,
+      "bm25": -20.060161052433493,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "风轻云淡",
+      "source_axis": "author"
+     },
+     {
+      "id": 14641,
+      "rank_score": 0.8045,
+      "bm25": -19.585169807084363,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     },
+     {
+      "id": 21802,
+      "rank_score": 0.7562,
+      "bm25": -18.641097316255838,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "我是事事通",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 引用来源单一且非权威：所有事实均引自今日头条自媒体文章（toutiao.com），而非民政部门官方统计或权威新闻报道，作为“事实”支撑力度较弱。",
+   "critical": [
+    "引用来源单一且非权威：所有事实均引自今日头条自媒体文章（toutiao.com），而非民政部门官方统计或权威新闻报道，作为“事实”支撑力度较弱。"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "引用来源单一且非权威：所有事实均引自今日头条自媒体文章（toutiao.com），而非民政部门官方统计或权威新闻报道，作为“事实”支撑力度较弱。",
+   "evidence_brief": [
+    {
+     "claim": "提起离婚，很多人第一反应想到的是出轨、家暴、婆媳矛盾这些冲突激烈的问题",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "过去很长一段时间，婚姻破裂的新闻，大多围绕这些极端矛盾展开",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "但最近民政部门的相关统计和基层婚姻登记处的反馈，出现了一个值得留意的新现象：越来越多刚步入婚姻的00后，选择结束婚姻",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00",
+      "orgs:但最近民政部门"
+     ]
+    },
+    {
+     "claim": "有意思的是，他们离婚的理由，很少是出轨、家暴这类严重伤害",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "不少年轻夫妻走到分开这一步，核心导火索，是两个人把钱花光了",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在消费观念、家庭收支规划上，持续不断爆发矛盾，成为了压垮婚姻的最后一根稻草",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "很多人第一反应会觉得，是不是年轻人太任性，对待婚姻不够慎重，一点小事就选择离婚",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "但如果静下心来看现实就会发现，这背后不单单是性格冲动那么简单，藏着当代年轻人真实的生活困境",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "提起离婚，大多数人的第一印象，总绕不开出轨、家暴、婆媳矛盾这类尖锐的问题",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "但现实里不少真实案例却不一样：夫妻俩之间没有触碰底线的原则性矛盾，最初感情也还算和睦",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "最后一拍两散，根源十分现实——婚后积蓄慢慢被消耗一空，柴米油盐的压力压得两个人喘不过气，日子实在过不下去了",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 154.7
+  },
+  {
+   "category": "social",
+   "topic": "就业 35岁",
+   "round": 1,
+   "draft_id": "social-20261121172318-351da5",
+   "status": "rejected",
+   "passed": false,
+   "versions": 7,
+   "revisions": 4,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     6535,
+     23756,
+     4921,
+     11439,
+     29188
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 6,
+     "label_counts": {
+      "normal": 3,
+      "potential": 2,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 6535,
+      "rank_score": 1.06,
+      "bm25": -13.217595476059538,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人生百态",
+      "source_axis": "author"
+     },
+     {
+      "id": 23756,
+      "rank_score": 0.4896,
+      "bm25": -12.501871360544355,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "非常人物志",
+      "source_axis": "author"
+     },
+     {
+      "id": 4921,
+      "rank_score": 0.4407,
+      "bm25": -12.433381333712388,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "深空之音",
+      "source_axis": "author"
+     },
+     {
+      "id": 11439,
+      "rank_score": 0.4045,
+      "bm25": -12.298492793099719,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "郝好摆烂",
+      "source_axis": "author"
+     },
+     {
+      "id": 29188,
+      "rank_score": 0.3428,
+      "bm25": -12.043680654643737,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "凤凰涅槃",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 独立评审判定不通过:修改后再评",
+   "critical": [
+    "独立评审判定不通过:修改后再评"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "独立评审判定不通过:修改后再评",
+   "evidence_brief": [
+    {
+     "claim": "2024年，人社部做了一次专项调查",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024",
+      "dates:2024年"
+     ]
+    },
+    {
+     "claim": "数据显示，25—34岁求职者平均获得面试机会的比例是38.7%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:25",
+      "numbers:34岁",
+      "numbers:38.7%"
+     ]
+    },
+    {
+     "claim": "35—44岁却只有12.4%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:35",
+      "numbers:44岁",
+      "numbers:12.4%"
+     ]
+    },
+    {
+     "claim": "斯坦福追踪460万人：AI抢走的不是35岁的饭碗，是22岁的",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:460",
+      "numbers:35岁",
+      "numbers:22岁"
+     ]
+    },
+    {
+     "claim": "以律所合伙人王欣桐为例，她做了14年知识产权工作",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:14"
+     ]
+    },
+    {
+     "claim": "以前她最多带5个律师——不是不想多带，是审年轻律师的文书太耗精力",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5"
+     ]
+    },
+    {
+     "claim": "现在AI包揽了基础检索和初稿，她能带10个律师，还有时间接更多高价值案子",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:10"
+     ]
+    },
+    {
+     "claim": "用她自己的话说：“AI绝对是给35岁+的律师带来了新机会。”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:35岁",
+      "persons:自己的话"
+     ]
+    }
+   ],
+   "elapsed_s": 370.6
+  },
+  {
+   "category": "social",
+   "topic": "退休 返聘",
+   "round": 1,
+   "draft_id": "social-20261121172923-3978e0",
+   "status": "rejected",
+   "passed": false,
+   "versions": 9,
+   "revisions": 4,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 0.833,
+   "facts": 12,
+   "checkable": 10,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     25456,
+     21168,
+     23562,
+     12647,
+     33354
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "low_quality": 2,
+      "potential": 6,
+      "normal": 3,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 25456,
+      "rank_score": 1.0412,
+      "bm25": -17.53556767626619,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "好奇费伊9Q2",
+      "source_axis": "author"
+     },
+     {
+      "id": 21168,
+      "rank_score": 1.0332,
+      "bm25": -17.45187710235281,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "星光点缀夜晚",
+      "source_axis": "author"
+     },
+     {
+      "id": 23562,
+      "rank_score": 1.0,
+      "bm25": -18.975206303469896,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天上驾白云的神仙",
+      "source_axis": "author"
+     },
+     {
+      "id": 12647,
+      "rank_score": 0.9948,
+      "bm25": -17.054119890703728,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "青衫烟雨",
+      "source_axis": "author"
+     },
+     {
+      "id": 33354,
+      "rank_score": 0.9821,
+      "bm25": -16.921477055242743,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "zg4045",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:二是作为信任背书，降低用人单位对退休人员专业能力的筛选成本(原文引句未绑定);事实未通过来源核验:三是提升议价能力，在稀缺专业领域为退休人员提供薪酬谈判空间(原文引句未绑定);部分引用来源为今日头条自媒体文章（toutiao.com），权威性相对较低，作为事实依据略显薄弱，但未构成致命错误。",
+   "critical": [
+    "事实未通过来源核验:二是作为信任背书，降低用人单位对退休人员专业能力的筛选成本(原文引句未绑定)",
+    "事实未通过来源核验:三是提升议价能力，在稀缺专业领域为退休人员提供薪酬谈判空间(原文引句未绑定)",
+    "部分引用来源为今日头条自媒体文章（toutiao.com），权威性相对较低，作为事实依据略显薄弱，但未构成致命错误。"
+   ],
+   "rule_hits": {
+    "引句未绑定(quote未过0.34)": 2
+   },
+   "primary": "fact.binding",
+   "primary_detail": "事实未通过来源核验:二是作为信任背书，降低用人单位对退休人员专业能力的筛选成本(原文引句未绑定);事实未通过来源核验:三是提升议价能力，在稀缺专业领域为退休人员提供薪酬谈判空间(原文引句未绑定);部分引用来源为今日头条自媒体文章（toutiao.com），权威性相对较低，作为事实依据略显薄弱，但未构成致命错误。",
+   "evidence_brief": [
+    {
+     "claim": "但持有高级职称证书的退休人员，完全是另一种就业赛道",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:有高级职"
+     ]
+    },
+    {
+     "claim": "很多职场技术人员、教师、医护、工程从业者，辛苦打拼十几年甚至几十年，终于拿到副高、正高高级职称证书",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:高高级职"
+     ]
+    },
+    {
+     "claim": "真正退休之后，多数人都会把这本证书随手塞进抽屉，觉得办理完退休手续、拿到养老金，职称就彻底没用了",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "其实这是绝大多数人的认知误区",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "高级职称从来不是在职期间才发挥作用，它在返聘市场中拥有三大用处",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:高级职"
+     ]
+    },
+    {
+     "claim": "高级职称在退休之后依旧藏着三大实打实的用处",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:高级职"
+     ]
+    },
+    {
+     "claim": "二是作为信任背书，降低用人单位对退休人员专业能力的筛选成本",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "三是提升议价能力，在稀缺专业领域为退休人员提供薪酬谈判空间",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "工厂找退休老技工解决技术难题，医院返聘退休医生，学校邀请退休教师代课",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "还有大量低龄老人进入社区服务、物业、仓储等岗位",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "很多人把这个现象解读为第二次人口红利",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这不仅是简单的缺人应急，更是应对老龄化、促进产业转型的一种市场响应机制",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 306.5
+  }
+ ],
+ "summary": {
+  "total_runs": 5,
+  "passed": 0,
+  "pass_rate": 0.0,
+  "primary_distribution": {
+   "other": {
+    "n": 3,
+    "share": 0.6
+   },
+   "fact.anchor_missing": {
+    "n": 1,
+    "share": 0.2
+   },
+   "fact.binding": {
+    "n": 1,
+    "share": 0.2
+   }
+  },
+  "rule_hit_totals": {
+   "引句未绑定(quote未过0.34)": 2,
+   "事实锚点缺失(数字/日期/人物/机构/因果)": 1
+  },
+  "by_category": {
+   "social": {
+    "runs": 5,
+    "passed": 0,
+    "primary": {
+     "fact.anchor_missing": 1,
+     "other": 3,
+     "fact.binding": 1
+    }
+   }
+  }
+ }
+}

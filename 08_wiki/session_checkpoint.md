@@ -77,4 +77,39 @@ AI 裁定≠人工裁定；生产类目库零写入（探针/烟测走 snapshot�
   引用把「渐进式延迟退休年龄」写成「渐进式延迟法定退休年龄」，quote 缺「法定」被判不支撑。
 - 证据：`03_intelligence/r61_smoke_receipt_r62_delay_models.json`。
 
-NEXT: 针对"编造具体数字建议/引用增字"做生成侧与修订侧收紧（一句一锚点、引用逐字），再跑烟测。
+## R63 代码+同题烟测（2026-11-21 15:20，延迟退休 养老金 / social）
+
+- 已推送 `2752746..7281e68` 四个提交（快进，未 force）：去重升级/三侧提示词收紧/列举承诺线索
+  （只进 issues）/用例。报告：`08_wiki/reports/r63-writing-tightening-smoke.md`。
+- 烟测（单任务独占模型 326.8s，回执 `03_intelligence/r63_smoke_receipt_r63_dedup_promises.json`）：
+  rejected；versions 8、revisions 4、score 0.6、fc 1.0（6/6）；两轮独立评审 flash 19.3s →
+  v4-pro 43.7s 均「修改后再评」；模板 within_budget。
+  **移花接木（提前1—3年）与引用增字（法定/统筹兼顾）两类 critical 消失**——生成侧收紧命中；
+  新停点是「有人退、有人退」（3 字短分句重复，低于去重门槛 4 字，按设计不删）。
+  copyedit 0 处、列举线索 0 条（未承诺数量，非失败）；repair：claims 44/失败 11/修好 8/余 3（quote_unbound）、
+  anchor_erased 4（守卫生效）。
+- 单测：指定 6 文件 103 passed；全量 A/B 新代码 1041 passed/1 failed(环境)/23 errors(环境，基线同 23)，
+  基线代码 12 failed（11 个正是新用例在基线失败）。
+- 事故：15:20 首跑与全量单测并发抢单实例模型（first payload timeout），且因 `ttxt/config.py:10`
+  硬编码 `D:/ttxt` 写进生产库（`writing_history` 6 行 draft `social-20261121151525-13cb57`、
+  evaluation_history、导出 md、model_jobs 行）。该回执留档为 `r63_smoke_receipt_concurrent_1520.json`；
+  生产数据未删（需授权）。规避：显式 `db_path`/`export_dir`；探针自带快照。
+- 运维事实：worktree 用系统 Python 3.12.10 + `D:\ttxt\.venv\Lib\site-packages`（PYTHONPATH）；
+  测本副本须 `-p _r63_warm`（conftest 会把生产目录插到 sys.path[0]）。**单任务串行，绝不并发跑模型**。
+- 进行中：10 题同题族子集复测（R61 G4 social 同 10 题基线 6/10），
+  输出 `03_intelligence/pass_rate_probe-20261121-r63.json`。
+
+- 10 题批量复测（同题族，1 轮，快照库，`template_decheck=False`）：
+  R63 **0/10**（270s/篇）、**基线代码同期复测也 0/10**（265s/篇，失败分布相同）
+  → 本轮读数是素材主题漂移+本地模型能力所致，**不是 R63 回归**；与 R61 G4 的 6/10 不可比（时间窗/库/评审口径）。
+  未达成"把可发布产出打出来"，如实记未达成。
+- 耗时实测（421 调用/20 篇，均 9.5s）：repair 8.4 次/篇（4.4s，第二轮从未修好）> 本地评审 3.9 次（11s）
+  > claims 3.9 次（16.9s）> revise 2.9 次（14.1s）。单实例服务（`--parallel 1`）对 2 并发请求
+  **排队不报错**（job_timeout 600s），但**不提吞吐**。
+- 提速尝试（均回退，报告 §6/§7）：①"原地打转早停"5 题实测无提速（323s/篇 vs 308s/篇，版本数 3–10 没变，
+  修复/校对几乎每轮都有改动）→ 回退不留死代码；②`MAX_REPAIR_ROUNDS=1` 被 `test_r53` 契约否决 → 回退。
+- 最快方案（需拍板，报告 §8）：① Strata 加并发槽 `--parallel 2`（~2×，需重启服务/授权；已实测 2 并发排队不报错）
+  ② 砍尝试次数（门禁修订 2→1、独立评审 3→2，动 R61 用户令配额）③ 素材相关性闸（打主题漂移，R64 首选）
+  ④ 修复批量化（~10%）。
+
+NEXT: 5 题快速复测（验证早停耗时）跑完后补进报告 §7 与本节；提交代码+报告+回执+检查点并推送；剩余未达成项按报告 §6 由用户拍板。
