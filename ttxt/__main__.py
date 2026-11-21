@@ -12,7 +12,7 @@ from . import __version__
 from . import config as cfg
 from . import db, doctor, housekeep, scheduler, supervisor
 from .analysis import analyze as analyzer
-from .analysis import metrics_import, prediction, score_v2_apply, viral
+from .analysis import metrics_import, prediction, score_v2_apply, topics, viral
 from .analysis import rag as analyzer_rag
 from .crawler import dedupe as crawler_dedupe
 from .crawler import keyword_crawl as crawler_keyword_crawl
@@ -390,6 +390,83 @@ def cmd_search(args: argparse.Namespace) -> int:
             indent=2,
         )
     )
+    return 0
+
+
+def cmd_topics(args: argparse.Namespace) -> int:
+    """R64:数据驱动选题 —— 只读类目库,按语料支持度排主题;不调模型、不入队、不动生产判定。"""
+    sources = tuple(item.strip() for item in args.sources.split(",") if item.strip())
+    bundle = topics.rank_topics(
+        args.category,
+        db_path=args.db_path,
+        limit=args.limit,
+        pool=args.pool,
+        extra_topics=tuple(args.topic or []),
+        sources=sources,
+        references=not args.no_refs,
+    )
+    counters, thresholds = bundle["counters"], bundle["method"]["thresholds"]
+    print(
+        f"主题支持度[{args.category}] 候选 {counters['candidates']} ⇒ 可写 {counters['writable']}"
+        f" / 被取材门禁拦 {counters['blocked']}"
+        f"(阈值:相关全文≥{thresholds['min_full']}、独立来源≥{thresholds['min_sources']},"
+        f"与 write_article 同一判定)"
+    )
+    for source_name, data in bundle["candidate_sources"].items():
+        print(f"  来源 {source_name}: {data['status']} 取 {data['picked']} 个候选")
+    for name in bundle["method"]["unknown_sources"]:
+        print(
+            f"  未知候选来源(已忽略):{name} ⇒ 当前可用来源只有 "
+            f"{'、'.join(topics.CANDIDATE_SOURCES)}"
+        )
+    for index, item in enumerate(bundle["ranking"], start=1):
+        support = item["support"]
+        marks = "、".join(
+            f"{src['kind']}"
+            + (f"[{src['origin']}]" if src.get("origin") else "")
+            + (f"({src['score']})" if src.get("score") is not None else "")
+            for src in item["sources"]
+        )
+        flag = "放行" if support["gate"] == "pass" else "拦下"
+        print(
+            f"  {index}. [{flag}] {item['topic']}"
+            f"  相关全文 {support['kept_full']}/{support['kept']} 检索 {support['searched']}"
+            f" 离题剔除 {support['dropped_off_topic']} 独立来源 {support['distinct_sources']}"
+            f" 来源:{marks}"
+        )
+        if support["gate"] != "pass":
+            for line in support["critical"]:
+                print(f"       门禁:{line}")
+            for hint in item["collection_hints"]:
+                print(f"       建议:{hint['gap']} ⇒ {hint['command']}")
+    if bundle["ranking_rest"]:
+        print(f"  …另有 {len(bundle['ranking_rest'])} 个候选未展开(见证据文件)")
+    refs = bundle["viral_reference_titles"]
+    if refs is not None:
+        print(
+            f"  参考爆款标题 {len(refs['items'])} 条(不参与支持度排序):"
+            f" {refs['note']}"
+        )
+        for item in refs["items"][: min(5, args.limit)]:
+            print(f"    · [{item['label']} {item['score']}] {item['title']}")
+    if not args.no_out:
+        path = topics.write_evidence(
+            bundle, topics.evidence_path(args.category, bundle["generated_at"], args.out)
+        )
+        print(f"证据文件:{path}")
+    if counters["writable"] == 0:
+        if counters["candidates"] == 0 and bundle["method"]["unknown_sources"]:
+            print(
+                "结论:候选来源名全部无效 ⇒ 先把 --sources 改对"
+                f"(可用:{'、'.join(topics.CANDIDATE_SOURCES)});"
+                "这是命令行写错,不是「库里没有主题」"
+            )
+            return 3
+        print(
+            "结论:该类目当前**没有语料支撑得起的主题** ⇒ 先补采集(crawl-plan),不要放宽取材门禁;"
+            "爆款要变成主题走既有挖词通道(ttxt analyze → mine_keywords)"
+        )
+        return 3
     return 0
 
 
@@ -957,6 +1034,25 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("--query", required=True)
     search.add_argument("--limit", type=int, default=10)
     search.set_defaults(func=cmd_search)
+
+    topics_cmd = sub.add_parser(
+        "topics",
+        help="R64 数据驱动选题:按语料支持度(与写作同一取材门禁)排主题;只读、不调模型、不入队",
+    )
+    topics_cmd.add_argument("--category", required=True, help="类目 slug")
+    topics_cmd.add_argument("--limit", type=int, default=8, help="榜单展开前 N 个主题")
+    topics_cmd.add_argument("--pool", type=int, default=12, help="每个数据源取多少候选(关键词战绩榜)")
+    topics_cmd.add_argument("--topic", action="append", default=[], help="人工补题(可重复;审计某题到底有没有素材)")
+    topics_cmd.add_argument(
+        "--sources",
+        default="keyword_performance",
+        help="候选来源(逗号分隔;当前只有 keyword_performance —— 整条爆款标题不进候选池)",
+    )
+    topics_cmd.add_argument("--no-refs", action="store_true", help="不列参考爆款标题(少一次只读查询)")
+    topics_cmd.add_argument("--db-path", default=None, help="类目库路径(巡检/快照用这个,别碰生产库)")
+    topics_cmd.add_argument("--out", default=None, help="证据文件输出目录(缺省 03_intelligence/topic_support/)")
+    topics_cmd.add_argument("--no-out", action="store_true", help="只打印,不落证据文件")
+    topics_cmd.set_defaults(func=cmd_topics)
 
     model = sub.add_parser("model", help="Strata 单模型串行闸门")
     model.add_argument("--ping", action="store_true", help="健康检查与模型列表")
