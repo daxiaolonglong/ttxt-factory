@@ -6,7 +6,8 @@
 
 复用,不另写一套判定:
 - 取材链与写作完全同一条:``rag.search(limit=MATERIAL_POOL_LIMIT)`` + ``workflow._rank_materials``
-  (取样规则、排序、选材零改动,预筛只是读它的输出);
+  (取样规则、排序、选材零改动,预筛只是读它的输出;R64-1 起这条链会先剔掉与主题不相关的候选,
+  预筛跟着一起变严 —— 离题材料本来也撑不起可绑定锚点);
 - 锚点抽取与归一化全部走 ``verifier.extract_anchors``/``norm``/``_anchor_in``/``_date_in``/
   ``is_anaphoric_org``,并沿用 verifier 的硬门禁口径:纯中文数量词不计(建议项)、
   泛指机构不计(建议项)——预筛数锚点的尺子和门禁数锚点的尺子必须同一把;
@@ -74,7 +75,7 @@ def precheck_topic(category: str, topic: str, db_path: Path | str | None = None)
     """
     db_path = store.articles_db_path(category) if db_path is None else Path(db_path)
     matches = rag.search(category, topic, limit=workflow.MATERIAL_POOL_LIMIT, db_path=db_path)
-    materials, stats = workflow._rank_materials(matches, db_path)
+    materials, stats = workflow._rank_materials(matches, db_path, topic=topic)
 
     full = cleaner.COMPLETENESS_FULL
     meta_by_id = {int(s["id"]): s for s in stats.get("scores", [])}

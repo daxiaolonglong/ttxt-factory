@@ -14,6 +14,7 @@ T-17(实测 analyze 的 index 段 236.27s = 整库 DROP+CREATE 重建):新增
 
 from __future__ import annotations
 
+import re
 import time
 from pathlib import Path
 
@@ -22,6 +23,16 @@ from ttxt.crawler.simhash import tokenize
 from ttxt.db import connect
 
 INDEX_CHAR_LIMIT = 8000
+
+# 主题相关度(R64-1,2026-11-21 实测):BM25 只在候选池内**相对**归一,没有绝对下限;
+# ``search`` 的 OR 回退还会把只沾一个双字词的稿件塞进来。10 题探针里 4 题
+# (邻里纠纷/高空抛物/装修 噪音/催婚)的 5 个素材槽被离题文章占满
+# (例:「装修 噪音」选中 外卖副业/棋牌室/KTV 加盟/旧衣服回收/北漂租房),
+# 模型拿着不相干的材料必产出编造 ⇒ 先给"是否真在讲这个主题"一个可复核的尺子。
+TOPIC_TOKEN_LIMIT = 12  # 与 search() 取词口径完全一致(同一分词器、同一上限)
+TITLE_HITS_MIN = 1      # 标题命中主题词
+PER_1K_WITH_TITLE = 2.0  # 标题点题时,正文密度下限(每千字命中次数)
+PER_1K_ONLY = 8.0        # 标题没点题时,只有正文密集复述主题词才算数
 
 
 def bigrams(text: str) -> str:
@@ -255,3 +266,55 @@ def search(category: str, query: str, limit: int = 10, db_path: Path | None = No
         return results
     finally:
         con.close()
+
+
+def topic_tokens(query: str) -> list[str]:
+    """主题取词:与 ``search`` 同一分词器、同一去重与 12 词上限。"""
+    return list(dict.fromkeys(tokenize(query or "")))[:TOPIC_TOKEN_LIMIT]
+
+
+def topic_relevance(query: str, title: str, body: str) -> dict:
+    """判定一篇文章是否**真的在讲这个主题**(确定性、可复核、零模型调用)。
+
+    尺子只用命中次数与密度,取词与 FTS 完全一致(双字词):
+
+    - ``title_hits>=1 且 per_1k>=PER_1K_WITH_TITLE``:标题点题且正文确实在讲它;
+    - 或 ``per_1k>=PER_1K_ONLY``:标题没写主题但正文密集复述主题词(生产语料里
+      转述稿/栏目稿常见);
+    - 取词为空(纯英文/符号主题)⇒ 无尺子可用,如实放行并写明理由,**不假装过滤**。
+
+    命中用非重叠 ``findall`` ⇒ 数值偏保守(宁可少算,不误留离题稿)。
+    阈值来自 2026-11-21 的 10 题生产快照探针(``07_tmp/r64_material_probe.json``):
+    该式把 6 个健康主题(7—15 篇相关)与 4 个漂移主题(0—1 篇相关)干净分开,无中间地带。
+    """
+    tokens = topic_tokens(query)
+    body_len = len(body or "")
+    if not tokens:
+        return {
+            "tokens": 0, "title_hits": 0, "body_hits": 0, "coverage": 0.0, "per_1k": 0.0,
+            "body_len": body_len, "relevant": True, "rule": "主题无可提取词 ⇒ 不做相关度过滤",
+        }
+    pattern = re.compile(
+        "|".join(re.escape(token) for token in sorted(set(tokens), key=len, reverse=True))
+    )
+    title_hits = pattern.findall(title or "")
+    body_hits = pattern.findall(body or "")
+    total_tokens = len(set(tokens))
+    distinct = len({*title_hits, *body_hits})
+    per_1k = len(body_hits) / max(1.0, body_len / 1000.0)
+    by_title = len(title_hits) >= TITLE_HITS_MIN and per_1k >= PER_1K_WITH_TITLE
+    by_density = per_1k >= PER_1K_ONLY
+    return {
+        "tokens": total_tokens,
+        "title_hits": len(title_hits),
+        "body_hits": len(body_hits),
+        "coverage": round(distinct / total_tokens, 3),
+        "per_1k": round(per_1k, 2),
+        "body_len": body_len,
+        "relevant": bool(by_title or by_density),
+        "rule": (
+            f"title_hits>={TITLE_HITS_MIN} 且 per_1k>={PER_1K_WITH_TITLE}"
+            f",或 per_1k>={PER_1K_ONLY}"
+        ),
+    }
+

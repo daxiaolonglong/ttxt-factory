@@ -645,8 +645,16 @@ def _independence_key(author: str | None, host: str) -> tuple[str, str]:
     return "none", ""
 
 
-def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TOP_K) -> tuple[list[dict], dict]:
-    """把 BM25 候选池按「真实爆款先验 + 证据密度」重排,并给出前置门禁要用的取材统计。
+def _rank_materials(
+    matches: list[dict], db_path: Path, topic: str = "", top_k: int = MATERIAL_TOP_K
+) -> tuple[list[dict], dict]:
+    """把 BM25 候选池按「主题相关 → 真实爆款先验 + 证据密度」重排,并给出前置门禁要用的取材统计。
+
+    R64-1(2026-11-21 实测):离题候选**不进池**。BM25 只在候选池内相对归一,没有绝对下限,
+    ``rag.search`` 的 OR 回退还会把只沾一个双字词的稿子塞进来;10 题探针里 4 题的 5 个素材槽
+    全是离题稿(「装修 噪音」选了 外卖副业/棋牌室/KTV 加盟/旧衣服回收/北漂租房),
+    模型拿这种材料只会编造。尺子是 ``rag.topic_relevance``(双字词命中 + 每千字密度,零模型调用),
+    剔除数与剔除样本如实写进 ``stats["relevance"]``;密度/独立性两个门槛因此只数**相关**候选。
 
     先验只认本类目库里 ``tier=measured`` 且有分数的真实标签(与 ``keywords.score_keywords``
     同一套词表和权重),未标定类目退化为纯 BM25 并如实记 ``calibration_status="uncalibrated"``
@@ -657,7 +665,7 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
     try:
         calibrated = viral.load_calibration(con) is not None
         measured = keywords._measured_label_map(con) if calibrated else {}
-        pool: list[dict] = []
+        pool_all: list[dict] = []
         for index, match in enumerate(matches):
             row = con.execute(
                 "SELECT id, title, url, author, completeness, published_at, "
@@ -669,7 +677,7 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
                 continue
             host = _source_host(row["url"])
             axis, key = _independence_key(row["author"], host)
-            pool.append(
+            pool_all.append(
                 {
                     "id": row["id"],
                     "title": row["title"],
@@ -684,10 +692,15 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
                     "bm25": float(match.get("rank") or 0.0),
                     "pool_index": index,
                     "label": measured.get(int(row["id"])),
+                    "relevance": rag.topic_relevance(topic, row["title"], row["text"] or ""),
                 }
             )
     finally:
         con.close()
+
+    # 离题稿直接出局:不占素材槽、不计密度与独立来源(见 docstring 的实测根因)
+    pool = [item for item in pool_all if item["relevance"]["relevant"]]
+    off_topic = [item for item in pool_all if not item["relevance"]["relevant"]]
 
     ranks = [item["bm25"] for item in pool]
     best, worst = (min(ranks), max(ranks)) if ranks else (0.0, 0.0)
@@ -723,12 +736,34 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
     axes = {"author": 0, "host": 0, "none": 0}
     for item in pool:
         axes[item["source_axis"]] += 1
+    probe_rel = rag.topic_relevance(topic, "", "")  # 尺子本身:取词数与规则,与候选无关
     stats = {
         "pool_limit": len(matches),
+        "searched_candidates": len(pool_all),
         "candidates": len(pool),
         "full_candidates": sum(1 for item in pool if item["completeness"] == is_full),
         "distinct_sources": independent(pool),
         "distinct_hosts": hosts(pool),
+        "relevance": {
+            "rule": probe_rel["rule"],
+            "tokens": probe_rel["tokens"],
+            "skipped": probe_rel["tokens"] == 0,
+            "searched": len(pool_all),
+            "kept": len(pool),
+            "dropped": len(off_topic),
+            "kept_full": sum(1 for item in pool if item["completeness"] == is_full),
+            "dropped_full": sum(1 for item in off_topic if item["completeness"] == is_full),
+            "off_topic_samples": [
+                {
+                    "id": item["id"],
+                    "title": (item["title"] or "")[:40],
+                    "title_hits": item["relevance"]["title_hits"],
+                    "per_1k": item["relevance"]["per_1k"],
+                    "completeness": item["completeness"],
+                }
+                for item in off_topic[:5]
+            ],
+        },
         "independence_axis": {
             "unit": "author(缺作者退回 host,缺作者不计数)",
             "articles_counted_by_author": axes["author"],
@@ -757,6 +792,9 @@ def _rank_materials(matches: list[dict], db_path: Path, top_k: int = MATERIAL_TO
                 "host": item["host"],
                 "author": item["author"],
                 "source_axis": item["source_axis"],
+                "title_hits": item["relevance"]["title_hits"],
+                "per_1k": item["relevance"]["per_1k"],
+                "coverage": item["relevance"]["coverage"],
             }
             for item in selected
         ],
@@ -783,8 +821,14 @@ def _material_gate(stats: dict, min_full: int, min_sources: int) -> list[str]:
     """
     critical = []
     if stats["full_candidates"] < min_full:
+        rel = stats.get("relevance") or {}
+        off = (
+            f";其中 {rel['dropped']} 篇与主题不相关已剔除(语料缺该主题素材,补采集而非放宽门槛)"
+            if rel.get("dropped")
+            else ""
+        )
         critical.append(
-            f"取材密度不足:候选里全文文章 {stats['full_candidates']} 篇 < {min_full}(短稿撑不起引句)"
+            f"取材密度不足:候选里全文文章 {stats['full_candidates']} 篇 < {min_full}(短稿撑不起引句){off}"
         )
     if stats["distinct_sources"] < min_sources:
         axis = stats["independence_axis"]["unit"]
@@ -831,7 +875,7 @@ def write_article(
     db_path = store.articles_db_path(category) if db_path is None else Path(db_path)
 
     matches = rag.search(category, topic, limit=MATERIAL_POOL_LIMIT, db_path=db_path)
-    materials, material_stats = _rank_materials(matches, db_path)
+    materials, material_stats = _rank_materials(matches, db_path, topic=topic)
     LOG.info(
         "writing.materials",
         category=category,
@@ -841,6 +885,8 @@ def write_article(
         axis=material_stats["independence_axis"]["unit"],
         calibration=material_stats["calibration_status"],
         prior_hits=material_stats["priors"]["measured_label_hits"],
+        relevant=f"{material_stats['relevance']['kept']}/{material_stats['relevance']['searched']}",
+        off_topic=material_stats["relevance"]["dropped"],
     )
     gate_critical = _material_gate(material_stats, material_min_full, material_min_sources)
     if gate_critical:
@@ -850,6 +896,9 @@ def write_article(
             topic=topic,
             full=f"{material_stats['full_candidates']}/{material_min_full}",
             sources=f"{material_stats['distinct_sources']}/{material_min_sources}",
+            searched=material_stats["relevance"]["searched"],
+            relevant=material_stats["relevance"]["kept"],
+            off_topic=material_stats["relevance"]["dropped"],
         )
         return {
             "category": category,
