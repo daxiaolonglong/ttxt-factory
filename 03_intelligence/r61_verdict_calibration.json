@@ -1,0 +1,386 @@
+{
+  "round": "r61_verdict_contract_calibration",
+  "at": "2026-11-21T11:10:00",
+  "prompt": "审评这篇文章",
+  "contract": "labels_v1",
+  "samples": [
+    {
+      "category": "finance",
+      "side": "passed",
+      "draft_id": "finance-20261121110520-e1abe2",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\finance\\finance-20261121110520-e1abe2.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 2304,
+        "completion_tokens": 2049,
+        "total_tokens": 4353,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1016
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2304
+      },
+      "elapsed_s": 24.094,
+      "review_chars": 1682,
+      "review_excerpt": "### 对《周五A股收盘复盘》一文的审评意见\n\n#### 一、总体评价\n本文是一篇典型的财经复盘类稿件，信息量较丰富，结构完整，涵盖了指数表现、驱动因素、资金动向、个股自救及后市策略等模块，并附有事实证据链核验表，体现了较强的数据溯源意识。整体事实核验结果良好（表格中所有陈述均标记为“verified”），但文本编辑质量存在明显硬伤，标题渲染过度，部分逻辑链条松散，尚未达到严谨财经媒体的发布标准。\n\n#### 二、主要问题\n\n**1. 文字编辑错误（严重）**  \n- 第一段出现明显重复与标点缺失：  \n  > “11月17日，上证指数下跌0.5%，深证成指下跌0.49%，创业板指下跌1.2%截至收盘，上证指数下跌0.5%，深证成指下跌0.49%，创业板指下跌1.2% [1]。”  \n\n  该句前半句缺少句号，且后半句与前文完全重复，属于典型的复制粘贴后未清理的错误。  \n- 第二段同样存在标点缺失：  \n  > “创业板盘中一度跌逾2.5%盘中一度出现5000多家个股下跌的情况 [2]。”  \n\n  两句话之间缺少句号或连接词，导致句子粘连，影响阅读流畅性。  \n\n**2. 标题与正文一致性偏差**  \n- 标题中“超5000只个股普跌引发市场恐慌”为强情绪化表述，但正文对“恐慌”的论证不足：  \n  - 正文仅提到“盘中一度5000多家个股下跌”“跌停股并不多，但市场在放量”，未给出量化恐慌指标（如换手率、波动率指数、跌停家数、资金流出规模等）；  \n  - 相反，“跌停股并不多”与“恐慌”存在逻辑张力，标题的“引发市场恐慌”未被正文充分支撑；  \n  - 评审记录中亦指出“标题词面正文覆盖仅46%”，说明标题与内容脱节。  \n\n**3. 逻辑与表达问题**  \n- 部分句子主语缺失或衔接生硬，影响信息传递效率：  \n  - “科技板块继续大跌属于日内行情走弱 [4]。” 该句缺少必要的主语或解释，读来突兀；  \n  - “港股恒生指数和恒生科技指数在拉升 [4]。这并未提振A股短期情绪 [4]。” 两句话之间逻辑转折未能自然过渡；  \n- “深度解析下跌三大诱因”一节中，三个诱因的展开不够独立，内容交织，段落内部缺乏清晰的因果链。  \n\n**4. 事实核验情况说明**  \n- 所有列入证据链的事实均已通过来源核验，但证据链覆盖范围有限，仅12条陈述，部分关键表述（如“创业板盘中一度跌逾2.5%”）在原文中对应度较低（重叠度0.38），仍需人工复核上下文准确性。  \n- 文中多处引用[1][2][3][4][5]等来源ID，但未在正文末尾统一列出参考来源，不符合标准财经稿件的引用规范。\n\n#### 三、修改建议\n1. **修正文本错误**：删除第一段重复的指数数据，添加缺失的句号；将“创业板盘中一度跌逾2.5%盘中一度出现5000多家个股下跌的情况”拆分",
+      "local_probe": {
+        "passed": true,
+        "score": 0.85,
+        "fact_check_rate": 1.0,
+        "primary": "passed",
+        "primary_detail": null,
+        "versions": 4,
+        "revisions": 1
+      }
+    },
+    {
+      "category": "social",
+      "side": "passed",
+      "draft_id": "social-20261121103502-07d6d2",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\social-20261121103502-07d6d2.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1736,
+        "completion_tokens": 4624,
+        "total_tokens": 6360,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2587
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1736
+      },
+      "elapsed_s": 56.484,
+      "review_chars": 3457,
+      "review_excerpt": "## 审评意见\n\n**稿件标题**：人到中年，逃不开的赡养困局：从“夹心层”到“共享儿女”的社会真相  \n**类目**：social  \n**草稿ID**：social-20261121103502-07d6d2  \n**审评结论**：**修改后发布**（建议评分：0.72–0.78，当前评审记录 0.85 略偏乐观）\n\n---\n\n### 一、总体印象\n\n本文选题具有明显的社会关怀，聚焦中年赡养压力、代际资源流动、地域养老差异、空巢老人情感缺失以及老年婚姻变动等现实问题，容易引发读者共鸣。文章语言总体流畅，开头“人到中年，最大的感受从来不是大起大落的风雨，而是源源不断的细碎麻烦”有较强的代入感。\n\n但作为一篇社会观察类稿件，本文在**结构连贯性、标题匹配度、事实证据严谨性**以及**原创深度**方面仍存在明显不足。现有评审记录中“最终评分0.85”可能偏高，主要是因为证据链里个别事实的支撑不够直接，且文章整体呈现出“素材拼贴”的特征，缺少贯穿全文的主线。\n\n---\n\n### 二、主要优点\n\n1. **选题有公共价值**  \n   赡养困局、空巢老人、老年离婚等话题切中当下社会痛点，具备传播潜力和讨论空间。\n\n2. **开头引入自然**  \n   用“细碎麻烦”描述中年困境，避免宏大叙事，容易让目标读者产生共情。\n\n3. **配有一定事实证据链**  \n   文末提供了逐条事实对应的来源 URL、原文引句和重叠度，说明编辑流程中有基本的事实核验意识。\n\n4. **覆盖了多个地域和群体**  \n   东北 90 后、北京空巢老人、60–70 岁离婚群体等，使文章不是单一案例，有横向扩展的意图。\n\n---\n\n### 三、主要问题与不足\n\n#### 1. 标题与正文匹配度不足\n\n标题中的“共享儿女”被提升为副题核心，但正文仅在第四段以北京“300 元一小时陪伴服务”作为局部案例出现，既未深入展开“共享儿女”的运作模式、规模、争议，也未论证其是否已成为一种“社会真相”。  \n“从‘夹心层’到‘共享儿女’”这一表述暗示某种演变或解决方案，但正文并未清晰呈现这种逻辑关系，导致标题承诺与内容交付之间存在落差。\n\n**建议**：  \n- 若保留该标题，需大幅补充“共享儿女”相关内容，包括服务形态、从业者画像、客户需求、定价逻辑、伦理争议等。  \n- 若正文结构不变，建议修改标题，将其改为更贴合实际内容的表述，如“人到中年的赡养困局：啃老、地域差异与空巢陪伴的现实切片”。\n\n---\n\n#### 2. 结构松散，段落间缺乏逻辑递进\n\n文章五个段落依次涉及：  \n中年六大难题 → “啃老”定义 → 东北养老金困境 → 北京陪伴服务 → 老年离婚。\n\n这些现象之间缺乏清晰的因果或递进关系，更像五个独立素材的罗列。开头提出“六种高频难题”，但后文只聚焦“赡养父母起分歧”，其他五种（婆媳",
+      "local_probe": {
+        "passed": true,
+        "score": 0.85,
+        "fact_check_rate": 1.0,
+        "primary": "passed",
+        "primary_detail": null,
+        "versions": 3,
+        "revisions": 1
+      }
+    },
+    {
+      "category": "social",
+      "side": "passed",
+      "draft_id": "social-20261121105733-0157dc",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\social-20261121105733-0157dc.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 2057,
+        "completion_tokens": 5860,
+        "total_tokens": 7917,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4822
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2057
+      },
+      "elapsed_s": 62.562,
+      "review_chars": 1696,
+      "review_excerpt": "收到，以下是对该草稿《AI换脸、现金陷阱与网红涉黑：警方通报揭秘新型诈骗与网络乱象》的评审意见。\n\n---\n\n## 一、总体结论\n\n文章选题明确，聚焦“警方通报”下的新型诈骗与网络乱象，信息密度较高，核心案例均有来源支撑，事实证据链未发现致命错误。已有评审记录给出 0.85 分、无致命问题，基本合理。\n\n但文章目前存在明显语言重复、病句、部分事实细节未完全纳入证据链等问题，建议**修改后通过**，不宜原样直接发布。\n\n---\n\n## 二、必须修改的问题\n\n### 1. 第四段存在重复冗余\n\n原文：\n\n> 8月28号长春警方发布通告，直接把这个近200万粉丝的“打假斗士”打回了原形——涉嫌黑恶性质犯罪 [4]。8月28号长春警方发布通告，直接把这个近200万粉丝的“打假斗士”打回了原形 [4]。\n\n两句高度重复，属于编辑失误。建议删去后一句，或将两句合并为：\n\n> 8月28日，长春警方发布通告，将这个近200万粉丝的“打假斗士”打回原形，并认定其涉嫌黑恶性质犯罪 [4]。\n\n### 2. 第三段存在病句\n\n原文：\n\n> 9月16日看看新闻报道了上海警方通报的一起案子男子刘辉（化名）网恋 [5]。\n\n句子成分不完整，缺标点，建议改为：\n\n> 9月16日，看看新闻报道了上海警方通报的一起案件：男子刘辉（化名）网恋被骗。\n\n### 3. 主语残缺\n\n原文：\n\n> 5个月，陆续转了17万 [5]。\n\n建议补足主语：\n\n> 刘辉在5个月内陆续转账17万元。\n\n---\n\n## 三、事实证据链复核问题\n\n文章整体事实方向无误，但证据链覆盖不够完整，部分关键表述未被逐句绑定。\n\n### 1. 部分正文细节未纳入证据链\n\n以下表述在正文中出现，但未在事实证据链中单独绑定原文引句：\n\n- “这些案件涉及网上刷单和虚假交友网站诱导”\n- “该团伙在短视频直播间打出‘50到70岁单身姐姐进来看’的口号”\n- “虚构‘丧偶老板、年入几百万、沪杭有房’等高品质大叔形象”\n- “对方在网络上展示大量高颜值日常视频并拥有过万粉丝”\n\n这些属于关键定性与细节，建议补充对应原文连续引句；若无法核验，应删除或弱化表述。\n\n### 2. 个别措辞与证据不一致\n\n正文写“年入几百万”，证据链中原文为“年入600万”。虽然大意兼容，但新闻表述应尽量准确，建议统一为“声称年入600万”或“声称年入数百万元”。\n\n### 3. 证据链存在重复行\n\n第8行与第9行实质为同一事实：\n\n> 8月28号长春警方发布通告，直接把这个近200万粉丝的“打假斗士”打回了原形——涉嫌黑恶性质犯罪\n\n建议合并为一条，避免表格冗余。\n\n### 4. 源文证据存在格式残留\n\n证据链中出现：\n\n> 杭州上海都有房的&#34;\n\n其中 `&#34;` 为 HTML 实体残留，应清理为正常引号。\n\n---\n\n## 四、结构与表达建议\n",
+      "local_probe": {
+        "passed": true,
+        "score": 0.85,
+        "fact_check_rate": 1.0,
+        "primary": "passed",
+        "primary_detail": null,
+        "versions": 6,
+        "revisions": 2
+      }
+    },
+    {
+      "category": "social",
+      "side": "passed",
+      "draft_id": "social-20261121110234-98cd87",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\social-20261121110234-98cd87.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1630,
+        "completion_tokens": 5193,
+        "total_tokens": 6823,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4385
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1630
+      },
+      "elapsed_s": 60.469,
+      "review_chars": 1351,
+      "review_excerpt": "### 审评意见\n\n基于现有材料，这篇文章整体质量较高：选题切中“AI裁员潮”与产品经理职业焦虑，结构完整，案例、数据、工具测评与观点结合得较自然，结尾有行动指引，具备较强的社交传播力。事实证据链中已列 8 条事实均显示 verified，无致命事实差错，评分 0.95 基本合理。\n\n不过，仍有几处需要修改完善：\n\n#### 一、事实核验层面\n\n1. **引用标注 [1] 缺失对应证据**  \n   正文中 [1] 出现了三次，但“事实证据链”表里没有 [1] 对应的来源 URL、原文连续引句及核验结果。这属于引用来源不完整，建议补齐；若无法补，应删除 [1] 或改为不标注，否则会影响合规性。\n\n2. **开头“网易纪录片《不够年轻的我们》评论区留言”未在证据链中绑定**  \n   证据链中 [2] 只核验了“清华丈夫与教培妻子卖保险”这一案例，但没有核验开头引用的纪录片评论。建议补充该评论的出处与原文连续引句，或将其改为“有评论说”等不依赖具体引用的表述，避免事实核验缺口。\n\n3. **引用 [3] 多处论断仅部分绑定**  \n   如“现在AI可以自动生成PRD、画原型、做用户研究分析”“真正稀缺的是知道‘为什么要做这个’的判断力”等表述，虽然可能来自同一来源文章，但证据链中只列出了“369%增长”和“多邻国案例”两条。建议逐条补全，或改为“综合自[3]”的笼统标注。\n\n4. **第 7 条证据重叠度偏低**  \n   “有人花了30天深度测评……”与原文“于是我花了30天……”为第一人称转述，重叠度仅 0.41。虽然核验为 verified，但建议在正文中统一为“测评者花了30天……”或保留“有人”并补充完整来源信息，以增强一致性。\n\n#### 二、行文表达层面\n\n1. **第二段“宝玉转发帖子”处衔接生硬**  \n   原句“9 月 4 日凌晨，技术博主宝玉转发了一条帖子[4] 发帖人称……”主语切换不自然，且缺少连接词。建议改为：  \n   > 9 月 4 日凌晨，技术博主宝玉转发的一条帖子显示，发帖人的老板在商谈后自己买了 Claude Code 和 Codex 狂写一个月，才拍板做了这三个决定。\n\n2. **部分段落引用标注密集，阅读略显碎片化**  \n   第三段连续出现 [3][1][3] 等标注，可适当合并同类引用，或改用“上述来源”“相关文章”等表达，减少视觉干扰。\n\n3. **结尾“唯一凭证”表述过于绝对**  \n   “唯有对业务价值的深刻洞察，才是穿越周期的唯一凭证”容易引发争议。建议改为“核心能力之一”“关键凭证之一”，或加上“在当前环境下”等限定，语气更稳妥。\n\n4. **标题与正文情绪浓度略有落差**  \n   “AI裁员潮”有一定焦虑标题感，但正文结论相对克制。整体可接受，但若发布在偏严肃的媒体平台，建议标题适当收敛，如改",
+      "local_probe": {
+        "passed": true,
+        "score": 0.95,
+        "fact_check_rate": 1.0,
+        "primary": "passed",
+        "primary_detail": null,
+        "versions": 3,
+        "revisions": 1
+      }
+    },
+    {
+      "category": "social",
+      "side": "rejected",
+      "draft_id": "social-20261121101500-bd2bf4",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\rejected\\social-20261121101500-bd2bf4.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1623,
+        "completion_tokens": 2032,
+        "total_tokens": 3655,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 444
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1623
+      },
+      "elapsed_s": 25.594,
+      "review_chars": 2625,
+      "review_excerpt": "## 审评意见\n\n### 总体评价\n\n这是一篇选题具有社会价值的新闻稿，聚焦AI换脸婚恋诈骗，切中当下热点。文章的事实核查做得相对扎实，证据链完整。但正如评审记录所指出的，**文章在结构和表述上存在明显问题，重复冗余严重，尚未达到发布标准**。以下分维度展开审评。\n\n---\n\n### 一、亮点与可取之处\n\n1. **选题时效性强，社会关切度高**\n   - AI换脸+婚恋诈骗是当前热点话题，叠加“中年情感缺口”的社会学视角，有一定的深度挖掘潜力。\n   - 有具体案例（泰安孙某芳案）、有时间节点（9月22日央视披露）、有数据支撑（80%受害者为30—55岁），信息基础较好。\n\n2. **事实核查链条完整**\n   - 每一条关键事实（fact）都关联了来源URL、原文引句、offset、重叠度和核验状态，证据链清晰可追溯。\n   - 多信源交叉验证（至少4篇来源文章），事实可信度较高。\n\n3. **导向正确，兼顾警示性与人文关怀**\n   - “不是单纯傻，是太渴望真心”这一表述虽略显口语化，但将受害者置于理解和同情的位置，避免了指责受害者的倾向，符合主流媒体的价值导向。\n\n---\n\n### 二、主要问题\n\n#### 问题一：严重的内容重复冗余（次要问题，但影响较大）\n\n评审记录已指出第四、五段存在语义重复，实际细读后，问题比“略显拖沓”更为突出。各段落间存在明显的“换一种说法再说一遍”现象：\n\n| 段落 | 核心信息 | 重复情况 |\n|---|---|---|\n| 第一段 | 中年人情感缺口被骗子利用，80%数据， AI新手段 | 引入 |\n| 第二段 | 孙某芳案基本案情，6年网恋，AI人设，13万 | 案件首现 |\n| 第三段 | 孙某芳案细节，诈骗理由，法院审理，缓刑 | 案件深化 |\n| 第四段 | 防骗建议（不轻信、拒金钱、核身份） | **建议首次** |\n| 第五段 | 再次复述案件+防骗建议 | **与第四段高度重叠** |\n| 第六段 | 再次复述案件细节+防骗原则 | **与第五段高度重叠** |\n\n第四、五、六段几乎在说同一件事。第四段讲“防坑指南”四要点，第五段再次复述“不轻信网络完美人设”“涉及金钱往来应拒绝”“及时核实身份”，第六段又来一遍。**三段内容压缩成一段足以覆盖全部有效信息**。\n\n**建议修改方向：**\n- 将全文压缩至400—500字左右，或重组为以下结构：\n  - **第1段**：引子——中年人情感困境与诈骗数据（引用[1]）\n  - **第2段**：案例——孙某芳案的事实经过与判决（引用[2][3][4][5]）\n  - **第3段**：警示与建议——专家/警方防骗要点（引用[1]），简洁列点，不复述案件\n- 删除第五、六段中与第四段重复的内容，保留其独有的信息增量（如“直到催债电话响起，李某才识破骗局”这一",
+      "local_probe": {
+        "passed": false,
+        "score": 0.85,
+        "fact_check_rate": 1.0,
+        "primary": "other",
+        "primary_detail": "独立评审判定不通过:不建议直接发布",
+        "versions": 1,
+        "revisions": 0
+      }
+    },
+    {
+      "category": "social",
+      "side": "rejected",
+      "draft_id": "social-20261121105122-8c789e",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\rejected\\social-20261121105122-8c789e.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 2853,
+        "completion_tokens": 3091,
+        "total_tokens": 5944,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1804
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2853
+      },
+      "elapsed_s": 34.125,
+      "review_chars": 2223,
+      "review_excerpt": "### 审评意见：《欠钱不还无后果？法律红线与防坑指南一次讲透》\n\n**总体结论**  \n该文选题紧扣社会痛点，标题具有一定吸引力，开头引入也较自然。但正文存在**严重法律引用错误、内容截断、事实核验不足**等致命问题，尤其多处将《民法典》第679条（自然人借款合同成立要件）错误套用于离婚、劳动辞退、试用期等无关场景，可能对读者产生严重误导。文章当前质量**不符合发布标准**，建议退回全面修改后再审。\n\n---\n\n## 一、主要亮点\n\n1. **选题贴近现实**：欠钱不还、老赖现象、诉讼时效等是普通民众高频关注的法律问题，具备传播价值。\n2. **开头引入合理**：从常见误区切入，能吸引读者继续阅读。\n3. **部分内容方向正确**：如诉讼时效三年、借条效力、利息上限等核心借贷法律知识点基本准确。\n\n---\n\n## 二、致命问题\n\n### 1. 法律条文引用严重错误（最核心问题）\n\n文章多处将《民法典》第679条作为万能条款套用，出现明显张冠李戴：\n\n- **第8条（离婚冷静期与劳动合同）**  \n  原文：“根据《民法典》第679条规定；但若一方不同意协议离婚或存在家暴、出轨等情形，可直接向法院起诉离婚，无需经过离婚冷静期。此外，根据《民法典》第679条规定”  \n  **问题**：《民法典》第679条实际规定的是“自然人之间的借款合同，自贷款人提供借款时成立”，与离婚冷静期、劳动合同毫无关系。离婚冷静期的法律依据应为《民法典》第1077条。且该条最后“此外，根据《民法典》第679条规定”后无下文，疑似拼接错误。\n\n- **第10条（劳动辞退补偿）**  \n  原文：“根据《民法典》第679条规定；根据《民法典》第679条规定N为工作年限，每满一年支付一个月工资。”  \n  **问题**：劳动辞退经济补偿的法定依据应为《劳动合同法》第47条，计算方式为“每满一年支付一个月工资”，而非《民法典》第679条。此处不仅引用错误，且表述混乱。\n\n- **第11条（试用期规定）**  \n  原文前半句“根据《中华人民共和国劳动合同法》第十九条规定，同一用人单位与同一劳动者只能约定一次试用期”正确，但随后又出现“根据《民法典》第679条规定”，属于残留错误，与上下文无关。\n\n上述错误已构成**法律常识硬伤**，若发布将严重损害媒体专业性和公信力。\n\n### 2. 内容截断，未兑现“一次讲透”\n\n文章承诺整理20条法律常识，但实际只写到第16条“高空抛物：从建筑物中”即戛然而止。不仅未完成20条，连第16条内容本身都未补全。这与标题“一次讲透”的承诺严重不符，属于完整性硬伤。\n\n### 3. 事实核验严重不足\n\n事实证据链显示，多条关键法律陈述状态为“unverified”，原文引句未绑定或来源无法支撑。例如：\n\n- “根据《中华人民共和国民法典》第一百八十八条规定……",
+      "local_probe": {
+        "passed": false,
+        "score": 0.3,
+        "fact_check_rate": 0.583,
+        "primary": "gate.structure_truncated",
+        "primary_detail": "内容完整性检查未通过(疑似截断)",
+        "versions": 6,
+        "revisions": 2
+      }
+    },
+    {
+      "category": "social",
+      "side": "rejected",
+      "draft_id": "social-20261121104207-383ddb",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\rejected\\social-20261121104207-383ddb.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "修改后再评",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "修改后再评"
+      ],
+      "publishable_markers": [],
+      "extraction": "修改后再评",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1554,
+        "completion_tokens": 2986,
+        "total_tokens": 4540,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1875
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1554
+      },
+      "elapsed_s": 36.766,
+      "review_chars": 1864,
+      "review_excerpt": "### 审评意见\n\n**总体结论：不建议直接发布。**  \n文章选题具有社会关注度，但存在事实来源单一、标题与内容不符、逻辑论证不足、情绪化表达等硬伤，现有版本未达到可发布标准。已有评审记录中“独立评审判定不通过”与“致命问题1”的判断是合理的，主要问题如下。\n\n---\n\n### 一、主要问题\n\n#### 1. 事实来源单一且权威性不足  \n- 全文事实仅引自两篇今日头条文章（ID 6480、1525），来源均为自媒体聚合平台，缺乏一手权威信源（如企业官方财报、市场监管部门通报、权威媒体报道）。  \n- 核验表虽显示“verified”，但该核验仅证明**正文陈述与来源文章内容一致**，并不能证明来源本身真实、准确、客观。  \n- 以“大鹏辞职爆料”为例，该信息完全来自单一个体叙述，未经多方核实，存在虚构或夸大风险，不宜作为“行业真相”的依据。\n\n#### 2. 标题与正文严重不符，存在标题党倾向  \n- 标题中的“AI裁员”和“巨亏关店”被并列呈现，但**两者无直接因果关系**：  \n  - “AI裁员”仅涉及一家公司研发部六人裁四人的个案，并非行业性大规模裁员。  \n  - “巨亏关店”属于另一品牌因信任危机导致的经营问题，与AI裁员无关。  \n- 标题用“黑幕”“真相”等词，但正文并未揭示系统性黑幕，多为个案与评论，明显夸大。\n\n#### 3. 逻辑结构松散，论证跳跃  \n- 第一段从个人爆料突然过渡到“消费者对预制菜透明度的担忧”，缺少必要铺垫。  \n- 第二段直接跳至某品牌财务数据，与第一段缺乏衔接。  \n- 第三段引用“利润高且不会消失的行业往往具备刚需属性”一句，与前文关联度低，疑似拼凑。  \n- 第四段结论“未来餐饮行业的竞争，不仅是口味的竞争，更是诚信的竞争”空泛口号化，缺少数据或案例支撑。\n\n#### 4. 客观性不足，情绪化严重  \n- 全文使用“黑幕”“遮羞布”“断崖式溃败”“隐形暴利”等情绪化词汇，带有明显负面倾向。  \n- 未呈现预制菜行业的积极面（如标准化带来的食品安全可控、供应链效率提升等），也未采访涉事企业或相关行业协会，缺乏平衡报道。  \n- 未点名具体品牌，但以“头部连锁品牌”指代，可能引发公众猜测，若事实有误将面临法律风险。\n\n#### 5. 证据链核验的局限  \n- 核验表仅标注“维度缺失：—”及“核验：verified”，但该核验只验证**来源文章中存在对应表述**，并未核验表述本身的真实性、时效性、全面性。  \n- 例如“累计亏损超6亿元”“关停门店102家”等关键数据未附官方财报或权威媒体交叉印证，可信度不足。\n\n---\n\n### 二、文章优点\n\n- 选题切中当前社会对预制菜透明度、食品安全及AI冲击就业的关切，有较强的话题性。  \n- 事实陈述均有出处标注，证据链格式完整，便于追溯。  \n- 部分观点（如“价",
+      "local_probe": {
+        "passed": false,
+        "score": 0.95,
+        "fact_check_rate": 1.0,
+        "primary": "other",
+        "primary_detail": "独立评审判定不通过:不建议直接发布",
+        "versions": 1,
+        "revisions": 0
+      }
+    },
+    {
+      "category": "social",
+      "side": "rejected",
+      "draft_id": "social-20261121103744-aaeea0",
+      "file": "07_tmp\\r49_passrate\\exports\\r1\\social\\rejected\\social-20261121103744-aaeea0.md",
+      "ok": true,
+      "reviewer_model": "deepseek-v4-pro",
+      "reviewer_endpoint": "https://api.deepseek.com",
+      "verdict_contract": "labels_v1",
+      "verdict_label": "不建议发布",
+      "blocking": true,
+      "publishable": false,
+      "blocking_markers": [
+        "不建议发布"
+      ],
+      "publishable_markers": [],
+      "extraction": "不建议发布",
+      "extraction_error": null,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 1121,
+        "completion_tokens": 1851,
+        "total_tokens": 2972,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1294
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1121
+      },
+      "elapsed_s": 21.375,
+      "review_chars": 932,
+      "review_excerpt": "审评结论：**不通过，维持拒绝。该草稿存在致命内容错误，不具备发布条件。**\n\n## 一、总体判断\n\n这篇文章的标题与正文完全脱节，正文出现严重的文本循环重复，证据链与主题无关且重复引用同一事实。评分 **0.1** 基本合理，属于生成失败或素材错位导致的废稿。\n\n## 二、致命问题\n\n1. **文不对题**\n   - 标题为《别把起名当玄学！回归本质，用务实心态为孩子定名》，主题应围绕“孩子起名”。\n   - 正文却突然转向“AI小生意”“宝妈”等内容，与“起名”毫无关系。\n   - 标题词面在正文中覆盖率为 0%，完全没有兑现标题承诺。\n\n2. **内容截断 / 生成错误**\n   - 正文出现大量无意义重复：\n     > 她只是做对了一件事：她没把这事儿想复杂  \n     > 她只是做对了一件事：她没把这事儿想复杂……\n   - 同一语句反复出现多次，文章无法正常阅读，逻辑完全断裂。\n   - 这疑似生成过程中出现文本循环或截断，属于严重内容完整性缺陷。\n\n## 三、次要问题\n\n1. **标题与正文一致性为 0**\n   - 标题讨论“起名”，正文讨论“AI小生意”，二者没有任何关联。\n\n2. **正文内容严重重复**\n   - 除重复句外，没有形成完整段落或有效信息。\n\n3. **事实证据链无效**\n   - 证据链引用的来源文章为“AI小生意”相关，与标题“孩子起名”无关。\n   - 同一事实“她只是做对了一件事：她没把这事儿想复杂”被重复引用 7 次，且 offset 完全相同，缺乏信息增量。\n\n4. **证据链与正文未形成有效支撑**\n   - 即使来源真实，所引用内容也无法支撑标题或正文主题，不能证明文章论点。\n\n## 四、处理建议\n\n- **不可发布**，该草稿应退回或作废。\n- 若需修改，建议：\n  1. 重新围绕“孩子起名”组织内容，确保标题与正文一致；\n  2. 修复生成错误，删除重复循环文本，形成完整、通顺的正文；\n  3. 替换或补充与“起名”主题直接相关的事实证据；\n  4. 每条事实证据只绑定一次，避免同一证据反复引用；\n  5. 修改后重新提交审核。\n\n**最终结论：该文维持拒绝，不应发布。**",
+      "local_probe": {
+        "passed": false,
+        "score": 0.1,
+        "fact_check_rate": 1.0,
+        "primary": "gate.structure_truncated",
+        "primary_detail": "内容完整性检查未通过(疑似截断)",
+        "versions": 6,
+        "revisions": 2
+      }
+    }
+  ],
+  "summary": {
+    "n": 8,
+    "labels": {
+      "修改后再评": 7,
+      "不建议发布": 1
+    },
+    "by_side": {
+      "passed": {
+        "修改后再评": 4
+      },
+      "rejected": {
+        "修改后再评": 3,
+        "不建议发布": 1
+      }
+    },
+    "extraction_errors": 0,
+    "unavailable": 0
+  }
+}

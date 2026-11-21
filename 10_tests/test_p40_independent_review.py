@@ -201,7 +201,13 @@ def test_key_reads_env_then_file_without_network(tmp_path, monkeypatch):
 
 
 def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch):
+    """只验自由评审这一跳的请求形状;端点用显式回环段,不绑生产配置(生产在 R51 测试里单验)。"""
     monkeypatch.setenv("STRATA_API_KEY", SENTINEL)
+    section = {
+        "base_url": "http://127.0.0.1:8080",
+        "model_id": REVIEW_MODEL,
+        "api_key_env": "STRATA_API_KEY",
+    }
     captured: dict = {}
 
     def fake_chat(messages, **kwargs):
@@ -215,7 +221,7 @@ def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch)
     logs: list = []
     monkeypatch.setattr(review_channel.LOG, "info", lambda event, **kw: logs.append((event, kw)))
 
-    outcome = review_channel.review("正文第一行\n正文第二行")
+    outcome = review_channel.review("正文第一行\n正文第二行", section=section)
 
     sent = captured["messages"][0]["content"]
     assert sent == review_channel.REVIEW_PROMPT + "\n\n正文第一行\n正文第二行"
@@ -224,7 +230,7 @@ def test_review_request_carries_only_prompt_and_draft_and_no_secret(monkeypatch)
         assert phrase not in sent
     assert captured["api_key"] == SENTINEL
     assert captured["model_id"] == REVIEW_MODEL
-    assert captured["base_url"] == review_channel.review_config()["base_url"]
+    assert captured["base_url"] == section["base_url"]
     assert outcome["reviewer_model"] == REVIEW_MODEL
     assert outcome["verdict"]["publishable"] is True
     blob = json.dumps(outcome, ensure_ascii=False) + repr(logs)
