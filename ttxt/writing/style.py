@@ -284,6 +284,17 @@ def decheck_draft(
 _ADJACENT_REPEAT_MIN = 6
 _MAX_SENTENCE_FOR_REPEAT_SCAN = 600
 
+# R63:R61 现场同一并列项被连写两遍("小步调整、小步调整")、同句跨段重复
+# 都漏网(旧实现只比"相邻片段严格相等"和"与本行上一句严格相等")。
+# 下面三把尺子都是**确定性**的:只做严格包含/严格相等,不做近似相似删除。
+_CLAUSE_SPLIT = re.compile(r"[^，,、；;]+[，,、；;]?")
+_CLAUSE_MIN_CHARS = 4  # 短分句可能是有意的反复修辞(如"哈哈哈"),不动刀
+_CROSS_LINE_MIN_CHARS = 10  # 归一化短于此不跨行去重:短句误删风险高于收益
+_SENT_TAIL = "。！？!?；;，,、"
+_CITE_MARKER = re.compile(r"\[\d{1,3}\]$")
+_TABLE_SEP = re.compile(r"[|\-:\s]+")
+_HEADING = re.compile(r"^#{1,6}\s")
+
 
 def _collapse_adjacent_repeats(sentence: str) -> str:
     """删除句内相邻重复片段(保留一份);找不到重复就原样返回。"""
@@ -305,29 +316,176 @@ def _collapse_adjacent_repeats(sentence: str) -> str:
     return s
 
 
+def _core(chunk: str) -> str:
+    """分句的比较核:去空白、剥分句末尾的连接标点与句末标点。"""
+    return re.sub(r"\s+", "", (chunk or "").strip()).rstrip(_SENT_TAIL + "，,、；;")
+
+
+def _collapse_repeat_clauses(part: str) -> tuple[str, bool]:
+    """删除**相邻**的重复并列项(逗号/顿号/分号分隔),保留第一处。
+
+    判定口径(确定性、可复算):当前并列项整体等于前一保留项的**尾部**
+    (含严格相等),且长度 ≥ ``_CLAUSE_MIN_CHARS`` 才算重复——
+    "坚持小步调整、小步调整、弹性实施" 里第二项会被删,
+    "既包括一线城市、一线城市人口" 这种不是尾部重复的不动。
+    """
+    chunks = [m.group(0) for m in _CLAUSE_SPLIT.finditer(part)]
+    if len(chunks) < 2:
+        return part, False
+    kept: list[str] = []
+    prev_core = ""
+    changed = False
+    for chunk in chunks:
+        core = _core(chunk)
+        if core and len(core) >= _CLAUSE_MIN_CHARS and prev_core.endswith(core):
+            changed = True
+            continue
+        kept.append(chunk)
+        prev_core = core
+    if not changed:
+        return part, False
+    out = "".join(kept).rstrip("，,、；;、 ")
+    tail = re.search(r"[。！？!?]$", part)
+    if tail and not re.search(r"[。！？!?]$", out):
+        out += tail.group(0)
+    return out, True
+
+
+def _normalize_sentence(part: str) -> str:
+    """句级去重的比较核:去空白、剥句末引用标记与结尾标点。"""
+    text = re.sub(r"\s+", "", part or "").rstrip(_SENT_TAIL)
+    text = _CITE_MARKER.sub("", text)
+    return text.strip(_SENT_TAIL)
+
+
+def _cite_marker(part: str) -> str:
+    text = re.sub(r"\s+", "", part or "").rstrip(_SENT_TAIL)
+    match = _CITE_MARKER.search(text)
+    return match.group(0) if match else ""
+
+
+def _insert_cite(sentence: str, marker: str) -> str:
+    """把引用标记插到句末标点之前;同一标记不重复插。"""
+    if not marker or marker in sentence:
+        return sentence
+    match = re.search(r"[。！？!?；;，,、]$", sentence)
+    if match:
+        return sentence[: match.start()] + marker + sentence[match.start():]
+    return sentence + marker
+
+
 def copyedit_draft(draft: str) -> tuple[str, list[dict]]:
-    """确定性校对:删相邻重复句/相邻重复片段,保留第一处;返回(新文本, 修改清单)。"""
+    """确定性校对:删相邻重复片段/重复并列项/重复句,一律保留第一处。
+
+    R63 升级(对应 R61 评审点名的"编校错误/重复表述"):
+    - 句级去重从"只比本行上一句"扩到"比本行已保留的任一句";
+    - 新增**跨行(跨段)重复句**消除:全篇只保留首现;
+    - 新增分句级重复消除(``clause_repeat``);
+    - 被删的重复句若带 ``[编号]`` 引用标记而保留句没有,标记**回填**进保留句
+      —— 引用证据不能因为去重而丢。
+    只做严格相等/尾部包含判定,不做近似相似删除;空行、Markdown 表格分隔行、
+    标题行(``#``)一律原样保留。
+    """
     fixes: list[dict] = []
-    out_lines: list[str] = []
-    for line in (draft or "").splitlines():
-        if not line.strip():
-            out_lines.append(line)
+    lines_raw = (draft or "").splitlines()
+    structures: list[list[str] | None] = []  # None = 该行原样保留
+    doc_seen: dict[str, tuple[int, int]] = {}  # 归一化句 → (首现行号, 行内序号)
+    for line in lines_raw:
+        index = len(structures)
+        stripped = line.strip()
+        if not stripped:
+            structures.append(None)
             continue
-        # Markdown 表格的分隔行(|---|---|)本身是合法的重复列语法,不得当重复片段删。
-        if line.strip().startswith("|") and re.fullmatch(r"[|\-:\s]+", line.strip()):
-            out_lines.append(line)
+        # 表格分隔行是合法的重复列语法;# 标题行不做删句处理。
+        if (stripped.startswith("|") and re.fullmatch(_TABLE_SEP, stripped)) or _HEADING.match(stripped):
+            structures.append(None)
             continue
-        parts = re.findall(r"[^。！？!?；;]+[。！？!?；;]?", line)
         kept: list[str] = []
-        for part in parts:
+        for part in re.findall(r"[^。！？!?；;]+[。！？!?；;]?", line):
             collapsed = _collapse_adjacent_repeats(part)
             if collapsed != part:
                 fixes.append({"kind": "adjacent_repeat", "before": part[:160], "after": collapsed[:160]})
                 part = collapsed
-            normalized = re.sub(r"\s+", "", part)
-            if kept and normalized and re.sub(r"\s+", "", kept[-1]) == normalized:
-                fixes.append({"kind": "duplicate_sentence", "before": part[:160]})
+            deduped, clauses_changed = _collapse_repeat_clauses(part)
+            if clauses_changed:
+                fixes.append({"kind": "clause_repeat", "before": part[:160], "after": deduped[:160]})
+                part = deduped
+            normalized = _normalize_sentence(part)
+            dup_at = next(
+                (k for k, prev in enumerate(kept) if normalized and _normalize_sentence(prev) == normalized),
+                None,
+            )
+            if dup_at is not None:
+                marker = _cite_marker(part)
+                if marker and not _cite_marker(kept[dup_at]):
+                    kept[dup_at] = _insert_cite(kept[dup_at], marker)
+                fixes.append({"kind": "duplicate_sentence", "before": part[:160], "kept_at": f"行{index + 1}第{dup_at + 1}句"})
                 continue
             kept.append(part)
-        out_lines.append("".join(kept))
+            if normalized:
+                doc_seen.setdefault(normalized, (index, len(kept) - 1))
+        structures.append(kept)
+    for index, kept in enumerate(structures):
+        if kept is None or not kept:
+            continue
+        survivors: list[str] = []
+        for part in kept:
+            normalized = _normalize_sentence(part)
+            earlier = doc_seen.get(normalized)
+            # 只删"更晚的行里、与更早某行严格同句"的重复;同行重复在上一轮已处理。
+            if earlier and earlier[0] < index and len(normalized) >= _CROSS_LINE_MIN_CHARS:
+                first_line, first_pos = earlier
+                marker = _cite_marker(part)
+                if marker and not _cite_marker(structures[first_line][first_pos]):
+                    structures[first_line][first_pos] = _insert_cite(structures[first_line][first_pos], marker)
+                fixes.append(
+                    {"kind": "cross_line_duplicate", "before": part[:160], "kept_at": f"行{first_line + 1}"}
+                )
+                continue
+            survivors.append(part)
+        structures[index] = survivors
+    out_lines = [
+        raw if kept is None else "".join(kept)
+        for raw, kept in zip(lines_raw, structures)
+    ]
     return "\n".join(out_lines), fixes
+
+
+# ------------------------------------------------------------------ R63 未兑现的列举承诺
+
+# 数量承诺:"两件核心大事/三个要点/几步准备"——只认 ≥2 的量词与可数名词,
+# "做好一件事"这种单数说法不算承诺(误报宁可漏,不要误伤正文)。
+_ENUM_PROMISE = re.compile(
+    r"(?P<num>[两二三四五六七八九十]|几|多|数|\d{1,2})\s*"
+    r"(?:件|个|项|步|条|大)\s*(?:核心|关键|重要|主要)?\s*"
+    r"(?:大事|要点|重点|方面|结论|变化|信号|信息|动作|准备|安排)"
+)
+# 列举结构:行首编号/项目符号、"一是/二是"、"第一/第二"、带圈数字。
+_ENUM_STRUCTURE = re.compile(
+    r"(?:^|\n)\s*(?:[-*·•]|\d+\s*[.、)）]|[①②③④⑤⑥⑦⑧⑨])"
+    r"|第[两二三四五六七八九十\d]+\s*(?:[件个项条点])?\s*[是为、，,：:]"
+    r"|[一二三四五六七八九十]\s*[是为：]"
+)
+
+
+def enum_promise_issues(draft: str) -> list[str]:
+    """正文承诺了"N 件大事/几个要点"却没有任何列举结构 ⇒ 给一条修订线索。
+
+    只出**线索**,不出 critical、不参与放行(判定口径见 ``workflow._passed``):
+    两位独立评审都点过"标题说两件核心大事、正文从未列举",这类问题可确定性
+    检出,但误报代价必须低,所以只在"有数量承诺 + 全篇无列举结构"时报告。
+    """
+    text = draft or ""
+    promise: tuple[str, int] | None = None
+    for match in _ENUM_PROMISE.finditer(text):
+        if match.group("num") in ("1", "0"):
+            continue
+        promise = (re.sub(r"\s+", "", match.group(0)), match.start())
+        break
+    if promise is None or _ENUM_STRUCTURE.search(text):
+        return []
+    snippet = re.sub(r"\s+", "", text[max(0, promise[1] - 20): promise[1] + 40])
+    return [
+        f"正文承诺了「{promise[0]}」但没有逐条列举(上下文:{snippet}…):"
+        "请把承诺的内容按「一是/二是…」或编号列表逐条写出,或改成不含数量承诺的说法"
+    ]
