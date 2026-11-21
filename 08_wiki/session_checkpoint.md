@@ -112,4 +112,35 @@ AI 裁定≠人工裁定；生产类目库零写入（探针/烟测走 snapshot�
   ② 砍尝试次数（门禁修订 2→1、独立评审 3→2，动 R61 用户令配额）③ 素材相关性闸（打主题漂移，R64 首选）
   ④ 修复批量化（~10%）。
 
-NEXT: 5 题快速复测（验证早停耗时）跑完后补进报告 §7 与本节；提交代码+报告+回执+检查点并推送；剩余未达成项按报告 §6 由用户拍板。
+（R63 收尾完成：报告 `08_wiki/reports/r63-writing-tightening-smoke.md`，`ca902a0` 已推送；
+早停与 MAX_REPAIR_ROUNDS 两条提速尝试已回退，§8 提速项待用户拍板。）
+
+## R64 素材相关度闸 + 数据驱动选题（2026-11-21 19:46，全程零模型调用）
+
+- 已推送 `ca902a0..9016a1b` 两个提交（快进、未 force；`git ls-remote` 已核）：
+  `a02691d` R64-1 相关度闸（`rag.topic_relevance` + `_rank_materials(topic=…)` 接线 + 门禁文案归因 + P41 用例）、
+  `9016a1b` R64-2 选题层（新增 `ttxt/analysis/topics.py`、`ttxt topics` CLI、P42 18 用例）。
+  报告：`08_wiki/reports/r64-material-relevance-data-driven-topics.md`。
+- **R64-1 前移的口径红线未动**：`material_min_full=6`/`material_min_sources=3` 仍只从 `config.writing` 读，
+  没有新增阈值；判据写在 `rag.topic_relevance`（标题命中≥1 且每千字≥2.0，或每千字≥8.0；切不出 token ⇒ 相关并 `skipped`）。
+- 生产快照 A/B（5 类目 48 个 active keyword，同一候选池，`07_tmp/r64_snap/gate_ab.json`）：
+  过滤前 **48/48 放行**，过滤后 **39 放行 / 9 拦**（美女/财报/神器/降价/科学家/特朗普/健康/多人/文明）；
+  窗口内离题候选剔除 **220** 条（上限 720），仅 15/48 主题零剔除，16/48 的相关全文被砍半以上
+  （警方 15→6、特朗普 14→2、多人 15→2）⇒ 此前门禁从不防"离题稿凑数"。
+- 选题层实跑（快照只读，`07_tmp/r64_snap/evidence/*.json`）：social 13→12、finance 14→12、
+  technology 10→7、health 6→4、history 5→4、demo 0→0（无 active 关键词如实报空）。
+  共 **39 个系统提出且当场语料撑得起的主题**（对比 R63 人工整标题出题 0/10）。
+- 已钉死的设计事实：整条爆款标题**不是主题**（FTS 按标题 token AND ⇒ 只召回自己，相关全文 1/独立来源 1），
+  且不进候选池、只作参考（`used_for="reference_only_not_topic"`）；爆款→主题的正规通道是
+  `analyze → analysis/keywords.mine_keywords`（写 `keywords.origin='mined'`，`analyze.py:42` 是唯一调用点）。
+- 测试基线：全量 `10_tests` **1092 passed（331.57s，exit 0）**。首跑的 1 failed 是仓库根残留探针垃圾
+  `D:/ttxt/tmpq092s9ax`（合成 `fewshot_library.json`）触发 p38 守卫，已删该垃圾目录
+  （生产 `00_control/fewshot_library.json` 11854 字节、`01_categories/`、`资产库/`、`11_backups/` 未动）。
+- 运维坑（本轮新增）：本 worktree 分支是 `r63-writing-tightening`，主 worktree `D:/ttxt` 的本地 `main`
+  停在 R62 的 `2752746`（落后 origin/main）⇒ **`git push origin main` 会推错分支被拒**；
+  推送一律用 `git push origin HEAD:main`，并以 `git ls-remote origin refs/heads/main` 核验。
+- 下一个缺口（候选广度）：active keyword 每类目仅 5–14，`mined` 稳定卡 10（=`MINE_TOP_N`，
+  每轮只出 10 个且不跨轮累积）⇒ 主题池上不去。
+
+NEXT: 挖词候选广度（`MINE_TOP_N`/跨轮去重累积与 `analyze` 频率）→ 让 9 个被拦主题走 crawl-plan 干跑补采集后复检；
+"可写主题→写作"的一键衔接需用户拍板（红线：调度器绝不触发写作）。
