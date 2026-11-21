@@ -1,0 +1,87 @@
+{
+ "generated_at": "2026-11-21 12:37:08",
+ "topic": "延迟退休 养老金",
+ "elapsed_s": 660.4,
+ "draft_id": "social-20261121122655-eaa9e2",
+ "status": "rejected",
+ "passed": false,
+ "versions": 11,
+ "revisions": 5,
+ "score": 0.65,
+ "fact_checkability": {
+  "rate": 1.0,
+  "facts": 12,
+  "checkable": 12,
+  "release_condition_met": true,
+  "release_threshold": 0.8
+ },
+ "fewshot_status": "ok:5",
+ "fewshot_count": 5,
+ "independent_reviews_used": 1,
+ "independent_review_max": 3,
+ "independent_review_rounds": [
+  {
+   "round": 1,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "总体评价：该文选题有现实意义，能够关注延迟退休政策下的身份认定与个人规划问题，方向正确，也传递了“提前准备、重视档案”的正确理念。但作为一篇标题为“身份认定与社保规划指南”的文章，其政策准确性、信息量、可操作性均存在明显不足，更像一篇政策提醒短文，尚不足以构成“指南”。\n\n### 一、主要优点\n\n1. **主题切中当下关切**  \n   延迟退休于2025年1月1日起实施，灵活就业人员、80后、90后等群体的退休身份认定和社保规划问题确有讨论价值。\n\n2. **核心建议方向正确**  \n   文章强调不要临近退休才处理档案、社保记录、身份认定问题，而是要在职业生涯中期主动查询本地政策，这种提醒具有实际意义。\n\n3. **语气理性**  \n   没有渲染焦虑，而是主张“避免盲目焦虑或消极应对”，基调较为积极、务实。\n\n### 二、主要问题\n\n#### 1. 政策表述不够准确、完整\n\n文章存在几处较明显的政策表述瑕疵：\n\n- **将全国统一节奏表述为地方政策，容易误导**  \n  原文称“以广东韶关为例，相关政策显示：原55岁女干部每4个月延1个月；原50岁女职工每2个月延1个月”。  \n  实际上，这一延迟节奏是全国性规定，并非韶关特有。如此表述容易让读者误以为这是广东韶关的地方政策。\n\n- **政策覆盖对象不完整**  \n  文章只提到女干部、女职工，未提及男职工。全国渐进式延迟退",
+   "elapsed_s": 49.0
+  }
+ ],
+ "independent_review": {
+  "attempted": true,
+  "available": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "prompt": "审评这篇文章",
+  "verdict_markers": {
+   "blocking": true,
+   "publishable": false,
+   "blocking_markers": [
+    "修改后再评"
+   ],
+   "publishable_markers": []
+  },
+  "verdict_contract": "labels_v1",
+  "verdict_label": "修改后再评",
+  "verdict_excerpt": "总体评价：该文选题有现实意义，能够关注延迟退休政策下的身份认定与个人规划问题，方向正确，也传递了“提前准备、重视档案”的正确理念。但作为一篇标题为“身份认定与社保规划指南”的文章，其政策准确性、信息量、可操作性均存在明显不足，更像一篇政策提醒短文，尚不足以构成“指南”。\n\n### 一、主要优点\n\n1. **主题切中当下关切**  \n   延迟退休于2025年1月1日起实施，灵活就业人员、80后、90后等群体的退休身份认定和社保规划问题确有讨论价值。\n\n2. **核心建议方向正确**  \n   文章强调不要临近退休才处理档案、社保记录、身份认定问题，而是要在职业生涯中期主动查询本地政策，这种提醒具有实际意义。\n\n3. **语气理性**  \n   没有渲染焦虑，而是主张“避免盲目焦虑或消极应对”，基调较为积极、务实。\n\n### 二、主要问题\n\n#### 1. 政策表述不够准确、完整\n\n文章存在几处较明显的政策表述瑕疵：\n\n- **将全国统一节奏表述为地方政策，容易误导**  \n  原文称“以广东韶关为例，相关政策显示：原55岁女干部每4个月延1个月；原50岁女职工每2个月延1个月”。  \n  实际上，这一延迟节奏是全国性规定，并非韶关特有。如此表述容易让读者误以为这是广东韶关的地方政策。\n\n- **政策覆盖对象不完整**  \n  文章只提到女干部、女职工，未提及男职工。全国渐进式延迟退",
+  "finish_reason": "stop",
+  "usage": {
+   "prompt_tokens": 522,
+   "completion_tokens": 4315,
+   "total_tokens": 4837,
+   "prompt_tokens_details": {
+    "cached_tokens": 0
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 2911
+   },
+   "prompt_cache_hit_tokens": 0,
+   "prompt_cache_miss_tokens": 522
+  },
+  "elapsed_s": 49.0
+ },
+ "review_account": "rejected",
+ "review_account_basis": "independent_review_blocked",
+ "model_meta": {
+  "same_model_review": false,
+  "review_independence": "independent",
+  "independent_review": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "reviewer_limitation": "评审由独立服务模型 deepseek-v4-pro 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+  "served_model": "qwen3.8-flash-next-iq3_s"
+ },
+ "template_check_status": "within_budget",
+ "template_flags": [],
+ "notes": "门禁致命问题: 事实未通过来源核验:弹性延迟退休最长不超过3年(numbers:3;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):3);致命问题:内容截断/拼接错误 - 第三部分'跨地区转移与档案缺失问题'段落末尾突然中断于'（有的地方要求累计满10年）'，随后直接跳转到另一段落的开头'两人都是45岁左右...'，导致语义完全断裂，属于严重的编辑事故或内容截断。;致命问题:无来源断言/事实混淆 - 文中提到'此前文中提及的“广东韶关”案例实为全国通用规则'，但前文并未提及任何关于'广东韶关'的内容，该注释凭空出现，造成逻辑混乱和误导。",
+ "critical": [
+  "事实未通过来源核验:弹性延迟退休最长不超过3年(numbers:3;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):3)",
+  "致命问题:内容截断/拼接错误 - 第三部分'跨地区转移与档案缺失问题'段落末尾突然中断于'（有的地方要求累计满10年）'，随后直接跳转到另一段落的开头'两人都是45岁左右...'，导致语义完全断裂，属于严重的编辑事故或内容截断。",
+  "致命问题:无来源断言/事实混淆 - 文中提到'此前文中提及的“广东韶关”案例实为全国通用规则'，但前文并未提及任何关于'广东韶关'的内容，该注释凭空出现，造成逻辑混乱和误导。"
+ ],
+ "path": "D:\\ttxt\\07_tmp\\r61_smoke\\exports\\social\\rejected\\social-20261121122655-eaa9e2.md"
+}

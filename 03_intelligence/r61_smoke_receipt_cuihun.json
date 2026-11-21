@@ -1,0 +1,105 @@
+{
+ "generated_at": "2026-11-21 12:56:29",
+ "topic": "催婚",
+ "elapsed_s": 266.9,
+ "draft_id": "social-20261121125242-69d2c9",
+ "status": "rejected",
+ "passed": false,
+ "versions": 3,
+ "revisions": 2,
+ "score": 0.95,
+ "fact_checkability": {
+  "rate": 1.0,
+  "facts": 5,
+  "checkable": 5,
+  "release_condition_met": true,
+  "release_threshold": 0.8
+ },
+ "fewshot_status": "ok:5",
+ "fewshot_count": 5,
+ "independent_reviews_used": 3,
+ "independent_review_max": 3,
+ "independent_review_rounds": [
+  {
+   "round": 1,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "审评意见\n\n这篇文章标题为《当年最抗拒催婚的90后，如今开始主动催婚子女》，但正文内容与标题之间严重脱节，整体更像围绕“年轻人婚恋压力”的素材拼贴，而不是一篇逻辑清晰、观点明确的文章。\n\n### 一、标题与正文明显不符\n\n标题提出“90后如今开始主动催婚子女”，但正文几乎没有论证这一点。除首段提到90后“终于读懂了父母当年的苦心与无奈”外，后文并未出现任何90后催婚子女的具体表现、案例或数据。相反，文章大量讨论的是“年轻人不愿结婚”“拒绝将就凑合”“不着急结婚生子”，这与“催婚”立场明显矛盾。\n\n更关键的是，第一批90后目前不过35岁左右，其子女大多尚未进入婚恋年龄，现实中“催婚子女”这一说法本身就缺乏基本事实支撑。\n\n### 二、中心论点不明确\n\n文章没有回答标题提出的核心问题：90后为什么、在什么意义上、以什么方式开始“主动催婚子女”。各段内容分别是：\n\n- 90后从被催婚到理解父母；\n- 年轻人不婚的社会压力；\n- 婚恋诈骗案件；\n- 县城青年沉迷棋牌室；\n- 未来年轻人更不愿匆忙结婚。\n\n这些内容并非围绕一个中心展开，而是多个话题的松散组合。读者读完后，既看不到“90后催婚子女”的论证，也看不到文章明确的立场或结论。\n\n### 三、段落之间缺乏逻辑衔接\n\n第二段讲社会系统如何导致年轻人不婚，第三段讲催婚压力下容易落入“杀猪盘”陷阱，第四段突然转到县城青年打牌逃避现实，第五段",
+   "elapsed_s": 46.5
+  },
+  {
+   "round": 2,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "以下是对这篇文章的审评意见，按“总体评价—优点—主要问题—修改建议”的结构展开。\n\n---\n\n### 一、总体评价\n\n这篇文章选题有现实意义，涉及90后婚恋观、代际冲突、婚育压力、婚恋诈骗等公共话题，有一定可读性和话题感。但作为一篇评论文章，目前更像多个观点和素材的拼贴，中心论点不够明确，段落之间逻辑跳跃较大，论据支撑不足，尤其标题与正文内容存在明显脱节。\n\n如果按评论文章标准衡量，属于“有素材潜力，但论证和结构需要较大修改”的状态。\n\n---\n\n### 二、优点\n\n1. **选题具有公共讨论价值**  \n   “90后婚恋观变化”“催婚”“不婚”“婚恋诈骗”都是当下关注度较高的话题，容易引发读者共鸣。\n\n2. **语言表达整体流畅**  \n   文中不乏概括性较强的句子，如“拒绝为了完成任务而将就凑合”“在高成本生活夹缝中的清醒与挣扎”等，有一定金句意识。\n\n3. **有引用意识**  \n   文中标注了[1][2][3][4]，说明作者试图引入外部信息增强说服力。\n\n---\n\n### 三、主要问题\n\n#### 1. 标题与正文内容脱节\n\n标题是《从抗拒催婚到理解父母：90后婚恋观的变化》，但正文真正围绕“理解父母”展开的内容非常少。第一段提出“终于读懂了父母当年的苦心与无奈”后，后文并没有具体写90后如何理解父母、理解了哪些内容、这种理解带来了什么变化。\n\n第二段转向“年轻人不",
+   "elapsed_s": 56.657
+  },
+  {
+   "round": 3,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "审评意见如下，供参考：\n\n**总体评价**\n\n《拒绝将就：90后在高成本时代的婚恋选择》一文选题切中当下社会热点，标题观点鲜明，具有较强的现实关怀。文章试图从代际态度转变、经济压力、婚恋风险和观念变化四个层面，分析90后晚婚、不婚现象，整体结构基本完整，结尾也有一定思想升华。但文章在论证严谨性、概念清晰度、案例衔接和引用规范等方面仍存在较明显不足，需进一步修改完善。\n\n**一、主要优点**\n\n1. **选题具有现实意义。** 90后婚恋观变化、高成本生活压力、催婚焦虑等，都是当前社会广泛关注的话题，容易引发读者共鸣。\n\n2. **标题有吸引力。** “拒绝将就”与“高成本时代”形成对照，准确概括了文章核心观点，也符合新媒体传播语境。\n\n3. **结构层次较清晰。** 文章从90后对催婚态度的变化，到经济压力分析，再到婚恋风险警示，最后进行趋势展望，逻辑线索基本清楚。\n\n4. **结尾有一定深度。** “理解父母不是认同催婚，而是看清两代人被同一种生活焦虑塑造”这一句提升了文章的思想层次，避免了简单站队式表达。\n\n**二、主要不足与修改建议**\n\n1. **核心概念不够清晰。**  \n   文中“高成本时代”没有具体界定，读者只能模糊理解为住房、彩礼、育儿等压力。同时，“不结婚的焦虑”与“主动选择晚婚或不婚”存在混用。究竟是焦虑还是主动选择，主体和因果关系需要更明确地区分。  \n  ",
+   "elapsed_s": 34.937
+  }
+ ],
+ "independent_review": {
+  "attempted": true,
+  "available": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "prompt": "审评这篇文章",
+  "verdict_markers": {
+   "blocking": true,
+   "publishable": false,
+   "blocking_markers": [
+    "修改后再评"
+   ],
+   "publishable_markers": []
+  },
+  "verdict_contract": "labels_v1",
+  "verdict_label": "修改后再评",
+  "verdict_excerpt": "审评意见如下，供参考：\n\n**总体评价**\n\n《拒绝将就：90后在高成本时代的婚恋选择》一文选题切中当下社会热点，标题观点鲜明，具有较强的现实关怀。文章试图从代际态度转变、经济压力、婚恋风险和观念变化四个层面，分析90后晚婚、不婚现象，整体结构基本完整，结尾也有一定思想升华。但文章在论证严谨性、概念清晰度、案例衔接和引用规范等方面仍存在较明显不足，需进一步修改完善。\n\n**一、主要优点**\n\n1. **选题具有现实意义。** 90后婚恋观变化、高成本生活压力、催婚焦虑等，都是当前社会广泛关注的话题，容易引发读者共鸣。\n\n2. **标题有吸引力。** “拒绝将就”与“高成本时代”形成对照，准确概括了文章核心观点，也符合新媒体传播语境。\n\n3. **结构层次较清晰。** 文章从90后对催婚态度的变化，到经济压力分析，再到婚恋风险警示，最后进行趋势展望，逻辑线索基本清楚。\n\n4. **结尾有一定深度。** “理解父母不是认同催婚，而是看清两代人被同一种生活焦虑塑造”这一句提升了文章的思想层次，避免了简单站队式表达。\n\n**二、主要不足与修改建议**\n\n1. **核心概念不够清晰。**  \n   文中“高成本时代”没有具体界定，读者只能模糊理解为住房、彩礼、育儿等压力。同时，“不结婚的焦虑”与“主动选择晚婚或不婚”存在混用。究竟是焦虑还是主动选择，主体和因果关系需要更明确地区分。  \n  ",
+  "finish_reason": "stop",
+  "usage": {
+   "prompt_tokens": 606,
+   "completion_tokens": 2916,
+   "total_tokens": 3522,
+   "prompt_tokens_details": {
+    "cached_tokens": 0
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 1943
+   },
+   "prompt_cache_hit_tokens": 0,
+   "prompt_cache_miss_tokens": 606
+  },
+  "elapsed_s": 34.937
+ },
+ "review_account": "rejected",
+ "review_account_basis": "independent_review_blocked",
+ "model_meta": {
+  "same_model_review": false,
+  "review_independence": "independent",
+  "independent_review": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "reviewer_limitation": "评审由独立服务模型 deepseek-v4-pro 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+  "served_model": "qwen3.8-flash-next-iq3_s"
+ },
+ "template_check_status": "within_budget",
+ "template_flags": [],
+ "notes": "门禁致命问题: 独立评审判定不通过:修改后再评",
+ "critical": [
+  "独立评审判定不通过:修改后再评"
+ ],
+ "path": "D:\\ttxt\\07_tmp\\r61_smoke_cuihun\\exports\\social\\rejected\\social-20261121125242-69d2c9.md"
+}

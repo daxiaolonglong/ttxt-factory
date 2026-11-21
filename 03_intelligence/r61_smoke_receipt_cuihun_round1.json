@@ -1,0 +1,96 @@
+{
+ "generated_at": "2026-11-21 12:50:25",
+ "topic": "催婚",
+ "elapsed_s": 654.3,
+ "draft_id": "social-20261121124011-5b4982",
+ "status": "rejected",
+ "passed": false,
+ "versions": 12,
+ "revisions": 7,
+ "score": 0.65,
+ "fact_checkability": {
+  "rate": 1.0,
+  "facts": 11,
+  "checkable": 11,
+  "release_condition_met": true,
+  "release_threshold": 0.8
+ },
+ "fewshot_status": "ok:5",
+ "fewshot_count": 5,
+ "independent_reviews_used": 2,
+ "independent_review_max": 3,
+ "independent_review_rounds": [
+  {
+   "round": 1,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "这篇文章选题敏锐，抓住了“90后婚恋观变化”“催婚焦虑”“杀猪盘”“县域青年社交”等热点，有较强的公共讨论价值。但从论证质量看，文章更像多素材拼贴，标题判断较强，正文却未提供足够证据支撑，逻辑链条也有明显跳跃。\n\n### 一、值得肯定之处\n\n1. **话题有现实意义**  \n   婚恋压力、经济成本、网络诈骗、县城青年生活状态，都是当下值得关注的社会议题。文章试图把年轻人不婚、恐婚的问题放入更宏观的社会结构中理解，而不是简单归因于个人“挑剔”或“不负责任”。\n\n2. **案例增强了可读性**  \n   福建福鼎“杀猪盘”案件、湖南县城棋牌室的流行等具体案例，使抽象问题有了具象落点，增加了文章的可读性和传播力。\n\n3. **视角有一定多维性**  \n   文章没有停留在“父母催婚—子女反抗”的浅层对立，而是提到了经济压力、情感风险、替代性社交出口等多个侧面，体现了观察的广度。\n\n### 二、主要问题\n\n1. **标题与正文脱节，“集体倒戈”缺乏依据**  \n   标题说90后“集体倒戈”，但正文并没有提供调查数据、统计趋势或代表性案例来证明这一点。正文更多是描述年轻人“读懂父母苦心”“理解现实压力”，这并不等同于“倒戈”或转而认同催婚。标题的强判断与正文的弱论证之间存在明显落差，有标题党倾向。\n\n2. **结构松散，各部分之间逻辑联系不足**  \n   文章从90后心态转变，突然跳到",
+   "elapsed_s": 52.297
+  },
+  {
+   "round": 2,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "以下是对《读懂父母的苦心，也守住自己的底线：90后婚恋观背后的真实困境》一文的审评意见。\n\n---\n\n## 一、总体评价\n\n本文选题具有现实关怀，试图跳出“90后反催婚”“年轻人不愿结婚”的简单道德判断，从房价、教育、养老、就业等结构性压力解释婚恋观念变化，这一视角值得肯定。文章语言流畅，部分现象描述如县城棋牌室、婚恋诈骗案例等具有一定可读性，能够引发读者对青年婚恋困境的共情。\n\n但作为一篇分析性文章，本文在标题与内容的匹配度、论证逻辑、证据支撑、概念界定和引用规范等方面存在较明显不足，整体上更接近现象评论，尚不足以构成严谨的社会观察或政策分析。\n\n---\n\n## 二、主要问题\n\n### 1. 标题与正文内容不匹配\n\n标题为“读懂父母的苦心，也守住自己的底线”，但正文只在开头提到90后“开始读懂父母当年的苦心与无奈”，之后几乎不再展开“读懂父母”这一层代际理解问题。而“守住自己的底线”更缺乏明确论述，仅在婚恋诈骗案例中隐约对应“保持理性防线”，并未形成独立论点。\n\n读者会期待文章讨论：年轻人在理解父母与现实压力之间，如何保持个人选择边界？如何避免因焦虑而仓促结婚或陷入情感骗局？但文章没有就此深入，标题中的“底线”基本悬空。\n\n### 2. 核心概念界定不清\n\n文中多次使用“社会系统对婚恋压力的转嫁”“真实困境”“适应性危机”等概念，但未作清晰界定。例如，“社会系统对婚恋压力的转嫁”",
+   "elapsed_s": 57.766
+  }
+ ],
+ "independent_review": {
+  "attempted": true,
+  "available": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "prompt": "审评这篇文章",
+  "verdict_markers": {
+   "blocking": true,
+   "publishable": false,
+   "blocking_markers": [
+    "修改后再评"
+   ],
+   "publishable_markers": []
+  },
+  "verdict_contract": "labels_v1",
+  "verdict_label": "修改后再评",
+  "verdict_excerpt": "以下是对《读懂父母的苦心，也守住自己的底线：90后婚恋观背后的真实困境》一文的审评意见。\n\n---\n\n## 一、总体评价\n\n本文选题具有现实关怀，试图跳出“90后反催婚”“年轻人不愿结婚”的简单道德判断，从房价、教育、养老、就业等结构性压力解释婚恋观念变化，这一视角值得肯定。文章语言流畅，部分现象描述如县城棋牌室、婚恋诈骗案例等具有一定可读性，能够引发读者对青年婚恋困境的共情。\n\n但作为一篇分析性文章，本文在标题与内容的匹配度、论证逻辑、证据支撑、概念界定和引用规范等方面存在较明显不足，整体上更接近现象评论，尚不足以构成严谨的社会观察或政策分析。\n\n---\n\n## 二、主要问题\n\n### 1. 标题与正文内容不匹配\n\n标题为“读懂父母的苦心，也守住自己的底线”，但正文只在开头提到90后“开始读懂父母当年的苦心与无奈”，之后几乎不再展开“读懂父母”这一层代际理解问题。而“守住自己的底线”更缺乏明确论述，仅在婚恋诈骗案例中隐约对应“保持理性防线”，并未形成独立论点。\n\n读者会期待文章讨论：年轻人在理解父母与现实压力之间，如何保持个人选择边界？如何避免因焦虑而仓促结婚或陷入情感骗局？但文章没有就此深入，标题中的“底线”基本悬空。\n\n### 2. 核心概念界定不清\n\n文中多次使用“社会系统对婚恋压力的转嫁”“真实困境”“适应性危机”等概念，但未作清晰界定。例如，“社会系统对婚恋压力的转嫁”",
+  "finish_reason": "stop",
+  "usage": {
+   "prompt_tokens": 936,
+   "completion_tokens": 4771,
+   "total_tokens": 5707,
+   "prompt_tokens_details": {
+    "cached_tokens": 0
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 3357
+   },
+   "prompt_cache_hit_tokens": 0,
+   "prompt_cache_miss_tokens": 936
+  },
+  "elapsed_s": 57.766
+ },
+ "review_account": "rejected",
+ "review_account_basis": "independent_review_blocked",
+ "model_meta": {
+  "same_model_review": false,
+  "review_independence": "independent",
+  "independent_review": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "reviewer_limitation": "评审由独立服务模型 deepseek-v4-pro 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+  "served_model": "qwen3.8-flash-next-iq3_s"
+ },
+ "template_check_status": "within_budget",
+ "template_flags": [],
+ "notes": "内容完整性检查未通过(疑似截断)",
+ "critical": [
+  "致命问题:事实错误/无来源断言 - 参考文献[4]声称数据来自'民政部、国家统计局'，但实际引用的URL及标题显示为自媒体文章（今日头条），且文中明确承认该引用为'示例性'或基于宏观观察，将非官方发布的自媒体观点包装成官方权威数据属于严重的事实误导。",
+  "致命问题:无来源断言 - 参考文献[1]明确标注为'示例性学术观点综述...具体页码及作者信息请以实际检索到的最新文献为准'，表明该引用并非真实存在的特定文献，而是虚构或占位符，违反了学术规范中的真实性原则。"
+ ],
+ "path": "D:\\ttxt\\07_tmp\\r61_smoke_cuihun\\exports\\social\\rejected\\social-20261121124011-5b4982.md"
+}

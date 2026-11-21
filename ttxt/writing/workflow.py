@@ -464,6 +464,31 @@ def _draft_title(draft: str, topic: str) -> tuple[str, str]:
     return title, body
 
 
+def _revise_with_retry(
+    model_call,
+    draft: str,
+    issues: list[str],
+    *,
+    max_tokens: int,
+    retry_cap: int,
+    gate_min_chars: int,
+    enable_thinking: bool,
+    topic: str,
+) -> str:
+    """修订输出疑似截断时按草稿同一先例重试一次(放宽 token,不放宽完整性判定)。"""
+    prompt = prompts.revise_prompt(draft, issues)
+    out = model_call(prompt, max_tokens=max_tokens, temperature=0.4, enable_thinking=enable_thinking)
+    if not _is_complete(out, gate_min_chars) and retry_cap > max_tokens:
+        LOG.warn("writing.revise_incomplete_retry", topic=topic, max_tokens=max_tokens)
+        out = model_call(
+            prompt,
+            max_tokens=min(max_tokens * 2, retry_cap),
+            temperature=0.4,
+            enable_thinking=enable_thinking,
+        )
+    return out
+
+
 def _merge_findings(review: dict, issues: list[str], critical: list[str]) -> dict:
     """确定性核验结论并入评审结论(确定性 critical 优先,顺序去重)。"""
     return {
@@ -921,11 +946,15 @@ def write_article(
         # 1) 本地门禁修复:每阶段给 max_revisions 次预算(独立评审驱动的修订另计总次数 revisions)。
         phase_revisions = 0
         while not passed and phase_revisions < max_revisions:
-            draft = model_call(
-                prompts.revise_prompt(draft, review["issues"] + review["critical"]),
+            draft = _revise_with_retry(
+                model_call,
+                draft,
+                review["issues"] + review["critical"],
                 max_tokens=max_tokens,
-                temperature=0.4,
+                retry_cap=retry_cap,
+                gate_min_chars=gate_min_chars,
                 enable_thinking=enable_thinking,
+                topic=topic,
             )
             draft, copyedit_fixes = style.copyedit_draft(draft)
             copyedit_total.extend(copyedit_fixes)
@@ -1045,14 +1074,15 @@ def write_article(
             )
             passed = False
             break
-        draft = model_call(
-            prompts.revise_prompt(
-                draft,
-                ["独立评审意见(必须逐条落实,不得只改表面措辞):\n" + (review_outcome.get("verdict_text") or "")[:4000]],
-            ),
+        draft = _revise_with_retry(
+            model_call,
+            draft,
+            ["独立评审意见(必须逐条落实,不得只改表面措辞):\n" + (review_outcome.get("verdict_text") or "")[:4000]],
             max_tokens=max_tokens,
-            temperature=0.4,
+            retry_cap=retry_cap,
+            gate_min_chars=gate_min_chars,
             enable_thinking=enable_thinking,
+            topic=topic,
         )
         draft, copyedit_fixes = style.copyedit_draft(draft)
         copyedit_total.extend(copyedit_fixes)

@@ -1,0 +1,47 @@
+{
+ "generated_at": "2026-11-21 13:00:40",
+ "topic": "A股 下跌",
+ "elapsed_s": 190.5,
+ "draft_id": "finance-20261121125825-ef6eeb",
+ "status": "rejected",
+ "passed": false,
+ "versions": 5,
+ "revisions": 2,
+ "score": 0.85,
+ "fact_checkability": {
+  "rate": 0.909,
+  "facts": 11,
+  "checkable": 10,
+  "release_condition_met": true,
+  "release_threshold": 0.8
+ },
+ "fewshot_status": "ok:6",
+ "fewshot_count": 6,
+ "independent_reviews_used": 0,
+ "independent_review_max": 3,
+ "independent_review_rounds": [],
+ "independent_review": {
+  "attempted": false,
+  "available": false,
+  "error": null
+ },
+ "review_account": "rejected",
+ "review_account_basis": "gate_rejected",
+ "model_meta": {
+  "same_model_review": true,
+  "review_independence": "self_review",
+  "independent_review": false,
+  "reviewer_model": null,
+  "reviewer_endpoint": null,
+  "reviewer_limitation": "写作与模型评审由同一服务模型完成,评审独立性受限;事实门禁另由 verifier 确定性规则独立判定",
+  "served_model": "qwen3.8-flash-next-iq3_s"
+ },
+ "template_check_status": null,
+ "template_flags": [],
+ "notes": "门禁致命问题: 事实未通过来源核验:翱捷科技遭遇3.55亿元资金出逃，在连续普跌背景下，后市策略应关注机构资金流向变化及超跌反弹中的结构(numbers:3.55亿元;orgs:后市策略应关注机构;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):3.55亿元);结尾段落关于'翱捷科技遭遇3.55亿元资金出逃'及后市策略建议的证据链标记为unverified（未验证），且原文引句缺失具体数字来源支撑，属于次要证据瑕疵",
+ "critical": [
+  "事实未通过来源核验:翱捷科技遭遇3.55亿元资金出逃，在连续普跌背景下，后市策略应关注机构资金流向变化及超跌反弹中的结构(numbers:3.55亿元;orgs:后市策略应关注机构;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):3.55亿元)",
+  "结尾段落关于'翱捷科技遭遇3.55亿元资金出逃'及后市策略建议的证据链标记为unverified（未验证），且原文引句缺失具体数字来源支撑，属于次要证据瑕疵"
+ ],
+ "path": "D:\\ttxt\\07_tmp\\r61_smoke_astock\\exports\\finance\\rejected\\finance-20261121125825-ef6eeb.md"
+}

@@ -38,3 +38,28 @@ def test_markdown_table_separator_is_not_collapsed():
     out, fixes = style.copyedit_draft(text)
     assert out == text
     assert fixes == []
+
+
+def test_revise_retries_once_when_output_truncated():
+    from ttxt.writing import workflow
+
+    calls: list[int] = []
+
+    def fake(prompt, max_tokens=800, temperature=0.3, enable_thinking=False):
+        calls.append(max_tokens)
+        if len(calls) == 1:
+            return "短句"
+        return "这是一段足够长的完整修订正文,没有截断。"
+
+    out = workflow._revise_with_retry(
+        fake,
+        "原文",
+        ["问题"],
+        max_tokens=100,
+        retry_cap=200,
+        gate_min_chars=10,
+        enable_thinking=False,
+        topic="测试",
+    )
+    assert calls == [100, 200], "第一次截断后应按草稿先例放宽 token 重试一次"
+    assert out.startswith("这是一段")
