@@ -491,12 +491,16 @@ def _revise_with_retry(
 
 def _merge_findings(review: dict, issues: list[str], critical: list[str]) -> dict:
     """确定性核验结论并入评审结论(确定性 critical 优先,顺序去重)。"""
-    return {
+    merged = {
         "score": review.get("score"),
         "issues": list(dict.fromkeys(issues + list(review.get("issues") or []))),
         "critical": list(dict.fromkeys(critical + list(review.get("critical") or []))),
         "raw": review.get("raw", ""),
     }
+    # R63:列举承诺线索只作修订线索随行,不参与 _passed 口径(它只看 complete/score/critical)。
+    if "promise_issues" in review:
+        merged["promise_issues"] = list(review["promise_issues"] or [])
+    return merged
 
 
 def _model_meta(model_call) -> dict:
@@ -611,7 +615,12 @@ def _verified_review(model_call, draft, materials, evidence, enable_thinking, to
     review = _review(model_call, draft, evidence, enable_thinking)
     title, body = _draft_title(draft, topic)
     det_issues, det_critical = verifier.deterministic_findings(evidence, title, body)
-    return _merge_findings(review, det_issues, det_critical)
+    # R63:数量承诺未兑现(如标题写"两件核心大事"正文从未列举)只作修订线索进 issues,
+    # 不进 critical、不参与 _passed —— 放行口径与既有门禁一字不动(见 _passed)。
+    promise = style.enum_promise_issues(draft)
+    merged = _merge_findings(review, list(det_issues) + promise, det_critical)
+    merged["promise_issues"] = promise
+    return merged
 
 
 def _source_host(url: str | None) -> str:
@@ -1179,6 +1188,8 @@ def write_article(
         "fewshot_count": len(fewshot_samples),
         "copyedit_count": len(copyedit_total),
         "copyedit_fixes": copyedit_total,
+        # R63:列举承诺线索(末轮读数)—— "检出 → 是否被修好"的账,不参与放行
+        "promise_issues": list((review or {}).get("promise_issues") or []),
         "notes": notes,
         "model_meta": model_meta,
         "review_account": account,
