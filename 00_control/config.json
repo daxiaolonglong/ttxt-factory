@@ -13,14 +13,17 @@
   },
   "review": {
     "enabled": true,
-    "base_url": "http://127.0.0.1:8080",
-    "model_id": "qwen3.8-flash-next-iq3_s",
-    "api_key_env": "STRATA_API_KEY",
+    "base_url": "https://api.deepseek.com",
+    "model_id": "deepseek-v4-pro",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "api_key_file": ".secrets/deepseek_api_key",
     "max_tokens": 8000,
     "temperature": 0.0,
-    "request_timeout_s": 300,
+    "request_timeout_s": 600,
     "enable_thinking": false,
-    "note": "P40 独立评审通道(账本 T-04):只做只读盲评,不参与写作。R51 策略拆分(2026-11-20,项目负责人定「DeepSeek 留着审核模型写作的文章质量」):评审侧允许配置里的云端 https 端点(ttxt/writing/review.py::_review_endpoint 校验:云端必须 https、必须配 key、不可达或缺 key 显式抛 ReviewUnavailable,不静默降级回本地、不换模型;回执如实记 reviewer_endpoint/reviewer_model,same_model_review 按两侧真实 id 比较);写作侧仍强制本地回环(ttxt/model_gate/client.py::require_loopback)。本段当前仍指本地端点:云端 key 已于 2026-11-20 在服务商后台注销,切回云端需先在 .secrets/ 放新 key 再改本段 base_url/model_id/api_key_env。评审与写作共用同一台本地模型期间 same_model_review 恒为 true,不得宣称 L4 独立评审通过。提示词固定 6 字「审评这篇文章」写在代码里,不做配置项,避免被写作侧口径诱导"
+    "verdict_contract": "labels_v1",
+    "verdict_max_tokens": 4096,
+    "note": "R61 用户令(2026-11-21):生产评审必须是 DeepSeek。端点 https://api.deepseek.com、模型 deepseek-v4-pro(reasoning 模型,max_tokens 需 ≥8000,2000 会被 reasoning 吃光);密钥只放 .secrets/deepseek_api_key(gitignore)。评审 prompt 仍固定 6 字「审评这篇文章」+ 正文,不看写作侧任何口径;verdict_contract=labels_v1 二次抽取「可以发布/修改后再评/不建议发布」,只有「可以发布」放行。写作侧仍强制本地回环(ttxt/model_gate/client.py::require_loopback),评审侧云端为 R51 允许的配置。同一篇稿独立评审总次数 ≤3(workflow.writing.independent_review_max),「修改后再评」把评审原文回流给修订后复审,超限或不建议发布即拒。"
   },
   "dashboard": {
     "host": "127.0.0.1",
@@ -99,6 +102,8 @@
     "draft_retry_max_tokens": 2048,
     "material_min_full": 6,
     "material_min_sources": 3,
+    "independent_review_max": 3,
+    "_independent_review_comment": "R61 用户令(2026-11-21):单篇独立评审总次数上限=3。只有「可以发布」放行;「不建议发布」当场硬拒;「修改后再评」把评审原文当修订反馈,修订后重抽 claim/重核事实/本地复评再复审,3 次用尽仍不通过即拒,不许无限循环。",
     "template_decheck_enabled": true,
     "_template_decheck_comment": "R48 T-10 第一小步:门禁全部通过后、独立评审前,对草稿做去模板化检查(预算见 00_control/template_budgets.json,由现有语料分布 p75 算出)。超预算段落经本地模型定向重写一次;仍超标只标记不拦截,不改任何既有门禁口径。false=完全跳过该步(对照实验/回退用)。",
     "_material_comment": "P39:取材前置门禁。候选池(BM25 取 15 篇,重排后喂 5 篇)里全文文章数 ≥ material_min_full 且独立来源数 ≥ material_min_sources 才会调用模型,不够就直接返回 insufficient_materials(零模型调用)。独立来源按**作者账号**计,缺作者才退回域名:实测每个正式类目只有一个域名(toutiao.com),只按域名计会把所有写作一律拦下。爆款先验只在类目已有 viral_calibration 时参与重排,未标定类目退化为纯 BM25 并如实标注。"

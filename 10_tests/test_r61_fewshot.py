@@ -208,6 +208,8 @@ def test_write_article_degrades_and_receipt_is_honest(tmp_path, monkeypatch):
         material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
+        # R61:生产评审已切 DeepSeek;本测试只验 few-shot 注入,明确关掉独立评审保持离线可复现。
+        independent_review=False,
     )
     assert result["fewshot_count"] == 0
     assert result["fewshot_status"] == "library_missing"
@@ -240,6 +242,8 @@ def test_write_article_injects_samples_into_draft_prompt_only(tmp_path, monkeypa
         material_min_sources=1,
         gate_min_chars=0,
         gate_min_score=0.6,
+        # R61:生产评审已切 DeepSeek;本测试只验 few-shot 注入,明确关掉独立评审保持离线可复现。
+        independent_review=False,
     )
     assert result["fewshot_count"] == 2
     assert result["fewshot_status"] == "ok:2"

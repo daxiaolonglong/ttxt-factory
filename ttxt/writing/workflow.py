@@ -572,6 +572,8 @@ def _review_summary(outcome: dict | None, error: str | None) -> dict:
         "reviewer_endpoint": outcome.get("reviewer_endpoint"),
         "prompt": outcome["prompt"].split("\n\n", 1)[0],
         "verdict_markers": outcome["verdict"],
+        "verdict_contract": outcome.get("verdict_contract"),
+        "verdict_label": outcome.get("verdict_label"),
         "verdict_excerpt": outcome["verdict_text"][:600],
         "finish_reason": outcome.get("finish_reason"),
         "usage": outcome.get("usage"),
@@ -861,6 +863,12 @@ def write_article(
         )
         complete = _is_complete(draft, gate_min_chars)
 
+    # R61 0 产出根因修复:生成侧确定性去重(只删相邻重复片段/重复句,不改写事实)。
+    copyedit_total: list[dict] = []
+    draft, copyedit_fixes = style.copyedit_draft(draft)
+    copyedit_total.extend(copyedit_fixes)
+    complete = _is_complete(draft, gate_min_chars)
+
     claims_text = model_call(
         prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
         max_tokens=CLAIMS_MAX_TOKENS,
@@ -897,18 +905,161 @@ def write_article(
     # 只收紧不放宽;不达标时如实拦下,不许用其他读数覆盖。
     passed = passed and fact_check["release_condition_met"]
     revisions = 0
-    while not passed and revisions < max_revisions:
+    review_outcome: dict | None = None
+    review_error: str | None = None
+    want_review = review_channel.review_config().get("enabled", False) if independent_review is None else independent_review
+    # 用户令(2026-11-21):单篇独立评审总次数 ≤3,超限即拒,不许无限循环。
+    # 只有「可以发布」放行;「不建议发布」当场硬拒;「修改后再评」把评审原文回流给修订,
+    # 修订后重抽 claim / 重核事实 / 本地复评,再复审。每次评审的 label 与轮次都进回执。
+    max_independent_reviews = max(1, int(writing_cfg.get("independent_review_max", 3)))
+    independent_rounds: list[dict] = []
+    decheck_enabled = bool(writing_cfg.get("template_decheck_enabled", True)) if template_decheck is None else template_decheck
+    template_check: dict | None = None
+    template_flags: list[str] = []
+    decheck_done = False
+    while True:
+        # 1) 本地门禁修复:每阶段给 max_revisions 次预算(独立评审驱动的修订另计总次数 revisions)。
+        phase_revisions = 0
+        while not passed and phase_revisions < max_revisions:
+            draft = model_call(
+                prompts.revise_prompt(draft, review["issues"] + review["critical"]),
+                max_tokens=max_tokens,
+                temperature=0.4,
+                enable_thinking=enable_thinking,
+            )
+            draft, copyedit_fixes = style.copyedit_draft(draft)
+            copyedit_total.extend(copyedit_fixes)
+            complete = _is_complete(draft, gate_min_chars)
+            version += 1
+            revisions += 1
+            phase_revisions += 1
+            _save_version(db_path, draft_id, category, topic, version, draft, served_model)
+            # 修订后的草稿必须重新抽取声明并重新核验(旧证据不覆盖新文本)
+            claims_text = model_call(
+                prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
+                max_tokens=CLAIMS_MAX_TOKENS,
+                temperature=0.0,
+                enable_thinking=enable_thinking,
+            )
+            claims = parse_claims(claims_text)
+            evidence = verify_claims(claims, materials)
+            draft, evidence, repair_stats = repair.repair_failing_claims(
+                model_call, draft, evidence, materials, enable_thinking=enable_thinking
+            )
+            repair.merge_stats(repair_total, repair_stats)
+            if repair_stats["changed_sentences"]:
+                version += 1
+                _save_version(db_path, draft_id, category, topic, version, draft, served_model)
+            review = _verified_review(model_call, draft, materials, evidence, enable_thinking, topic)
+            _save_evaluation(db_path, draft_id, version, review, model_meta, evaluator=served_model or "model_review")
+            passed = _passed(complete, review, gate_min_score)
+            fact_check = fact_checkability(evidence)
+            passed = passed and fact_check["release_condition_met"]
+        if not passed:
+            break
+
+        # 2) R48 T-10 第一小步:去模板化检查只在所有既有门禁通过之后、独立评审之前跑一次。
+        # 结构红线:不新增/不修改任何门禁 —— template_check 不参与 passed 判定;
+        # 超预算段落经 model_call(生产即本地 model_gate 通道)定向重写一次,
+        # 仍超标只标记(回执 template_check 字段 + 导出文件标记清单),绝不静默放过。
+        if not decheck_done:
+            decheck_done = True
+            if decheck_enabled:
+                template_check = style.decheck_draft(
+                    draft, category, model_call, budget_path=budget_path, enable_thinking=enable_thinking
+                )
+                if template_check["draft"] != draft:
+                    draft = template_check["draft"]
+                    draft, copyedit_fixes = style.copyedit_draft(draft)
+                    copyedit_total.extend(copyedit_fixes)
+                    version += 1
+                    _save_version(db_path, draft_id, category, topic, version, draft, served_model)
+                if template_check["check_status"] in ("still_over_budget", "rewrite_failed"):
+                    before_eval = template_check["before"]
+                    template_flags = list(before_eval.get("reasons") or [])
+                    if template_check["check_status"] == "rewrite_failed":
+                        template_flags.append("定向重写未成功:" + str(template_check.get("error", ""))[:200])
+                    else:
+                        after_eval = template_check.get("after") or {}
+                        template_flags = [
+                            f"{r}(定向重写一次后仍超:{'; '.join(after_eval.get('reasons') or []) or after_eval.get('status')})"
+                            for r in before_eval.get("reasons") or []
+                        ]
+                elif template_check["check_status"] == "not_available":
+                    # 预算不可用同样不得静默:回执与导出都要露一行,人工复核时能看见"没尺子"
+                    template_flags = [
+                        f"类目预算不可用,去模板化检查未执行:{template_check.get('before', {}).get('reason') or template_check.get('budget_status')}"
+                    ]
+
+        # 3) 独立评审只在门禁已通过时跑(账本 T-04):被门禁拦下的稿子不值得再花评审配额。
+        # 通道不可用/模型同名 ⇒ 独立性按不成立处理,绝不为了好看把 same_model_review 改成 false。
+        if not (want_review or review_call is not None):
+            break
+        if len(independent_rounds) >= max_independent_reviews:
+            break
+        try:
+            review_outcome = review_call(draft) if review_call is not None else review_channel.review(draft)
+        except review_channel.ReviewUnavailable as exc:
+            review_error = str(exc)
+            # 通道不可用必须如实写进回执(独立性按不成立处理);若前一轮已评过,保留其评审者身份。
+            _apply_reviewer(model_meta, review_outcome, review_error)
+            break
+        _apply_reviewer(model_meta, review_outcome, review_error)
+        label = review_outcome.get("verdict_label")
+        blocking = bool(review_outcome["verdict"]["blocking"])
+        independent_rounds.append({
+            "round": len(independent_rounds) + 1,
+            "verdict_label": label,
+            "blocking": blocking,
+            "publishable": bool(review_outcome["verdict"].get("publishable")),
+            "reviewer_model": review_outcome.get("reviewer_model"),
+            "reviewer_endpoint": review_outcome.get("reviewer_endpoint"),
+            "verdict_excerpt": (review_outcome.get("verdict_text") or "")[:600],
+            "elapsed_s": review_outcome.get("elapsed_s"),
+        })
+        _save_evaluation(
+            db_path,
+            draft_id,
+            version,
+            {"score": None, "issues": [], "critical": []},
+            {
+                **model_meta,
+                "criteria": "independent_review",
+                "prompt": review_outcome["prompt"],
+                "verdict": review_outcome["verdict_text"][:6000],
+                "verdict_contract": review_outcome.get("verdict_contract"),
+                "verdict_label": label,
+                "review_round": len(independent_rounds),
+                "usage": review_outcome.get("usage"),
+            },
+            evaluator=review_outcome["reviewer_model"],
+        )
+        if not blocking:
+            break
+        # 不建议发布 → 当场硬拒;修改后再评 → 还有配额就按评审原文修订,配额用尽同样硬拒。
+        if label == "不建议发布" or len(independent_rounds) >= max_independent_reviews:
+            review = _merge_findings(
+                review,
+                [],
+                ["独立评审判定不通过:" + ",".join(review_outcome["verdict"]["blocking_markers"])],
+            )
+            passed = False
+            break
         draft = model_call(
-            prompts.revise_prompt(draft, review["issues"] + review["critical"]),
+            prompts.revise_prompt(
+                draft,
+                ["独立评审意见(必须逐条落实,不得只改表面措辞):\n" + (review_outcome.get("verdict_text") or "")[:4000]],
+            ),
             max_tokens=max_tokens,
             temperature=0.4,
             enable_thinking=enable_thinking,
         )
+        draft, copyedit_fixes = style.copyedit_draft(draft)
+        copyedit_total.extend(copyedit_fixes)
         complete = _is_complete(draft, gate_min_chars)
         version += 1
         revisions += 1
         _save_version(db_path, draft_id, category, topic, version, draft, served_model)
-        # 修订后的草稿必须重新抽取声明并重新核验(旧证据不覆盖新文本)
         claims_text = model_call(
             prompts.claims_prompt(draft, list(range(1, len(materials) + 1))),
             max_tokens=CLAIMS_MAX_TOKENS,
@@ -929,74 +1080,6 @@ def write_article(
         passed = _passed(complete, review, gate_min_score)
         fact_check = fact_checkability(evidence)
         passed = passed and fact_check["release_condition_met"]
-
-    # R48 T-10 第一小步:去模板化检查只在所有既有门禁通过之后、独立评审之前跑一次。
-    # 结构红线:不新增/不修改任何门禁 —— template_check 不参与 passed 判定;
-    # 超预算段落经 model_call(生产即本地 model_gate 通道)定向重写一次,
-    # 仍超标只标记(回执 template_check 字段 + 导出文件标记清单),绝不静默放过。
-    decheck_enabled = bool(writing_cfg.get("template_decheck_enabled", True)) if template_decheck is None else template_decheck
-    template_check: dict | None = None
-    template_flags: list[str] = []
-    if passed and decheck_enabled:
-        template_check = style.decheck_draft(
-            draft, category, model_call, budget_path=budget_path, enable_thinking=enable_thinking
-        )
-        if template_check["draft"] != draft:
-            draft = template_check["draft"]
-            version += 1
-            _save_version(db_path, draft_id, category, topic, version, draft, served_model)
-        if template_check["check_status"] in ("still_over_budget", "rewrite_failed"):
-            before_eval = template_check["before"]
-            template_flags = list(before_eval.get("reasons") or [])
-            if template_check["check_status"] == "rewrite_failed":
-                template_flags.append("定向重写未成功:" + str(template_check.get("error", ""))[:200])
-            else:
-                after_eval = template_check.get("after") or {}
-                template_flags = [
-                    f"{r}(定向重写一次后仍超:{'; '.join(after_eval.get('reasons') or []) or after_eval.get('status')})"
-                    for r in before_eval.get("reasons") or []
-                ]
-        elif template_check["check_status"] == "not_available":
-            # 预算不可用同样不得静默:回执与导出都要露一行,人工复核时能看见"没尺子"
-            template_flags = [
-                f"类目预算不可用,去模板化检查未执行:{template_check.get('before', {}).get('reason') or template_check.get('budget_status')}"
-            ]
-
-    # 独立评审只在门禁已通过时跑(账本 T-04):被事实门禁拦下的稿子不值得再花一次评审配额。
-    # 通道不可用/模型同名 ⇒ 独立性按不成立处理,绝不为了好看把 same_model_review 改成 false。
-    review_outcome: dict | None = None
-    review_error: str | None = None
-    want_review = review_channel.review_config().get("enabled", False) if independent_review is None else independent_review
-    if passed and (want_review or review_call is not None):
-        try:
-            review_outcome = review_call(draft) if review_call is not None else review_channel.review(draft)
-        except review_channel.ReviewUnavailable as exc:
-            review_error = str(exc)
-    _apply_reviewer(model_meta, review_outcome, review_error)
-    if review_outcome:
-        _save_evaluation(
-            db_path,
-            draft_id,
-            version,
-            {"score": None, "issues": [], "critical": []},
-            {
-                **model_meta,
-                "criteria": "independent_review",
-                "prompt": review_outcome["prompt"],
-                "verdict": review_outcome["verdict_text"][:6000],
-                "verdict_contract": review_outcome.get("verdict_contract"),
-                "verdict_label": review_outcome.get("verdict_label"),
-                "usage": review_outcome.get("usage"),
-            },
-            evaluator=review_outcome["reviewer_model"],
-        )
-        if review_outcome["verdict"]["blocking"]:
-            review = _merge_findings(
-                review,
-                [],
-                ["独立评审判定不通过:" + ",".join(review_outcome["verdict"]["blocking_markers"])],
-            )
-            passed = False
 
     # status 决定导出目录与回执口径;writing_history.status 用 T-05 的三态口径小写归一版(独立复核成立才给独立标签)
     status = "passed" if passed else "rejected"
@@ -1060,11 +1143,16 @@ def write_article(
         "material_stats": material_stats,
         "fewshot_status": fewshot_status,
         "fewshot_count": len(fewshot_samples),
+        "copyedit_count": len(copyedit_total),
+        "copyedit_fixes": copyedit_total,
         "notes": notes,
         "model_meta": model_meta,
         "review_account": account,
         "review_account_basis": _review_account_basis(passed, model_meta, review_outcome, review_error),
         "independent_review": _review_summary(review_outcome, review_error),
+        "independent_reviews_used": len(independent_rounds),
+        "independent_review_max": max_independent_reviews,
+        "independent_review_rounds": independent_rounds,
         "published": False,
     }
     LOG.info(

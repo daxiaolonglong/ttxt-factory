@@ -522,6 +522,73 @@ def test_verdict_without_publishable_wording_gives_no_independent_label(tmp_path
     assert rows[-1][1] == "auto_passed"
 
 
+def _contract_outcome(reviewer_id: str, label: str, text: str = "") -> dict:
+    publishable = label == "可以发布"
+    return {
+        "reviewer_model": reviewer_id,
+        "reviewer_endpoint": "https://api.deepseek.com",
+        "verdict_text": text or f"评审意见:{label}",
+        "verdict": {
+            "blocking": not publishable,
+            "publishable": publishable,
+            "blocking_markers": [] if publishable else [label],
+            "publishable_markers": [label] if publishable else [],
+        },
+        "verdict_contract": "labels_v1",
+        "verdict_label": label,
+        "prompt": review_channel.REVIEW_PROMPT,
+        "finish_reason": "stop",
+        "usage": {},
+        "elapsed_s": 0.1,
+    }
+
+
+def test_review_loop_caps_at_three_and_uses_verdict_as_feedback(tmp_path, monkeypatch):
+    """用户令(2026-11-21):单篇独立评审 ≤3 次,「修改后再评」回流给修订,超限即拒。"""
+    seen: list = []
+
+    def review_call(draft):
+        seen.append(draft)
+        return _contract_outcome("deepseek-flash", "修改后再评", "第二段重复了一句,标点缺失。")
+
+    _, result = _run(tmp_path, monkeypatch, review_call=review_call)
+    assert len(seen) == 3, "3 次评审后必须停,不许无限循环"
+    assert result["passed"] is False and result["status"] == "rejected"
+    assert result["independent_reviews_used"] == 3
+    assert [r["verdict_label"] for r in result["independent_review_rounds"]] == ["修改后再评"] * 3
+    assert result["independent_review"]["verdict_label"] == "修改后再评"
+    assert result["independent_review"]["verdict_contract"] == "labels_v1"
+
+
+def test_publishable_after_revision_stops_review_loop(tmp_path, monkeypatch):
+    labels = ["修改后再评", "可以发布"]
+    seen: list = []
+
+    def review_call(draft):
+        seen.append(draft)
+        return _contract_outcome("deepseek-flash", labels[len(seen) - 1], "按意见改完即可。")
+
+    _, result = _run(tmp_path, monkeypatch, review_call=review_call)
+    assert len(seen) == 2, "第二轮回「可以发布」后不再多花评审次数"
+    assert result["passed"] is True
+    assert result["independent_reviews_used"] == 2
+    assert result["review_account"] == "independent_review_passed"
+    assert result["review_account_basis"] == "independent_review_approved"
+
+
+def test_not_recommended_rejects_without_burning_revision_rounds(tmp_path, monkeypatch):
+    seen: list = []
+
+    def review_call(draft):
+        seen.append(draft)
+        return _contract_outcome("deepseek-flash", "不建议发布", "全文循环,文不对题。")
+
+    _, result = _run(tmp_path, monkeypatch, review_call=review_call)
+    assert len(seen) == 1, "「不建议发布」当场硬拒,不再复审"
+    assert result["passed"] is False
+    assert result["independent_reviews_used"] == 1
+
+
 def test_rejected_draft_never_costs_a_review(tmp_path, monkeypatch):
     called: list = []
 

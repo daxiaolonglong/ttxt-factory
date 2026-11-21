@@ -276,3 +276,58 @@ def decheck_draft(
             for k in ("sentences", "marker_hits", "parallel_pattern_hits", "sentence_length_cv")
         },
     }
+
+
+# R61 0 产出根因:本地模型会写出相邻重复片段(如"每4个月延1个月"连写两遍)和重复句。
+# 这里做**确定性去重**:只删相邻重复,不改写、不增删事实、不动标题以外内容;修完仍要
+# 重抽 claim / 重核事实,去重不替代任何门禁。
+_ADJACENT_REPEAT_MIN = 6
+_MAX_SENTENCE_FOR_REPEAT_SCAN = 600
+
+
+def _collapse_adjacent_repeats(sentence: str) -> str:
+    """删除句内相邻重复片段(保留一份);找不到重复就原样返回。"""
+    s = sentence
+    if len(s) > _MAX_SENTENCE_FOR_REPEAT_SCAN:
+        return s
+    changed = True
+    while changed:
+        changed = False
+        n = len(s)
+        for length in range(n // 2, _ADJACENT_REPEAT_MIN - 1, -1):
+            for start in range(0, n - 2 * length + 1):
+                if s[start:start + length] == s[start + length:start + 2 * length]:
+                    s = s[:start + length] + s[start + 2 * length:]
+                    changed = True
+                    break
+            if changed:
+                break
+    return s
+
+
+def copyedit_draft(draft: str) -> tuple[str, list[dict]]:
+    """确定性校对:删相邻重复句/相邻重复片段,保留第一处;返回(新文本, 修改清单)。"""
+    fixes: list[dict] = []
+    out_lines: list[str] = []
+    for line in (draft or "").splitlines():
+        if not line.strip():
+            out_lines.append(line)
+            continue
+        # Markdown 表格的分隔行(|---|---|)本身是合法的重复列语法,不得当重复片段删。
+        if line.strip().startswith("|") and re.fullmatch(r"[|\-:\s]+", line.strip()):
+            out_lines.append(line)
+            continue
+        parts = re.findall(r"[^。！？!?；;]+[。！？!?；;]?", line)
+        kept: list[str] = []
+        for part in parts:
+            collapsed = _collapse_adjacent_repeats(part)
+            if collapsed != part:
+                fixes.append({"kind": "adjacent_repeat", "before": part[:160], "after": collapsed[:160]})
+                part = collapsed
+            normalized = re.sub(r"\s+", "", part)
+            if kept and normalized and re.sub(r"\s+", "", kept[-1]) == normalized:
+                fixes.append({"kind": "duplicate_sentence", "before": part[:160]})
+                continue
+            kept.append(part)
+        out_lines.append("".join(kept))
+    return "\n".join(out_lines), fixes

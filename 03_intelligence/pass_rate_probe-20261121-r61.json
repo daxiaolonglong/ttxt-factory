@@ -1,0 +1,7385 @@
+{
+ "generated_at": "2026-11-21 09:55:49",
+ "note": "只读探针:不改门禁/阈值/取样规则;template_decheck 显式关闭;正式库零写入",
+ "gate_min_score": 0.6,
+ "fact_checkability_min": 0.8,
+ "model": null,
+ "batch": [
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "彩礼",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "催婚",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "邻里纠纷",
+   "full": 15,
+   "srcs": 14
+  },
+  {
+   "category": "social",
+   "topic": "高空抛物",
+   "full": 8,
+   "srcs": 8
+  },
+  {
+   "category": "social",
+   "topic": "网恋 诈骗",
+   "full": 15,
+   "srcs": 14
+  },
+  {
+   "category": "social",
+   "topic": "家暴 离婚",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "装修 噪音",
+   "full": 15,
+   "srcs": 14
+  },
+  {
+   "category": "social",
+   "topic": "就业 35岁",
+   "full": 15,
+   "srcs": 14
+  },
+  {
+   "category": "social",
+   "topic": "退休 返聘",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "物业 纠纷",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "赡养 老人",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "孩子 起名",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "预制菜",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "全职妈妈",
+   "full": 15,
+   "srcs": 13
+  },
+  {
+   "category": "social",
+   "topic": "考研 考公",
+   "full": 15,
+   "srcs": 13
+  },
+  {
+   "category": "social",
+   "topic": "农村 宅基地",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "欠钱 不还",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "警方 通报",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "social",
+   "topic": "产品经理 裁员",
+   "full": 15,
+   "srcs": 13
+  },
+  {
+   "category": "finance",
+   "topic": "A股 下跌",
+   "full": 15,
+   "srcs": 9
+  },
+  {
+   "category": "finance",
+   "topic": "美联储 加息",
+   "full": 15,
+   "srcs": 7
+  },
+  {
+   "category": "finance",
+   "topic": "存款 利率",
+   "full": 15,
+   "srcs": 14
+  },
+  {
+   "category": "finance",
+   "topic": "消费贷",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "finance",
+   "topic": "黄金 投资",
+   "full": 15,
+   "srcs": 12
+  },
+  {
+   "category": "finance",
+   "topic": "基金 定投",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "finance",
+   "topic": "纳斯达克",
+   "full": 14,
+   "srcs": 7
+  },
+  {
+   "category": "finance",
+   "topic": "IPO",
+   "full": 14,
+   "srcs": 6
+  },
+  {
+   "category": "finance",
+   "topic": "保险 理赔",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "finance",
+   "topic": "汇率 人民币",
+   "full": 13,
+   "srcs": 11
+  },
+  {
+   "category": "finance",
+   "topic": "新能源 汽车 价格战",
+   "full": 13,
+   "srcs": 13
+  },
+  {
+   "category": "finance",
+   "topic": "拼多多 财报",
+   "full": 13,
+   "srcs": 8
+  },
+  {
+   "category": "finance",
+   "topic": "外卖 骑手 收入",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "finance",
+   "topic": "快递 涨价",
+   "full": 12,
+   "srcs": 12
+  },
+  {
+   "category": "finance",
+   "topic": "房价 二手房",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "finance",
+   "topic": "数据分析 岗位",
+   "full": 15,
+   "srcs": 15
+  },
+  {
+   "category": "finance",
+   "topic": "滴滴 司机 收入",
+   "full": 11,
+   "srcs": 11
+  },
+  {
+   "category": "finance",
+   "topic": "千问 大模型",
+   "full": 14,
+   "srcs": 14
+  },
+  {
+   "category": "finance",
+   "topic": "市场",
+   "full": 15,
+   "srcs": 14
+  },
+  {
+   "category": "finance",
+   "topic": "投资",
+   "full": 15,
+   "srcs": 15
+  }
+ ],
+ "rounds": 1,
+ "runs": [
+  {
+   "category": "social",
+   "topic": "延迟退休 养老金",
+   "round": 1,
+   "draft_id": "social-20261121095649-78f198",
+   "status": "passed",
+   "passed": true,
+   "versions": 4,
+   "revisions": 1,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 9,
+   "checkable": 9,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     3747,
+     12004,
+     18622,
+     22884,
+     3978
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "normal": 4,
+      "potential": 2,
+      "verified_viral": 2,
+      "low_quality": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 3747,
+      "rank_score": 1.0853,
+      "bm25": -37.32882630480038,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "泉边静听泉声",
+      "source_axis": "author"
+     },
+     {
+      "id": 12004,
+      "rank_score": 1.06,
+      "bm25": -38.01961936208247,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "家有娃的日常",
+      "source_axis": "author"
+     },
+     {
+      "id": 18622,
+      "rank_score": 0.9097,
+      "bm25": -36.92349072575341,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "平安喜乐",
+      "source_axis": "author"
+     },
+     {
+      "id": 22884,
+      "rank_score": 0.852,
+      "bm25": -36.50197509271738,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "桃桃育儿",
+      "source_axis": "author"
+     },
+     {
+      "id": 3978,
+      "rank_score": 0.8294,
+      "bm25": -34.58677970540474,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天使的眼泪",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "延迟退休政策已于2025年1月1日正式启动",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:1",
+      "dates:2025年1月1日"
+     ]
+    },
+    {
+     "claim": "当前的核心原则是“小步调整、弹性实施、分类推进”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "政策支持符合条件的劳动者进行弹性选择，最多可提前退休",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "对于80后、90后而言，最大的认知误区在于以为能像父辈一样安稳养老",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:80",
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "灵活就业女性的退休年龄认定需结合具体身份与缴费记录综合判断",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "部分符合特定条件的女性可能在50岁左右办理退休并领取养老金",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50岁"
+     ]
+    },
+    {
+     "claim": "按韶关这边的规定，早年如果在企业上过班、离开时不是管理岗，也可以争取 50 岁退",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50 岁"
+     ]
+    },
+    {
+     "claim": "我中间断过几年又换过好几座城市打工最后还是按 55 走",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:55"
+     ]
+    },
+    {
+     "claim": "有人跑了4趟社保局才办完退休",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4"
+     ]
+    }
+   ],
+   "elapsed_s": 298.7
+  },
+  {
+   "category": "social",
+   "topic": "彩礼",
+   "round": 1,
+   "draft_id": "social-20261121100412-7c01f2",
+   "status": "passed",
+   "passed": true,
+   "versions": 5,
+   "revisions": 2,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 11,
+   "checkable": 11,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     12886,
+     12201,
+     4286,
+     24262,
+     23145
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "normal": 3,
+      "verified_viral": 4,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 12886,
+      "rank_score": 1.0,
+      "bm25": -11.470634055402915,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "北京丰台法院",
+      "source_axis": "author"
+     },
+     {
+      "id": 12201,
+      "rank_score": 0.891,
+      "bm25": -11.244379333254205,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "晴空万里",
+      "source_axis": "author"
+     },
+     {
+      "id": 4286,
+      "rank_score": 0.8257,
+      "bm25": -10.984356216586278,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "相信头条创作者",
+      "source_axis": "author"
+     },
+     {
+      "id": 24262,
+      "rank_score": 0.6061,
+      "bm25": -10.653083364877963,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "安静、",
+      "source_axis": "author"
+     },
+     {
+      "id": 23145,
+      "rank_score": 0.5693,
+      "bm25": -9.95407371231009,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "大皖新闻",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "2026年中央一号文件明确提出：持续整治农村高额彩礼",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "dates:2026年"
+     ]
+    },
+    {
+     "claim": "该文件强调加强省际毗邻地区联动治理",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:文件"
+     ]
+    },
+    {
+     "claim": "浙江一位39岁的女士在媒人安排下，一天内进行了三场相亲",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:39岁"
+     ]
+    },
+    {
+     "claim": "她提出的条件包括58万彩礼、杭州一套150平米的全款婚房、婚后房产过户至其名下以及男方婚后工资全额上交",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:58",
+      "numbers:150"
+     ]
+    },
+    {
+     "claim": "表哥40岁了，花了30万彩礼终于找到了真爱",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:40岁",
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "上海男子刘辉以为邂逅了事业爱情双丰收的完美缘分",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "他历经五年网恋，对方全网发布近七千条高颜值日常视频",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "朝夕相处的90后清秀医生女友，竟是一名65岁女子靠AI技术凭空捏造的虚假人设",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90",
+      "numbers:65岁"
+     ]
+    },
+    {
+     "claim": "该女子一人分饰两角，扮演早已离世的母亲要求30万彩礼",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "目前，涉案嫌疑人已被警方控制",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "最近几年，第一批到达法定婚龄的00后陆续领证结婚",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00"
+     ]
+    }
+   ],
+   "elapsed_s": 383.2
+  },
+  {
+   "category": "social",
+   "topic": "催婚",
+   "round": 1,
+   "draft_id": "social-20261121100755-1b406a",
+   "status": "passed",
+   "passed": true,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 6,
+   "checkable": 6,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     19214,
+     19181,
+     40459,
+     2151,
+     18529
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "normal": 1,
+      "potential": 5,
+      "verified_viral": 1,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 19214,
+      "rank_score": 1.0,
+      "bm25": -12.678730629756684,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "悦读诗意篇章",
+      "source_axis": "author"
+     },
+     {
+      "id": 19181,
+      "rank_score": 0.378,
+      "bm25": -9.191037678729453,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "王晴",
+      "source_axis": "author"
+     },
+     {
+      "id": 40459,
+      "rank_score": 0.3651,
+      "bm25": -7.436948131442611,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "光明网",
+      "source_axis": "author"
+     },
+     {
+      "id": 2151,
+      "rank_score": 0.3389,
+      "bm25": -7.962549275279209,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "丽丝百货店",
+      "source_axis": "author"
+     },
+     {
+      "id": 18529,
+      "rank_score": 0.3318,
+      "bm25": -8.932052093388767,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "yang",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "第一批90后已经跨过三十五岁门槛",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "福建省福鼎市检察院对一“杀猪盘”诈骗犯罪集团18名犯罪嫌疑人提起公诉",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:18名",
+      "orgs:诈骗犯罪集团"
+     ]
+    },
+    {
+     "claim": "被害人王女士通过“伊对”相亲网站匹配到了一位独自带娃的离异中年男子",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "自助棋牌品牌“四个朋友”单单在湖南就开了1400多家",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1400"
+     ]
+    },
+    {
+     "claim": "最近两年，身边二十多岁、三十岁出头的年轻人不再着急谈恋爱、订婚、结婚、生孩子了",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "放在十年前，这个年纪的人大多已经成家立业",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 99.8
+  },
+  {
+   "category": "social",
+   "topic": "邻里纠纷",
+   "round": 1,
+   "draft_id": "social-20261121100943-926a0b",
+   "status": "passed",
+   "passed": true,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 6,
+   "checkable": 6,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 13,
+     "articles_counted_by_host": 2,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     39261,
+     41121,
+     19593,
+     35510,
+     14641
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "potential": 6,
+      "normal": 1,
+      "low_quality": 1,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 39261,
+      "rank_score": 1.18,
+      "bm25": -17.59790853476472,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "生意经",
+      "source_axis": "author"
+     },
+     {
+      "id": 41121,
+      "rank_score": 0.788,
+      "bm25": -16.486679855329292,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 19593,
+      "rank_score": 0.7139,
+      "bm25": -15.78385872137531,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "铭铭",
+      "source_axis": "author"
+     },
+     {
+      "id": 35510,
+      "rank_score": 0.539,
+      "bm25": -14.237789066995983,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "慧姐家常感悟录",
+      "source_axis": "author"
+     },
+     {
+      "id": 14641,
+      "rank_score": 0.5381,
+      "bm25": -15.176423550308087,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "近期就有95后小伙专门帮人“吵架”，他不用露面也不用骂人，仅靠一部手机和AI辅助，月入稳稳3万",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:95",
+      "numbers:3"
+     ]
+    },
+    {
+     "claim": "浙江义乌佛堂古镇近年来尝试将警务工作向前延伸，推动从事后处置向源头预防转变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在每年农历十月初十的“十月十”盛会期间",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "单日游客量超过30万人次",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "目前整理出的20条高频法律常识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20"
+     ]
+    },
+    {
+     "claim": "全部基于《民法典》《劳动合同法》等权威法规",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 99.1
+  },
+  {
+   "category": "social",
+   "topic": "高空抛物",
+   "round": 1,
+   "draft_id": "social-20261121101120-872b7a",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.4,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 8,
+    "candidates": 8,
+    "full_candidates": 8,
+    "distinct_sources": 8,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 8,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     14641,
+     20975,
+     21338,
+     15250,
+     38633
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 3,
+     "label_counts": {
+      "low_quality": 1,
+      "normal": 1,
+      "potential": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 14641,
+      "rank_score": 1.0,
+      "bm25": -30.502686855742795,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     },
+     {
+      "id": 20975,
+      "rank_score": 0.9359,
+      "bm25": -29.518983485457802,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "坡谷看秋",
+      "source_axis": "author"
+     },
+     {
+      "id": 21338,
+      "rank_score": 0.9195,
+      "bm25": -29.26666215115074,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "苔阶待月来",
+      "source_axis": "author"
+     },
+     {
+      "id": 15250,
+      "rank_score": 0.7354,
+      "bm25": -26.44064329724751,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "风轻云淡",
+      "source_axis": "author"
+     },
+     {
+      "id": 38633,
+      "rank_score": 0.3643,
+      "bm25": -19.82263384558175,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "国启未来AI",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "评审得分 0.4 低于门禁 0.6",
+   "critical": [
+    "致命问题:内容拼凑/逻辑断裂 - 第四段关于房企和恒大的内容与“高空抛物”主题完全无关，属于典型的素材堆砌而非有机论述。",
+    "致命问题:无来源断言/事实错误风险 - “生活里90%的纠纷...都有明确的法律依据”这一数据虽在证据链中有来源，但该来源为自媒体文章，且该断言本身缺乏严谨统计支撑，作为核心论据引用不当；更严重的是，文章将不同领域的无关素材（交通AI、房企危机）强行嫁接至高空抛物主题，导致整体论述逻辑崩塌。"
+   ],
+   "rule_hits": {},
+   "primary": "fact.binding",
+   "primary_detail": "致命问题:内容拼凑/逻辑断裂 - 第四段关于房企和恒大的内容与“高空抛物”主题完全无关，属于典型的素材堆砌而非有机论述。;致命问题:无来源断言/事实错误风险 - “生活里90%的纠纷...都有明确的法律依据”这一数据虽在证据链中有来源，但该来源为自媒体文章，且该断言本身缺乏严谨统计支撑，作为核心论据引用不当；更严重的是，文章将不同领域的无关素材（交通AI、房企危机）强行嫁接至高空抛物主题，导致整体论述逻辑崩塌。",
+   "evidence_brief": [
+    {
+     "claim": "不懂法的人遇事只会自认倒霉，但懂基础法律常识才能守住合法权益",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "目前AI视频分析已在交通领域成熟应用，可在事故发生3-5秒内自动识别异常停车、碰撞等事件",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3",
+      "numbers:5"
+     ]
+    },
+    {
+     "claim": "生活里90%的纠纷看似复杂，其实都有明确的法律依据",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90%"
+     ]
+    },
+    {
+     "claim": "懂法不吃亏，懂基础法律常识就能守住自己的合法权益",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "不懂法、不会用法，只能忍气吞声；懂一点法，就能合法止损",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "粗放式扩张已无出路，数字驱动是穿越调整周期的选择",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "对于房企、建筑企业、物业公司及各类涉房主体而言，恒大的教训绝非遥远的“他人故事”，而是近在眼前的生存警示",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:物业公司"
+     ]
+    },
+    {
+     "claim": "普通人无需精通所有条文，但需了解保命、保钱、保权益的基础常识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 215.9
+  },
+  {
+   "category": "social",
+   "topic": "网恋 诈骗",
+   "round": 1,
+   "draft_id": "social-20261121101500-bd2bf4",
+   "status": "rejected",
+   "passed": false,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     31442,
+     19731,
+     20062,
+     20088,
+     20009
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 14,
+     "label_counts": {
+      "verified_viral": 6,
+      "normal": 5,
+      "low_quality": 1,
+      "potential": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 31442,
+      "rank_score": 1.3,
+      "bm25": -17.6821301753042,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "盈徳律法",
+      "source_axis": "author"
+     },
+     {
+      "id": 19731,
+      "rank_score": 0.6264,
+      "bm25": -17.278870228142296,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "领潮新闻",
+      "source_axis": "author"
+     },
+     {
+      "id": 20062,
+      "rank_score": 0.6029,
+      "bm25": -17.256995167804064,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "深圳新闻网",
+      "source_axis": "author"
+     },
+     {
+      "id": 20088,
+      "rank_score": 0.6,
+      "bm25": -17.031113033501768,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "大河报",
+      "source_axis": "author"
+     },
+     {
+      "id": 20009,
+      "rank_score": 0.5653,
+      "bm25": -16.998878072761073,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "德州晚报",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 独立评审判定不通过:不建议直接发布",
+   "critical": [
+    "独立评审判定不通过:不建议直接发布"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "独立评审判定不通过:不建议直接发布",
+   "evidence_brief": [
+    {
+     "claim": "近几年警方数据显示：网恋杀猪盘，受害者80%以上是30—55岁中年人",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:80%",
+      "numbers:30",
+      "numbers:55岁"
+     ]
+    },
+    {
+     "claim": "9月22日，央视新闻披露了一起案件",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:9",
+      "numbers:22",
+      "dates:9月22日"
+     ]
+    },
+    {
+     "claim": "一名已婚中年女子利用AI换脸、录音合成技术打造虚假人设，诈骗网恋男友13万余元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:13"
+     ]
+    },
+    {
+     "claim": "被告人孙某芳与被害人李某6年前在网络游戏中相识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:6"
+     ]
+    },
+    {
+     "claim": "现实中生活拮据、早已结婚并育有两子的孙某芳，利用AI技术加持，精心打造了一套完美“白富美”人设",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "被告人以给父亲交社保金、买苹果手机等为由向网恋男友索取13万余元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:13"
+     ]
+    },
+    {
+     "claim": "泰安市宁阳县人民法院对此进行了审理",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "最终，被告人被判缓刑",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 112.2
+  },
+  {
+   "category": "social",
+   "topic": "家暴 离婚",
+   "round": 1,
+   "draft_id": "social-20261121101658-866692",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     23658,
+     22297,
+     15250,
+     14641,
+     21802
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "potential": 2,
+      "low_quality": 1,
+      "normal": 4,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 23658,
+      "rank_score": 1.0353,
+      "bm25": -20.026891963792913,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "朝朝暮语",
+      "source_axis": "author"
+     },
+     {
+      "id": 22297,
+      "rank_score": 1.0,
+      "bm25": -21.28802006120229,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "陶家二小姐",
+      "source_axis": "author"
+     },
+     {
+      "id": 15250,
+      "rank_score": 0.859,
+      "bm25": -20.059273521661055,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "风轻云淡",
+      "source_axis": "author"
+     },
+     {
+      "id": 14641,
+      "rank_score": 0.8045,
+      "bm25": -19.584293503456998,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "茶酒禅心",
+      "source_axis": "author"
+     },
+     {
+      "id": 21802,
+      "rank_score": 0.7562,
+      "bm25": -18.640399967196828,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "我是事事通",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 独立评审判定不通过:不可发布,不可发布",
+   "critical": [
+    "独立评审判定不通过:不可发布,不可发布"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "独立评审判定不通过:不可发布,不可发布",
+   "evidence_brief": [
+    {
+     "claim": "提起离婚，公众的第一反应往往联想到出轨、家暴或激烈的婆媳矛盾等极端冲突",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "最近民政部门的相关统计和基层婚姻登记处的反馈，出现了一个值得留意的新现象：越来越多刚步入婚姻的00后，选择结束婚姻",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00",
+      "orgs:最近民政部门"
+     ]
+    },
+    {
+     "claim": "不少年轻夫妻走到分开这一步，核心导火索是两个人把钱花光了，在消费观念、家庭收支规划上持续不断爆发矛盾",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "很多人第一反应会觉得是不是年轻人太任性对待婚姻不够慎重",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这背后折射出的是当代年轻人在高生活成本下的真实困境",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "如今部分00后年轻夫妻刚踏入婚姻生活没多久，就匆匆走向了离婚",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00"
+     ]
+    },
+    {
+     "claim": "婚后积蓄慢慢被消耗一空，柴米油盐的压力压得两个人喘不过气",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "不少00后步入婚姻没多久就选择办理离婚",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00"
+     ]
+    },
+    {
+     "claim": "懂法不吃亏！普通人必看的20条法律常识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20"
+     ]
+    },
+    {
+     "claim": "懂法不吃亏！普通人必看的20条法律常识",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20"
+     ]
+    },
+    {
+     "claim": "生活里90%的纠纷：借钱不还、劳务欠薪、消费被坑、邻里矛盾、婚姻纠纷",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90%"
+     ]
+    },
+    {
+     "claim": "生活里90%的纠纷：借钱不还、劳务欠薪、消费被坑、邻里矛盾、婚姻纠纷",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90%"
+     ]
+    }
+   ],
+   "elapsed_s": 343.3
+  },
+  {
+   "category": "social",
+   "topic": "装修 噪音",
+   "round": 1,
+   "draft_id": "social-20261121102226-35bf3d",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.4,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 1,
+   "checkable": 1,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     5394,
+     8720,
+     17326,
+     31339,
+     38570
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "low_quality": 3,
+      "normal": 3,
+      "potential": 3,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 5394,
+      "rank_score": 1.0,
+      "bm25": -12.061665447637846,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "kiku酱",
+      "source_axis": "author"
+     },
+     {
+      "id": 8720,
+      "rank_score": 0.694,
+      "bm25": -10.96282852478411,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "铭铭",
+      "source_axis": "author"
+     },
+     {
+      "id": 17326,
+      "rank_score": 0.6395,
+      "bm25": -9.68955003995865,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "三联生活周刊",
+      "source_axis": "author"
+     },
+     {
+      "id": 31339,
+      "rank_score": 0.5818,
+      "bm25": -10.559720969021132,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "纷响时光",
+      "source_axis": "author"
+     },
+     {
+      "id": 38570,
+      "rank_score": 0.5713,
+      "bm25": -9.875595646791275,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "创业好青年",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "评审得分 0.4 低于门禁 0.6",
+   "critical": [
+    "致命问题:内容截断/逻辑断裂。文章第二段开头‘虽然商业场所的运营逻辑与家庭居住不同...’缺乏前文对商业场所或特定职业场景的引入，导致指代不明，上下文衔接失败，疑似由无关素材拼接而成且未做平滑处理。"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "致命问题:内容截断/逻辑断裂。文章第二段开头‘虽然商业场所的运营逻辑与家庭居住不同...’缺乏前文对商业场所或特定职业场景的引入，导致指代不明，上下文衔接失败，疑似由无关素材拼接而成且未做平滑处理。",
+   "evidence_brief": [
+    {
+     "claim": "90后女孩小鹿从事古籍、旧照片修复及电子化归档",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90"
+     ]
+    }
+   ],
+   "elapsed_s": 269.3
+  },
+  {
+   "category": "social",
+   "topic": "就业 35岁",
+   "round": 1,
+   "draft_id": "social-20261121102705-92d96e",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 9,
+   "checkable": 9,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     6535,
+     23756,
+     4921,
+     11439,
+     29188
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 6,
+     "label_counts": {
+      "normal": 3,
+      "potential": 2,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 6535,
+      "rank_score": 1.06,
+      "bm25": -13.21675963541185,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人生百态",
+      "source_axis": "author"
+     },
+     {
+      "id": 23756,
+      "rank_score": 0.4895,
+      "bm25": -12.501081666595699,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "非常人物志",
+      "source_axis": "author"
+     },
+     {
+      "id": 4921,
+      "rank_score": 0.4407,
+      "bm25": -12.432640449683792,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "深空之音",
+      "source_axis": "author"
+     },
+     {
+      "id": 11439,
+      "rank_score": 0.4046,
+      "bm25": -12.297838359296094,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "郝好摆烂",
+      "source_axis": "author"
+     },
+     {
+      "id": 29188,
+      "rank_score": 0.3428,
+      "bm25": -12.042993091098381,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "凤凰涅槃",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "于东来“四年合同制”起了个坏头儿",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "该制度规定新招员工为学员性质，合同期为四年且不续签，未达标者将走向社会",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "于东来“四年合同制”精准卡死“35岁”前夜",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:35岁"
+     ]
+    },
+    {
+     "claim": "25岁进胖东来，干四年，29岁出来",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:25岁",
+      "numbers:29岁"
+     ]
+    },
+    {
+     "claim": "人社部2024年的专项调查显示，25至34岁求职者获得面试机会的比例为38.7%，而35至44岁群体仅为12.4%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024",
+      "numbers:25",
+      "numbers:34岁",
+      "numbers:38.7%",
+      "numbers:35",
+      "numbers:44岁"
+     ]
+    },
+    {
+     "claim": "智联招聘《2024中年职场生态报告》也指出，该年龄段在互联网行业遭遇了严重的职业断层",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024"
+     ]
+    },
+    {
+     "claim": "斯坦福数字经济实验室追踪460万名工人的研究发现，就业收缩最严重的不是35岁+而是22-25岁的年轻人",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:460",
+      "numbers:35岁",
+      "numbers:22",
+      "numbers:25岁"
+     ]
+    },
+    {
+     "claim": "以律所合伙人王欣桐为例，以前她最多带5个律师，现在AI包揽了基础检索和初稿，她能带10个了",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5",
+      "numbers:10"
+     ]
+    },
+    {
+     "claim": "展望2027年，就业风向可能发生转变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2027",
+      "dates:2027年"
+     ]
+    }
+   ],
+   "elapsed_s": 136.2
+  },
+  {
+   "category": "social",
+   "topic": "退休 返聘",
+   "round": 1,
+   "draft_id": "social-20261121102924-33c69e",
+   "status": "passed",
+   "passed": true,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     25456,
+     21168,
+     23562,
+     12647,
+     33354
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "low_quality": 2,
+      "potential": 6,
+      "normal": 3,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 25456,
+      "rank_score": 1.0412,
+      "bm25": -17.534417381749684,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "好奇费伊9Q2",
+      "source_axis": "author"
+     },
+     {
+      "id": 21168,
+      "rank_score": 1.0332,
+      "bm25": -17.450751594314973,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "星光点缀夜晚",
+      "source_axis": "author"
+     },
+     {
+      "id": 23562,
+      "rank_score": 1.0,
+      "bm25": -18.973913322296312,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "天上驾白云的神仙",
+      "source_axis": "author"
+     },
+     {
+      "id": 12647,
+      "rank_score": 0.9948,
+      "bm25": -17.053076674105448,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "青衫烟雨",
+      "source_axis": "author"
+     },
+     {
+      "id": 33354,
+      "rank_score": 0.9821,
+      "bm25": -16.920438396761078,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "zg4045",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "有一部分老人退休之后，还能稳定月入过万",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "职场技术人员、教师、医护、工程从业者辛苦打拼十几年甚至几十年",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "有人拿着两千出头的退休金",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "单位返聘又拿到三千多工资",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "工厂找退休老技工解决技术难题",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "医院返聘退休医生",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "学校邀请退休教师代课",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "大量低龄老人进入社区服务、物业、仓储等岗位",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "前同事老刘985毕业",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:985"
+     ]
+    },
+    {
+     "claim": "老刘在大厂干了12年",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:12"
+     ]
+    },
+    {
+     "claim": "老刘今年刚满39岁",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:39岁"
+     ]
+    },
+    {
+     "claim": "老刘投了200多份简历",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:200"
+     ]
+    }
+   ],
+   "elapsed_s": 137.0
+  },
+  {
+   "category": "social",
+   "topic": "物业 纠纷",
+   "round": 1,
+   "draft_id": "social-20261121103141-7ddeea",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.4,
+   "truncated": false,
+   "fact_check_rate": 0.857,
+   "facts": 7,
+   "checkable": 6,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 14,
+     "articles_counted_by_host": 1,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     22677,
+     16783,
+     21338,
+     13199,
+     1733
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "potential": 1,
+      "normal": 2,
+      "low_quality": 5
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 22677,
+      "rank_score": 1.18,
+      "bm25": -10.827561007044306,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "最高人民法院",
+      "source_axis": "author"
+     },
+     {
+      "id": 16783,
+      "rank_score": 0.8785,
+      "bm25": -10.479840964311716,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "北京日报",
+      "source_axis": "author"
+     },
+     {
+      "id": 21338,
+      "rank_score": 0.8703,
+      "bm25": -10.579135624215805,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "苔阶待月来",
+      "source_axis": "author"
+     },
+     {
+      "id": 13199,
+      "rank_score": 0.7483,
+      "bm25": -10.345506695698763,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "百变小厨坊",
+      "source_axis": "author"
+     },
+     {
+      "id": 1733,
+      "rank_score": 0.4425,
+      "bm25": -9.75981046185284,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "欣欣向上008",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "评审得分 0.4 低于门禁 0.6",
+   "critical": [
+    "无来源断言:虽然文中提及的侯纯英系原朝阳法院退休法官 [2]，其“凭借半生经验与一腔热忱，兼顾法理和情理”的调解",
+    "致命问题:无来源断言。文中提及'侯纯英系原朝阳法院退休法官'及其调解理念，证据链明确标记该事实核验为'no_source'（无来源），属于编造或未经证实的断言",
+    "致命问题:内容截断/逻辑错误。首段'辖区内活跃着超过15万家经营主体这一案例的圆满解决'语句不通顺，疑似文本拼接错误或生成截断，导致语义无法理解"
+   ],
+   "rule_hits": {
+    "无来源断言": 1
+   },
+   "primary": "fact.binding",
+   "primary_detail": "无来源断言:虽然文中提及的侯纯英系原朝阳法院退休法官 [2]，其“凭借半生经验与一腔热忱，兼顾法理和情理”的调解;致命问题:无来源断言。文中提及'侯纯英系原朝阳法院退休法官'及其调解理念，证据链明确标记该事实核验为'no_source'（无来源），属于编造或未经证实的断言;致命问题:内容截断/逻辑错误。首段'辖区内活跃着超过15万家经营主体这一案例的圆满解决'语句不通顺，疑似文本拼接错误或生成截断，导致语义无法理解",
+   "evidence_brief": [
+    {
+     "claim": "南城法庭地处东莞CBD中心，辖区内活跃着超过15万家经营主体",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:15"
+     ]
+    },
+    {
+     "claim": "虽然文中提及的侯纯英系原朝阳法院退休法官 [2]，其“凭借半生经验与一腔热忱，兼顾法理和情理”的调解理念 [2] 具有普适性参考价值",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "该法庭地处东莞CBD中心，辖区内活跃着超过15万家经营主体 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:15"
+     ]
+    },
+    {
+     "claim": "就在不久前，南城法庭从全国1.1万个人民法庭中脱颖而出 [1]，获评全国首批“枫桥式人民法庭”，成为全省乃至全国基层治理的一个标杆 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1.1"
+     ]
+    },
+    {
+     "claim": "最近几年，行业风向悄然发生改变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "过去被视为适合中老年人的岗位，如今不仅年轻人极少愿意入行，连曾经支撑队伍的中老年群体也在逐渐撤退 [4]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "既要帮助业主避免因不懂基础法律规则而错过取证、维权的最佳时机",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 211.9
+  },
+  {
+   "category": "social",
+   "topic": "赡养 老人",
+   "round": 1,
+   "draft_id": "social-20261121103502-07d6d2",
+   "status": "passed",
+   "passed": true,
+   "versions": 3,
+   "revisions": 1,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     6042,
+     16950,
+     3060,
+     18279,
+     8455
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "potential": 4,
+      "low_quality": 2,
+      "normal": 2,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 6042,
+      "rank_score": 1.0,
+      "bm25": -11.832734892148606,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "生活的美好",
+      "source_axis": "author"
+     },
+     {
+      "id": 16950,
+      "rank_score": 0.9449,
+      "bm25": -11.683661816953752,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "雄雄民生说谈",
+      "source_axis": "author"
+     },
+     {
+      "id": 3060,
+      "rank_score": 0.8759,
+      "bm25": -11.010508106703082,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人生的上上签文章",
+      "source_axis": "author"
+     },
+     {
+      "id": 18279,
+      "rank_score": 0.6881,
+      "bm25": -10.178353086725613,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "👣妥协",
+      "source_axis": "author"
+     },
+     {
+      "id": 8455,
+      "rank_score": 0.635,
+      "bm25": -10.359235449626706,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "花前凝思的贤者",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "很多人每天过得疲惫又内耗，不是能力不够，而是被六种高频难题反复拉扯",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在东北，非常多90后正在被没有退休金的父母拖垮",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "大量生于上世纪五六十年代的东北长辈，一辈子务农、打零工、做小生意，没有稳定单位，没缴够养老保险",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "就是一大批东北90后，人到三十出头，一边要养家、养孩子、还房贷，一边要持续承担父母养老开支",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:90"
+     ]
+    },
+    {
+     "claim": "在北京这座千万人口的超一线城市，每天都在上演着相聚和别离",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "有95后从业者提供高达300元一小时的陪伴服务",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:95",
+      "numbers:300元"
+     ]
+    },
+    {
+     "claim": "60岁至70岁之间的中老年人离婚现象日益增多",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:60岁",
+      "numbers:70岁"
+     ]
+    },
+    {
+     "claim": "多地法院家事审判的数据显示，该年龄段离婚案件呈现稳步上升态势",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 156.5
+  },
+  {
+   "category": "social",
+   "topic": "孩子 起名",
+   "round": 1,
+   "draft_id": "social-20261121103744-aaeea0",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.1,
+   "truncated": true,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     37953,
+     16222,
+     32279,
+     7500,
+     28117
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "low_quality": 2,
+      "potential": 4,
+      "verified_viral": 2,
+      "normal": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 37953,
+      "rank_score": 1.0,
+      "bm25": -14.066955852730555,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "山林里幽居的隐士",
+      "source_axis": "author"
+     },
+     {
+      "id": 16222,
+      "rank_score": 0.6351,
+      "bm25": -11.726487555616616,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "笨笨的鸟儿",
+      "source_axis": "author"
+     },
+     {
+      "id": 32279,
+      "rank_score": 0.4999,
+      "bm25": -10.859598623134534,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "飞鱼",
+      "source_axis": "author"
+     },
+     {
+      "id": 7500,
+      "rank_score": 0.4904,
+      "bm25": -8.874593883080756,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "军哥自媒体",
+      "source_axis": "author"
+     },
+     {
+      "id": 28117,
+      "rank_score": 0.4187,
+      "bm25": -9.184183750459407,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "雪中静舞的花",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "内容完整性检查未通过(疑似截断)",
+   "critical": [
+    "致命问题:内容截断/生成错误：正文出现严重的文本循环和重复（'她只是做对了一件事...'重复多次），导致文章无法阅读且逻辑断裂",
+    "致命问题:文不对题：标题声称讨论'起名'，但正文及证据链均关于'AI小生意'，存在严重的内容错位"
+   ],
+   "rule_hits": {},
+   "primary": "gate.structure_truncated",
+   "primary_detail": "内容完整性检查未通过(疑似截断)",
+   "evidence_brief": [
+    {
+     "claim": "我见过最成功的AI小生意，是一个宝妈做的",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她只是做对了一件事：她没把这事儿想复杂",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 261.2
+  },
+  {
+   "category": "social",
+   "topic": "预制菜",
+   "round": 1,
+   "draft_id": "social-20261121104207-383ddb",
+   "status": "rejected",
+   "passed": false,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     6480,
+     31275,
+     2215,
+     1525,
+     35513
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 14,
+     "label_counts": {
+      "verified_viral": 2,
+      "normal": 3,
+      "potential": 4,
+      "low_quality": 5
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 6480,
+      "rank_score": 1.3,
+      "bm25": -19.784064089791517,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "森林中漫步的小精灵",
+      "source_axis": "author"
+     },
+     {
+      "id": 31275,
+      "rank_score": 1.0409,
+      "bm25": -19.698265987126806,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "八七的兔",
+      "source_axis": "author"
+     },
+     {
+      "id": 2215,
+      "rank_score": 0.8562,
+      "bm25": -18.33211263265568,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "颖儿",
+      "source_axis": "author"
+     },
+     {
+      "id": 1525,
+      "rank_score": 0.7908,
+      "bm25": -18.038795055036445,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "花园故事",
+      "source_axis": "author"
+     },
+     {
+      "id": 35513,
+      "rank_score": 0.6464,
+      "bm25": -16.85300309136416,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "水中的幻影",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 独立评审判定不通过:不建议直接发布",
+   "critical": [
+    "独立评审判定不通过:不建议直接发布"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "独立评审判定不通过:不建议直接发布",
+   "evidence_brief": [
+    {
+     "claim": "他在杭州一家预制菜公司工作了一年半，职位是“菜品研发助理”，实际工作内容是为料理包调味",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "该公司每天生产三十吨宫保鸡丁、鱼香肉丝等加热即食产品",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "公司引入AI技术后，一天能生成八十个配方",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "原本六个人的团队裁掉了四个",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "2025年10月，一家主打“明厨现做”的头部连锁品牌被网络大V公开质疑堂食菜品多为央厨预制",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:10",
+      "dates:2025年10月"
+     ]
+    },
+    {
+     "claim": "该品牌在2025年9月至2026年3月期间，累计亏损超6亿元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:9",
+      "numbers:2026",
+      "numbers:3",
+      "numbers:6亿元",
+      "dates:2025年9月"
+     ]
+    },
+    {
+     "claim": "随后在2026年一季度，该品牌一次性关停门店102家",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:102家",
+      "dates:2026年"
+     ]
+    }
+   ],
+   "elapsed_s": 107.4
+  },
+  {
+   "category": "social",
+   "topic": "全职妈妈",
+   "round": 1,
+   "draft_id": "social-20261121104353-5b4974",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 13,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     31706,
+     330,
+     31651,
+     30762,
+     24261
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 7,
+     "label_counts": {
+      "normal": 4,
+      "low_quality": 3
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 31706,
+      "rank_score": 1.0,
+      "bm25": -21.06547414789853,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "核桃树下有星光",
+      "source_axis": "author"
+     },
+     {
+      "id": 330,
+      "rank_score": 0.7497,
+      "bm25": -20.816695849795213,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人生百态",
+      "source_axis": "author"
+     },
+     {
+      "id": 31651,
+      "rank_score": 0.7178,
+      "bm25": -20.785057848222998,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "岭上听松声",
+      "source_axis": "author"
+     },
+     {
+      "id": 30762,
+      "rank_score": 0.6085,
+      "bm25": -20.61683676589848,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "赚钱小能手",
+      "source_axis": "author"
+     },
+     {
+      "id": 24261,
+      "rank_score": 0.5719,
+      "bm25": -20.64010094980826,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "市井杂谈",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "在传统的市场经济评价体系中，只有能换来薪水的劳动才被视为创造价值",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "社会普遍将“经济独立”等同于“个人价值”，导致全职妈妈的家务劳动和情绪劳动被严重低估",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这并非个人的简单选择，而是一个复杂的社会结构性问题",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "甚至很多全职妈妈自己，也会陷入深深的自我内耗",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在很多人的固有认知里，上班族被视为体面稳定，而全职妈妈创业、居家增收则被贴上“不务正业”、“丢人现眼”的标签",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在家踏实带娃，被人说只会手心向上、依附家庭；鼓起勇气挤出碎片时间创业赚钱，又被身边人嘲讽折腾",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "然而，回归职场的第一天就能让人明白：全职妈妈不是没能力，而是换了赛道",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "过去三年练就的“婴儿级精准模式”生物钟，恰恰证明了她们具备极强的执行力与责任感",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "全职妈妈做自媒体不晚，而且可能恰恰是最好的时候",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "你的真实经历，是最有竞争力的壁垒",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "事实上，不上班的全职妈妈一个人在家也能做一些小事业",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "看着身边朋友职场升职加薪、经济独立，再看看自己全年无休却没有稳定收入，这种对比往往带来巨大的心理落差",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 120.8
+  },
+  {
+   "category": "social",
+   "topic": "考研 考公",
+   "round": 1,
+   "draft_id": "social-20261121104546-7a9ba6",
+   "status": "passed",
+   "passed": true,
+   "versions": 3,
+   "revisions": 1,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 2,
+   "checkable": 2,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 13,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     18360,
+     10096,
+     6791,
+     6026,
+     19807
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 11,
+     "label_counts": {
+      "potential": 5,
+      "normal": 1,
+      "verified_viral": 1,
+      "low_quality": 4
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 18360,
+      "rank_score": 1.18,
+      "bm25": -17.191640208394823,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "林间星絮",
+      "source_axis": "author"
+     },
+     {
+      "id": 10096,
+      "rank_score": 0.9421,
+      "bm25": -16.92004833205447,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "林间星絮",
+      "source_axis": "author"
+     },
+     {
+      "id": 6791,
+      "rank_score": 0.7597,
+      "bm25": -15.947178662702784,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "山间轻松攀峰",
+      "source_axis": "author"
+     },
+     {
+      "id": 6026,
+      "rank_score": 0.582,
+      "bm25": -15.814303182878103,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "巷尾徘徊的路人",
+      "source_axis": "author"
+     },
+     {
+      "id": 19807,
+      "rank_score": 0.5229,
+      "bm25": -15.678012995958468,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "安然小暖",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "教育部官方数据显示，2026届全国普通高校毕业生规模持续扩大，预计达到1270万",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:1270"
+     ]
+    },
+    {
+     "claim": "2027年起应届毕业生或迎来3大变革",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2027",
+      "numbers:3",
+      "dates:2027年"
+     ]
+    }
+   ],
+   "elapsed_s": 156.8
+  },
+  {
+   "category": "social",
+   "topic": "农村 宅基地",
+   "round": 1,
+   "draft_id": "social-20261121104831-a5a6b2",
+   "status": "passed",
+   "passed": true,
+   "versions": 4,
+   "revisions": 1,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 6,
+   "checkable": 6,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     21804,
+     39614,
+     21562,
+     13494,
+     15414
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "verified_viral": 3,
+      "normal": 3,
+      "potential": 4,
+      "low_quality": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 21804,
+      "rank_score": 1.3,
+      "bm25": -24.24262517393406,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "财猫",
+      "source_axis": "author"
+     },
+     {
+      "id": 39614,
+      "rank_score": 1.0265,
+      "bm25": -21.94442416937606,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "全国党媒信息公共平台",
+      "source_axis": "author"
+     },
+     {
+      "id": 21562,
+      "rank_score": 1.0119,
+      "bm25": -23.83817117486683,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "llj515",
+      "source_axis": "author"
+     },
+     {
+      "id": 13494,
+      "rank_score": 0.9447,
+      "bm25": -23.77811071772365,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "随缘",
+      "source_axis": "author"
+     },
+     {
+      "id": 15414,
+      "rank_score": 0.5934,
+      "bm25": -19.313621284125134,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "白白",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "近期，不少农村朋友在短视频平台刷到“2026年农村合并落地，1000户以下整村搬迁”的消息",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:1000",
+      "dates:2026年"
+     ]
+    },
+    {
+     "claim": "巴中市巴州区方山寨村的青年创业者张娟，将自家老宅改造为“凡素小院”，成功实现了返乡创业",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "她站在由老宅改造的夯土墙前，从遥望家乡的少女成长为手握“乡村规划师”称号的创业者",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "未来五年，农村的人口结构、生活模式将迎来颠覆性洗牌",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "城市职场年龄限制严重，35岁、40岁职场危机凸显",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:35岁",
+      "numbers:40岁"
+     ]
+    },
+    {
+     "claim": "农村精品土特产分拣代发轻资产月纯利2-3万",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2",
+      "numbers:3"
+     ]
+    }
+   ],
+   "elapsed_s": 172.2
+  },
+  {
+   "category": "social",
+   "topic": "欠钱 不还",
+   "round": 1,
+   "draft_id": "social-20261121105122-8c789e",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.3,
+   "truncated": true,
+   "fact_check_rate": 0.583,
+   "facts": 12,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     14482,
+     19407,
+     15805,
+     15250,
+     15395
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "potential": 3,
+      "normal": 1,
+      "low_quality": 5,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 14482,
+      "rank_score": 1.18,
+      "bm25": -23.812391707322476,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "世象I有观",
+      "source_axis": "author"
+     },
+     {
+      "id": 19407,
+      "rank_score": 0.5968,
+      "bm25": -16.59851516223307,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "关注看故事",
+      "source_axis": "author"
+     },
+     {
+      "id": 15805,
+      "rank_score": 0.5632,
+      "bm25": -19.33120874830671,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "顺风顺水",
+      "source_axis": "author"
+     },
+     {
+      "id": 15250,
+      "rank_score": 0.5147,
+      "bm25": -18.834288340200857,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "风轻云淡",
+      "source_axis": "author"
+     },
+     {
+      "id": 15395,
+      "rank_score": 0.4646,
+      "bm25": -18.320464387222575,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "海上漂流",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "内容完整性检查未通过(疑似截断)",
+   "critical": [
+    "事实未通过来源核验:根据《中华人民共和国民法典》第一百八十八条规定，向人民法院请求保护民事权利的诉讼时效期间为三年。(原文引句未绑定)",
+    "事实未通过来源核验:根据《最高人民法院关于审理民间借贷案件适用法律若干问题的规定》，民间借贷利率受法律保护的上限为合同成(原文引句未绑定)",
+    "事实未通过来源核验:根据《中华人民共和国劳动合同法》第十九条规定，同一用人单位与同一劳动者只能约定一次试用期。(原文引句未绑定)",
+    "事实未通过来源核验:根据《中华人民共和国劳动法》第四十四条规定，安排劳动者延长工作时间的，支付不低于工资的百分之一百五十(原文引句未绑定)",
+    "事实未通过来源核验:休息日安排劳动者工作又不能安排补休的，支付不低于工资的百分之二百的工资报酬；(原文引句未绑定)",
+    "内容截断:文章在第16条'高空抛物：从建筑物中'处突然中断，未完成承诺的20条常识列举",
+    "事实错误/编造:第8、10、11条多次引用《民法典》第679条作为离婚冷静期、劳动辞退补偿、试用期规定的依据，该条文实际规定的是自然人之间借款合同的成立要件，属于严重的法律常识错误和胡编乱造"
+   ],
+   "rule_hits": {
+    "引句未绑定(quote未过0.34)": 5
+   },
+   "primary": "gate.structure_truncated",
+   "primary_detail": "内容完整性检查未通过(疑似截断)",
+   "evidence_brief": [
+    {
+     "claim": "目前国内规范欠钱不还行为，核心依据是《民法典》借贷条款和最高法民间借贷司法解释。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "以一名40岁男子网上借贷200万硬扛5年誓死不还的案例为例",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:40岁",
+      "numbers:200",
+      "numbers:5"
+     ]
+    },
+    {
+     "claim": "根据《中华人民共和国民法典》第一百八十八条规定，向人民法院请求保护民事权利的诉讼时效期间为三年。",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "根据《最高人民法院关于审理民间借贷案件适用法律若干问题的规定》，民间借贷利率受法律保护的上限为合同成立时一年期贷款市场报价利率（LPR）的四倍。",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "根据《民法典》第679条规定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:679"
+     ]
+    },
+    {
+     "claim": "根据《民法典》第679条规定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:679"
+     ]
+    },
+    {
+     "claim": "根据《民法典》第679条规定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:679"
+     ]
+    },
+    {
+     "claim": "根据《民法典》第679条规定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:679"
+     ]
+    },
+    {
+     "claim": "根据《中华人民共和国劳动合同法》第十九条规定，同一用人单位与同一劳动者只能约定一次试用期。",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "根据《民法典》第679条规定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:679"
+     ]
+    },
+    {
+     "claim": "根据《中华人民共和国劳动法》第四十四条规定，安排劳动者延长工作时间的，支付不低于工资的百分之一百五十的工资报酬；",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "休息日安排劳动者工作又不能安排补休的，支付不低于工资的百分之二百的工资报酬；",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 364.2
+  },
+  {
+   "category": "social",
+   "topic": "警方 通报",
+   "round": 1,
+   "draft_id": "social-20261121105733-0157dc",
+   "status": "passed",
+   "passed": true,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 10,
+   "checkable": 10,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     1937,
+     29387,
+     1357,
+     30207,
+     22916
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "low_quality": 3,
+      "normal": 4,
+      "potential": 1,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 1937,
+      "rank_score": 1.0,
+      "bm25": -15.918105560305433,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人间烟火录",
+      "source_axis": "author"
+     },
+     {
+      "id": 29387,
+      "rank_score": 0.9322,
+      "bm25": -15.55209167565775,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "梓玥",
+      "source_axis": "author"
+     },
+     {
+      "id": 1357,
+      "rank_score": 0.9031,
+      "bm25": -15.64056030262525,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "阿南避坑笔记",
+      "source_axis": "author"
+     },
+     {
+      "id": 30207,
+      "rank_score": 0.8834,
+      "bm25": -15.06820662159907,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "夏川",
+      "source_axis": "author"
+     },
+     {
+      "id": 22916,
+      "rank_score": 0.7201,
+      "bm25": -14.944350943862599,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "清晨剪辑",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "汉阳警方在10月12日至13日期间连续拦截了多起诈骗案件",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:10",
+      "numbers:12",
+      "numbers:13",
+      "dates:10月12日"
+     ]
+    },
+    {
+     "claim": "汉阳警方通过快速反应连续拦截，成功挽回损失16万元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:16万元"
+     ]
+    },
+    {
+     "claim": "央视《法治在线》和成都高新公安通报了一起利用AI生成假照片的案子",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "警方拆穿了这些由AI生成的假人设，共有28人落网",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:28人"
+     ]
+    },
+    {
+     "claim": "9月16日看看新闻报道了上海警方通报的一起案子男子刘辉（化名）网恋",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:9",
+      "numbers:16",
+      "dates:9月16日"
+     ]
+    },
+    {
+     "claim": "5个月，陆续转了17万",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5",
+      "numbers:17"
+     ]
+    },
+    {
+     "claim": "有受害者在网上寻找“数据录入”兼职时，被要求先交299元“工牌押金”，承诺做满10单后退还",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:299元",
+      "numbers:10"
+     ]
+    },
+    {
+     "claim": "8月28号长春警方发布通告，直接把这个近200万粉丝的“打假斗士”打回了原形——涉嫌黑恶性质犯罪",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:28",
+      "numbers:200",
+      "dates:8月"
+     ]
+    },
+    {
+     "claim": "8月28号长春警方发布通告，直接把这个近200万粉丝的“打假斗士”打回了原形",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:28",
+      "numbers:200",
+      "dates:8月"
+     ]
+    },
+    {
+     "claim": "警方行动中，整个团伙20多名成员被全部抓获",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20"
+     ]
+    }
+   ],
+   "elapsed_s": 302.1
+  },
+  {
+   "category": "social",
+   "topic": "产品经理 裁员",
+   "round": 1,
+   "draft_id": "social-20261121110234-98cd87",
+   "status": "passed",
+   "passed": true,
+   "versions": 3,
+   "revisions": 1,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 13,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     39063,
+     39557,
+     38514,
+     28546,
+     38612
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 11,
+     "label_counts": {
+      "potential": 3,
+      "verified_viral": 3,
+      "normal": 2,
+      "low_quality": 3
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 39063,
+      "rank_score": 1.18,
+      "bm25": -16.86088925180517,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人人都是产品经理",
+      "source_axis": "author"
+     },
+     {
+      "id": 39557,
+      "rank_score": 1.0505,
+      "bm25": -15.912269524279937,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "谈书阁",
+      "source_axis": "author"
+     },
+     {
+      "id": 38514,
+      "rank_score": 0.9434,
+      "bm25": -15.961047081986806,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人人都是产品经理",
+      "source_axis": "author"
+     },
+     {
+      "id": 28546,
+      "rank_score": 0.7308,
+      "bm25": -15.837332161297198,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "AI不焦虑指南",
+      "source_axis": "author"
+     },
+     {
+      "id": 38612,
+      "rank_score": 0.7015,
+      "bm25": -15.49743707410809,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "AI智能体落地王炸",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "丈夫是清华毕业的互联网前中层，妻子曾是教培机构高管。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:妻子曾是教培机构"
+     ]
+    },
+    {
+     "claim": "俩人加起来年薪过百万，现在却在朋友圈卖保险。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "数据显示，AI产品经理岗位增长了369%。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:369%"
+     ]
+    },
+    {
+     "claim": "9 月 4 日凌晨，技术博主宝玉转发了一条帖子",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:9",
+      "numbers:4"
+     ]
+    },
+    {
+     "claim": "发帖人称老板商谈后自己买了Claude Code和Codex狂写一个月，才拍板做了这三个决定。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:发帖人"
+     ]
+    },
+    {
+     "claim": "多邻国创始人坦言AI并非万能，但两个非程序员用vibe coding做出了日活700万的爆款。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:700"
+     ]
+    },
+    {
+     "claim": "为了验证这一趋势，有人花了30天深度测评了市面上主流的7款AI产品经理工具。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30",
+      "numbers:7款"
+     ]
+    },
+    {
+     "claim": "老王说他们部门优化了3个人",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3",
+      "persons:老王",
+      "orgs:老王说他们部门"
+     ]
+    }
+   ],
+   "elapsed_s": 158.9
+  },
+  {
+   "category": "finance",
+   "topic": "A股 下跌",
+   "round": 1,
+   "draft_id": "finance-20261121110520-e1abe2",
+   "status": "passed",
+   "passed": true,
+   "versions": 4,
+   "revisions": 1,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 9,
+    "distinct_hosts": 3,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 8,
+     "articles_counted_by_host": 7,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     418,
+     13785,
+     12951,
+     261,
+     13042
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 4,
+     "label_counts": {
+      "low_quality": 2,
+      "potential": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 418,
+      "rank_score": 1.0,
+      "bm25": -15.451451097217555,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "投资快报",
+      "source_axis": "author"
+     },
+     {
+      "id": 13785,
+      "rank_score": 0.3135,
+      "bm25": -12.912881292994314,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "金美圆的财经笔记",
+      "source_axis": "author"
+     },
+     {
+      "id": 12951,
+      "rank_score": 0.2893,
+      "bm25": -12.823576700944589,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "上观新闻",
+      "source_axis": "author"
+     },
+     {
+      "id": 261,
+      "rank_score": 0.2644,
+      "bm25": -12.065821610118487,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "金美圆的财经笔记",
+      "source_axis": "author"
+     },
+     {
+      "id": 13042,
+      "rank_score": 0.2546,
+      "bm25": -12.695066131275766,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "11月17日，上证指数下跌0.5%，深证成指下跌0.49%，创业板指下跌1.2%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:17",
+      "numbers:0.5%",
+      "numbers:0.49%",
+      "numbers:1.2%",
+      "dates:11月17日"
+     ]
+    },
+    {
+     "claim": "截至收盘，上证指数下跌0.5%，深证成指下跌0.49%，创业板指下跌1.2% [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:0.5%",
+      "numbers:0.49%",
+      "numbers:1.2%"
+     ]
+    },
+    {
+     "claim": "开盘不到一个小时，大盘已跌逾1.5% [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1.5%"
+     ]
+    },
+    {
+     "claim": "创业板盘中一度跌逾2.5%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2.5%"
+     ]
+    },
+    {
+     "claim": "盘中一度出现5000多家个股下跌的情况 [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5000"
+     ]
+    },
+    {
+     "claim": "美东时间11月16日，英伟达收盘股价再跌4.12% [3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:16",
+      "numbers:4.12%",
+      "dates:11月16日"
+     ]
+    },
+    {
+     "claim": "较10月6日历史高点累计下跌约35% [3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:10",
+      "numbers:6",
+      "numbers:35%",
+      "dates:10月6日"
+     ]
+    },
+    {
+     "claim": "做空英伟达的投资者已获得约240亿美元账面利润 [3]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:240亿"
+     ]
+    },
+    {
+     "claim": "11月17日盘后龙虎榜数据显示，共有51只个股因当日异动登上龙虎榜 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:17",
+      "numbers:51",
+      "dates:11月17日"
+     ]
+    },
+    {
+     "claim": "资金净流入最多的是有研新材（600206.SH） [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:600206"
+     ]
+    },
+    {
+     "claim": "其金额达2.62亿元 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2.62亿元"
+     ]
+    },
+    {
+     "claim": "30只个股龙虎榜出现了机构的身影 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30",
+      "orgs:个股龙虎榜出现了机构"
+     ]
+    }
+   ],
+   "elapsed_s": 200.9
+  },
+  {
+   "category": "finance",
+   "topic": "美联储 加息",
+   "round": 1,
+   "draft_id": "finance-20261121110829-c224a9",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 10,
+   "checkable": 10,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 7,
+    "distinct_hosts": 6,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 3,
+     "articles_counted_by_host": 12,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     13264,
+     13247,
+     348,
+     13936,
+     14209
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 5,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 2,
+     "label_counts": {
+      "normal": 1,
+      "potential": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 13264,
+      "rank_score": 1.0,
+      "bm25": -29.456777254771644,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "yicai.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13247,
+      "rank_score": 0.9248,
+      "bm25": -29.330531007373697,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "forex.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 348,
+      "rank_score": 0.8438,
+      "bm25": -29.19466495898439,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13936,
+      "rank_score": 0.8039,
+      "bm25": -29.127735538730676,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "futures.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 14209,
+      "rank_score": 0.7329,
+      "bm25": -29.008561972157004,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "stock.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "北京时间周四凌晨，美联储公布了10月政策会议纪要。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "dates:10月"
+     ]
+    },
+    {
+     "claim": "上月为期两天的会议结束时，FOMC以10-2的结果决定维持联邦基金利率不变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:10",
+      "numbers:2"
+     ]
+    },
+    {
+     "claim": "只有美联储理事利萨·库克和克利夫兰联储主席贝丝·哈马克赞成将政策利率上调25个基点",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:25"
+     ]
+    },
+    {
+     "claim": "纪要中明确提到，有两位官员提出下个月有可能加息50个基点",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50"
+     ]
+    },
+    {
+     "claim": "克利夫兰联储主席贝丝·哈马克重申，她倾向于缓慢、稳步加息，以应对她认为正在向更广泛经济领域扩散的通胀压力",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:以应对她"
+     ]
+    },
+    {
+     "claim": "芝加哥联储主席奥斯坦·古尔斯比表示，在政策制定者下个月再次开会设定利率时，他将考虑所有选项",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:古尔斯比"
+     ]
+    },
+    {
+     "claim": "旧金山联储主席玛丽·戴利表示，美联储仍有必要进一步加息",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:戴利"
+     ]
+    },
+    {
+     "claim": "费城联储主席安娜·保尔森也主张以“审慎”的步伐提高利率",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "纪要称，人工智能被视为通胀和潜在金融不稳定的推手",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:纪要"
+     ]
+    },
+    {
+     "claim": "戴利指出，关税政策、伊朗战争等因素加剧了这种不确定性",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:戴利"
+     ]
+    }
+   ],
+   "elapsed_s": 111.5
+  },
+  {
+   "category": "finance",
+   "topic": "存款 利率",
+   "round": 1,
+   "draft_id": "finance-20261121111019-4562e9",
+   "status": "passed",
+   "passed": true,
+   "versions": 4,
+   "revisions": 1,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 10,
+   "checkable": 10,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 3,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 12,
+     "articles_counted_by_host": 3,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     13708,
+     13494,
+     308,
+     1729,
+     13962
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 3,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 5,
+     "label_counts": {
+      "normal": 2,
+      "potential": 3
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 13708,
+      "rank_score": 1.0,
+      "bm25": -14.229514558331246,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "全民新视野",
+      "source_axis": "author"
+     },
+     {
+      "id": 13494,
+      "rank_score": 0.9802,
+      "bm25": -14.168336754361963,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 308,
+      "rank_score": 0.9251,
+      "bm25": -13.812070753253327,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "Sasa0828",
+      "source_axis": "author"
+     },
+     {
+      "id": 1729,
+      "rank_score": 0.8959,
+      "bm25": -13.35028802762913,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "第一",
+      "source_axis": "author"
+     },
+     {
+      "id": 13962,
+      "rank_score": 0.8741,
+      "bm25": -13.839789344021522,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "yicai.com",
+      "author": "",
+      "source_axis": "host"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "2026年7月1日，中国银行挂出首期个人大额存单公告",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:7",
+      "numbers:1",
+      "dates:2026年7月1日",
+      "orgs:中国银行"
+     ]
+    },
+    {
+     "claim": "覆盖短至1个月、长至5年的各档期限",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1",
+      "numbers:5"
+     ]
+    },
+    {
+     "claim": "此后农行、建行、工行、交行、邮储陆续恢复发行",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "国有大行力推储蓄型保险以稳客留客",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "对于持有30万以上存款的家庭而言",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "两个期限品种的LPR报价连续第18个月保持不变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:18"
+     ]
+    },
+    {
+     "claim": "11月20日，中国人民银行授权全国银行间同业拆借中心公布新版LPR报价：1年期品种报3.0%，上月为3.0%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:20",
+      "numbers:1",
+      "numbers:3.0%",
+      "dates:11月20日",
+      "orgs:中国人民银行"
+     ]
+    },
+    {
+     "claim": "2015年前后，行情好的时候",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2015",
+      "dates:2015年"
+     ]
+    },
+    {
+     "claim": "2015年前后，行情好的时候，我们银行理财动不动就是百分之五点几的收益",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2015",
+      "dates:2015年",
+      "orgs:我们银行"
+     ]
+    },
+    {
+     "claim": "两个期限品种的LPR报价连续第18个月保持不变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:18"
+     ]
+    }
+   ],
+   "elapsed_s": 197.6
+  },
+  {
+   "category": "finance",
+   "topic": "消费贷",
+   "round": 1,
+   "draft_id": "finance-20261121111336-65b1b6",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     10572,
+     1715,
+     739,
+     664,
+     12882
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "normal": 3,
+      "low_quality": 4,
+      "potential": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 10572,
+      "rank_score": 1.06,
+      "bm25": -11.477823015117995,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "ATC043",
+      "source_axis": "author"
+     },
+     {
+      "id": 1715,
+      "rank_score": 0.8064,
+      "bm25": -10.97170423644064,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "人人都是产品经理",
+      "source_axis": "author"
+     },
+     {
+      "id": 739,
+      "rank_score": 0.4777,
+      "bm25": -9.641837715118802,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "给自己取个响亮的名字",
+      "source_axis": "author"
+     },
+     {
+      "id": 664,
+      "rank_score": 0.4722,
+      "bm25": -10.098192691082637,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "新浪财经",
+      "source_axis": "author"
+     },
+     {
+      "id": 12882,
+      "rank_score": 0.3741,
+      "bm25": -9.371019860077057,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "兜有米26200606",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:这类宣传专门瞄准上班族、宝妈和大学生群体(orgs:宝妈和大学);致命问题:事实错误/时间逻辑悖论 - 文中多次提及'中消协5月11日刚发了2026年一季度数据'。当前现实时间为2024年或2025年（取决于模型训练截止点，但绝非2026年之后），引用'2026年'的数据属于严重的时间事实错误或幻觉/编造未来数据。即使假设这是虚构场景，在内容评审中引用未来年份的统计数据作为既定事实通常被视为严重的事实性错误。",
+   "critical": [
+    "事实未通过来源核验:这类宣传专门瞄准上班族、宝妈和大学生群体(orgs:宝妈和大学)",
+    "致命问题:事实错误/时间逻辑悖论 - 文中多次提及'中消协5月11日刚发了2026年一季度数据'。当前现实时间为2024年或2025年（取决于模型训练截止点，但绝非2026年之后），引用'2026年'的数据属于严重的时间事实错误或幻觉/编造未来数据。即使假设这是虚构场景，在内容评审中引用未来年份的统计数据作为既定事实通常被视为严重的事实性错误。"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1
+   },
+   "primary": "fact.anchor_missing",
+   "primary_detail": "事实未通过来源核验:这类宣传专门瞄准上班族、宝妈和大学生群体(orgs:宝妈和大学);致命问题:事实错误/时间逻辑悖论 - 文中多次提及'中消协5月11日刚发了2026年一季度数据'。当前现实时间为2024年或2025年（取决于模型训练截止点，但绝非2026年之后），引用'2026年'的数据属于严重的时间事实错误或幻觉/编造未来数据。即使假设这是虚构场景，在内容评审中引用未来年份的统计数据作为既定事实通常被视为严重的事实性错误。",
+   "evidence_brief": [
+    {
+     "claim": "中消协5月11日刚发了2026年一季度数据",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5",
+      "numbers:11",
+      "numbers:2026",
+      "dates:5月11日",
+      "dates:2026年"
+     ]
+    },
+    {
+     "claim": "中消协5月11日刚发了2026年一季度数据：职业技能培训投诉平均涉诉金额超过7000块",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5",
+      "numbers:11",
+      "numbers:2026",
+      "numbers:7000",
+      "dates:5月11日",
+      "dates:2026年"
+     ]
+    },
+    {
+     "claim": "这类宣传专门瞄准上班族、宝妈和大学生群体",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "骗子在直播间或短视频广告中打出免费公开课或9.9元体验课的旗号",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:9.9元"
+     ]
+    },
+    {
+     "claim": "499元“包教包会”刷到过吧",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:499元"
+     ]
+    },
+    {
+     "claim": "部分AI副业培训机构甚至诱导大学生办理消费贷交学费",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:副业培训机构",
+      "orgs:甚至诱导大学"
+     ]
+    },
+    {
+     "claim": "警方已多次通报此类AI培训贷连环骗局",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 208.7
+  },
+  {
+   "category": "finance",
+   "topic": "黄金 投资",
+   "round": 1,
+   "draft_id": "finance-20261121111711-e9ba32",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 12,
+    "distinct_hosts": 3,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 13,
+     "articles_counted_by_host": 2,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     13592,
+     4331,
+     4949,
+     13368,
+     1177
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "potential": 5,
+      "low_quality": 2,
+      "normal": 1,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 13592,
+      "rank_score": 1.18,
+      "bm25": -9.130473041567521,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "金融界",
+      "source_axis": "author"
+     },
+     {
+      "id": 4331,
+      "rank_score": 0.8023,
+      "bm25": -9.048809316611655,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "山海寻鹿",
+      "source_axis": "author"
+     },
+     {
+      "id": 4949,
+      "rank_score": 0.6109,
+      "bm25": -8.895407799666856,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "青竹韵",
+      "source_axis": "author"
+     },
+     {
+      "id": 13368,
+      "rank_score": 0.5474,
+      "bm25": -8.943530122324507,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "理晓玉",
+      "source_axis": "author"
+     },
+     {
+      "id": 1177,
+      "rank_score": 0.4313,
+      "bm25": -8.77164228395376,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "央视新闻",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:据《消费者报道》调查指出，不少人在购买黄金时，往往只盯着屏幕上的金价数字进行对比(persons:调查);第三段引用《消费者报道》调查时，证据链显示该来源核验状态为unverified且维度缺失（persons:调查），属于无充分来源支撑的断言。;第四段关于市民陈女士的描述中，原文仅提及她‘感触颇深’，文章将其具体化为‘原本打算买一只实心手镯...最终选了一枚小巧的金饰’，虽符合语境逻辑但属于对原文信息的过度演绎或补充细节，非直接引用事实。",
+   "critical": [
+    "事实未通过来源核验:据《消费者报道》调查指出，不少人在购买黄金时，往往只盯着屏幕上的金价数字进行对比(persons:调查)",
+    "第三段引用《消费者报道》调查时，证据链显示该来源核验状态为unverified且维度缺失（persons:调查），属于无充分来源支撑的断言。",
+    "第四段关于市民陈女士的描述中，原文仅提及她‘感触颇深’，文章将其具体化为‘原本打算买一只实心手镯...最终选了一枚小巧的金饰’，虽符合语境逻辑但属于对原文信息的过度演绎或补充细节，非直接引用事实。"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1
+   },
+   "primary": "fact.anchor_missing",
+   "primary_detail": "事实未通过来源核验:据《消费者报道》调查指出，不少人在购买黄金时，往往只盯着屏幕上的金价数字进行对比(persons:调查);第三段引用《消费者报道》调查时，证据链显示该来源核验状态为unverified且维度缺失（persons:调查），属于无充分来源支撑的断言。;第四段关于市民陈女士的描述中，原文仅提及她‘感触颇深’，文章将其具体化为‘原本打算买一只实心手镯...最终选了一枚小巧的金饰’，虽符合语境逻辑但属于对原文信息的过度演绎或补充细节，非直接引用事实。",
+   "evidence_brief": [
+    {
+     "claim": "周一（11月16日）金价跌至一年多以来最低水平",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:16",
+      "dates:11月16日"
+     ]
+    },
+    {
+     "claim": "黄金今年以来的跌幅已超过30%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30%"
+     ]
+    },
+    {
+     "claim": "这正面临2015年以来最糟糕的年度表现",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2015",
+      "dates:2015年"
+     ]
+    },
+    {
+     "claim": "3800美元整数关口正成为黄金多头必须守住的重要心理防线",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3800美元"
+     ]
+    },
+    {
+     "claim": "据《每日经济新闻》报道，前一段时间金价一路走高，刷新历史记录",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "短视频、社交平台到处都在说黄金稳赚不赔",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:到处都在"
+     ]
+    },
+    {
+     "claim": "很多普通人看着一路上涨的行情，拿出积蓄跟风抢购金条、金首饰",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "据《消费者报道》调查指出，不少人在购买黄金时，往往只盯着屏幕上的金价数字进行对比",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在北京城区一家品牌金店，柜台前客流不算拥挤",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "现在5克以内的小吊坠、编绳金饰反而更走俏",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5"
+     ]
+    },
+    {
+     "claim": "正在挑首饰的市民陈女士原本打算买一只实心手镯",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "11 月 17 日，国际现货黄金盘中最低探至 3832 美元 / 盎司",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:17",
+      "numbers:3832 美元"
+     ]
+    }
+   ],
+   "elapsed_s": 221.0
+  },
+  {
+   "category": "finance",
+   "topic": "基金 定投",
+   "round": 1,
+   "draft_id": "finance-20261121112056-1bccbf",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 10,
+   "checkable": 10,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     376,
+     4582,
+     9542,
+     1293,
+     11855
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "potential": 4,
+      "normal": 3,
+      "low_quality": 2,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 376,
+      "rank_score": 1.18,
+      "bm25": -15.313309032713985,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "西瓜看盘",
+      "source_axis": "author"
+     },
+     {
+      "id": 4582,
+      "rank_score": 1.0451,
+      "bm25": -15.251621650187491,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "创业笔记",
+      "source_axis": "author"
+     },
+     {
+      "id": 9542,
+      "rank_score": 0.762,
+      "bm25": -13.581592259522253,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "创业职场感悟",
+      "source_axis": "author"
+     },
+     {
+      "id": 1293,
+      "rank_score": 0.4914,
+      "bm25": -13.20623671529842,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "一一点论",
+      "source_axis": "author"
+     },
+     {
+      "id": 11855,
+      "rank_score": 0.4686,
+      "bm25": -12.365852630404653,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "财联社",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "沪指盘中出现破位迹象",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "当下的止跌只能靠主力资金撑着",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "政策底已现，等待市场底磨出来",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "定投200元天弘中证光伏",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:200元"
+     ]
+    },
+    {
+     "claim": "每月固定金额定投宽基指数（如沪深300、中证500）",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:300",
+      "numbers:500"
+     ]
+    },
+    {
+     "claim": "2025年末，公司旗下所有AI产业链指数产品的95后持有人户数同比增长92.14%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:95",
+      "numbers:92.14%",
+      "dates:2025年"
+     ]
+    },
+    {
+     "claim": "00后持有人户数同比增长超2倍",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00",
+      "numbers:2倍"
+     ]
+    },
+    {
+     "claim": "05后入场AI投资的势头最为迅猛",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:05"
+     ]
+    },
+    {
+     "claim": "其持有人户数较2024年末猛增十倍",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2024",
+      "dates:2024年"
+     ]
+    },
+    {
+     "claim": "30岁以下持有人占比从2024年的1.94%近乎翻倍至3.78%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30岁",
+      "numbers:2024",
+      "numbers:1.94%",
+      "numbers:3.78%",
+      "dates:2024年"
+     ]
+    }
+   ],
+   "elapsed_s": 113.6
+  },
+  {
+   "category": "finance",
+   "topic": "纳斯达克",
+   "round": 1,
+   "draft_id": "finance-20261121112241-d47454",
+   "status": "passed",
+   "passed": true,
+   "versions": 5,
+   "revisions": 2,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 11,
+   "checkable": 11,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 14,
+    "distinct_sources": 7,
+    "distinct_hosts": 5,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 4,
+     "articles_counted_by_host": 11,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     14127,
+     13326,
+     13391,
+     13582,
+     6908
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 3,
+    "selected_distinct_hosts": 3,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 2,
+     "label_counts": {
+      "verified_viral": 1,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 14127,
+      "rank_score": 0.9727,
+      "bm25": -28.377549450104375,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13326,
+      "rank_score": 0.8454,
+      "bm25": -27.564609321495816,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13391,
+      "rank_score": 0.8425,
+      "bm25": -27.546211197702277,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13582,
+      "rank_score": 0.6545,
+      "bm25": -26.346328053625165,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "nbd.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 6908,
+      "rank_score": 0.5138,
+      "bm25": -23.53424928883051,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "财联社",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "纳斯达克100指数期货涨幅扩大至2%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:100",
+      "numbers:2%"
+     ]
+    },
+    {
+     "claim": "Anthropic宣布将其IPO的A类普通股定价为每股83.00美元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:83.00美元"
+     ]
+    },
+    {
+     "claim": "Anthropic将于周四在纳斯达克开始交易",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "此次发行包括980,000,000股A类普通股",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:980,000",
+      "numbers:000"
+     ]
+    },
+    {
+     "claim": "其中，956,351,354股由Anthropic出售",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:956,351",
+      "numbers:354"
+     ]
+    },
+    {
+     "claim": "另有23,648,646股由某些售股股东出售",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:23,648",
+      "numbers:646"
+     ]
+    },
+    {
+     "claim": "截至发稿时，纳指期货涨1.90%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1.90%"
+     ]
+    },
+    {
+     "claim": "谷歌、美光科技涨超3%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3%"
+     ]
+    },
+    {
+     "claim": "字节跳动CEO梁汝波表示，过去50年IT领域共出现四次产业高峰",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50",
+      "persons:梁汝波"
+     ]
+    },
+    {
+     "claim": "戴尔科技集团首席执行官迈克尔・戴尔向投资者表示，算力设备与个人电脑价格将持续走高",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:投资者",
+      "orgs:戴尔科技集团"
+     ]
+    },
+    {
+     "claim": "硬件设备芯片的“结构性短缺”问题大概率会在2027年进一步恶化",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2027",
+      "dates:2027年"
+     ]
+    }
+   ],
+   "elapsed_s": 191.2
+  },
+  {
+   "category": "finance",
+   "topic": "IPO",
+   "round": 1,
+   "draft_id": "finance-20261121112547-26cf9b",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 14,
+    "distinct_sources": 7,
+    "distinct_hosts": 5,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 4,
+     "articles_counted_by_host": 11,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     13492,
+     12991,
+     13397,
+     13517,
+     13311
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 1,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 1,
+     "label_counts": {
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 13492,
+      "rank_score": 1.0,
+      "bm25": -9.631742191925078,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 12991,
+      "rank_score": 0.8668,
+      "bm25": -9.536922860579663,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13397,
+      "rank_score": 0.6191,
+      "bm25": -9.360633116262827,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13517,
+      "rank_score": 0.5025,
+      "bm25": -9.277630014364382,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13311,
+      "rank_score": 0.465,
+      "bm25": -9.250970899016968,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "备受瞩目的AI巨头Anthropic将于11月19日在纳斯达克正式挂牌上市",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:19",
+      "dates:11月19日"
+     ]
+    },
+    {
+     "claim": "Anthropic及其部分投资方计划通过本次IPO外加一轮独立私募配售，合计募资额最高可达904亿美元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:904亿"
+     ]
+    },
+    {
+     "claim": "根据官方公告，Anthropic将以每股83美元的价格出售股票",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:83美元"
+     ]
+    },
+    {
+     "claim": "硅谷投资大佬、Altimeter Capital首席执行官Brad Gerstner透露，该IPO的超额认购倍数高达10至20倍",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:10",
+      "numbers:20倍"
+     ]
+    },
+    {
+     "claim": "Gerstner表示，其投资机构已经申报了价值50亿美元的Anthropic新股认购意向",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50亿"
+     ]
+    },
+    {
+     "claim": "这是Altimeter Capital成立20年以来规模最大的新股申购",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20"
+     ]
+    },
+    {
+     "claim": "该公司七位创始人将跻身全球百亿美元富豪行列",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "Anthropic IPO预计将在现任及前任员工中造就数千名账面百万富翁",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 100.9
+  },
+  {
+   "category": "finance",
+   "topic": "保险 理赔",
+   "round": 1,
+   "draft_id": "finance-20261121112734-0608ad",
+   "status": "rejected",
+   "passed": false,
+   "versions": 4,
+   "revisions": 2,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 6,
+   "checkable": 6,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     8950,
+     10702,
+     8308,
+     7228,
+     11062
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 7,
+     "label_counts": {
+      "low_quality": 5,
+      "normal": 1,
+      "potential": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 8950,
+      "rank_score": 1.0,
+      "bm25": -17.640164106788728,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "IT之家",
+      "source_axis": "author"
+     },
+     {
+      "id": 10702,
+      "rank_score": 0.5081,
+      "bm25": -16.124818987521003,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "阿星ai经济时代",
+      "source_axis": "author"
+     },
+     {
+      "id": 8308,
+      "rank_score": 0.402,
+      "bm25": -15.79824192487958,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "星钥塔管理系统",
+      "source_axis": "author"
+     },
+     {
+      "id": 7228,
+      "rank_score": 0.367,
+      "bm25": -15.690281399153495,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "中云亲子鉴定中心",
+      "source_axis": "author"
+     },
+     {
+      "id": 11062,
+      "rank_score": 0.3444,
+      "bm25": -15.435985572723428,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "华为中国政企业务",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 部分段落（如健康险基因检测、宠物医疗AI）缺乏对应的直接证据链支撑，虽未构成致命错误，但属于无来源断言或基于常识的泛泛而谈，降低了严谨性。",
+   "critical": [
+    "部分段落（如健康险基因检测、宠物医疗AI）缺乏对应的直接证据链支撑，虽未构成致命错误，但属于无来源断言或基于常识的泛泛而谈，降低了严谨性。"
+   ],
+   "rule_hits": {},
+   "primary": "fact.binding",
+   "primary_detail": "部分段落（如健康险基因检测、宠物医疗AI）缺乏对应的直接证据链支撑，虽未构成致命错误，但属于无来源断言或基于常识的泛泛而谈，降低了严谨性。",
+   "evidence_brief": [
+    {
+     "claim": "中国太保作为行业先行者，正加速推进“AI+”深度发展战略，携手华为共建保险业首个自主创新AI算力基础设施",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "据Glassdoor平台数据显示，保险理赔员已成为美国最反感人工智能的职业群体",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "星钥塔的电子发票模块直接把开票动作嵌进结算流程，实现了自动化处理",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "某大型保险公司团队长老陈通过用AI重构整个销售流程，在三个月内实现了个人业绩翻两倍",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:某大型保险公司"
+     ]
+    },
+    {
+     "claim": "其团队整体业绩也上涨了百分之四十",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "传统缘故市场开发完毕后，购买线索的转化率往往不到百分之五",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 141.3
+  },
+  {
+   "category": "finance",
+   "topic": "汇率 人民币",
+   "round": 1,
+   "draft_id": "finance-20261121112953-fa0bdc",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 0.5,
+   "facts": 4,
+   "checkable": 2,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 13,
+    "distinct_sources": 12,
+    "distinct_hosts": 3,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 12,
+     "articles_counted_by_host": 3,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     5450,
+     6192,
+     142,
+     10879,
+     1970
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "low_quality": 2,
+      "normal": 1,
+      "verified_viral": 4,
+      "potential": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 5450,
+      "rank_score": 1.0,
+      "bm25": -22.795683950669424,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "瘦瘦也劲儿大",
+      "source_axis": "author"
+     },
+     {
+      "id": 6192,
+      "rank_score": 0.9585,
+      "bm25": -22.505525688790485,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "烈日下绽放的玫瑰",
+      "source_axis": "author"
+     },
+     {
+      "id": 142,
+      "rank_score": 0.9486,
+      "bm25": -22.436394503680127,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 10879,
+      "rank_score": 0.9135,
+      "bm25": -20.095783491836016,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "IT之家",
+      "source_axis": "author"
+     },
+     {
+      "id": 1970,
+      "rank_score": 0.8944,
+      "bm25": -19.96206915053166,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "青花影评",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:彭博采访的特里维迪称人民币是当下定价最不充分的货币之一(persons:特里维迪);事实未通过来源核验:OpenAI 并未正式宣布任何因汇率变动而调整产品功能可用性的政策(原文引句未绑定);部分引用来源（如特里维迪观点、OpenAI政策声明）标记为unverified，缺乏权威出处支撑",
+   "critical": [
+    "事实未通过来源核验:彭博采访的特里维迪称人民币是当下定价最不充分的货币之一(persons:特里维迪)",
+    "事实未通过来源核验:OpenAI 并未正式宣布任何因汇率变动而调整产品功能可用性的政策(原文引句未绑定)",
+    "部分引用来源（如特里维迪观点、OpenAI政策声明）标记为unverified，缺乏权威出处支撑"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1,
+    "引句未绑定(quote未过0.34)": 1
+   },
+   "primary": "fact.binding",
+   "primary_detail": "事实未通过来源核验:彭博采访的特里维迪称人民币是当下定价最不充分的货币之一(persons:特里维迪);事实未通过来源核验:OpenAI 并未正式宣布任何因汇率变动而调整产品功能可用性的政策(原文引句未绑定);部分引用来源（如特里维迪观点、OpenAI政策声明）标记为unverified，缺乏权威出处支撑",
+   "evidence_brief": [
+    {
+     "claim": "金融机构外汇存款准备金率今起提高至6%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:6%",
+      "orgs:金融机构"
+     ]
+    },
+    {
+     "claim": "彭博采访的特里维迪称人民币是当下定价最不充分的货币之一",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    },
+    {
+     "claim": "一名 ChatGPT 用户在论坛 Reddit 上发帖称，自己使用的是每月 20 美元的 ChatGPT Plus 套餐",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:20 美元",
+      "persons:上发帖"
+     ]
+    },
+    {
+     "claim": "OpenAI 并未正式宣布任何因汇率变动而调整产品功能可用性的政策",
+     "first_hand": false,
+     "checkable": false,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 193.9
+  },
+  {
+   "category": "finance",
+   "topic": "新能源 汽车 价格战",
+   "round": 1,
+   "draft_id": "finance-20261121113318-8f26cb",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 3,
+   "checkable": 3,
+   "material_stats": {
+    "pool_limit": 13,
+    "candidates": 13,
+    "full_candidates": 13,
+    "distinct_sources": 13,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 13,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     12548,
+     5094,
+     833,
+     5749,
+     9159
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 10,
+     "label_counts": {
+      "potential": 5,
+      "low_quality": 1,
+      "normal": 4
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 12548,
+      "rank_score": 1.18,
+      "bm25": -19.72728374518456,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "环球网",
+      "source_axis": "author"
+     },
+     {
+      "id": 5094,
+      "rank_score": 1.1243,
+      "bm25": -19.182878291418632,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "徐向杰",
+      "source_axis": "author"
+     },
+     {
+      "id": 833,
+      "rank_score": 0.9281,
+      "bm25": -19.025033391139715,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "柳林间倾听蝉鸣",
+      "source_axis": "author"
+     },
+     {
+      "id": 5749,
+      "rank_score": 0.8937,
+      "bm25": -16.930599450356546,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "沙丘上滑翔的勇者",
+      "source_axis": "author"
+     },
+     {
+      "id": 9159,
+      "rank_score": 0.8421,
+      "bm25": -17.598536426290536,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "破晓星光集",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 致命问题:事实错误/时间线错乱。证据链[2]中引用的原文引句显示‘2026年8月，经济学家王德培道出真相...’，而文章正文将其作为当前（隐含为2024-2025年左右）的现状进行陈述，且未注明该预测或观点的时间背景，导致事实语境错误。此外，证据链[1]中关于‘外卖补贴大战’的描述若指代近期事件，需确认具体时间点，但结合[2]的2026年未来视角，整篇文章的时间基准存在严重混淆，疑似将未来预测或虚构时间线当作当前事实陈述。",
+   "critical": [
+    "致命问题:事实错误/时间线错乱。证据链[2]中引用的原文引句显示‘2026年8月，经济学家王德培道出真相...’，而文章正文将其作为当前（隐含为2024-2025年左右）的现状进行陈述，且未注明该预测或观点的时间背景，导致事实语境错误。此外，证据链[1]中关于‘外卖补贴大战’的描述若指代近期事件，需确认具体时间点，但结合[2]的2026年未来视角，整篇文章的时间基准存在严重混淆，疑似将未来预测或虚构时间线当作当前事实陈述。"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "致命问题:事实错误/时间线错乱。证据链[2]中引用的原文引句显示‘2026年8月，经济学家王德培道出真相...’，而文章正文将其作为当前（隐含为2024-2025年左右）的现状进行陈述，且未注明该预测或观点的时间背景，导致事实语境错误。此外，证据链[1]中关于‘外卖补贴大战’的描述若指代近期事件，需确认具体时间点，但结合[2]的2026年未来视角，整篇文章的时间基准存在严重混淆，疑似将未来预测或虚构时间线当作当前事实陈述。",
+   "evidence_brief": [
+    {
+     "claim": "国内外专家定调：在未来10年，有5大巨变",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:10",
+      "numbers:5"
+     ]
+    },
+    {
+     "claim": "知名经济学家王德培指出，当下并非经济衰退，而是中国经济正在经历一场急剧大洗牌，各行各业都在新旧更替",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:家王德培"
+     ]
+    },
+    {
+     "claim": "自去年底中央经济工作会议以来，多个重磅会议都旗帜鲜明地强调要“防止‘内卷式’恶性竞争”。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:帜鲜明地"
+     ]
+    }
+   ],
+   "elapsed_s": 189.8
+  },
+  {
+   "category": "finance",
+   "topic": "拼多多 财报",
+   "round": 1,
+   "draft_id": "finance-20261121113625-13e56f",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 13,
+    "candidates": 13,
+    "full_candidates": 13,
+    "distinct_sources": 8,
+    "distinct_hosts": 7,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 2,
+     "articles_counted_by_host": 11,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     13775,
+     13603,
+     13632,
+     13661,
+     13591
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 4,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 1,
+     "label_counts": {
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 13775,
+      "rank_score": 1.0,
+      "bm25": -23.228937231898005,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "nbd.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13603,
+      "rank_score": 0.911,
+      "bm25": -21.83906636031958,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13632,
+      "rank_score": 0.9069,
+      "bm25": -21.774942345926732,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "finance.eastmoney.com",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13661,
+      "rank_score": 0.8454,
+      "bm25": -20.81509805645294,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "nbd.com.cn",
+      "author": "",
+      "source_axis": "host"
+     },
+     {
+      "id": 13591,
+      "rank_score": 0.6125,
+      "bm25": -17.180285746271444,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "新浪财经",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "11月19日，拼多多发布截至9月30日的2026年第三季度财报。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:19",
+      "numbers:9",
+      "numbers:30",
+      "numbers:2026",
+      "dates:11月19日"
+     ]
+    },
+    {
+     "claim": "数据显示，拼多多三季度营收达到1083亿元 [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1083亿元"
+     ]
+    },
+    {
+     "claim": "与此同时，其净利润录得295亿元 [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:295亿元"
+     ]
+    },
+    {
+     "claim": "在美股交易时段，拼多多股价狂飙近13% [4]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:13%"
+     ]
+    },
+    {
+     "claim": "值得注意的是，当晚美股“科技七巨头”也呈现集体上涨态势 [4]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "11月19日晚间，美股三大指数盘中直线跳水",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:19",
+      "dates:11月19日"
+     ]
+    },
+    {
+     "claim": "费城半导体指数也从盘初涨近5%回落至涨幅不到1% [5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5%",
+      "numbers:1%"
+     ]
+    },
+    {
+     "claim": "拼多多发布Q3财报，赵佳臻：坚持深耕“全产业链”，推动传统产业数智升级",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:3"
+     ]
+    },
+    {
+     "claim": "今年三季度，“千亿扶持”惠商战略持续深化对商家和产业的扶持 [2]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "11月19日，阿里巴巴集团发布2027财年第二季度财报 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:19",
+      "numbers:2027",
+      "dates:11月19日",
+      "orgs:阿里巴巴集团"
+     ]
+    },
+    {
+     "claim": "本季度，阿里巴巴集团收入为2715.19亿元，同比增长10% [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2715.19亿元",
+      "numbers:10%",
+      "orgs:阿里巴巴集团"
+     ]
+    },
+    {
+     "claim": "其经调整EBITA（经调整息税及摊销前利润）同比增长高达260% [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:260%"
+     ]
+    }
+   ],
+   "elapsed_s": 103.1
+  },
+  {
+   "category": "finance",
+   "topic": "外卖 骑手 收入",
+   "round": 1,
+   "draft_id": "finance-20261121113802-95f0ae",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "revisions": 2,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     996,
+     12628,
+     1040,
+     12627,
+     3871
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "normal": 1,
+      "potential": 8,
+      "low_quality": 1,
+      "verified_viral": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 996,
+      "rank_score": 1.049,
+      "bm25": -16.922958983899342,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "骑手阿云",
+      "source_axis": "author"
+     },
+     {
+      "id": 12628,
+      "rank_score": 1.0131,
+      "bm25": -16.896338784040196,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "钱江晚报",
+      "source_axis": "author"
+     },
+     {
+      "id": 1040,
+      "rank_score": 1.0,
+      "bm25": -17.020126983276228,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "晚风",
+      "source_axis": "author"
+     },
+     {
+      "id": 12627,
+      "rank_score": 0.9791,
+      "bm25": -16.87117000131308,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "随申Hi-新闻晨报",
+      "source_axis": "author"
+     },
+     {
+      "id": 3871,
+      "rank_score": 0.9393,
+      "bm25": -16.93059270336779,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "多，一点。",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 部分段落（如第二段关于运营策略的建议）缺乏直接对应的具体事实来源标注，虽逻辑合理但属于通用建议而非独家新闻事实",
+   "critical": [
+    "部分段落（如第二段关于运营策略的建议）缺乏直接对应的具体事实来源标注，虽逻辑合理但属于通用建议而非独家新闻事实"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "部分段落（如第二段关于运营策略的建议）缺乏直接对应的具体事实来源标注，虽逻辑合理但属于通用建议而非独家新闻事实",
+   "evidence_brief": [
+    {
+     "claim": "商圈及小区门口等待接单的骑手数量显著增加，往往一排能站十几人",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "4月25日，饿了么正式推出AI助手“小饿”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4",
+      "numbers:25",
+      "dates:4月25日"
+     ]
+    },
+    {
+     "claim": "目前，“小饿”已在无锡、沈阳、佛山、苏州等城市上线运行",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "在杭州西溪银泰城南门，浙江大学经济学院博士生导师袁哲曾体验该功能",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:浙江大学",
+      "orgs:经济学院"
+     ]
+    },
+    {
+     "claim": "他通过语音指令“小饿小饿，帮我上线”，系统迅速响应并提示：“好的，已上线，交警部门联合平台提醒您，送单前一定要检查车况，佩戴好头盔减速慢行哦。”",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:交警部门"
+     ]
+    },
+    {
+     "claim": "此前，一款名为“点滑器”的蓝牙抢单设备曾在骑手圈流传",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "该案件涉及“骑手抢单神器被判赔300万”的司法裁定",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:300"
+     ]
+    }
+   ],
+   "elapsed_s": 142.4
+  },
+  {
+   "category": "finance",
+   "topic": "快递 涨价",
+   "round": 1,
+   "draft_id": "finance-20261121114021-15bb45",
+   "status": "rejected",
+   "passed": false,
+   "versions": 5,
+   "revisions": 2,
+   "score": 0.3,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 12,
+    "candidates": 12,
+    "full_candidates": 12,
+    "distinct_sources": 12,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 12,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     6472,
+     952,
+     6018,
+     10078,
+     4897
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "normal": 2,
+      "low_quality": 2,
+      "potential": 4,
+      "verified_viral": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 6472,
+      "rank_score": 1.06,
+      "bm25": -14.187991042083553,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "懂AI的物流人",
+      "source_axis": "author"
+     },
+     {
+      "id": 952,
+      "rank_score": 0.7218,
+      "bm25": -11.915475145453662,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "铭铭",
+      "source_axis": "author"
+     },
+     {
+      "id": 6018,
+      "rank_score": 0.6345,
+      "bm25": -11.202260183348805,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "巷里家常闲谈",
+      "source_axis": "author"
+     },
+     {
+      "id": 10078,
+      "rank_score": 0.5685,
+      "bm25": -9.192424761208501,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "窗下数流萤",
+      "source_axis": "author"
+     },
+     {
+      "id": 4897,
+      "rank_score": 0.5178,
+      "bm25": -8.778592052053511,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "追风",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "评审得分 0.3 低于门禁 0.6",
+   "critical": [
+    "致命问题:内容截断/逻辑断裂。第三段开头‘国家邮政局公布2026年1—8月运行数据他花费19万元接下一个驿站’语句完全不通，主语缺失或错位，导致事实陈述无法成立，属于严重的内容生成错误",
+    "致命问题:无来源断言/编造嫌疑。文中提到‘他花费19万元接下一个驿站’，但证据链中仅包含宏观行业数据（收入、业务量），没有任何关于具体个人案例、转让费金额或特定驿站经营细节的来源支持，该具体数字和案例属于无来源的孤立断言"
+   ],
+   "rule_hits": {},
+   "primary": "fact.binding",
+   "primary_detail": "致命问题:内容截断/逻辑断裂。第三段开头‘国家邮政局公布2026年1—8月运行数据他花费19万元接下一个驿站’语句完全不通，主语缺失或错位，导致事实陈述无法成立，属于严重的内容生成错误;致命问题:无来源断言/编造嫌疑。文中提到‘他花费19万元接下一个驿站’，但证据链中仅包含宏观行业数据（收入、业务量），没有任何关于具体个人案例、转让费金额或特定驿站经营细节的来源支持，该具体数字和案例属于无来源的孤立断言",
+   "evidence_brief": [
+    {
+     "claim": "9月18日，国家邮政局公布2026年1—8月运行数据：快递业务收入10289.2亿元，同比增长7.4%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:9",
+      "numbers:18",
+      "numbers:2026",
+      "numbers:1",
+      "numbers:10289.2亿元",
+      "numbers:7.4%"
+     ]
+    },
+    {
+     "claim": "同期快递业务量同比增长4.6%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4.6%"
+     ]
+    },
+    {
+     "claim": "按行业收入与业务量简单估算，前8个月每件对应收入约7.68元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:8",
+      "numbers:7.68元"
+     ]
+    },
+    {
+     "claim": "国家邮政局公布2026年1—8月运行数据显示快递业务收入同比增长7.4%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:1",
+      "numbers:7.4%",
+      "dates:2026年",
+      "dates:8月"
+     ]
+    },
+    {
+     "claim": "国家邮政局公布2026年1—8月运行数据：快递业务收入10289.2亿元",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:1",
+      "numbers:10289.2亿元",
+      "dates:2026年",
+      "dates:8月"
+     ]
+    },
+    {
+     "claim": "国家邮政局公布2026年1—8月运行数据",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:1",
+      "dates:2026年",
+      "dates:8月"
+     ]
+    },
+    {
+     "claim": "国家邮政局公布2026年1—8月运行数据",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2026",
+      "numbers:1",
+      "dates:2026年",
+      "dates:8月"
+     ]
+    }
+   ],
+   "elapsed_s": 187.4
+  },
+  {
+   "category": "finance",
+   "topic": "房价 二手房",
+   "round": 1,
+   "draft_id": "finance-20261121114329-d05876",
+   "status": "rejected",
+   "passed": false,
+   "versions": 6,
+   "revisions": 2,
+   "score": 0.65,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 8,
+   "checkable": 8,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 13,
+     "articles_counted_by_host": 2,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     4409,
+     13090,
+     2049,
+     2101,
+     13033
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "normal": 4,
+      "potential": 4,
+      "low_quality": 1
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 4409,
+      "rank_score": 1.1385,
+      "bm25": -24.882122941041985,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "慧海闲谈",
+      "source_axis": "author"
+     },
+     {
+      "id": 13090,
+      "rank_score": 1.1262,
+      "bm25": -24.74938773611709,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "游文刀",
+      "source_axis": "author"
+     },
+     {
+      "id": 2049,
+      "rank_score": 1.06,
+      "bm25": -25.330092358196936,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "华商网",
+      "source_axis": "author"
+     },
+     {
+      "id": 2101,
+      "rank_score": 1.0587,
+      "bm25": -25.31558379003131,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "环球网",
+      "source_axis": "author"
+     },
+     {
+      "id": 13033,
+      "rank_score": 1.0363,
+      "bm25": -23.778810594644625,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "专聊房君",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实错误/无来源断言：文章声称'10月单月网签同比增长18.7%'是人工智能重构交易生态的结果（'该技术不仅解决了...10月单月网签...'），但证据链仅显示该数据存在，未建立AI技术与该特定月份网签增长之间的因果关系，属于无来源断言或逻辑归因错误。;内容截断/标点缺失：第二段末尾'第一次超过新房'后缺少句号；第三段中'18.7%该技术'之间缺少标点符号，导致句子结构混乱，疑似编辑失误造成的文本瑕疵。",
+   "critical": [
+    "事实错误/无来源断言：文章声称'10月单月网签同比增长18.7%'是人工智能重构交易生态的结果（'该技术不仅解决了...10月单月网签...'），但证据链仅显示该数据存在，未建立AI技术与该特定月份网签增长之间的因果关系，属于无来源断言或逻辑归因错误。",
+    "内容截断/标点缺失：第二段末尾'第一次超过新房'后缺少句号；第三段中'18.7%该技术'之间缺少标点符号，导致句子结构混乱，疑似编辑失误造成的文本瑕疵。"
+   ],
+   "rule_hits": {},
+   "primary": "fact.binding",
+   "primary_detail": "事实错误/无来源断言：文章声称'10月单月网签同比增长18.7%'是人工智能重构交易生态的结果（'该技术不仅解决了...10月单月网签...'），但证据链仅显示该数据存在，未建立AI技术与该特定月份网签增长之间的因果关系，属于无来源断言或逻辑归因错误。;内容截断/标点缺失：第二段末尾'第一次超过新房'后缺少句号；第三段中'18.7%该技术'之间缺少标点符号，导致句子结构混乱，疑似编辑失误造成的文本瑕疵。",
+   "evidence_brief": [
+    {
+     "claim": "支撑这一判断的核心指标是，二手房交易在住房交易总量中的占比已超过50%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50%"
+     ]
+    },
+    {
+     "claim": "数据见证着楼市逻辑的根本性转折，支撑这一判断的核心指标是，二手房交易在住房交易总量中的占比已超过50%——从2020年的27%提升到2025年的46%，再到20",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50%",
+      "numbers:2020",
+      "numbers:27%",
+      "numbers:2025",
+      "numbers:46%",
+      "numbers:2026"
+     ]
+    },
+    {
+     "claim": "支撑这一判断的核心指标是，二手房交易在住房交易总量中的占比已超过50%——从2020年的27%提升到2025年的46%，再到2026年前8个月进一步提升至52%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:50%",
+      "numbers:2020",
+      "numbers:27%",
+      "numbers:2025",
+      "numbers:46%",
+      "numbers:2026"
+     ]
+    },
+    {
+     "claim": "支撑这一判断的核心指标是，二手房在住房成交中的占比升到52%，第一次超过新房",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:52%"
+     ]
+    },
+    {
+     "claim": "9月份，上海的二手房价格同比由负转正",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "dates:9月"
+     ]
+    },
+    {
+     "claim": "国家统计局的数据显示，从今年3月开始，一线城市二手住宅价格已经连续七个月环比回升",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "dates:今年3月"
+     ]
+    },
+    {
+     "claim": "国家统计局的数据显示，北上广深四城二手房价格的同比跌幅收窄到1.5%左右",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1.5%"
+     ]
+    },
+    {
+     "claim": "10月单月网签同比增长18.7%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:18.7%",
+      "dates:10月"
+     ]
+    }
+   ],
+   "elapsed_s": 243.7
+  },
+  {
+   "category": "finance",
+   "topic": "数据分析 岗位",
+   "round": 1,
+   "draft_id": "finance-20261121114748-5ba448",
+   "status": "rejected",
+   "passed": false,
+   "versions": 3,
+   "revisions": 2,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 1,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 15,
+     "articles_counted_by_host": 0,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     2352,
+     5251,
+     7149,
+     9315,
+     3673
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 8,
+     "label_counts": {
+      "normal": 2,
+      "potential": 3,
+      "low_quality": 1,
+      "verified_viral": 2
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 2352,
+      "rank_score": 1.063,
+      "bm25": -9.566483931088468,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "阿水老师讲证",
+      "source_axis": "author"
+     },
+     {
+      "id": 5251,
+      "rank_score": 1.0329,
+      "bm25": -9.678237516613287,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "上进根河3j4",
+      "source_axis": "author"
+     },
+     {
+      "id": 7149,
+      "rank_score": 1.0,
+      "bm25": -9.711881842537537,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "有趣青年聊人力",
+      "source_axis": "author"
+     },
+     {
+      "id": 9315,
+      "rank_score": 0.9968,
+      "bm25": -9.707880429482723,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "高校教育说",
+      "source_axis": "author"
+     },
+     {
+      "id": 3673,
+      "rank_score": 0.5399,
+      "bm25": -9.140363729448252,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "协同智造",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 部分引用来源为今日头条自媒体文章，权威性一般，但已标注且与原文事实一致",
+   "critical": [
+    "部分引用来源为今日头条自媒体文章，权威性一般，但已标注且与原文事实一致"
+   ],
+   "rule_hits": {},
+   "primary": "other",
+   "primary_detail": "部分引用来源为今日头条自媒体文章，权威性一般，但已标注且与原文事实一致",
+   "evidence_brief": [
+    {
+     "claim": "当前，用户已可通过自然语言提出分析需求，由AI自动生成查询语句、处理数据、制作图表，甚至直接输出带有结论和建议的分析报告 [5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "过去需要专业人员花费数小时完成的标准化操作，如今可在更短时间内完成 [5]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "以应用统计学专业进入咨询公司为例，最容易体现优势的领域包括消费者调研、营销效果评估、需求预测和风险分析 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:计学专业进入咨询公司"
+     ]
+    },
+    {
+     "claim": "这些任务不仅要求处理数据，更要求判断样本的可信度、差异的真实性以及结论对决策的支持力度 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "咨询项目最终要回答的是：客户应该做什么，依据是什么，结论有哪些限制 [1]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "ATS（Applicant Tracking System）作为招聘流程管理系统，确实通过AI Agent实现了简历解析与职位分发的闭环，提升了HR团队的数据驱",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "直播运营也融合了实时数据分析与智能选品技术 [4]。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 145.6
+  },
+  {
+   "category": "finance",
+   "topic": "滴滴 司机 收入",
+   "round": 1,
+   "draft_id": "finance-20261121114958-858367",
+   "status": "rejected",
+   "passed": false,
+   "versions": 4,
+   "revisions": 2,
+   "score": 0.85,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 5,
+   "checkable": 5,
+   "material_stats": {
+    "pool_limit": 11,
+    "candidates": 11,
+    "full_candidates": 11,
+    "distinct_sources": 11,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 10,
+     "articles_counted_by_host": 1,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     11960,
+     11959,
+     9832,
+     11731,
+     8882
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "verified_viral": 2,
+      "normal": 2,
+      "potential": 1,
+      "low_quality": 4
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 11960,
+      "rank_score": 1.3,
+      "bm25": -17.682994134310768,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "光明网",
+      "source_axis": "author"
+     },
+     {
+      "id": 11959,
+      "rank_score": 1.2899,
+      "bm25": -17.608061484000324,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "出行快讯",
+      "source_axis": "author"
+     },
+     {
+      "id": 9832,
+      "rank_score": 0.8661,
+      "bm25": -15.348216488776204,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "阿亮谈副业日常",
+      "source_axis": "author"
+     },
+     {
+      "id": 11731,
+      "rank_score": 0.8368,
+      "bm25": -16.023297910600647,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "三个AI打工人",
+      "source_axis": "author"
+     },
+     {
+      "id": 8882,
+      "rank_score": 0.6281,
+      "bm25": -14.916969290688689,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "电商108将-贾真",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": "门禁致命问题: 事实未通过来源核验:有体验者表示，虽然不用自己有车，只需带上折叠电动车，看似是很不错的副业选择(persons:有体验者);部分引用标记（如[1], [2], [5]）在提供的证据链中缺失对应来源，导致这些断言缺乏直接支撑",
+   "critical": [
+    "事实未通过来源核验:有体验者表示，虽然不用自己有车，只需带上折叠电动车，看似是很不错的副业选择(persons:有体验者)",
+    "部分引用标记（如[1], [2], [5]）在提供的证据链中缺失对应来源，导致这些断言缺乏直接支撑"
+   ],
+   "rule_hits": {
+    "事实锚点缺失(数字/日期/人物/机构/因果)": 1
+   },
+   "primary": "fact.anchor_missing",
+   "primary_detail": "事实未通过来源核验:有体验者表示，虽然不用自己有车，只需带上折叠电动车，看似是很不错的副业选择(persons:有体验者);部分引用标记（如[1], [2], [5]）在提供的证据链中缺失对应来源，导致这些断言缺乏直接支撑",
+   "evidence_brief": [
+    {
+     "claim": "Uber近期实施了一项举措，将OpenAI的技术直接嵌入自身系统",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "新司机则颇为艰难，需完成数百单业务方能掌握技巧",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "这个每日处理超过4000万行程的全球平台，正逐渐成为AI落地应用的一个鲜活范例",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4000"
+     ]
+    },
+    {
+     "claim": "以滴滴代驾为例，作者原先的认知里认为其门槛不算高，只要会开车、有驾驶证、考个代驾证就可以上岗",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "persons:认知里"
+     ]
+    },
+    {
+     "claim": "有体验者表示，虽然不用自己有车，只需带上折叠电动车，看似是很不错的副业选择",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 150.7
+  },
+  {
+   "category": "finance",
+   "topic": "千问 大模型",
+   "round": 1,
+   "draft_id": "finance-20261121115231-17f9e0",
+   "status": "passed",
+   "passed": true,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 11,
+   "checkable": 11,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 14,
+    "distinct_sources": 15,
+    "distinct_hosts": 2,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 14,
+     "articles_counted_by_host": 1,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     12218,
+     12220,
+     11009,
+     12318,
+     9518
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 12,
+     "label_counts": {
+      "potential": 7,
+      "verified_viral": 1,
+      "low_quality": 1,
+      "normal": 3
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 12218,
+      "rank_score": 1.18,
+      "bm25": -11.086677470786592,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "纵相新闻",
+      "source_axis": "author"
+     },
+     {
+      "id": 12220,
+      "rank_score": 1.1629,
+      "bm25": -11.069587684022649,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "券商中国",
+      "source_axis": "author"
+     },
+     {
+      "id": 11009,
+      "rank_score": 1.0157,
+      "bm25": -10.922643376654207,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "驱动中国",
+      "source_axis": "author"
+     },
+     {
+      "id": 12318,
+      "rank_score": 0.812,
+      "bm25": -10.599445993303359,
+      "viral_prior": 1.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "大河财立方",
+      "source_axis": "author"
+     },
+     {
+      "id": 9518,
+      "rank_score": 0.5155,
+      "bm25": -10.42325716479175,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "中国经营报",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "1月15日，千问App宣布全面接入淘宝、支付宝、飞猪、高德等阿里生态业务",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1",
+      "numbers:15",
+      "dates:1月15日"
+     ]
+    },
+    {
+     "claim": "这一举措在全球范围内首次实现了点外卖、买东西、订机票等全流程AI购物功能",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "上线两个月，千问C端月度活跃用户突破1亿",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:1亿"
+     ]
+    },
+    {
+     "claim": "该事业群由吴嘉负责并担任总裁",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "具体抽成比例仍在谈判中，预计下周对外公布",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "12月3日，千问App上线了阿里最强学习大模型Qwen3-Learning",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:12",
+      "numbers:3",
+      "dates:12月3日"
+     ]
+    },
+    {
+     "claim": "8月26日晚，阿里旗下千问办公首发上线Qwen3.8-Flash模型",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:8",
+      "numbers:26",
+      "numbers:3.8",
+      "dates:8月26日"
+     ]
+    },
+    {
+     "claim": "在真实办公场景测试中，单任务生成速度提升约100%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:100%"
+     ]
+    },
+    {
+     "claim": "Token消耗平均减少75%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:75%"
+     ]
+    },
+    {
+     "claim": "约95%的日常任务通过标准模式即可完成",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:95%"
+     ]
+    },
+    {
+     "claim": "仅5%的复杂任务需要使用高级模式",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5%"
+     ]
+    }
+   ],
+   "elapsed_s": 105.6
+  },
+  {
+   "category": "finance",
+   "topic": "市场",
+   "round": 1,
+   "draft_id": "finance-20261121115424-e98823",
+   "status": "passed",
+   "passed": true,
+   "versions": 1,
+   "revisions": 0,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 12,
+   "checkable": 12,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 14,
+    "distinct_hosts": 5,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 11,
+     "articles_counted_by_host": 4,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     2478,
+     2456,
+     8454,
+     5798,
+     13128
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 4,
+    "selected_distinct_hosts": 2,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 9,
+     "label_counts": {
+      "low_quality": 3,
+      "normal": 2,
+      "potential": 4
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 2478,
+      "rank_score": 1.052,
+      "bm25": -0.1188336358575379,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "光明网",
+      "source_axis": "author"
+     },
+     {
+      "id": 2456,
+      "rank_score": 1.0,
+      "bm25": -0.11885337352090888,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "金台资讯",
+      "source_axis": "author"
+     },
+     {
+      "id": 8454,
+      "rank_score": 0.9238,
+      "bm25": -0.11866430392377963,
+      "viral_prior": 0.0,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "奋发有为，高山流水",
+      "source_axis": "author"
+     },
+     {
+      "id": 5798,
+      "rank_score": 0.5347,
+      "bm25": -0.11725129292635467,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "金台资讯",
+      "source_axis": "author"
+     },
+     {
+      "id": 13128,
+      "rank_score": 0.5295,
+      "bm25": -0.11768520815875785,
+      "viral_prior": null,
+      "completeness": "full",
+      "host": "chinanews.com.cn",
+      "author": "",
+      "source_axis": "host"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "市场监管总局批复在长三角开展民用水表、燃气表出厂检定与首次强制检定合并实施互认试点。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "orgs:市场监管总局"
+     ]
+    },
+    {
+     "claim": "该试点实现了全国首次在区域范围内的计量器具“一次检定、区域通行”。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "沪苏浙皖范围内，检定资质与检定结果全域互认，不再重复检定。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "产品交付周期平均缩短一半，降低了跨区域流通的制度性成本。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "5月22日开市以来，滁州水果市场迅速成为长三角果品流通的重要节点。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:5",
+      "numbers:22",
+      "dates:5月22日"
+     ]
+    },
+    {
+     "claim": "800多间标准化档口、200多家商户、3000多名员工进驻该市场。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:800",
+      "numbers:200",
+      "numbers:3000"
+     ]
+    },
+    {
+     "claim": "日均人流量近万人，货主、采购商、司机川流不息。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "“寻味”烧烤店主朱龙伟忙得脚不沾地，23张桌子翻台不停，营业持续到次日凌晨。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:23"
+     ]
+    },
+    {
+     "claim": "几个月前他的烧烤店才只有4张桌子。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:4"
+     ]
+    },
+    {
+     "claim": "11月18日，第五届中非经贸西湖大会五金机电专场活动在浙江杭州拱墅区启幕。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:11",
+      "numbers:18",
+      "dates:11月18日"
+     ]
+    },
+    {
+     "claim": "来自非洲以及共建“一带一路”国家的30余位海外采购商走进浙江建华五金机电市场。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30"
+     ]
+    },
+    {
+     "claim": "当前全球AI产业中，只有底层模型下载市场完全成熟、商业化跑通、达到百亿美金市值规模。",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 107.7
+  },
+  {
+   "category": "finance",
+   "topic": "投资",
+   "round": 1,
+   "draft_id": "finance-20261121115607-37ec76",
+   "status": "passed",
+   "passed": true,
+   "versions": 2,
+   "revisions": 1,
+   "score": 0.95,
+   "truncated": false,
+   "fact_check_rate": 1.0,
+   "facts": 7,
+   "checkable": 7,
+   "material_stats": {
+    "pool_limit": 15,
+    "candidates": 15,
+    "full_candidates": 15,
+    "distinct_sources": 15,
+    "distinct_hosts": 3,
+    "independence_axis": {
+     "unit": "author(缺作者退回 host,缺作者不计数)",
+     "articles_counted_by_author": 13,
+     "articles_counted_by_host": 2,
+     "articles_without_any_source_key": 0
+    },
+    "selected_ids": [
+     7103,
+     4993,
+     2673,
+     788,
+     11855
+    ],
+    "selected_full": 5,
+    "selected_distinct_sources": 5,
+    "selected_distinct_hosts": 1,
+    "calibration_status": "calibrated",
+    "priors": {
+     "applied": true,
+     "weight": 0.3,
+     "measured_label_hits": 11,
+     "label_counts": {
+      "normal": 5,
+      "potential": 6
+     },
+     "reason": ""
+    },
+    "scores": [
+     {
+      "id": 7103,
+      "rank_score": 1.06,
+      "bm25": -2.933994877820713,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "微醺小酌",
+      "source_axis": "author"
+     },
+     {
+      "id": 4993,
+      "rank_score": 1.021,
+      "bm25": -2.9226570266146137,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "刚刚讲商业",
+      "source_axis": "author"
+     },
+     {
+      "id": 2673,
+      "rank_score": 0.6188,
+      "bm25": -2.9025419327154522,
+      "viral_prior": 0.2,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "121增观点",
+      "source_axis": "author"
+     },
+     {
+      "id": 788,
+      "rank_score": 0.555,
+      "bm25": -2.889435492216037,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "文县公安",
+      "source_axis": "author"
+     },
+     {
+      "id": 11855,
+      "rank_score": 0.5172,
+      "bm25": -2.8867424759743936,
+      "viral_prior": 0.6,
+      "completeness": "full",
+      "host": "toutiao.com",
+      "author": "财联社",
+      "source_axis": "author"
+     }
+    ]
+   },
+   "notes": null,
+   "critical": [],
+   "rule_hits": {},
+   "primary": "passed",
+   "primary_detail": null,
+   "evidence_brief": [
+    {
+     "claim": "诈骗分子假扮“理财专家”或“投资大佬”，通过免费授课和财经视频博取信任，再以“内幕消息”、“特殊渠道”等为噱头，诱骗受害人进行虚假投资",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    },
+    {
+     "claim": "天弘基金持有人数据显示，2025年末，公司旗下所有AI产业链指数产品的95后持有人户数同比增长92.14%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:2025",
+      "numbers:95",
+      "numbers:92.14%",
+      "dates:2025年"
+     ]
+    },
+    {
+     "claim": "与此同时，00后持有人户数同比增长超2倍",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:00",
+      "numbers:2倍"
+     ]
+    },
+    {
+     "claim": "值得注意的是，05后入场AI投资的势头最为迅猛，其持有人户数较2024年末猛增十倍",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:05",
+      "numbers:2024",
+      "dates:2024年"
+     ]
+    },
+    {
+     "claim": "整体来看，30岁以下持有人占比从2024年的1.94%近乎翻倍至3.78%",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:30岁",
+      "numbers:2024",
+      "numbers:1.94%",
+      "numbers:3.78%",
+      "dates:2024年"
+     ]
+    },
+    {
+     "claim": "这是一个有标准流程的系统工程，按7步执行可显著提升成功率",
+     "first_hand": true,
+     "checkable": true,
+     "hits": [
+      "numbers:7"
+     ]
+    },
+    {
+     "claim": "清华五道口首席经济学家论坛上，余永定提出“不存在消费驱动的增长方式”，认为经济要增长还是得靠投资，尤其是公共投资",
+     "first_hand": true,
+     "checkable": true,
+     "hits": []
+    }
+   ],
+   "elapsed_s": 158.7
+  }
+ ],
+ "summary": {
+  "total_runs": 40,
+  "passed": 22,
+  "pass_rate": 0.55,
+  "primary_distribution": {
+   "passed": {
+    "n": 22,
+    "share": 0.55
+   },
+   "other": {
+    "n": 7,
+    "share": 0.175
+   },
+   "fact.binding": {
+    "n": 6,
+    "share": 0.15
+   },
+   "fact.anchor_missing": {
+    "n": 3,
+    "share": 0.075
+   },
+   "gate.structure_truncated": {
+    "n": 2,
+    "share": 0.05
+   }
+  },
+  "rule_hit_totals": {
+   "引句未绑定(quote未过0.34)": 6,
+   "事实锚点缺失(数字/日期/人物/机构/因果)": 4,
+   "无来源断言": 1
+  },
+  "by_category": {
+   "finance": {
+    "runs": 20,
+    "passed": 10,
+    "primary": {
+     "passed": 10,
+     "fact.anchor_missing": 3,
+     "fact.binding": 4,
+     "other": 3
+    }
+   },
+   "social": {
+    "runs": 20,
+    "passed": 12,
+    "primary": {
+     "passed": 12,
+     "fact.binding": 2,
+     "other": 4,
+     "gate.structure_truncated": 2
+    }
+   }
+  }
+ }
+}
