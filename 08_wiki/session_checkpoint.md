@@ -2,7 +2,7 @@
 
 **这个文件的作用是"无损压缩"**：上下文被压缩、或换新窗口时，只相信这里写的事实，不靠对话记忆。
 规则：每完成一个阶段、每次提交推送后、每次产生大输出（全量测试日志、全盘扫描、长报告）之后，必须重写本文件。
-最后更新：2026-11-21 13:26 — **R61 已完成（DONE）；R62 轮次模型规则 + 首次真实烟测已完成，继续推进。**
+最后更新：2026-11-21 22:40 — **R65 已推送；R66 写作质量修复进行中（Qoder worktree）。**
 远端 `main` 以 `git ls-remote` 实测为准：R62 规则提交 = `44706f4`；本次烟测回执/检查点为紧随其后的提交。
 
 ## R62 用户新规（2026-11-21，已落地）
@@ -168,6 +168,43 @@ AI 裁定≠人工裁定；生产类目库零写入（探针/烟测走 snapshot�
 - 已钉死的新事实：`harvested` 是"词表有没有真的把语料撑大"的唯一凭证；`collected` 不是。
   判定发生在能看到上一次补采回执之后的复审轮，不在入队当轮判死。
 
-NEXT: ①生产拉代码重启 supervisor，等一次 analyze 回填 `harvested`，读回执确认 `filter_keywords`
-出现挖词与逐词 `directed_attempts`；②挖词闸门补"边界证据"（量词/姓氏邻字），把 `位女/钱小/女款/神器`
-在入表前拒掉（现在它们要先烧 3 轮定向预算才退场）；③候选广度 `MINE_TOP_N=10` 跨轮累积。
+## R66 Qoder 接手与写作质量修复（进行中，2026-11-21 22:40）
+
+- **环境已核实**：本次 Qoder 工作树 `C:\Users\yangl\.qoder\worktrees\app\d88451\ttxt` 原为 detached HEAD
+  `0c19819`（=origin/main=R65，干净）；已新建分支 `r66-writing-quality`。主工作树 `D:/ttxt` 本地 main
+  仍停 `2752746`（落后 11），推送必须 `git push origin HEAD:main` 并 `git ls-remote` 核验。
+  Strata `/health` 实测 200；`D:/ttxt/.secrets/deepseek_api_key` 存在；系统 Python 3.12.10 无 pytest，
+  需 `PYTHONPATH=D:/ttxt/.venv/Lib/site-packages:.`（`D:/ttxt/.venv` 内 pytest 可用）。
+- **R63 唯一 critical 根因证据（已复算）**：稿中 `有人50岁退、有人55岁退，受地方政策…` 在来源
+  `social/articles.db id=18622` 上有逐字支撑（“有人50岁就顺利办退休…有的人却被告知要等到55岁”），
+  但整句与来源句词面重叠仅 **0.30 < QUOTE_MIN_OVERLAP=0.34** ⇒ `quote_unbound`；repair 两轮未修好；
+  revise 按提示词“删数字留动作”把句子改成 `有人退、有人退`，独立评审判内容截断。
+  实测把句子拆成单锚点 `有人50岁退。` / `有人55岁退。` 后，`verify_claim` 均 **verified**（引句 18622）。
+  ⇒ R66 首选修复：确定性“一句一锚点”拆分 + 禁止删数字留下残缺/相邻重复碎片；不改任何门禁阈值。
+- **代码已改（本地分支 `r66-writing-quality`，提交 `fa1318a`，待推送）**：
+  1. `ttxt/writing/style.py` 新增 `_split_two_anchor_sentence` / `_split_multi_anchor_line`：仅当一句里
+     恰好两个 ASCII 数字锚点、分处不同分句、非日期句时，做标点级拆分（“一句一锚点”），引用标记
+     `[n]` 随每个事实句保留；标题/表格/列表/多锚点政策句一律不动；接入 `copyedit_draft`（四处调用点
+     自动生效），并记为 `multi_anchor_split` 供回执审计。
+  2. `ttxt/writing/prompts.py`：`revise_prompt` 保留“删数字、保留动作与条件”的既有条文，新增
+     禁止“有人退、有人退”这类残缺/相邻重复/无主干碎片，要求一句一数字锚点；`repair_sentence_prompt`
+     增加同一禁令。未改任何门禁阈值、verifier 判定、评审配额。
+  3. 新增 `10_tests/test_r66_one_anchor_split.py`（6 条）：拆分后两句都能对来源 18622 逐字绑定；
+     标题不拆、日期句/多锚点句不拆、提示词条文不回退。
+- **定向测试已跑**（系统 Python + `D:/ttxt/.venv/Lib/site-packages`，`--noconftest` + 临时
+  `_r66_warm` 强制本 worktree 代码，插件已删除）：`test_r66` + `test_r61_copyedit` + `test_r29` =
+  **36 passed**；`test_r53` + `test_p6_writing` = **15 passed**。未跑全量：生产 supervisor 持有
+  `gate.lock` 且 `09_logs`/`system.db` 持续写入，conftest 生产隔离门禁会拒绝；停服务需在无并发模型时做。
+- **真实烟测未跑（不是失败）**：另一 Qoder 工作树 `207d2f` 正在跑 `_r66_write_probe.py`（同源模型），
+  日志 `D:/ttxt/07_tmp/r66_write/run.log` 显示 social rejected 1446.7s、finance rejected 294.5s、
+  technology 进行中。按红线“单任务串行、绝不并发跑模型”，本轮不启动第二路烟测；该工作树还有未提交的
+  R66 自动选题改动（`ttxt/analysis/topics.py`、`ttxt/__main__.py`、`test_r66_auto_topic_pick.py`），
+  **不属于本分支，不得顺手提交**。
+- **另一安全缺口（未修）**：`ttxt/config.py:10` 仍硬编码 `PROJECT_ROOT=Path("D:/ttxt")`，R63 已发生
+  worktree 烟测误写生产库 6 行；本轮所有实测/烟测必须显式传 `db_path`/`export_dir` 或用快照。
+
+NEXT: ①等 207d2f 探针结束后，用显式快照路径 + 本分支代码复跑同题烟测（延迟退休/养老金），验证
+`有人退、有人退` 类 critical 是否消失；②服务静默窗口内停 supervisor/scheduler/worker，跑全量
+`10_tests`，恢复口令 `worker --clear-stop → supervisor --clear-stop → supervisor --ensure`；
+③R67 处理 `config.py` 路径注入（env 覆盖 + worktree 写保护），杜绝再次误写生产库；④R65 遗留的
+挖词边界证据与 `MINE_TOP_N` 跨轮累积另开一轮，不与写作修复混做。
