@@ -76,6 +76,28 @@ DEFAULT_FEEDBACK_COOLDOWN_HOURS = 24.0
 # 这个词。冷却必须随**真实入队次数**指数退避,否则每 24h 重烧一次限速预算。
 MAX_FEEDBACK_COOLDOWN_HOURS = 168.0
 
+# ---------------------------------------------------------------------------
+# R65(2026-11-21):挖词必须进采集闭环,而且采不动要认账。
+#
+# 实测(2026-11-21 全类目只读探针 ``07_tmp/r65_harvest/harvest.json``):38 个 origin='mined'
+# 关键词里 **30 个自被提出之日起一篇新文章都没带回来**(harvested=0),而它们的 collected
+# 全是 6~399 —— 因为 collected 口径是"全库标题命中",挖词本来就是从这批标题里挖出来的。
+# 结果:这些词永远不等于零覆盖 ⇒ 永远进不了 gap ⇒ 反哺从来没为它们入过队 ⇒
+# "反馈关键词给模型继续采集"这一环在挖词侧是断的(scheduler._job_crawl_enqueue 走的是
+# 整源入队,带 keyword_filter 的采集只有 auto_feedback 一条路,而它只认 gap)。
+#
+# 修法只加两条,不放宽任何阈值:
+#   ① harvested=0 的挖词进同一轮反哺的 keyword_filter(与 gap 同一个来源、同一个冷却窗口);
+#   ② 定向补采真实入队 ``MINE_FEEDBACK_MAX_ATTEMPTS`` 次仍然 harvested=0 ⇒ 标 ``exhausted`` 退场。
+#      **不删关键词、不删评分行**:采不动是学到的负面知识,删了下一轮又会挖出同一个词重烧预算。
+#      复活凭证只有一个:harvested>0(语料里真的因为这个词多出了文章)。
+# 定向次数记在类目库 articles_meta.dispatch_state 的 ``keyword_feedback.per_keyword``:
+# 不落 crawl_jobs.meta_json —— 任务一跑完 finish_crawl_job 会用回执整体覆盖那一列(冷却同款教训)。
+PER_KEYWORD_STATE_KEY = "per_keyword"
+DIRECTED_ATTEMPTS_FIELD = "directed_attempts"
+MINE_FEEDBACK_MAX_ATTEMPTS = 3
+MINE_STATUS_EXHAUSTED = "exhausted"
+
 
 def _effective_cooldown_hours(base_hours: float, enqueued: int) -> float:
     """反哺冷却按真实入队次数指数退避:24h → 48h → 96h → … 封顶 7 天。
@@ -133,6 +155,17 @@ def seed_keywords(category: str, db_path: Path | None = None) -> int:
     return total
 
 
+def _iso_or_none(value: object) -> datetime | None:
+    """ISO 时间串 → 可比较的 datetime;读不动返回 ``None``(不猜时间)。"""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
+
+
 def _measured_label_map(con) -> dict[int, str]:
     """本类目库里**真实测得**的爆款标签,article_id -> label。
 
@@ -178,16 +211,24 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
     try:
         # 覆盖统计必须覆盖全部关键词(含 gap):若只统计 active,gap 词再也不会被重新计数,
         # auto_feedback 的 gap→active 恢复通道就永远无法触发(闭环断在评分层)。
-        rows = con.execute("SELECT id, keyword FROM keywords ORDER BY id").fetchall()
+        rows = con.execute(
+            "SELECT id, keyword, origin, status, created_at FROM keywords ORDER BY id"
+        ).fetchall()
         # P31:匹配口径同时看「标题 + 正文」。实测现网 532/532 条文章的标题都原样出现在清洗正文里,
         # 所以这次改动对当下覆盖数是 0 影响;它防的是将来某个清洗器把标题从正文里剥掉之后
         # 覆盖统计悄悄掉一半(那种掉法是静默的,和调度停摆同一类问题)。
-        articles = con.execute("SELECT id, title, cleaned_content, content FROM articles ORDER BY id").fetchall()
+        articles = con.execute(
+            "SELECT id, title, cleaned_content, content, fetched_at FROM articles ORDER BY id"
+        ).fetchall()
         # R57:判定前先按类目别名表归一(文件不存在 ⇒ 纯字面匹配,行为与旧版一致)。
         aliases = _load_keyword_aliases(target.parent)
         article_ids = [int(row["id"]) for row in articles]
         bodies = [(row["cleaned_content"] or row["content"] or "") for row in articles]
         titles = [(row["title"] or "") for row in articles]
+        # R65:采集时刻(fetched_at)。用它跟关键词的 created_at 比,得到"这个词被提出来之后
+        # 采集侧带回来的、标题命中的文章"——这是词表**扩张**的证据,与 collected(全库覆盖)
+        # 是两个口径。时间读不动的条目记 None,不猜。
+        fetched_times = [_iso_or_none(row["fetched_at"]) for row in articles]
         # 正文质量与平均长度仍然只看正文:标题命中但正文为空的文章不能算"有效正文"。
         lengths = [len(body) for body in bodies]
         # P28:真实爆款表现喂回评分。只读本类目库的 viral_labels,严禁跨类目。
@@ -196,7 +237,9 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         calibration_state = "calibrated" if calibration else "default_thresholds"
         category_ready = len(measured) >= viral.MIN_CALIBRATION_SAMPLE
         now = cfg.now_iso()
-        collected_rows: list[tuple[int, str, int, int, float, float | None]] = []
+        perf_columns = {str(item[1]) for item in con.execute("PRAGMA table_info(keyword_performance)")}
+        tracks_harvest = "harvested" in perf_columns
+        collected_rows: list[tuple[int, str, int, int, float, float | None, int | None]] = []
         signal_details: dict[str, dict] = {}
         for row in rows:
             keyword = row["keyword"]
@@ -222,17 +265,29 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
                 signal = None
                 reason = (f"类目真实测得样本 {len(measured)} 条 < {viral.MIN_CALIBRATION_SAMPLE} 条,"
                           "阈值仍是设计假定,不宣称已标定,爆款项不参与评分")
+            # R65 口径(只新增指标,不动 collected/评分公式/权重):
+            #   harvested = 标题命中(别名归一后)且 fetched_at 晚于该词 created_at 的篇数,
+            #   即"这个词被提出之后,采集侧真的带回来的文章"。挖词本来就是从库里已有标题里
+            #   挖出来的 ⇒ collected 天然 >0,永远进不了 gap;只有 harvested 能区分
+            #   "复述库里已有"与"真的把语料撑大了"。时间口径读不动的词记 None(不猜 ⇒ 不据此退场)。
+            created_at = _iso_or_none(row["created_at"])
+            harvested: int | None = None
+            if created_at is not None:
+                harvested = sum(1 for index in title_hits
+                                if fetched_times[index] is not None and fetched_times[index] > created_at)
             signal_details[keyword] = {
                 "signal": signal,
                 "measured_hits": measured_hits,
                 "matched_articles": collected,       # 标题命中篇数(计贡献口径,别名归一后)
                 "coverage_articles": len(hits),      # 标题∪正文命中(判定闸/准入判定用这个口径)
                 "weak_content_hits": len(weak_only),  # 仅正文命中:单列 weak,权重零
+                "harvested_after_keyword": harvested,  # 建词之后采集侧带回的标题命中(None=时间读不动)
                 "reason": reason,
             }
-            collected_rows.append((row["id"], keyword, collected, quality, average_length, signal))
+            collected_rows.append(
+                (row["id"], keyword, collected, quality, average_length, signal, harvested))
         max_collected = max((item[2] for item in collected_rows), default=0)
-        for keyword_id, _keyword, collected, quality, average_length, signal in collected_rows:
+        for keyword_id, _keyword, collected, quality, average_length, signal, harvested in collected_rows:
             collected_norm = (collected / max_collected) if max_collected else 0.0
             quality_ratio = (quality / collected) if collected else 0.0
             base = 0.6 * collected_norm + 0.4 * quality_ratio
@@ -249,20 +304,23 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
                 detail["quality_ratio"] = round(quality_ratio, 4)
                 detail["viral_component"] = round(VIRAL_WEIGHT * signal, 4) if signal is not None else None
                 detail["score"] = score
+            # 列名全是代码内固定字面量(不拼外部输入);拼 SQL 只为让 harvested 列可缺省:
+            # 老库没迁移这一列时,评分照旧写,不因为缺列而整轮失败。
+            columns = ["keyword_id", "collected", "quality_articles", "avg_text_length", "score",
+                       "last_used_at", "updated_at"]
+            values: list[object] = [keyword_id, collected, quality, round(average_length, 1), score, now, now]
+            updates = ["collected = excluded.collected", "quality_articles = excluded.quality_articles",
+                       "avg_text_length = excluded.avg_text_length", "score = excluded.score",
+                       "last_used_at = excluded.last_used_at", "updated_at = excluded.updated_at"]
+            if tracks_harvest:
+                columns.append("harvested")
+                values.append(harvested)
+                updates.append("harvested = excluded.harvested")
             con.execute(
-                """
-                INSERT INTO keyword_performance(
-                  keyword_id, collected, quality_articles, avg_text_length, score, last_used_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(keyword_id) DO UPDATE SET
-                  collected = excluded.collected,
-                  quality_articles = excluded.quality_articles,
-                  avg_text_length = excluded.avg_text_length,
-                  score = excluded.score,
-                  last_used_at = excluded.last_used_at,
-                  updated_at = excluded.updated_at
-                """,
-                (keyword_id, collected, quality, round(average_length, 1), score, now, now),
+                f"INSERT INTO keyword_performance({', '.join(columns)})"
+                f" VALUES ({', '.join('?' * len(columns))})"
+                f" ON CONFLICT(keyword_id) DO UPDATE SET {', '.join(updates)}",
+                values,
             )
         con.commit()
         candidates = [item[1] for item in collected_rows if item[2] == 0]
@@ -281,6 +339,17 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
         "keywords": len(collected_rows),
         "zero_coverage": len(candidates),
         "feedback_candidates": candidates,
+        # R65:把"词表有没有真的把语料撑大"单独交出来。collected 是全库覆盖(挖词天然 >0),
+        # harvested 只看建词之后采集侧带回的文章 —— 两个口径必须分开写,不能混成一个数。
+        "harvest": {
+            "column_tracked": tracks_harvest,
+            "with_harvest": sum(1 for item in collected_rows if (item[6] or 0) > 0),
+            "never_harvested": sum(1 for item in collected_rows if item[6] == 0),
+            "unknown": sum(1 for item in collected_rows if item[6] is None),
+            "note": ("harvested = 标题命中(别名归一后)且 articles.fetched_at 晚于 keywords.created_at"
+                     " 的篇数 = 该词被提出之后采集侧真的带回的文章;collected = 全库标题命中(覆盖口径),"
+                     " 挖词本来就来自这批标题,所以 collected 不能证明词表扩张;时间读不动的词记 unknown"),
+        },
         "viral": {
             "status": viral_status,
             "measured_samples": len(measured),
@@ -305,6 +374,22 @@ def score_keywords(category: str, db_path: Path | None = None) -> dict:
     }
 
 
+def _per_keyword_state(feedback_state: dict) -> dict[str, dict]:
+    """取(必要时建)``keyword_feedback.per_keyword``:每个词的定向补采台账。
+
+    老回执里没有这个键 ⇒ 返回空 dict。**不覆盖既有键**,只在旁边加一个同级键:
+    现有测试和冷却逻辑都按 source_id 读 ``keyword_feedback``,不能动那部分形状。
+    """
+    per_keyword = feedback_state.get(PER_KEYWORD_STATE_KEY)
+    if not isinstance(per_keyword, dict):
+        per_keyword = {}
+        feedback_state[PER_KEYWORD_STATE_KEY] = per_keyword
+    result: dict[str, dict] = {}
+    for keyword, entry in per_keyword.items():
+        result[str(keyword)] = dict(entry) if isinstance(entry, dict) else {}
+    return result
+
+
 def auto_feedback(
     category: str,
     db_path: Path | None = None,
@@ -313,10 +398,15 @@ def auto_feedback(
     evidence_dir: Path | None = None,
     cooldown_hours: float = DEFAULT_FEEDBACK_COOLDOWN_HOURS,
 ) -> dict:
-    """B3 关键词反哺闭环:零覆盖关键词 → gap 状态 → 自动入队补充采集(只入队)。
+    """B3 关键词反哺闭环:零覆盖关键词 + 采不动的挖词 → 定向补采集(只入队)。
 
     - 关键词从 gap 恢复覆盖 → 回到 active;
     - 零覆盖 gap 关键词 → 为该类目正式来源入队一条采集任务(已有排队/运行任务则去重);
+    - **R65**:`harvested = 0` 的挖词(有标题覆盖,但自被提出起一篇新文章都没采回来)进同一个
+      ``keyword_filter``;定向补采真实入队满 ``MINE_FEEDBACK_MAX_ATTEMPTS`` 次仍是 0 ⇒ 标
+      ``exhausted`` 退场(留关键词行、留评分行,只退出选词);复活凭证只有 ``harvested > 0``。
+      不加这条,挖词侧的"反馈关键词继续采集"永远是断的:挖词天然有覆盖 ⇒ 永远不等于零覆盖
+      ⇒ 永远进不了 gap ⇒ 从来没被定向采过一次(逐词数字见模块注释与 R65 报告);
     - **冷却窗口**:同一来源距上次反哺入队不足 ``cooldown_hours``(默认 24h)不再入队,
       只记录证据;``cooldown_hours=0`` 关闭冷却(紧急补采/测试);
     - 每次动作都落证据文件到 03_intelligence/keyword_feedback/,可审计;
@@ -328,6 +418,9 @@ def auto_feedback(
     target = Path(db_path) if db_path is not None else cfg.CATEGORIES_DIR / category / "articles.db"
     recovered = 0
     gaps: list[str] = []
+    revived_mined = 0
+    harvest_tracked = False
+    unharvested: list[dict] = []
     con = connect(target)
     try:
         zero_rows = con.execute(
@@ -355,9 +448,75 @@ def auto_feedback(
                 "SELECT keyword FROM keywords WHERE category=? AND status='gap' ORDER BY keyword", (category,)
             ).fetchall()
         ]
+        # --- R65:挖词的"采到了没有"判定(harvested 列不存在 ⇒ 整段跳过,不猜) ----------
+        harvest_tracked = any(
+            str(row[1]) == "harvested" for row in con.execute("PRAGMA table_info(keyword_performance)")
+        )
+        if harvest_tracked:
+            # 复活凭证只有一个:这个词被提出之后,采集侧真的带回过标题命中的文章。
+            revived_mined = int(
+                con.execute(
+                    "SELECT COUNT(*) FROM keywords k"
+                    " JOIN keyword_performance p ON p.keyword_id = k.id"
+                    " WHERE k.origin=? AND k.status=? AND p.harvested > 0",
+                    (MINE_ORIGIN, MINE_STATUS_EXHAUSTED),
+                ).fetchone()[0]
+            )
+            if revived_mined:
+                con.execute(
+                    "UPDATE keywords SET status='active' WHERE origin=? AND status=?"
+                    " AND id IN (SELECT p.keyword_id FROM keyword_performance p WHERE p.harvested > 0)",
+                    (MINE_ORIGIN, MINE_STATUS_EXHAUSTED),
+                )
+            # harvested=0 才是"定向采过仍没带回东西"的硬证据;NULL 是不可判定,不算。
+            unharvested = [
+                {
+                    "keyword": str(row["keyword"]),
+                    "harvested": int(row["harvested"]),
+                    "collected": int(row["collected"] or 0),
+                    "created_at": str(row["created_at"] or ""),
+                }
+                for row in con.execute(
+                    "SELECT k.keyword, k.created_at, p.harvested, p.collected FROM keywords k"
+                    " JOIN keyword_performance p ON p.keyword_id = k.id"
+                    " WHERE k.category=? AND k.origin=? AND k.status='active' AND p.harvested = 0"
+                    " ORDER BY k.id",
+                    (category, MINE_ORIGIN),
+                ).fetchall()
+            ]
         con.commit()
     finally:
         con.close()
+
+    # 定向次数账在本类目库的 dispatch_state 里 ⇒ 先按每个词自己的历史决定退场,再决定这轮
+    # keyword_filter 里放谁。退场只改 status,不删 keywords 行、不删 keyword_performance 行。
+    exhausted_now: list[str] = []
+    directed: list[dict] = unharvested
+    state = store.load_dispatch_state(target)
+    feedback_state = state.get("keyword_feedback")
+    if not isinstance(feedback_state, dict):
+        feedback_state = {}
+        state["keyword_feedback"] = feedback_state
+    per_keyword = _per_keyword_state(feedback_state)
+    if unharvested:
+        stale = [
+            item["keyword"]
+            for item in unharvested
+            if int(per_keyword.get(item["keyword"], {}).get(DIRECTED_ATTEMPTS_FIELD) or 0)
+            >= MINE_FEEDBACK_MAX_ATTEMPTS
+        ]
+        if stale:
+            con = connect(target)
+            try:
+                con.executemany(
+                    "UPDATE keywords SET status=? WHERE category=? AND keyword=? AND origin=?",
+                    [(MINE_STATUS_EXHAUSTED, category, keyword, MINE_ORIGIN) for keyword in stale],
+                )
+                con.commit()
+            finally:
+                con.close()
+            exhausted_now = sorted(stale)
+            directed = [item for item in unharvested if item["keyword"] not in set(stale)]
 
     job_id: int | None = None
     job_note = None
@@ -365,7 +524,8 @@ def auto_feedback(
     cooldown_effective: float | None = None
     last_enqueued_at: str | None = None
     feedback_attempts: int | None = None
-    if gaps:
+    wanted = sorted(set(gaps) | {item["keyword"] for item in directed})
+    if wanted:
         loader_kwargs = {"path": Path(sources_path)} if sources_path else {}
         try:
             candidates_sources = [
@@ -383,10 +543,6 @@ def auto_feedback(
                 # 冷却窗口:一次反哺至少要给采集一次机会,否则 gap 词会永远重新排队。
                 # 状态落在类目库 articles_meta.dispatch_state,不落在 crawl_jobs ——
                 # 任务一跑完 finish_crawl_job 用回执整体覆盖 meta_json,provenance 就没了。
-                state = store.load_dispatch_state(target)
-                feedback_state = state.get("keyword_feedback")
-                if not isinstance(feedback_state, dict):
-                    feedback_state = {}
                 entry = feedback_state.get(target_source.id)
                 entry = entry if isinstance(entry, dict) else {}
                 last_enqueued_at = entry.get("last_enqueued_at")
@@ -411,14 +567,30 @@ def auto_feedback(
                         target_source.id,
                         category,
                         db_path=system_db,
-                        meta={"reason": "keyword_gap_feedback", "keywords": gaps,
-                              "keyword_filter": gaps,
+                        meta={"reason": "keyword_gap_feedback", "keywords": wanted,
+                              "keyword_filter": wanted,
                               "dispatched_via": "keyword_feedback", "attempt": attempts},
                     )
                     job_note = "已入队补充采集任务(不自动执行;入库侧按 gap 词过滤)"
+                    if directed:
+                        job_note += (
+                            f";其中 {len(directed)} 个挖词 harvested=0,本轮定向补采"
+                            f"(满 {MINE_FEEDBACK_MAX_ATTEMPTS} 次仍为 0 则标 {MINE_STATUS_EXHAUSTED} 退场)"
+                        )
                     last_enqueued_at = cfg.now_iso()
                     entry = {"last_enqueued_at": last_enqueued_at, "attempts": attempts,
                              "enqueued": enqueued + 1}
+                    # R65:逐词定向次数只在**真实入队**时 +1(与冷却同一口径:冷却中跳过不算),
+                    # 否则调度器每 4h 一跑会把"退场"变成"三轮没到就判死"。
+                    for keyword in wanted:
+                        word_entry = per_keyword.get(keyword, {})
+                        per_keyword[keyword] = {
+                            **word_entry,
+                            DIRECTED_ATTEMPTS_FIELD:
+                                int(word_entry.get(DIRECTED_ATTEMPTS_FIELD) or 0) + 1,
+                            "last_enqueued_at": last_enqueued_at,
+                        }
+                    feedback_state[PER_KEYWORD_STATE_KEY] = per_keyword
                 feedback_state[target_source.id] = entry
                 state["keyword_feedback"] = feedback_state
                 store.save_dispatch_state(state, db_path=target)
@@ -437,9 +609,34 @@ def auto_feedback(
         "cooldown_remaining_hours": cooldown_remaining,
         "last_enqueued_at": last_enqueued_at,
         "feedback_attempts": feedback_attempts,
+        # R65:挖词侧闭环的账本 —— 这轮到底为哪些词定向、每个词已经被定向过几次。
+        "filter_keywords": wanted,
+        "harvest_feedback": {
+            "column_tracked": harvest_tracked,
+            "unharvested_mined_keywords": [
+                {
+                    "keyword": item["keyword"],
+                    "harvested": item["harvested"],
+                    "collected": item["collected"],
+                    "created_at": item["created_at"],
+                    DIRECTED_ATTEMPTS_FIELD:
+                        int(per_keyword.get(item["keyword"], {}).get(DIRECTED_ATTEMPTS_FIELD) or 0),
+                }
+                for item in unharvested
+            ],
+            "directed_keywords_in_filter": [item["keyword"] for item in directed],
+            "exhausted_keywords": exhausted_now,
+            "revived_mined_keywords": revived_mined,
+            "max_directed_attempts": MINE_FEEDBACK_MAX_ATTEMPTS,
+            "note": (
+                "harvested=0 的挖词也进这一轮的 keyword_filter(与 gap 同一来源、同一冷却窗口);"
+                "真实入队满 max_directed_attempts 次仍是 0 ⇒ status=exhausted 退场(不删关键词、"
+                "不删评分行),此后 harvested>0 会自动复活回 active"
+            ),
+        },
     }
     file_written = None
-    if gaps or recovered:
+    if wanted or recovered or exhausted_now:
         out_dir = Path(evidence_dir) if evidence_dir else cfg.INTELLIGENCE_DIR / "keyword_feedback"
         out_dir.mkdir(parents=True, exist_ok=True)
         stamp = cfg.now_iso().replace(":", "").replace("-", "")
@@ -842,14 +1039,30 @@ def mine_keywords(
         # 围着早就过时的词打转(实测:上一版算法留下的 10 个碎片词一直留在 technology 里)。
         # 语料太少时不动(不能因为一轮语料不够就把词表清空)。
         pruned = 0
+        proven_kept = 0
         if total_docs >= MINE_PRUNE_MIN_TITLES:
             keep = [item["keyword"] for item in picked]
+            # R65:已被证明"采得动"的挖词(harvested>0)不因本轮没被选中就删 —— 这是系统学到的、
+            # 能真的从采集侧带回文章的话题,删了下一轮又得从零重挖、重烧定向预算(目标④)。
+            proven_ids: list[int] = []
+            if any(str(row[1]) == "harvested" for row in con.execute("PRAGMA table_info(keyword_performance)")):
+                proven_ids = [
+                    int(row["keyword_id"])
+                    for row in con.execute(
+                        "SELECT p.keyword_id FROM keyword_performance p"
+                        " JOIN keywords k ON k.id = p.keyword_id"
+                        " WHERE k.origin=? AND k.category=? AND p.harvested > 0",
+                        (MINE_ORIGIN, category),
+                    )
+                ]
+            skip = set(proven_ids)
+            proven_kept = len(proven_ids)
             target_ids = [
                 int(row["id"])
                 for row in con.execute(
                     "SELECT id, keyword FROM keywords WHERE origin=? AND category=?", (MINE_ORIGIN, category)
                 )
-                if str(row["keyword"]) not in keep
+                if str(row["keyword"]) not in keep and int(row["id"]) not in skip
             ]
             for keyword_id in target_ids:
                 con.execute("DELETE FROM keyword_performance WHERE keyword_id=?", (keyword_id,))
@@ -869,6 +1082,7 @@ def mine_keywords(
             "candidates": len(scored),
             "inserted": inserted,
             "pruned": pruned,
+            "proven_mined_kept": proven_kept,
             "min_docs": min_docs,
             "min_lift": min_lift,
             "specificity_min": specificity_min,

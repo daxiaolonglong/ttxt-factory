@@ -140,14 +140,19 @@ def keyword_candidates(category: str, db_path: Path | str | None = None, limit: 
 
     ``origin`` 必须带出来:``mined`` 的词本身就是上一轮「爆款标题 → 挖词」的产物,
     没有它就没法审计「这个主题是系统学的还是人塞的」。
+
+    R65(2026-11-21):``exhausted`` 的词**仍然算主题候选**。那个状态只说明"采集侧带不回
+    新文章"(别再烧采集预算),不代表语料撑不起这篇稿子 —— 实测 social 的 ``闷声发财``
+    标题命中 399 篇却一篇新的都没采回,它照样是当下最能写的主题之一。被排除的是
+    ``gap``(库里根本没有)和 ``weak``(仅正文命中的宽词,不是话题)。
     """
     target = resolve_db_path(category, db_path)
     con = connect(target)
     try:
         rows = con.execute(
-            "SELECT k.keyword, k.origin, p.score, p.collected, p.quality_articles, p.updated_at"
+            "SELECT k.keyword, k.origin, k.status, p.score, p.collected, p.quality_articles, p.updated_at"
             " FROM keywords k LEFT JOIN keyword_performance p ON p.keyword_id = k.id"
-            " WHERE k.category = ? AND k.status = 'active'"
+            " WHERE k.category = ? AND k.status IN ('active', 'exhausted')"
             " ORDER BY p.score IS NULL, p.score DESC, p.collected DESC, k.id ASC LIMIT ?",
             (category, limit),
         ).fetchall()
@@ -165,6 +170,7 @@ def keyword_candidates(category: str, db_path: Path | str | None = None, limit: 
                 "topic": topic,
                 "ref": row["keyword"],
                 "origin": row["origin"],
+                "keyword_status": row["status"],
                 "score": row["score"],
                 "collected": row["collected"],
                 "quality_articles": row["quality_articles"],

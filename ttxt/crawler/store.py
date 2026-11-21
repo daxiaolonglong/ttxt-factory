@@ -126,6 +126,9 @@ CREATE TABLE IF NOT EXISTS keyword_performance (
   score REAL,
   last_used_at TEXT,
   updated_at TEXT NOT NULL,
+  -- R65(2026-11-21):词表**扩张**证据 —— 建词之后采集侧带回的标题命中篇数。
+  -- 可为 NULL:时间口径读不动时"不可判定"不等于"采不到"(退场判定只认 0)。
+  harvested INTEGER,
   FOREIGN KEY(keyword_id) REFERENCES keywords(id)
 );
 CREATE TABLE IF NOT EXISTS viral_labels (
@@ -261,6 +264,11 @@ def migrate_articles_db(category: str, db_path: Path | None = None) -> Path:
         for name, ddl in (("source_url", "TEXT"), ("checks_json", "TEXT")):
             if name not in evidence_columns:
                 con.execute(f"ALTER TABLE evidence_links ADD COLUMN {name} {ddl}")
+        # R65(2026-11-21):关键词的"采集扩张"证据列(幂等)。老库只加列、不动任何既有行,
+        # 新列一律 NULL —— 没算过就是"不可判定",不能默认成"采不到"。
+        performance_columns = {row[1] for row in con.execute("PRAGMA table_info(keyword_performance)")}
+        if "harvested" not in performance_columns:
+            con.execute("ALTER TABLE keyword_performance ADD COLUMN harvested INTEGER")
         con.execute(
             "INSERT OR REPLACE INTO articles_meta(key, value) VALUES('schema_version', ?)",
             (SCHEMA_VERSION,),

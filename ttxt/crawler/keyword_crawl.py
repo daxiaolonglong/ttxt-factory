@@ -50,6 +50,11 @@ def category_keywords(
 
     R57(2026-11-20):``weak``(仅正文命中的宽词)不进选词——高分表的准入看区分度,
     不看频次;判定闸(runner 入库侧)照旧放行 title∪正文,本处只收窄"什么值得再采"的计划词。
+
+    R65(2026-11-21):``exhausted`` 也不进选词。它的含义是"这个词已经被定向补采过
+    ``MINE_FEEDBACK_MAX_ATTEMPTS`` 轮,采集侧一篇新文章都没带回"(见 analysis.keywords
+    模块注释)——再排进计划就是白烧限速预算。退场只影响**采集侧**:它仍是合法的写作主题
+    (语料里本来就有几百篇),所以 topics.keyword_candidates 照旧收它。
     """
     target = Path(db_path) if db_path is not None else cfg.CATEGORIES_DIR / category / "articles.db"
     if not target.exists():
@@ -59,7 +64,7 @@ def category_keywords(
         rows = con.execute(
             "SELECT k.keyword, k.status, COALESCE(p.score, 0) AS score, COALESCE(p.collected, 0) AS collected"
             " FROM keywords k LEFT JOIN keyword_performance p ON p.keyword_id = k.id"
-            " WHERE k.category = ? AND k.status <> 'weak'"
+            " WHERE k.category = ? AND k.status NOT IN ('weak', 'exhausted')"
             " ORDER BY CASE k.status WHEN 'gap' THEN 0 ELSE 1 END, score DESC, k.id"
             " LIMIT ?",
             (category, max(1, int(limit))),
