@@ -537,9 +537,17 @@ def test_dashboard_post_routes_reject_everything_else():
 
     Probe("/api/other").do_POST()
     assert sent[-1][0] == 405 and "405" not in str(sent[-1][1])
-    probe = Probe("/api/tasks/write")
+    probe = Probe("/api/tasks/publish")
     probe._task_allowed = lambda: None                      # type: ignore[method-assign]
     probe.rfile = io.BytesIO(b"{}")
     probe._read_json_body = lambda: {}                      # type: ignore[method-assign]
     probe.do_POST()
-    assert sent[-1][0] == 404 and "写作" in sent[-1][1]["error"]
+    assert sent[-1][0] == 404 and "发布不可下发" in sent[-1][1]["error"]
+    # R59:/api/tasks/write 真实存在,但没有 category/confirm 二次确认就被 400 挡下,
+    # 绝不会把写作任务悄悄起起来。
+    probe2 = Probe("/api/tasks/write")
+    probe2._task_allowed = lambda: None                     # type: ignore[method-assign]
+    probe2.rfile = io.BytesIO(b"{}")
+    probe2._read_json_body = lambda: {}                     # type: ignore[method-assign]
+    probe2.do_POST()
+    assert sent[-1][0] == 400 and "category" in sent[-1][1]["error"]

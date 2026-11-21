@@ -89,6 +89,9 @@ def stage2_toutiao_one_article() -> dict:
     _gate(CHANNEL_URL, ua, robot_cache)
 
     profile = OUT_DIR / "browser-profile"
+    # p36 护栏:起浏览器必须同时持有 profile 锁,与生产采集/账号采集互斥,绝不允许双开。
+    from ttxt.crawler import browser_lock
+    handle = browser_lock.acquire(profile, tag="r54-probe")
     session = StealthySession(headless=True, max_pages=1, user_data_dir=str(profile))
     session.start()
     try:
@@ -113,6 +116,7 @@ def stage2_toutiao_one_article() -> dict:
         item = toutiao.extract_article(page, article_url)
     finally:
         session.close()
+        handle.release()
 
     assert len(item.content or "") >= 200, f"正文过短:{len(item.content or '')}"
     (OUT_DIR / "article_item.json").write_text(

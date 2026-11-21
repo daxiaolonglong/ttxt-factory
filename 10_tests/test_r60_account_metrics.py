@@ -152,12 +152,13 @@ def test_account_source_is_authorized():
     assert sources.get(account_metrics.SOURCE_ID) == "self_reported"
 
 
-def test_scheduler_has_disabled_account_job_until_login():
+def test_account_job_is_live_with_hard_interval_floor():
+    """R60 已扫码登录并验收落库,调度采集在线;两小时硬下限与 apply 口径不得动摇。"""
     jobs = scheduler.load_jobs()["jobs"]
     job = next(item for item in jobs if item.get("kind") == "account_metrics")
-    assert job["interval_min"] == 120
-    assert job["enabled"] is False, "未扫码登录前不得自动开浏览器"
+    assert job["interval_min"] == 120, "两小时硬下限不得下调"
     assert job["apply"] is True
+    assert job["enabled"] is True, "账号已登录且采集已验收,作业应在线(下线须先处理登录态)"
 
 
 def test_scheduler_maps_account_status_without_faking_ok(monkeypatch):

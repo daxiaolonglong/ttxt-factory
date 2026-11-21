@@ -624,7 +624,8 @@ def test_no_caller_can_bypass_browser_session() -> None:
     """护栏:除 fetcher 外,任何生产代码都不得自己起浏览器(绕过同一把锁)。
 
     起浏览器只有两条路:调 ``fetcher._open_session`` 或直接 import ``StealthySession``。
-    两者在本仓其他文件里必须一次都不出现。
+    ``_open_session`` 在本仓其他文件里必须一次都不出现;自起 ``StealthySession`` 的
+    诊断脚本必须同时 ``browser_lock.acquire`` 持锁(与生产采集互斥),否则算绕过。
     """
     targets = [ROOT / "ttxt" / "scheduler.py"]
     targets += sorted((ROOT / "ttxt").rglob("*.py"))
@@ -635,8 +636,11 @@ def test_no_caller_can_bypass_browser_session() -> None:
             continue
         text = path.read_text(encoding="utf-8")
         for token in ("_open_session", "StealthySession"):
-            if token in text:
-                offenders.append(f"{path.relative_to(ROOT)}: {token}")
+            if token not in text:
+                continue
+            if token == "StealthySession" and "browser_lock.acquire" in text:
+                continue  # 自起浏览器但持同一把 profile 锁 ⇒ 不绕过互斥
+            offenders.append(f"{path.relative_to(ROOT)}: {token}")
     assert offenders == [], f"发现绕过 browser_session 的浏览器启动路径:{offenders}"
 
     source = (ROOT / "ttxt" / "crawler" / "fetcher.py").read_text(encoding="utf-8")
