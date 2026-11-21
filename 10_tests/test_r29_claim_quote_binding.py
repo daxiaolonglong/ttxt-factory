@@ -131,3 +131,26 @@ def test_draft_prompt_forbids_tense_laundering_of_future_events():
     text = prompts.draft_prompt("t", "o", "m")
     assert "将举办" in text and "不得写成已发生" in text
     assert "当前现实时间" in text
+
+
+def test_draft_prompt_bans_unsourced_advice_numbers_and_added_words():
+    """R63:两位独立评审共同指出的可修复缺陷——建议句编造数字区间(移花接木)、引用增字。"""
+    text = prompts.draft_prompt("t", "o", "m")
+    assert "建议、操作、清单类句子**不得写材料里没有的数字或区间**" in text
+    assert "只写动作与条件,不写数字" in text
+    assert "必须**逐字照抄**来源原句" in text and "不得增字、减字、换序" in text
+    assert "正文必须把承诺的内容**逐条列出**" in text
+    # 既有条文不得被新条文替换掉(逐字绑定/一句一锚点/来源边界仍是硬约束)
+    for kept in ("不得编造统计数字", "一个事实句子只装**一个**事实锚点", "[编号] 只指向给定材料"):
+        assert kept in text
+
+
+def test_revise_prompt_rewrites_named_numbers_without_new_ones():
+    text = prompts.revise_prompt("原文", ["问题"])
+    assert "按" in text and "删掉该数字、保留动作与条件" in text
+    assert "不得换一个数字顶上" in text
+    assert "不得为了修补措辞而新增任何数字" in text
+    assert "引用官方表述与并列枚举必须逐字照抄来源原句" in text
+    # 既有条文仍在(定向修订、不新增案例、不删引用标注)
+    for kept in ("只改评审意见明确指出的问题", "不得删除引用标注[编号]"):
+        assert kept in text

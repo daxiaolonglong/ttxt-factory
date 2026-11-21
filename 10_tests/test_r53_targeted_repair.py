@@ -171,3 +171,20 @@ def test_verified_and_opinion_rows_never_touched():
     assert stats["facts_failed"] == 0 and stats["attempts"] == 0
     assert new_draft == draft
     assert [r["credibility"] for r in new_evidence] == ["opinion", "verified"]
+
+
+def test_repair_prompt_prefers_dropping_unsourced_numbers():
+    """R63:修复建议句时去掉无来源数字,而不是换一个数字(与 anchor_erased 守卫同向不冲突)。"""
+    from ttxt.writing import prompts
+
+    text = prompts.repair_sentence_prompt("全文", "问题句", "失败详情", "numbers", "来源块", ["候选原句"])
+    assert "删掉这个数字、只保留动作与条件就是正确修法" in text
+    assert "不得换一个数字或区间顶上" in text
+    # 空话守卫与一句一锚点必须原样还在(不得为了过闸洗掉锚点)
+    for kept in (
+        "新句子必须仍带至少一个事实锚点",
+        "不得改写成没有事实的空话",
+        "一条句子只装一个事实锚点",
+        "绝不编造、换算、近似数字/日期",
+    ):
+        assert kept in text
