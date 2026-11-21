@@ -351,6 +351,106 @@ def _collapse_repeat_clauses(part: str) -> tuple[str, bool]:
     return out, True
 
 
+# ---------------------------------------------------------------- R66 一句一锚点
+# R63 实测:同一句里塞两个数字锚点(「有人50岁退、有人55岁退」)时,整句与来源句的
+# 词面重叠只有 0.30,低于 verifier.QUOTE_MIN_OVERLAP=0.34 ⇒ quote_unbound;
+# 随后修订按「删数字留动作」改写成「有人退、有人退」,被独立评审判成内容截断。
+# 这里只做**标点级**拆分:把两个数字锚点所在的分句拆成两句,不增删任何字词,
+# 让每条事实回到「一句一锚点」,从而能被逐句绑定。拆不动就原样返回。
+_MULTI_ANCHOR_MIN_CHARS = 4  # 拆分后每个锚点句至少保留的中文字符数(不含标点/数字)
+
+
+def _hard_numbers(text: str) -> list[str]:
+    """与门禁同一立场的硬数字:ASCII 数字锚点;引用编号 [n] 不算事实。"""
+    from ttxt.writing import verifier  # 延迟导入,避免 style↔verifier 循环
+
+    numbers = verifier.extract_anchors(text).get("numbers") or []
+    out: list[str] = []
+    for item in numbers:
+        clean = re.sub(r"\s+", "", item or "")
+        if any(ch.isdigit() and ch.isascii() for ch in clean) and clean not in out:
+            out.append(clean)
+    return out
+
+
+def _split_two_anchor_sentence(sentence: str) -> tuple[str, dict | None]:
+    """把恰好含两个数字锚点的句子按分句拆成「一句一锚点」。
+
+    只在**两个不同分句**各含一个数字锚点、且拆后每句仍有足够正文时才拆;
+    日期句/多锚点句/同分句双数字一律不动(交给现有 claim 抽取与 repair),
+    避免把政策条款、并列清单拆成碎片。"""
+    if not sentence or len(sentence) > _MAX_SENTENCE_FOR_REPEAT_SCAN:
+        return sentence, None
+    marker = _cite_marker(sentence)
+    body = sentence[: -len(marker)] if marker and sentence.endswith(marker) else sentence
+    tail_match = re.search(r"[。！？!?]$", body)
+    terminal = tail_match.group(0) if tail_match else ""
+    core = body[: -len(terminal)] if terminal else body
+    if not core:
+        return sentence, None
+    from ttxt.writing import verifier  # 延迟导入,避免 style↔verifier 循环
+
+    # 日期句不拆:日期本身就是一个锚点,拆开只会制造跨句引句问题。
+    if verifier.extract_anchors(core).get("dates"):
+        return sentence, None
+    clauses = [m.group(0) for m in _CLAUSE_SPLIT.finditer(core)]
+    if len(clauses) < 2:
+        return sentence, None
+    anchor_idx = [i for i, chunk in enumerate(clauses) if _hard_numbers(chunk)]
+    if len(anchor_idx) != 2:
+        return sentence, None
+    first, second = anchor_idx
+    if first == second:
+        return sentence, None
+    parts = [
+        "".join(clauses[: first + 1]),
+        "".join(clauses[first + 1 : second + 1]),
+        "".join(clauses[second + 1 :]),
+    ]
+    cleaned: list[str] = []
+    for pos, part in enumerate(parts):
+        text = part.rstrip("，,、；; ")
+        if not text:
+            continue
+        if pos < 2:
+            text += "。"
+        elif not re.search(r"[。！？!?]$", text):
+            text += "。"
+        cleaned.append(text)
+    if len(cleaned) < 2:
+        return sentence, None
+    for part in cleaned[:2]:
+        if len(re.sub(r"[^\u4e00-\u9fff]", "", part)) < _MULTI_ANCHOR_MIN_CHARS:
+            return sentence, None
+    if marker:
+        # 引用证据随事实句保留;拆成几句就各带一个同编号标记。
+        cleaned = [p if marker in p else _insert_cite(p, marker) for p in cleaned]
+    out = "".join(cleaned)
+    if out == sentence:
+        return sentence, None
+    return out, {"kind": "multi_anchor_split", "before": sentence[:160], "after": out[:160]}
+
+
+def _split_multi_anchor_line(line: str) -> tuple[str, list[dict]]:
+    """对一行正文逐个句号句做「一句一锚点」拆分,不碰标题/表格/列表行。"""
+    stripped = line.strip()
+    if not stripped or _HEADING.match(stripped) or stripped.startswith(("|", ">", "- ", "* ")):
+        return line, []
+    pieces = re.findall(r"[^。！？!?；;]+[。！？!?；;]?", line)
+    if not pieces:
+        return line, []
+    fixes: list[dict] = []
+    out: list[str] = []
+    changed = False
+    for piece in pieces:
+        new_piece, fix = _split_two_anchor_sentence(piece)
+        out.append(new_piece)
+        if fix:
+            fixes.append(fix)
+            changed = True
+    return ("".join(out) if changed else line), fixes
+
+
 def _normalize_sentence(part: str) -> str:
     """句级去重的比较核:去空白、剥句末引用标记与结尾标点。"""
     text = re.sub(r"\s+", "", part or "").rstrip(_SENT_TAIL)
@@ -390,6 +490,7 @@ def copyedit_draft(draft: str) -> tuple[str, list[dict]]:
     lines_raw = (draft or "").splitlines()
     structures: list[list[str] | None] = []  # None = 该行原样保留
     doc_seen: dict[str, tuple[int, int]] = {}  # 归一化句 → (首现行号, 行内序号)
+    first_content = True  # 首行是标题,不做一句一锚点拆分
     for line in lines_raw:
         index = len(structures)
         stripped = line.strip()
@@ -399,7 +500,12 @@ def copyedit_draft(draft: str) -> tuple[str, list[dict]]:
         # 表格分隔行是合法的重复列语法;# 标题行不做删句处理。
         if (stripped.startswith("|") and re.fullmatch(_TABLE_SEP, stripped)) or _HEADING.match(stripped):
             structures.append(None)
+            first_content = False
             continue
+        if not first_content:
+            line, split_fixes = _split_multi_anchor_line(line)
+            fixes.extend(split_fixes)
+        first_content = False
         kept: list[str] = []
         for part in re.findall(r"[^。！？!?；;]+[。！？!?；;]?", line):
             collapsed = _collapse_adjacent_repeats(part)
