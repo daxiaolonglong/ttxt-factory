@@ -2,43 +2,56 @@
 
 **这个文件的作用是"无损压缩"**：上下文被压缩、或换新窗口时，只相信这里写的事实，不靠对话记忆。
 规则：每完成一个阶段、每次提交推送后、每次产生大输出（全量测试日志、全盘扫描、长报告）之后，必须重写本文件。
-最后更新：2026-11-21 03:46 — **R60 全部四步已闭合并推送**；远端 `main` = `edfeb34`。
+最后更新：2026-11-21 11:05 — **R61 在途**。远端 `main` = `302cff0`。
 
-## 接手三行
+## 接手清单（R61 现在到哪了）
 
-1. **R60 已完成**（计划 `C:\Users\yangl\.qoder\plans\rolling-meadow-owl.md`）：G6 `e1998b6`、
-   G3 `89c8724`、G1 全链 `3ba7697→…→9ce51d6→d6a17ad→edfeb34`、G2 核对确认 R28 已在生产生效。
-   账本见 `08_wiki/PROJECT_STATUS.md` R60 段，细节见 `08_wiki/reports/r60-favorites-mining-banding.md`。
-2. **收藏已打通**：收藏只在管理页逐行"查看数据"弹层"互动"区；生产采集+标题合并+`register_pass`
-   登记（全库判重、只登记一次、只进 `account.own_work_category`=social）已验收：social 11697
-   `favorites=1 reads=14 impressions=693`，登记行 41128 `source=own_account favorites=0 reads=3`，
-   其余四类目零污染；`favorites is not null` 计数=2>0。job `account_metrics_2h` `enabled=true`。
-3. **下一轮是 R61**：G4 写作批次 social+finance 各 ≥20 复验通过率；G5 verified_viral/junk 样本
-   → 写作 few-shot 库（不微调）；黄金集 61 条冲突卡按模板重判。旧账：T-02 第二来源、
-   T-16 展现量/标签覆盖、T-17 管线增量化、health 标定（26<30）。**不要按本文件旧版续跑 R60。**
+1. **黄金集重判已闭合并推送**（`586b5f2`）：12 张分歧卡第二轮重裁完成，实际执行者 =
+   本地 127.0.0.1:8080 模型 qwen3.8-flash-next-iq3_s（DeepSeek 密钥缺失未用，身份如实记录）。
+   证据 `10_tests/golden/adjudications/r61_recheck_local_round{,2}.json`（round1 自相矛盾存证未采用；
+   round2 钉死①元问题后 12/12 自洽）。重判只写 ai_recheck_*，human_* 全空、human_adjudicated_count=0。
+   生成器 `--check` 0 错误；CURRENT_BASIS_REREAD = 16 张（T-03 6 + T-15 10）；machine_label_drift=[]。
+   批3/批4 测试钉已按新现实更新（含批4 sidecar SHA-256 重新锚定 `dedb6bad…`，卡片文件与纸面标签哈希钉未动）。
+2. **G5 few-shot 已实现并推送**（`302cff0`）：`ttxt/writing/fewshot.py`（≤6 样本、只收 verified、
+   库空/缺失/损坏自动降级）、`prompts.draft_prompt(topic, outline, materials, fewshot_text="")`、
+   `workflow.write_article` 两处 draft 注入 + 回执 `fewshot_status/fewshot_count`；
+   建库脚本 `scripts/build_fewshot_library.py`（正例=passed 且 score≥0.8 且 fc≥1.0，反例=fact.* 失败，
+   每类目 ≤3+3，只从探针回执+导出 .md 逐字抽取，导出件缺失跳过不冒充，0 样本拒绝写库）；
+   测试 `10_tests/test_r61_fewshot.py`。`00_control/fewshot_library.json` 现为空（降级生效），
+   G4 探针结束后用建库脚本填充。
+3. **测试运行被 G4 探针占锁阻塞**：golden 批3/批4 与 G5 测试都因 conftest 的
+   `model_gate_lock_isolated` 断言（生产 gate.lock 必须不存在）无法运行。锁持有者 =
+   PID 12548 = G4 探针本体（`scripts/pass_rate_probe.py --batch 07_tmp/r61_batch.json --rounds 1`，
+   09:55:49 起，**红线：不杀不重启**）。Git Bash 的 `kill -0` 不认 Windows PID，用
+   `wmic process where "ProcessId=12548" get ProcessId` 判断存活。探针 14/40（10:44 读数，
+   7 过 7 驳，均值 202s/篇），预计 12:30–13:30 跑完。探针结束后第一件事：跑三组测试
+   （test_p13_batch3、test_p13_batch4、test_r61_fewshot），再建 few-shot 库、写账本/报告。
+4. **DeepSeek 已解锁（2026-11-21 11:05）**：用户已把 key 存进 `.secrets/deepseek_api_key`
+   （35 字符、sk- 前缀，gitignore 覆盖，不入库）。实测端点可用，模型 =
+   `deepseek-flash` / `deepseek-v4-pro`（`deepseek-chat` 已下线）；两者都是 reasoning 模型，
+   max_tokens 需 ≥8000（2000 会被 reasoning 吃光 → empty completion）。
+5. **DeepSeek 第二来源交叉验证已完成**：复用本地 round2 的同一 §6 钉死 prompt（未改一字），
+   12/12 ③同意，与本地 round2 完全一致（v2h01 能核实、v2h03 对不上、其余 10 张对不上）；
+   证据 `10_tests/golden/adjudications/r61_recheck_deepseek.json`（v4-pro，52s，6864 tokens）。
+   **生产评审配置仍指本地**：另用 6 字评审 prompt 真跑了两次 DeepSeek，输出都没有命中现有
+   blocking/publishable 标记（且「修改后可发布」会误命中「可发布」），直接切换会让独立评审门
+   失效或误放行 —— 决定不切，先做 verdict 契约（自由评审后做标签抽取）并在样本上校准+测试，
+   列入 R62 首项。空 key 文件已按缺失处理（`review.api_key` 修复 + 新增测试，待释锁后跑）。
 
-## 已实测事实（2026-11-21 03:45）
+## 已实测事实（2026-11-21 10:40）
 
-- **G1 落库读数**（SQL 直查）：social `article_metrics` 中 `data_source='toutiao_account'` 共 2 行
-  （11697、41128），`own_account` 文章 1 行；history/health/technology/finance 四类目
-  `own_account=0`、`toutiao_account=0`。污染清理共删 15 行（history 363/364、health 236/237、
-  technology 1235/1236、finance 14186/14187、social 41123/41124-41127 及其 metrics/snapshot）。
-- **三个已修根因**（全有回归测试）：①`match_and_write` 缺 `con.commit()` → 登记回滚循环 +
-  注册行对 `write_metric_rows` 不可见被静默拒收；②登记写在逐类目匹配循环里 → 每个类目库各建
-  一份自有行 + 后台双行(feed 行/弹层行两个 url)同轮再各造一份；③后台 feed 多条响应把 4 篇重复
-  成 24 条 → `dedup_captured_items` 按 host+path 去查询参数判重、字段取先到非 None 并集，
-  无 url 条目不许仅凭标题并库。判重口径：url/item_id/**同名(含目标类目自身)**任一命中即不登记。
-- **G2 核对**：`mine_keywords` R28 已接 `ttxt/analysis/analyze.py:42`；social 库 `origin='mined'`
-  35 词全 `active` 且 `keyword_performance.collected` 20–138 真实非空；24h `crawl_jobs` mined
-  入队 0（mined 词靠来源轮换采集，auto_feedback 只服务零覆盖 gap 词）。
-- **门禁四数字**：日进量 2286（24h `fetched_at`）；窗口成功率 133/175≈76%（`crawl.done`/
-  `crawl.browser_lock.acquired`）；favorites 覆盖=自有作品 2/2 全量；mined 35 词生效。
-- **测试**：`10_tests/test_r60_account_metrics.py` **16 passed**（弹层解析/合并/去重/登记判重/
-  白名单/调度接线全链）。全量 suite 本轮未重跑，不得声称全绿。
-- **CLI**：`account-fetch [--category X] [--apply] [--force]`；`--force` 只供人工排障，
-  日志留 `account.fetch.force_override` 审计，调度器永不传。本轮排障共 6 次 force。
-- **工作区**：提交推送后 `git status` 应仅剩本文件；`03_intelligence/account_metrics/` 证据 JSON
-  按 housekeep 7 天保留。
+- 探针无断点续跑：崩溃时须自建「剩余选题」batch（输出 runs 里没有的 topic）续跑并合并。
+- 探针 run 记录字段：passed/score/fact_check_rate/primary/primary_detail/draft_id/topic/category；
+  草稿导出在 `07_tmp/r49_passrate/exports/r1/<类目>/<draft_id>.md`（失败件在 `rejected/` 子目录）。
+- 探针失败主因（前半段）：fact.binding（含 fact.binding 0.4/0.857 等）、other（本地评审
+  verdict 阻断，非事实绑定）；R50 基线通过率 27.8%（5/18）。
+- **当前评审 = 本地 127.0.0.1:8080 同款模型**（`same_model_review=true`，按 T-04 不算独立评审）；
+  云端 DeepSeek key 已注销（`00_control/config.json` review.note），切回需新 key + 改配置。
+- DeepSeek 端点实测模型列表 = `deepseek-flash`,`deepseek-v4-pro`；reasoning_tokens 会占
+  max_tokens，评审调用需 ≥8000；12 张第二来源 = 12/12 与本地一致。
+- 进程：supervisor/schedule/worker/probe 各 1 个逻辑实例（venv 启动器+基解释器成对 = 一个进程，非重复）。
+- 工作区提交后应仅剩：scheduler_state.json（运行时状态，不入库）、08_wiki/session_checkpoint.md、
+  未跟踪证据件（03_intelligence/account_metrics/、03_intelligence/pass_rate_probe-20261121-r61.json）。
 
 ## 红线（接手后继续有效）
 
@@ -46,13 +59,25 @@
 `00_control/account_metrics_state.json`）；两小时硬下限不得下调；`--force` 不得进调度；
 调度器绝不触发写作/发布/模型；800 字门禁与规则 57/64 不得放宽；127.0.0.1:8080 Strata
 (qwen3.8-flash-next-iq3_s, 147456 ctx) 配置/端口/量化不动；DeepSeek 评审密钥只允许
-`.secrets/deepseek_api_key`；每完成一项独立提交并推送 origin/main（已预授权），推送失败如实报告并用 `git ls-remote` 核验。
+`.secrets/deepseek_api_key`；每完成一项独立提交并推送 origin/main（已预授权），推送失败如实报告并用 `git ls-remote` 核验；
+黄金集卡片文件一字节不改、sidecar 只加 ai_* 字段、human_adjudicated_count 保持 0、AI 裁定≠人工裁定；
+生产类目库零写入（探针/烟测走 snapshot）；01_categories/、资产库/、11_backups/ 不删；主会话执行，子代理只派窄任务；
+G4 探针跑完前不杀不重启（PID 12548）；few-shot 样本只来自实测回执，不编样本。
 
-## 还欠着的账
+## 还欠着的账（R61 剩余步骤）
 
-G1/G2/G3/G6 已全部闭合（见上）。R61：写作批次复验、样本回流 few-shot、黄金集重判。
-旧账：T-02 第二来源、T-16 展现量/标签覆盖、T-17 管线增量化、health 标定（26<30）。
-新增小账：自有作品登记类目由 `account.own_work_category` 指定（现 social），若日后发布类目
-变化需改配置；同名多篇的自有作品不自动登记（宁缺毋滥），走后台导出备份通道 c。
+1. 探针结束 → 跑 golden 批3/批4 + G5 测试 + test_p40 新增空 key 测试（预期全绿；
+   红了按新现实修，不许回退钉到旧口径）。探针结束前不切 review 配置。
+2. G4 读数：40 runs 通过率 vs R50 27.8%（5/18），social/finance 各 20 的失败主因分布。
+3. 建 few-shot 库：`scripts/build_fewshot_library.py --probe 03_intelligence/pass_rate_probe-20261121-r61.json --exports 07_tmp/r49_passrate/exports`，建库后跑 1 篇 snapshot 烟测证明注入后链路不破。
+4. 收尾：目标回归 + 账本（PROJECT_STATUS R61 段）+ 本检查点重写（最后一行 DONE）+
+   R61 报告 `08_wiki/reports/r61-writing-batch-fewshot-golden.md` + 提交推送 + V3.0 第十五部分 8 项报告。
+   报告须如实写：DeepSeek 第二来源 §6 重判仍阻塞（密钥缺失），12 张重裁实际执行者是本地模型。
 
-DONE
+5. R62 首项：DeepSeek verdict 契约（自由评审后做标签抽取：可以发布/修改后再评/不建议发布），
+   先在一批 passed/rejected 草稿上校准并测试，再切 config；不改 6 字 prompt、不猜语义、不伪造。
+
+旧账（本轮不做）：T-02 第二来源（DeepSeek 交叉验证已留证）、T-16 展现量/标签覆盖、
+T-17 管线增量化、health 标定（26<30）。
+
+NEXT: 探针（PID 12548）跑完 → 三组测试 → 建 few-shot 库 → snapshot 烟测 → 账本/报告收尾；生产评审切换留到 verdict 契约修复后。

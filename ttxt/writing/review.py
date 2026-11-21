@@ -96,10 +96,12 @@ def api_key(section: dict | None = None, *, required: bool = True) -> str:
     if file_name:
         path = cfg.PROJECT_ROOT / file_name
         if path.is_file():
-            return path.read_text(encoding="utf-8").strip()
+            value = path.read_text(encoding="utf-8").strip()
+            if value:
+                return value
     if not required:
         return ""
-    raise ReviewUnavailable(f"缺独立评审密钥:环境变量 {env_name} 未设,文件 {file_name or '(未配置)'} 不存在")
+    raise ReviewUnavailable(f"缺独立评审密钥:环境变量 {env_name} 未设,文件 {file_name or '(未配置)'} 不存在或为空")
 
 
 def served_model(section: dict | None = None) -> str:

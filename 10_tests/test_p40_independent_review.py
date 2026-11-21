@@ -175,6 +175,19 @@ def test_missing_key_raises_without_leaking_anything(tmp_path, monkeypatch):
     assert "DEEPSEEK_API_KEY" in str(exc.value)
 
 
+def test_empty_key_file_is_treated_as_missing(tmp_path, monkeypatch):
+    """空文件不能当密钥:required=True 必须显式抛错,不许无凭据发云端请求。"""
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.setattr(cfg, "PROJECT_ROOT", tmp_path)
+    secret = tmp_path / ".secrets"
+    secret.mkdir()
+    (secret / "deepseek_api_key").write_text("\n", encoding="utf-8")
+    section = {"api_key_env": "DEEPSEEK_API_KEY", "api_key_file": ".secrets/deepseek_api_key"}
+    with pytest.raises(review_channel.ReviewUnavailable):
+        review_channel.api_key(section)
+    assert review_channel.api_key(section, required=False) == ""
+
+
 def test_key_reads_env_then_file_without_network(tmp_path, monkeypatch):
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     monkeypatch.delenv("STRATA_API_KEY", raising=False)
