@@ -1,0 +1,97 @@
+{
+ "generated_at": "2026-11-21 13:31:54",
+ "topic": "延迟退休 养老金",
+ "elapsed_s": 404.9,
+ "draft_id": "social-20261121132557-982992",
+ "status": "rejected",
+ "passed": false,
+ "versions": 10,
+ "revisions": 4,
+ "score": 0.85,
+ "fact_checkability": {
+  "rate": 1.0,
+  "facts": 12,
+  "checkable": 12,
+  "release_condition_met": true,
+  "release_threshold": 0.8
+ },
+ "fewshot_status": "ok:5",
+ "fewshot_count": 5,
+ "independent_reviews_used": 2,
+ "independent_review_max": 3,
+ "independent_review_rounds": [
+  {
+   "round": 1,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-flash",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "## 审评结论\n\n这是一篇“政策解读+养老焦虑+个案提醒”混合型自媒体文章。选题有现实关注度，抓住了延迟退休、灵活就业女性退休年龄、退休手续办理等真实痛点；但整体看，**事实框架大体沾边，严谨性不足，标题与正文不匹配，引用失范，核心建议落空，带有明显焦虑营销色彩**。若作为正式科普或机构稿件，**不建议直接发布，需要较大幅度修改**。\n\n---\n\n## 一、主要优点\n\n1. **选题贴近现实**：延迟退休、灵活就业人员退休、社保缴费年限、退休手续等确实是中年打工人关心的问题。\n2. **有案例感**：韶关灵活就业女性“跑4趟办退休”的细节有可读性，能提醒读者提前咨询本地社保经办规则。\n3. **语言通俗**：段落短、口语化强，适合移动端阅读。\n4. **提出“提前布局”的方向**：提醒读者不要临近退休才处理社保、档案、退休地等问题，方向正确。\n\n---\n\n## 二、主要问题\n\n### 1. 标题与正文不匹配，存在标题党\n\n标题是“2026年养老新政深化：告别‘单位养老’幻想，打工人需提前布局应对变局”，但正文并没有讲清楚：\n\n- 2026年到底有哪些“养老新政深化”；\n- “单位养老”是什么概念，为什么是幻想；\n- “两件核心大事”具体是哪两件；\n- 打工人应如何布局。\n\n正文反复说“核心差距不在于政策，而在于有没有提前布局两件核心大事”，但**全文没有明确列出这两件大事**，这是",
+   "elapsed_s": 21.313
+  },
+  {
+   "round": 2,
+   "verdict_label": "修改后再评",
+   "blocking": true,
+   "publishable": false,
+   "reviewer_model": "deepseek-v4-pro",
+   "reviewer_endpoint": "https://api.deepseek.com",
+   "verdict_excerpt": "以下是审稿意见，供参考。\n\n**总体评价：**  \n文章选题有现实针对性，切中延迟退休后80后、90后普遍关心的养老与社保问题，尤其关注灵活就业女性退休年龄差异，具有一定实用提醒价值。但文章在结构、编校、政策准确性和引用规范上存在较明显问题，目前不宜直接发布，建议修改后再审。\n\n---\n\n## 一、主要问题\n\n### 1. 标题与正文内容不匹配\n\n标题写“80后90后更要关注这几件养老大事”，但正文并没有清晰列举“几件大事”是什么。  \n全文主要只围绕两件事展开：灵活就业女性退休年龄差异、退休手续办理注意事项。其他如最低缴费年限提高、跨省社保转移等仅简单出现在行动清单里，没有展开。\n\n文中两次提到“两件核心大事”，但始终没有明确点出是哪两件，读者读完后容易感到内容悬空。\n\n### 2. 编校错误明显\n\n- “符合条件可最多提前3年，符合条件可最多提前3年，符合条件可最多提前3年[1]。”  \n  同一句话连续重复三次，属于明显复制或排版错误，应删除两处。\n\n- “核心差距根本不在于政策，而在于你有没有提前布局两件核心大事[2]。”  \n  这句话在前后段落中几乎原样重复出现，建议合并或删除其中一处。\n\n- “延迟退休政策已于2025年1月1日正式启动”中，“已于”和“正式启动”略有冗余，可改为“延迟退休政策自2025年1月1日起实施”。\n\n### 3. 部分表述不够准确，容易误导\n",
+   "elapsed_s": 63.718
+  }
+ ],
+ "independent_review": {
+  "attempted": true,
+  "available": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "prompt": "审评这篇文章",
+  "verdict_markers": {
+   "blocking": true,
+   "publishable": false,
+   "blocking_markers": [
+    "修改后再评"
+   ],
+   "publishable_markers": []
+  },
+  "verdict_contract": "labels_v1",
+  "verdict_label": "修改后再评",
+  "verdict_excerpt": "以下是审稿意见，供参考。\n\n**总体评价：**  \n文章选题有现实针对性，切中延迟退休后80后、90后普遍关心的养老与社保问题，尤其关注灵活就业女性退休年龄差异，具有一定实用提醒价值。但文章在结构、编校、政策准确性和引用规范上存在较明显问题，目前不宜直接发布，建议修改后再审。\n\n---\n\n## 一、主要问题\n\n### 1. 标题与正文内容不匹配\n\n标题写“80后90后更要关注这几件养老大事”，但正文并没有清晰列举“几件大事”是什么。  \n全文主要只围绕两件事展开：灵活就业女性退休年龄差异、退休手续办理注意事项。其他如最低缴费年限提高、跨省社保转移等仅简单出现在行动清单里，没有展开。\n\n文中两次提到“两件核心大事”，但始终没有明确点出是哪两件，读者读完后容易感到内容悬空。\n\n### 2. 编校错误明显\n\n- “符合条件可最多提前3年，符合条件可最多提前3年，符合条件可最多提前3年[1]。”  \n  同一句话连续重复三次，属于明显复制或排版错误，应删除两处。\n\n- “核心差距根本不在于政策，而在于你有没有提前布局两件核心大事[2]。”  \n  这句话在前后段落中几乎原样重复出现，建议合并或删除其中一处。\n\n- “延迟退休政策已于2025年1月1日正式启动”中，“已于”和“正式启动”略有冗余，可改为“延迟退休政策自2025年1月1日起实施”。\n\n### 3. 部分表述不够准确，容易误导\n",
+  "finish_reason": "stop",
+  "usage": {
+   "prompt_tokens": 735,
+   "completion_tokens": 5624,
+   "total_tokens": 6359,
+   "prompt_tokens_details": {
+    "cached_tokens": 0
+   },
+   "completion_tokens_details": {
+    "reasoning_tokens": 4480
+   },
+   "prompt_cache_hit_tokens": 0,
+   "prompt_cache_miss_tokens": 735
+  },
+  "elapsed_s": 63.718
+ },
+ "review_account": "rejected",
+ "review_account_basis": "independent_review_blocked",
+ "model_meta": {
+  "same_model_review": false,
+  "review_independence": "independent",
+  "independent_review": true,
+  "reviewer_model": "deepseek-v4-pro",
+  "reviewer_endpoint": "https://api.deepseek.com",
+  "reviewer_limitation": "评审由独立服务模型 deepseek-v4-pro 完成,与写作模型 qwen3.8-flash-next-iq3_s 不同源",
+  "served_model": "qwen3.8-flash-next-iq3_s"
+ },
+ "template_check_status": "within_budget",
+ "template_flags": [],
+ "notes": "门禁致命问题: 事实未通过来源核验:提前1—3年查询个人社保缴费记录(numbers:1,3;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):3);部分事实引用存在轻微偏差：文中称核心原则为“小步调整、弹性实施、分类推进、统筹兼顾”，但证据链[1]原文仅列出“小步调整、弹性实施、分类推进”，缺少“统筹兼顾”四字，虽符合官方完整表述，但与所引具体切片不完全一致。;行动清单第1点“提前1—3年查询...”在证据链中标记为unverified（未验证），且引用的原文片段仅为免责声明，未直接支撑该具体建议的时间跨度，属于无来源断言或弱关联引用。",
+ "critical": [
+  "事实未通过来源核验:提前1—3年查询个人社保缴费记录(numbers:1,3;numbers锚点不在引句窗口但在正文别处出现(移花接木嫌疑):3)",
+  "部分事实引用存在轻微偏差：文中称核心原则为“小步调整、弹性实施、分类推进、统筹兼顾”，但证据链[1]原文仅列出“小步调整、弹性实施、分类推进”，缺少“统筹兼顾”四字，虽符合官方完整表述，但与所引具体切片不完全一致。",
+  "行动清单第1点“提前1—3年查询...”在证据链中标记为unverified（未验证），且引用的原文片段仅为免责声明，未直接支撑该具体建议的时间跨度，属于无来源断言或弱关联引用。"
+ ],
+ "path": "D:\\ttxt\\07_tmp\\r61_smoke_r62_delay_models\\exports\\social\\rejected\\social-20261121132557-982992.md"
+}

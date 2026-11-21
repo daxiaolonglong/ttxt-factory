@@ -422,8 +422,13 @@ few-shot 正例仅本地门禁通过、未获 DeepSeek 认证；DeepSeek 单轮 
 - 回归：`test_p40_independent_review.py` 新增 4 项（轮次模型序列、缺省回退、生产配置钉、
   回路传轮次），连同 few-shot/copyedit **54 passed / 0 error**。
 
-**下一步（R62）**：按新轮次模型跑真实烟测与批次复验，继续攻「可发布产出 0」的论证/概念质量与
-素材组织问题；门禁阈值不动。
+**首次真实烟测（13:26，延迟退休/social）**：rejected；round1 `deepseek-flash` 21.3s、round2
+`deepseek-v4-pro` 63.7s，均「修改后再评」；第 2 轮修订后本地事实绑定 critical 先拒，round3 未花。
+轮次模型规则生产生效、逐轮可审计；剩余硬伤 = 编造「提前1至3个月查询」数字建议 + 引用增字「法定」。
+证据 `03_intelligence/r61_smoke_receipt_r62_delay_models.json`。
+
+**下一步（R62）**：生成侧/修订侧收紧「一句一锚点、引用逐字、禁编具体数字建议」，再跑烟测与批次复验；
+门禁阈值不动。
 
 ## 三、工作顺序(2026-11-17 由项目负责人定,后续轮次照此执行)
 
